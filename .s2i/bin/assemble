@@ -1,0 +1,9 @@
+#!/bin/bash
+
+./mvnw clean package
+
+mkdir /deployments
+mkdir /deployments/libs
+
+cp target/adoptopenjdk-api-*-runner.jar' /deployments/
+cp target/libs/*' /deployments/libs/
