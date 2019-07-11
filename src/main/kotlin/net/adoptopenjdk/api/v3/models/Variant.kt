@@ -1,17 +1,14 @@
 package net.adoptopenjdk.api.v3.models
 
-import com.fasterxml.jackson.annotation.JsonProperty
-
-
 class Variant(
-        @JsonProperty("searchableName") val searchableName: String,
-        @JsonProperty("jvm") val jvm: JvmImpl,
-        @JsonProperty("vendor") val vendor: Vendor,
-        @JsonProperty("version") val version: Int,
-        @JsonProperty("lts") lts: Boolean?,
-        @JsonProperty("websiteDescription") val websiteDescription: String?,
-        @JsonProperty("websiteDescriptionLink") val websiteDescriptionLink: String?,
-        @JsonProperty("websiteDefault") val websiteDefault: Boolean?) {
+        val searchableName: String,
+        val jvm: JvmImpl,
+        val vendor: Vendor,
+        val version: Int,
+        lts: Boolean?,
+        val websiteDescription: String?,
+        val websiteDescriptionLink: String?,
+        val websiteDefault: Boolean?) {
 
     val lts: Boolean
     val label: String
@@ -26,7 +23,7 @@ class Variant(
     }
 }
 
-class Variants(@JsonProperty("variants") val variants: List<Variant>) {
+class Variants(val variants: List<Variant>) {
 
     val versions: List<Int>
     val latestVersion: Int

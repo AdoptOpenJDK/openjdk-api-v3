@@ -1,6 +1,6 @@
 package net.adoptopenjdk.api.v3.dataSources
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.gson.Gson
 import net.adoptopenjdk.api.v3.models.Platforms
 import net.adoptopenjdk.api.v3.models.Variants
 
@@ -13,11 +13,11 @@ class AvailablePlatforms {
 
         init {
             val platformData = this.javaClass.getResource("/JSON/platforms.json").readText()
-            platforms = ObjectMapper().readValue<Platforms>(platformData, Platforms::class.java);
+            platforms = Gson().fromJson<Platforms>(platformData, Platforms::class.java);
 
 
             val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
-            variants = ObjectMapper().readValue<Variants>(variantData, Variants::class.java);
+            variants = Gson().fromJson<Variants>(variantData, Variants::class.java);
 
         }
     }
