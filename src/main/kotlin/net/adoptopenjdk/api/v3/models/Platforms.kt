@@ -2,87 +2,28 @@ package net.adoptopenjdk.api.v3.models
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-class Attributes {
-    val heapSize: HeapSize
-    val os: OperatingSystem
-    val architecture: Architecture
+class Attributes(@JsonProperty("heapSize") val heapSize: HeapSize,
+                 @JsonProperty("os") val os: OperatingSystem,
+                 @JsonProperty("architecture") val architecture: Architecture) {
 
-    constructor(
-            @JsonProperty("heapSize")
-            heapSize: HeapSize,
-
-            @JsonProperty("os")
-            os: OperatingSystem,
-
-            @JsonProperty("architecture")
-            architecture: Architecture) {
-        this.heapSize = heapSize
-        this.os = os
-        this.architecture = architecture
-    }
 }
 
-class Platform {
-    val officialName: String
-    val searchableName: String
-    val logo: String
-    val attributes: Attributes
-    val binaryExtension: String
-    val installerExtension: String
-    val installCommand: String
-    val pathCommand: String
-    val checksumCommand: String
-    val checksumAutoCommandHint: String
-    val checksumAutoCommand: String
-    val osDetectionString: String
+class Platform(@JsonProperty("officialName") val officialName: String,
+               @JsonProperty("searchableName") val searchableName: String,
+               @JsonProperty("logo") val logo: String,
+               @JsonProperty("attributes") val attributes: Attributes,
+               @JsonProperty("binaryExtension") val binaryExtension: String,
+               @JsonProperty("installerExtension") val installerExtension: String,
+               @JsonProperty("installCommand") val installCommand: String,
+               @JsonProperty("pathCommand") val pathCommand: String,
+               @JsonProperty("checksumCommand") val checksumCommand: String,
+               @JsonProperty("checksumAutoCommandHint") val checksumAutoCommandHint: String,
+               @JsonProperty("checksumAutoCommand") val checksumAutoCommand: String,
+               @JsonProperty("osDetectionString") val osDetectionString: String) {
 
-    constructor(
-            @JsonProperty("officialName")
-            officialName: String,
-            @JsonProperty("searchableName")
-            searchableName: String,
-            @JsonProperty("logo")
-            logo: String,
-            @JsonProperty("attributes")
-            attributes: Attributes,
-            @JsonProperty("binaryExtension")
-            binaryExtension: String,
-            @JsonProperty("installerExtension")
-            installerExtension: String,
-            @JsonProperty("installCommand")
-            installCommand: String,
-            @JsonProperty("pathCommand")
-            pathCommand: String,
-            @JsonProperty("checksumCommand")
-            checksumCommand: String,
-            @JsonProperty("checksumAutoCommandHint")
-            checksumAutoCommandHint: String,
-            @JsonProperty("checksumAutoCommand")
-            checksumAutoCommand: String,
-            @JsonProperty("osDetectionString")
-            osDetectionString: String) {
-        this.officialName = officialName
-        this.searchableName = searchableName
-        this.logo = logo
-        this.attributes = attributes
-        this.binaryExtension = binaryExtension
-        this.installerExtension = installerExtension
-        this.installCommand = installCommand
-        this.pathCommand = pathCommand
-        this.checksumCommand = checksumCommand
-        this.checksumAutoCommandHint = checksumAutoCommandHint
-        this.checksumAutoCommand = checksumAutoCommand
-        this.osDetectionString = osDetectionString
-    }
 }
 
 
-class Platforms {
-    val platforms: List<Platform>;
+class Platforms(@JsonProperty("platforms") val platforms: List<Platform>) {
 
-    constructor(
-            @JsonProperty("platforms")
-            platforms: List<Platform>) {
-        this.platforms = platforms
-    }
 }

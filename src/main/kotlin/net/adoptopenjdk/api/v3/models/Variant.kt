@@ -3,54 +3,30 @@ package net.adoptopenjdk.api.v3.models
 import com.fasterxml.jackson.annotation.JsonProperty
 
 
-class Variant {
+class Variant(
+        @JsonProperty("searchableName") val searchableName: String,
+        @JsonProperty("jvm") val jvm: JvmImpl,
+        @JsonProperty("vendor") val vendor: Vendor,
+        @JsonProperty("version") val version: Int,
+        @JsonProperty("lts") lts: Boolean?,
+        @JsonProperty("websiteDescription") val websiteDescription: String?,
+        @JsonProperty("websiteDescriptionLink") val websiteDescriptionLink: String?,
+        @JsonProperty("websiteDefault") val websiteDefault: Boolean?) {
 
-    val searchableName: String
-    val jvm: JvmImpl
-    val vendor: Vendor
-    val version: Int
     val lts: Boolean
-    val websiteDescription: String?
-    val websiteDescriptionLink: String?
-    val websiteDefault: Boolean?
     val label: String
     val officialName: String
 
     var latest: Boolean = false
 
-    constructor(
-            @JsonProperty("searchableName")
-            searchableName: String,
-            @JsonProperty("jvm")
-            jvm: JvmImpl,
-            @JsonProperty("vendor")
-            vendor: Vendor,
-            @JsonProperty("version")
-            version: Int,
-            @JsonProperty("lts")
-            lts: Boolean?,
-            @JsonProperty("websiteDescription")
-            websiteDescription: String?,
-            @JsonProperty("websiteDescriptionLink")
-            websiteDescriptionLink: String?,
-            @JsonProperty("websiteDefault")
-            websiteDefault: Boolean?) {
-        this.searchableName = searchableName
-        this.jvm = jvm
-        this.vendor = vendor
-        this.version = version
+    init {
         this.lts = lts ?: false
-        this.websiteDescription = websiteDescription
-        this.websiteDescriptionLink = websiteDescriptionLink
-        this.websiteDefault = websiteDefault
         this.label = "${vendor} ${version}"
         this.officialName = "${vendor} ${version} with ${jvm}"
-
     }
 }
 
-class Variants {
-    val variants: List<Variant>;
+class Variants(@JsonProperty("variants") val variants: List<Variant>) {
 
     val versions: List<Int>
     val latestVersion: Int
@@ -58,17 +34,11 @@ class Variants {
     val ltsVersions: List<Int>
     val latestLtsVersion: Int
 
-    constructor(
-            @JsonProperty("variants")
-            variants: List<Variant>) {
-        this.variants = variants
-
+    init {
         versions = variants.map { it.version }.sorted().distinct()
         latestVersion = versions.last()
-
         ltsVersions = variants.filter { it.lts }.map { it.version }.sorted().distinct()
         latestLtsVersion = ltsVersions.last()
-
         variants
                 .forEach({
                     if (it.version == latestVersion) {
