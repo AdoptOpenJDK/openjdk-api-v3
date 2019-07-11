@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head><title>AdoptOpenJDK</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+    <div><h1>AdoptOpenJDK API v1</h1>
+        <h2>Notice of Deprecation</h2>
+        <p>AdoptOpenJDK API v1 (i.e. the API documented here) has been deprecated and will be removed.
+            If you are using v1 please move to <a href="/">the latest version</a> as soon as possible.</p>
+        <h2>Overview</h2>
+        <p>The AdoptOpenJDK API provides a way to consume JSON information about the AdoptOpenJDK releases and nightly
+            builds. Sign up to the <a href="https://mail.openjdk.java.net/mailman/listinfo/adoption-discuss">mailing
+                list</a> where major API updates will be announced, and visit <a href="https://adoptopenjdk.net">adoptopenjdk.net</a>
+            to find out more about the community.</p>
+        <h2>Usage</h2>
+        <p>Here is an example using <code>curl</code> (see the <a href="https://curl.haxx.se/docs/tooldocs.html">curl
+            documentation</a>):</p>
+        <pre><code>curl https:<span>//</span>api.adoptopenjdk.net<span>/v1/</span>openjdk8<span>/releases</span></code></pre>
+        <p>This command returns information about all &#39;OpenJDK&#39; releases, and defaults to the latest version of
+            the API.</p>
+        <p>Optionally, you can include an &#39;accept header&#39; to specify a version of the API:</p>
+        <pre><code>curl -H <span>'accept-version: 1.0.0'</span> https:<span>//</span>api.adoptopenjdk.net<span>/v1/</span>openjdk8<span>/releases</span></code></pre>
+        <p>The following <a
+                href="https://docs.microsoft.com/en-us/powershell/scripting/getting-started/getting-started-with-windows-powershell?view=powershell-6">Windows
+            Powershell</a> script uses <code>Invoke-Webrequest</code> to download the latest Windows 64-bit archive.</p>
+        <pre><code><span>function</span> Get-RedirectedUrl
+{
+    <span>Param</span> (
+        [Parameter(Mandatory=<span>$true</span>)]
+        [String]<span>$URL</span>
+    )
+
+    <span>$request</span> = [System.Net.WebRequest]::Create(<span>$url</span>)
+    <span>$request</span>.AllowAutoRedirect=<span>$false</span>
+    <span>$response</span>=<span>$request</span>.GetResponse()
+
+    <span>If</span> (<span>$response</span>.StatusCode <span>-eq</span> <span>"Found"</span>)
+    {
+        <span>$response</span>.GetResponseHeader(<span>"Location"</span>)
+    }
+}
+
+<span>$url</span>= <span>"https://api.adoptopenjdk.net/v1/openjdk8/releases/x64_win/latest/binary"</span>
+
+<span>$fUrl</span> = Get-RedirectedUrl <span>$url</span>
+<span>$filename</span> = [System.IO.Path]::GetFileName(<span>$fUrl</span>);
+
+<span>Write-Host</span> <span>"Downloading <span>$filename</span>"</span>
+
+[Net.ServicePointManager]::SecurityProtocol = <span>"tls12, tls11, tls"</span>
+<span>Invoke-WebRequest</span> -Uri <span>$url</span> -OutFile <span>$filename</span></code></pre>
+        <blockquote>
+            <p><strong>Note on the API rate limit:</strong> Add the <code>-i</code> option (e.g. <code>curl -i
+                https://api.adoptopenjdk.net/v1/openjdk8/releases</code>) to return the response header as well as the
+                response body. There is a limit of 100 API calls per hour per IP, and the value of <code>X-RateLimit-Remaining</code>
+                in the response header is useful to determine how many API calls are remaining from this limit.</p>
+        </blockquote>
+        <h2>API v1.0.0 Specification</h2>
+        <p>You can append different paths to the <code>https://api.adoptopenjdk.net</code> URL, either in the above
+            <code>curl</code> format, in a browser, or through an HTTP client, to return different JSON information:</p>
+        <pre><code>/<span>&lt;<span>variant</span>&gt;</span>/<span>&lt;<span>build</span> <span>type</span>&gt;</span>/<span>&lt;<span>platform</span>&gt;</span>/<span>&lt;<span>build</span>&gt;</span>/<span>&lt;<span>data</span> <span>type</span>&gt;</span></code></pre>
+        <p>There are default values for all values in this path, with the exception of <code>&lt;variant&gt;</code>,
+            which must be specified. These default values are as follows:</p>
+        <pre><code>/<span>&lt;variant&gt;</span><span>/releases/</span>allplatforms<span>/allbuilds/</span>info</code></pre>
+        <p>To view the list of available variants simply use the following <a
+                href="https://api.adoptopenjdk.net/v1/variants">route</a>:</p>
+        <pre><code><span>/variants</span></code></pre>
+        <p>This means that each of the following paths all return the same result (information about all builds, all
+            platforms, of the &#39;release&#39; build type):</p>
+        <ul>
+            <li><code>/openjdk8</code></li>
+            <li><code>/openjdk8/releases</code></li>
+            <li><code>/openjdk8/releases/allplatforms</code></li>
+            <li><code>/openjdk8/releases/allplatforms/allbuilds</code></li>
+            <li><code>/openjdk8/releases/allplatforms/allbuilds/info</code></li>
+        </ul>
+        <p>However, if you need to specify <code>&lt;build&gt;</code> as <code>latest</code>, for instance, then you
+            also need to specify <code>&lt;build type&gt;</code> and <code>&lt;platform&gt;</code> prior to that, even
+            if you are using the default values:</p>
+        <pre><code><span>/openjdk8/</span>releases<span>/allplatforms/</span>latest</code></pre>
+        <h3>Path options</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Variant</th>
+                <th>Example (click to view)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><code>openjdk8</code></td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk8"><code>/openjdk8</code></a></td>
+            </tr>
+            <tr>
+                <td><code>openjdk8</code></td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk8-openj9"><code>/openjdk8-openj9</code></a></td>
+            </tr>
+            <tr>
+                <td><code>openjdk9</code></td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk9"><code>/openjdk9</code></a></td>
+            </tr>
+            <tr>
+                <td><code>openjdk9</code></td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk9-openj9"><code>/openjdk9-openj9</code></a></td>
+            </tr>
+            <tr>
+                <td><code>openjdk10</code></td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk10"><code>/openjdk10</code></a></td>
+            </tr>
+            <tr>
+                <td><code>amber</code></td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk-amber"><code>/openjdk-amber</code></a></td>
+            </tr>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+            <tr>
+                <th>Build Type</th>
+                <th>Example (click to view)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><code>releases</code> (DEFAULT)</td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk8/releases"><code>/openjdk8/releases</code></a></td>
+            </tr>
+            <tr>
+                <td><code>nightly</code></td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk8/nightly"><code>/openjdk8/nightly</code></a></td>
+            </tr>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+            <tr>
+                <th>Platform</th>
+                <th>Example (click to view)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><code>allplatforms</code> (DEFAULT)</td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk8/releases/allplatforms"><code>/openjdk8/releases/allplatforms</code></a>
+                </td>
+            </tr>
+            <tr>
+                <td><code>x64_linux</code></td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk8/releases/x64_linux"><code>/openjdk8/releases/x64_linux</code></a>
+                </td>
+            </tr>
+            <tr>
+                <td><code>x64_mac</code></td>
+                <td>
+                    <a href="https://api.adoptopenjdk.net/v1/openjdk8/releases/x64_mac"><code>/openjdk8/releases/x64_mac</code></a>
+                </td>
+            </tr>
+            <tr>
+                <td><code>x64_win</code></td>
+                <td>
+                    <a href="https://api.adoptopenjdk.net/v1/openjdk8/releases/x64_win"><code>/openjdk8/releases/x64_win</code></a>
+                </td>
+            </tr>
+            <tr>
+                <td><code>s390x_linux</code></td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk8/releases/s390x_linux"><code>/openjdk8/releases/s390x_linux</code></a>
+                </td>
+            </tr>
+            <tr>
+                <td><code>ppc64le_linux</code></td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk8/releases/ppc64le_linux"><code>/openjdk8/releases/ppc64le_linux</code></a>
+                </td>
+            </tr>
+            <tr>
+                <td><code>aarch64_linux</code></td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk8/releases/aarch64_linux"><code>/openjdk8/releases/aarch64_linux</code></a>
+                </td>
+            </tr>
+            <tr>
+                <td><code>ppc64_aix</code></td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk8/releases/ppc64_aix"><code>/openjdk8/releases/ppc64_aix</code></a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+            <tr>
+                <th>Build</th>
+                <th>Example (click to view)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><code>allbuilds</code> (DEFAULT)</td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk8/releases/x64_linux/allbuilds"><code>/openjdk8/releases/x64_linux/allbuilds</code></a>
+                </td>
+            </tr>
+            <tr>
+                <td><code>latest</code></td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk8/releases/x64_linux/latest"><code>/openjdk8/releases/x64_linux/latest</code></a>
+                </td>
+            </tr>
+            <tr>
+                <td><code>&lt;build number&gt;</code></td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk8/releases/x64_linux/jdk8u152-b03"><code>/openjdk8/releases/x64_linux/jdk8u152-b03</code></a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <blockquote>
+            <p><strong>Note on build numbers:</strong> You can find more &#39;release&#39; build numbers at <a
+                    href="https://adoptopenjdk.net/archive.html">adoptopenjdk.net/archive</a>.
+                To specify a &#39;nightly&#39; build number, go to <a href="https://adoptopenjdk.net/nightly.html">adoptopenjdk.net/nightly</a>
+                and click on the build number. This will take you to a GitHub page which contains the full, unique
+                Nightly build number, e.g. <code>jdk8u162-b00-20171207</code>.</p>
+        </blockquote>
+        <table>
+            <thead>
+            <tr>
+                <th>Data Type</th>
+                <th>Example (click to view)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><code>info</code> (DEFAULT)</td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk8/releases/x64_linux/latest/info"><code>/openjdk8/releases/x64_linux/latest/info</code></a>
+                </td>
+            </tr>
+            <tr>
+                <td><code>binary</code> (Redirects to download)</td>
+                <td><a href="https://api.adoptopenjdk.net/v1/openjdk8/releases/x64_linux/latest/binary"><code>/openjdk8/releases/x64_linux/latest/binary</code></a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <blockquote>
+            <p><strong>Note on the <code>/binary</code> path:</strong> you must specify a single platform and a single
+                build before you can use <code>/binary</code>.</p>
+        </blockquote>
+        <p>Example usage of the <code>/binary</code> path, to download the latest binary for Linux X64 with
+            <code>curl</code>:</p>
+        <pre><code>curl -OLJ https:<span>//</span>api.adoptopenjdk.net<span>/v1/</span>openjdk8<span>/releases/</span>x64_linux<span>/latest/</span>binary</code></pre>
+        <h3>Additional path options</h3>
+        <p>By default, the API returns a pretty-printed JSON. You can disable this pretty-printing by appending <code>?pretty=false</code>
+            to the end of any URL. For example:</p>
+        <pre><code>curl <span>https:</span><span>//api.adoptopenjdk.net/v1/openjdk8/releases?pretty=false</span></code></pre>
+    </div>
+    <footer>
+        <hr>
+        <strong>Last modified:</strong> Mon Jun 17 2019 09:35:00 GMT+0000 (Coordinated Universal Time) <br/></footer>
+</div>
+</body>
+</html>
