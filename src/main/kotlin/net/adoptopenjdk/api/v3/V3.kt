@@ -7,7 +7,7 @@ import javax.ws.rs.core.Application
 
 @OpenAPIDefinition(
         servers = [
-            Server(url = "https://api.adoptopenjdk.net")
+            Server(url = "http://127.0.0.1:8080")
         ], info = Info(title = "v3", version = "3.0.0-beta"))
 class V3 : Application() {
 

@@ -8,6 +8,8 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
+import org.json.JSONObject
+import org.json.JSONArray
 import javax.ws.rs.GET
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
@@ -19,6 +21,12 @@ import javax.ws.rs.core.MediaType
 class PlatformsResource {
 
     companion object {
+      val platforms: JSONArray
+      init {
+        val platformData = this.javaClass.getResource("/JSON/platforms.json").readText()
+        platforms = JSONObject(platformData).getJSONArray("platforms")
+      }
+
         const val exampleResult = """[
     {
       "officialName": "Linux x64",
@@ -66,9 +74,7 @@ class PlatformsResource {
                 content = [Content(schema = Schema(example = exampleResult))]
         )
     ])
-    private fun get(): ReleaseInfo {
-        return ReleaseInfo(listOf(), 11, 13)
+    fun get(): String {
+        return platforms.toString()
     }
-
-
 }

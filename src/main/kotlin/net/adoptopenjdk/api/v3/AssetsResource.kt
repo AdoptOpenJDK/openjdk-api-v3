@@ -79,7 +79,7 @@ class AssetsResource {
             throw IllegalArgumentException("Unrecognised type")
         }
 
-        return listOf(Info(release_type, "", "", LocalDateTime.now(), listOf<Binary>(), 1, Vendor.adopt, VersionData(1, 2, "pre", 4, 5, "a", 6, "opt", "")))
+        return listOf(Info(release_type, "", "", LocalDateTime.now(), listOf<Binary>(), 1, Vendor.adoptopenjdk, VersionData(1, 2, "pre", 4, 5, "a", 6, "opt", "")))
     }
 
 
