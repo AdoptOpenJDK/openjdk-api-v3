@@ -17,7 +17,7 @@ import javax.ws.rs.core.Response
 
 
 @Tag(name = "Binary")
-@Path("/binary/")
+@Path("/v3/binary/")
 @Produces(MediaType.APPLICATION_JSON)
 class BinaryResource {
 
