@@ -20,7 +20,7 @@ import javax.ws.rs.core.MediaType
 
 
 @Tag(name = "Assets")
-@Path("/assets/")
+@Path("/v3/assets/")
 @Produces(MediaType.APPLICATION_JSON)
 class AssetsResource {
 
