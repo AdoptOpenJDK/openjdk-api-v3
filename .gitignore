@@ -1,0 +1,10 @@
+node_modules/
+.idea/
+cache/
+auth/
+regression-data/
+nodejs_dc.log
+nodejs_restclient.log
+coverage/
+.mvn
+.iml
