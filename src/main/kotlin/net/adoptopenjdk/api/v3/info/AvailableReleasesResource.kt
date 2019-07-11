@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api.v3.info
 
+import net.adoptopenjdk.api.v3.dataSources.AvailablePlatforms
 import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
@@ -16,6 +17,6 @@ class AvailableReleasesResource {
     @GET
     @Operation(summary = "Returns information about available releases")
     fun get(): ReleaseInfo {
-        return ReleaseInfo(VariantsResource.versions, VariantsResource.LTSVersions, VariantsResource.latestLTSVersion, VariantsResource.latestVersion)
+        return ReleaseInfo(AvailablePlatforms.variants.versions, AvailablePlatforms.variants.ltsVersions, AvailablePlatforms.variants.latestLtsVersion, AvailablePlatforms.variants.latestVersion)
     }
 }

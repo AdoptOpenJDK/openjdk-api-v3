@@ -4,7 +4,7 @@
       "searchableName": "X64_LINUX",
       "logo": "linux.png",
       "attributes": {
-        "heap_size": "normal",
+        "heapSize": "normal",
         "os": "linux",
         "architecture": "x64"
       },
@@ -21,7 +21,7 @@
       "officialName": "Linux x64 Large Heap",
       "searchableName": "LINUXXL",
       "attributes": {
-        "heap_size": "large",
+        "heapSize": "large",
         "os": "linux",
         "architecture": "x64"
       },
@@ -39,7 +39,7 @@
       "officialName": "Windows x32",
       "searchableName": "X32_WIN",
       "attributes": {
-        "heap_size": "normal",
+        "heapSize": "normal",
         "os": "windows",
         "architecture": "x32"
       },
@@ -57,7 +57,7 @@
       "officialName": "Windows x64",
       "searchableName": "X64_WIN",
       "attributes": {
-        "heap_size": "normal",
+        "heapSize": "normal",
         "os": "windows",
         "architecture": "x64"
       },
@@ -75,7 +75,7 @@
       "officialName": "Windows x64 Large Heap",
       "searchableName": "X64_WINXL",
       "attributes": {
-        "heap_size": "large",
+        "heapSize": "large",
         "os": "windows",
         "architecture": "x64"
       },
@@ -93,7 +93,7 @@
       "officialName": "macOS x64",
       "searchableName": "X64_MAC",
       "attributes": {
-        "heap_size": "normal",
+        "heapSize": "normal",
         "os": "mac",
         "architecture": "x64"
       },
@@ -111,7 +111,7 @@
       "officialName": "macOS x64 Large Heap",
       "searchableName": "MACOSXL",
       "attributes": {
-        "heap_size": "large",
+        "heapSize": "large",
         "os": "mac",
         "architecture": "x64"
       },
@@ -129,7 +129,7 @@
       "officialName": "Linux s390x",
       "searchableName": "S390X_LINUX",
       "attributes": {
-        "heap_size": "normal",
+        "heapSize": "normal",
         "os": "linux",
         "architecture": "s390x"
       },
@@ -147,7 +147,7 @@
       "officialName": "Linux ppc64le",
       "searchableName": "PPC64LE_LINUX",
       "attributes": {
-        "heap_size": "normal",
+        "heapSize": "normal",
         "os": "linux",
         "architecture": "ppc64le"
       },
@@ -165,7 +165,7 @@
       "officialName": "Linux aarch64",
       "searchableName": "AARCH64_LINUX",
       "attributes": {
-        "heap_size": "normal",
+        "heapSize": "normal",
         "os": "linux",
         "architecture": "aarch64"
       },
@@ -183,7 +183,7 @@
       "officialName": "Linux arm32",
       "searchableName": "ARM32_LINUX",
       "attributes": {
-        "heap_size": "normal",
+        "heapSize": "normal",
         "os": "linux",
         "architecture": "arm"
       },
@@ -201,7 +201,7 @@
       "officialName": "Solaris sparcv9",
       "searchableName": "SPARCV9_SOLARIS",
       "attributes": {
-        "heap_size": "normal",
+        "heapSize": "normal",
         "os": "solaris",
         "architecture": "sparcv9"
       },
@@ -219,7 +219,7 @@
       "officialName": "Solaris x64",
       "searchableName": "X64_SOLARIS",
       "attributes": {
-        "heap_size": "normal",
+        "heapSize": "normal",
         "os": "solaris",
         "architecture": "x64"
       },
@@ -237,7 +237,7 @@
       "officialName": "AIX ppc64",
       "searchableName": "PPC64_AIX",
       "attributes": {
-        "heap_size": "normal",
+        "heapSize": "normal",
         "os": "aix",
         "architecture": "ppc64"
       },

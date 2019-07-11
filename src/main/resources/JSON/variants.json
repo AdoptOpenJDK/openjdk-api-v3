@@ -21,7 +21,7 @@
       "searchableName": "openjdk9-hotspot",
       "jvm": "hotspot",
       "vendor": "adoptopenjdk",
-      "version": 9,
+      "version": 9
     },
     {
       "searchableName": "openjdk9-openj9",
@@ -35,7 +35,7 @@
       "searchableName": "openjdk10-hotspot",
       "jvm": "hotspot",
       "vendor": "adoptopenjdk",
-      "version": 10,
+      "version": 10
     },
     {
       "searchableName": "openjdk10-openj9",
@@ -65,7 +65,7 @@
       "searchableName": "openjdk12-hotspot",
       "jvm": "hotspot",
       "vendor": "adoptopenjdk",
-      "version": 12,
+      "version": 12
     },
     {
       "searchableName": "openjdk12-openj9",
