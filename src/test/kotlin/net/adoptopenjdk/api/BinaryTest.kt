@@ -13,10 +13,10 @@ import java.util.stream.Stream
 import javax.ws.rs.core.Response
 
 
-@QuarkusTest
+//@QuarkusTest
 open class BinaryTest {
 
-    @TestFactory
+//    @TestFactory
     fun testDynamicTestStream(): Stream<DynamicTest> {
         return runTest(createPermutations(listOf(
                 names(ReleaseType.values()),

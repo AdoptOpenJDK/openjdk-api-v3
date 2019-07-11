@@ -4,7 +4,7 @@ package net.adoptopenjdk.api
 import io.quarkus.test.junit.QuarkusTest
 
 
-@QuarkusTest
+//@QuarkusTest
 open class InfoTest {
     /*
     @TestFactory
