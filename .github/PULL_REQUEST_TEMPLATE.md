@@ -6,5 +6,5 @@ the requirements below.
 ##### Checklist
 <!-- Remove items that do not apply. For completed items, change [ ] to [x]. -->
 
-- [ ] `npm test` passes
+- [ ] `mvn clean package` build and test completes
 - [ ] documentation is changed or added
