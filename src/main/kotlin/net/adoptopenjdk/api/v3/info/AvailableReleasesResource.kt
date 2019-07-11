@@ -16,8 +16,6 @@ class AvailableReleasesResource {
     @GET
     @Operation(summary = "Returns information about available releases")
     fun get(): ReleaseInfo {
-        return ReleaseInfo(listOf(), 11, 13)
+        return ReleaseInfo(VariantsResource.versions, VariantsResource.LTSVersions, VariantsResource.latestLTSVersion, VariantsResource.latestVersion)
     }
-
-
 }
