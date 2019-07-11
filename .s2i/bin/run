@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd /deployments
+java -jar adoptopenjdk-api-3.0.0-SNAPSHOT-runner.jar
