@@ -6,4 +6,4 @@ cd /tmp/src
 mkdir -p /deployments/libs
 
 cp target/adoptopenjdk-api-*-runner.jar /deployments/
-cp target/libs/*' /deployments/libs/
+cp target/libs/* /deployments/libs/
