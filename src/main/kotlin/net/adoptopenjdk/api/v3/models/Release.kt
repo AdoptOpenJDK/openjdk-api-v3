@@ -4,8 +4,8 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema
 import java.time.LocalDateTime
 
 
-class Info {
-    @Schema(example = "https://github.com/AdoptOpenJDK/openjdk8-openj9-releases/releases/tag/jdk8u162-b12_openj9-0.8.0", required = true)
+class Release {
+    @Schema(example = "https://github.com/AdoptOpenJDK/openjdk8-openj9-releases/ga/tag/jdk8u162-b12_openj9-0.8.0", required = true)
     val release_link: String;
 
     @Schema(example = "jdk8u162-b12_openj9-0.8.0", required = true)
@@ -20,7 +20,7 @@ class Info {
     @Schema(example = "7128", required = true)
     val download_count: Int;
 
-    @Schema(example = "releases", required = true)
+    @Schema(example = "ga", required = true)
     val release_type: ReleaseType;
 
     @Schema(example = "adopt", required = true)

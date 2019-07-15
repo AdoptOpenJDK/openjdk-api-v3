@@ -1,14 +1,12 @@
 package net.adoptopenjdk.api
 
 
-import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured.given
 import net.adoptopenjdk.api.APITestUtils.Companion.createPermutations
 import net.adoptopenjdk.api.APITestUtils.Companion.names
 import net.adoptopenjdk.api.APITestUtils.Companion.runTest
 import net.adoptopenjdk.api.v3.models.*
 import org.junit.jupiter.api.DynamicTest
-import org.junit.jupiter.api.TestFactory
 import java.util.stream.Stream
 import javax.ws.rs.core.Response
 
@@ -22,7 +20,7 @@ open class BinaryTest {
                 names(ReleaseType.values()),
                 names(OperatingSystem.values()),
                 names(Architecture.values()),
-                names(BinaryType.values()),
+                names(ImageType.values()),
                 names(JvmImpl.values()),
                 names(HeapSize.values())
         ), 500), { params ->

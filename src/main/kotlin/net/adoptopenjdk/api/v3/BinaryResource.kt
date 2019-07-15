@@ -22,7 +22,7 @@ import javax.ws.rs.core.Response
 class BinaryResource {
 
     @GET
-    @Path("{release_type}/{version}/{os}/{arch}/{release_name}/{binary_type}/{jvm_impl}/{heap_size}/{vendor}")
+    @Path("{release_type}/{version}/{os}/{arch}/{release_name}/{image_type}/{jvm_impl}/{heap_size}/{vendor}")
     @Produces("application/octet-stream")
     @Operation(summary = "Redirects to the binary that matches your current query", description = "Redirects to the binary that matches your current query")
     @APIResponses(value = [
@@ -47,14 +47,14 @@ class BinaryResource {
             @PathParam("arch")
             arch: Architecture?,
 
-            @Parameter(name = "release_name", description = "Release e.g latest, jdk8u172-b00-201807161800", required = true,
+            @Parameter(name = "release_name", description = "Release e.g jdk8u172-b00-201807161800", required = true,
                     schema = Schema(defaultValue = "latest"))
             @PathParam("release_name")
             release_name: String?,
 
-            @Parameter(name = "binary_type", description = "Binary Type", required = true)
-            @PathParam("binary_type")
-            binary_type: BinaryType?,
+            @Parameter(name = "image_type", description = "Image Type", required = true)
+            @PathParam("image_type")
+            image_type: ImageType?,
 
             @Parameter(name = "jvm_impl", description = "OpenJDK Implementation", required = true)
             @PathParam("jvm_impl")

@@ -22,7 +22,7 @@ open class InfoTest {
     fun badVersion() {
         given()
                 .`when`()
-                .get("/v3/info/releases/openjdk3")
+                .get("/v3/info/ga/openjdk3")
                 .then()
                 .statusCode(404)
     }
@@ -31,7 +31,7 @@ open class InfoTest {
     fun goodVersion() {
         given()
                 .`when`()
-                .get("/v3/info/releases/openjdk13")
+                .get("/v3/info/ga/openjdk13")
                 .then()
                 .statusCode(200)
     }

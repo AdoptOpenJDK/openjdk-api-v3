@@ -12,7 +12,6 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
 import java.time.LocalDateTime
-import javax.ws.rs.DefaultValue
 import javax.ws.rs.GET
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
@@ -29,7 +28,7 @@ class AssetsResource {
     @Operation(summary = "Returns release information", description = "List of information about builds that match the current query ")
     @APIResponses(value = [
         APIResponse(responseCode = "200", description = "search results matching criteria",
-                content = [Content(schema = Schema(type = SchemaType.ARRAY, implementation = Info::class))]
+                content = [Content(schema = Schema(type = SchemaType.ARRAY, implementation = Release::class))]
         ),
         APIResponse(responseCode = "400", description = "bad input parameter",
                 content = [Content(schema = Schema(implementation = Void::class))])
@@ -57,9 +56,9 @@ class AssetsResource {
             @QueryParam("release_name")
             release_name: String?,
 
-            @Parameter(name = "binary_type", description = "Binary Type", required = false)
-            @QueryParam("binary_type")
-            binary_type: BinaryType?,
+            @Parameter(name = "image_type", description = "Binary Type", required = false)
+            @QueryParam("image_type")
+            image_type: ImageType?,
 
             @Parameter(name = "jvm_impl", description = "JVM Implementation", required = false)
             @QueryParam("jvm_impl")
@@ -73,13 +72,13 @@ class AssetsResource {
             @QueryParam("vendor")
             vendor: Vendor?
 
-    ): List<Info> {
+    ): List<Release> {
 
         if (release_type == null || version == null) {
             throw IllegalArgumentException("Unrecognised type")
         }
 
-        return listOf(Info(release_type, "", "", LocalDateTime.now(), listOf<Binary>(), 1, Vendor.adoptopenjdk, VersionData(1, 2, "pre", 4, 5, "a", 6, "opt", "")))
+        return listOf(Release(release_type, "", "", LocalDateTime.now(), listOf<Binary>(), 1, Vendor.adoptopenjdk, VersionData(1, 2, "pre", 4, 5, "a", 6, "opt", "")))
     }
 
 
