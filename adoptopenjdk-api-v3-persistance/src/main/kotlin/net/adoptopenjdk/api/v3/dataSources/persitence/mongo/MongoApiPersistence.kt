@@ -63,7 +63,7 @@ class MongoApiPersistence : ApiPersistence {
         var session: ClientSession? = null
 
         try {
-            session = client.startSession();
+            session = client.startSession()
         } catch (e: Exception) {
             LOGGER.warn("DB does not support transactions")
         }

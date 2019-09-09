@@ -121,22 +121,6 @@ abstract class BaseTest {
 
                 val metadataResponse = mockk<HttpResponse<String>>()
                 every { metadataResponse.statusCode() } returns 404
-/*
-                every { metadataResponse.body() } answers {
-
-                    JsonMapper.mapper.writeValueAsString(GHMetaData(
-                            "a",
-                            OperatingSystem.linux,
-                            Architecture.aarch64,
-                            JvmImpl.hotspot,
-                            GHVersion(majorVersion, 2, 3, "s", 5, "6", "7", 2, "9"),
-                            "scm",
-                            "4",
-                            ImageType.jdk,
-                            "I am a checksum"
-                    ))
-                }*/
-
                 CompletableFuture.completedFuture(metadataResponse)
             }
 

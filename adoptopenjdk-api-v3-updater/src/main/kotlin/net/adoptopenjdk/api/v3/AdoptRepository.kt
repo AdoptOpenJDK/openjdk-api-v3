@@ -26,7 +26,7 @@ object AdoptRepositoryImpl : AdoptRepository {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-    val client = GraphQLGitHubClient();
+    val client = GraphQLGitHubClient()
 
     override suspend fun getReleaseById(id: String): Release? {
         return client.getReleaseById(id)

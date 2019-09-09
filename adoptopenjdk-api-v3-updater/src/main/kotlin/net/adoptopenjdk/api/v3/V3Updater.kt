@@ -48,7 +48,7 @@ class V3Updater {
         }, if (instantFullUpdate) 0 else 1, 1, TimeUnit.DAYS)
 
 
-        var incrementalUpdateDelay = 0;
+        var incrementalUpdateDelay = 0
         if (instantFullUpdate) {
             //if doing a full update wait 30 min before starting
             incrementalUpdateDelay = 30
@@ -78,7 +78,7 @@ class V3Updater {
                 val updatedRepo = AdoptReposBuilder.incrementalUpdate(repo)
 
                 if (updatedRepo != repo) {
-                    repo = updatedRepo;
+                    repo = updatedRepo
                     database.updateAllRepos(repo)
                 }
 

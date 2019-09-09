@@ -19,10 +19,9 @@ class TestResourceGenerator {
                 val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
                 val variants = JsonMapper.mapper.readValue(variantData, Variants::class.java)
 
-                //GraphQLGitHubClient.REPO_GET_COUNT_LIMIT = 49
                 val repo = AdoptReposBuilder.build(variants.versions)
 
-                //File("adoptopenjdk-api-v3-updater/src/test/resources/example-data.json.gz").delete()
+                File("adoptopenjdk-api-v3-updater/src/test/resources/example-data.json.gz").delete()
 
                 val out = GZIPOutputStream(File("adoptopenjdk-api-v3-updater/src/test/resources/example-data.json.gz").outputStream())
                 JsonMapper.mapper.writerWithDefaultPrettyPrinter().writeValues(out).write(repo)

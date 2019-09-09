@@ -37,7 +37,6 @@
     </dependencies>
 
     <build>
-        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
     </build>
 </project>

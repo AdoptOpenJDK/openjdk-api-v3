@@ -5,7 +5,7 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.*
 import org.slf4j.LoggerFactory
 
 
-open class GraphQLGitHubRepositoryClient : GraphQLGitHubInterface() {
+open class GraphQLGitHubRepositoryClient : GraphQLGitHubReleaseRequest() {
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)

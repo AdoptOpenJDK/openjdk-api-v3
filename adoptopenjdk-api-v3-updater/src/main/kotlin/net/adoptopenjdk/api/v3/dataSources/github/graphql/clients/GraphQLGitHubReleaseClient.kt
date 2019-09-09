@@ -7,7 +7,7 @@ import net.adoptopenjdk.api.v3.models.Release
 import org.slf4j.LoggerFactory
 
 
-open class GraphQLGitHubReleaseClient : GraphQLGitHubInterface() {
+open class GraphQLGitHubReleaseClient : GraphQLGitHubReleaseRequest() {
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
