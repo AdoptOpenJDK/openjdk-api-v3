@@ -2,6 +2,7 @@ package net.adoptopenjdk.api.v3.dataSources.github.graphql.clients
 
 import io.aexp.nodes.graphql.GraphQLRequestEntity
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.*
+import net.adoptopenjdk.api.v3.models.Vendor
 import org.slf4j.LoggerFactory
 
 
@@ -11,7 +12,7 @@ open class GraphQLGitHubRepositoryClient : GraphQLGitHubReleaseRequest() {
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
     }
 
-    suspend fun getRepository(repoName: String): Repository {
+    suspend fun getRepository(repoName: String): GHRepository {
         val requestEntityBuilder = getReleasesRequest(repoName)
 
         LOGGER.info("Getting repo $repoName")
@@ -24,7 +25,7 @@ open class GraphQLGitHubRepositoryClient : GraphQLGitHubReleaseRequest() {
 
         LOGGER.info("Done getting ${repoName}")
 
-        return Repository(GHReleases(releases, PageInfo(false, null)))
+        return GHRepository(GHReleases(releases, PageInfo(false, null)))
     }
 
     private suspend fun getAllAssets(request: QueryData): List<GHRelease> {

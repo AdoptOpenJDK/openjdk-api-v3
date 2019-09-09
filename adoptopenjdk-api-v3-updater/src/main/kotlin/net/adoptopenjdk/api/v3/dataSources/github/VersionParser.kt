@@ -89,7 +89,7 @@ class VersionParser {
     }
 
     private fun matchPre223(versionString: String): Boolean {
-        val pre223regex = "jdk\\-?(?<version>(?<major>[0-8]+)(u(?<update>[0-9]+))?(-b(?<build>[0-9]+))(_(?<opt>[-a-zA-Z0-9\\.]+))?)"
+        val pre223regex = "(jdk\\-?)?(?<version>(?<major>[0-8]+)(u(?<update>[0-9]+))?(-b(?<build>[0-9]+))(_(?<opt>[-a-zA-Z0-9\\.]+))?)"
         val matched = Pattern.compile(".*?$pre223regex.*?").matcher(versionString)
 
         if (matched.matches()) {

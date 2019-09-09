@@ -1,13 +1,11 @@
 package net.adoptopenjdk.api.v3
 
-import com.fasterxml.jackson.annotation.JsonProperty
-import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.RepositorySummary
+import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
-import net.adoptopenjdk.api.v3.models.*
+import net.adoptopenjdk.api.v3.models.Release
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 
 object AdoptReposBuilder {
 
@@ -50,7 +48,7 @@ object AdoptReposBuilder {
         }
     }
 
-    private suspend fun getUpdatedReleases(summary: RepositorySummary, pruned: FeatureRelease): List<Release> {
+    private suspend fun getUpdatedReleases(summary: GHRepositorySummary, pruned: FeatureRelease): List<Release> {
         return summary.releases.releases
                 .filter { !pruned.releases.hasReleaseBeenUpdated(it.id, it.getUpdatedTime()) }
                 .map {
@@ -60,7 +58,7 @@ object AdoptReposBuilder {
 
     }
 
-    private suspend fun getNewReleases(summary: RepositorySummary, currentRelease: FeatureRelease): List<Release> {
+    private suspend fun getNewReleases(summary: GHRepositorySummary, currentRelease: FeatureRelease): List<Release> {
         return summary.releases.releases
                 .filter { !currentRelease.releases.hasReleaseId(it.id) }
                 .map {

@@ -13,7 +13,7 @@ open class GraphQLGitHubReleaseClient : GraphQLGitHubReleaseRequest() {
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
     }
 
-    suspend fun getReleaseById(id: String): Release? {
+    suspend fun getReleaseById(id: String): GHRelease? {
         val requestEntityBuilder = getReleaseByIdQuery(id)
 
         LOGGER.info("Getting id $id")
@@ -31,7 +31,7 @@ open class GraphQLGitHubReleaseClient : GraphQLGitHubReleaseRequest() {
             release = result.response.release
         }
 
-        return release.toAdoptRelease()
+        return release
     }
 
     private fun getReleaseByIdQuery(releaseId: String): GraphQLRequestEntity.RequestBuilder {

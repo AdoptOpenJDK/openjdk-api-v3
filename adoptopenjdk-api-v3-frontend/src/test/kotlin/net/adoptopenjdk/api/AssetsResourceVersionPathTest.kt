@@ -38,7 +38,9 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
                 versionRange.equals(RANGE_11_12) && element == Architecture.sparcv9 ||
                 versionRange.equals(JAVA11) && element == Architecture.x32 ||
                 versionRange.equals(JAVA11) && element == OperatingSystem.solaris ||
-                versionRange.equals(JAVA11) && element == Architecture.sparcv9
+                versionRange.equals(JAVA11) && element == Architecture.sparcv9 ||
+                versionRange.equals(JAVA8_212) && element == ImageType.testimage ||
+                versionRange.equals(JAVA11) && element == ImageType.testimage
     }
 }
 

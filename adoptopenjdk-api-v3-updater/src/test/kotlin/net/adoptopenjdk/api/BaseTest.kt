@@ -12,11 +12,9 @@ import io.mockk.mockk
 import net.adoptopenjdk.api.v3.*
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
-import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
-import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHVersion
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleasesSummary
-import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.RepositorySummary
+import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.models.*
@@ -83,11 +81,11 @@ abstract class BaseTest {
                     return adoptRepos.repos.get(version)!!
                 }
 
-                override suspend fun getSummary(version: Int): RepositorySummary {
+                override suspend fun getSummary(version: Int): GHRepositorySummary {
                     return repoToSummary(adoptRepos.repos.get(version)!!)
                 }
 
-                protected fun repoToSummary(featureRelease: FeatureRelease): RepositorySummary {
+                protected fun repoToSummary(featureRelease: FeatureRelease): GHRepositorySummary {
 
                     val gHReleaseSummarys = featureRelease.releases.getReleases()
                             .map {
@@ -98,7 +96,7 @@ abstract class BaseTest {
                             .toList()
 
 
-                    return RepositorySummary(GHReleasesSummary(gHReleaseSummarys, PageInfo(false, "")))
+                    return GHRepositorySummary(GHReleasesSummary(gHReleaseSummarys, PageInfo(false, "")))
                 }
             }
         }

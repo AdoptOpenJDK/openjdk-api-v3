@@ -5,7 +5,7 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.QuerySummaryData
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleasesSummary
-import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.RepositorySummary
+import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 import org.slf4j.LoggerFactory
 
 
@@ -16,7 +16,7 @@ class GraphQLGitHubSummaryClient : GraphQLGitHubInterface() {
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
     }
 
-    suspend fun getRepositorySummary(repoName: String): RepositorySummary {
+    suspend fun getRepositorySummary(repoName: String): GHRepositorySummary {
         val requestEntityBuilder = getReleaseSummary(repoName)
 
         LOGGER.info("Getting repo summary $repoName")
@@ -29,7 +29,7 @@ class GraphQLGitHubSummaryClient : GraphQLGitHubInterface() {
 
         LOGGER.info("Done getting summary ${repoName}")
 
-        return RepositorySummary(GHReleasesSummary(releases, PageInfo(false, null)))
+        return GHRepositorySummary(GHReleasesSummary(releases, PageInfo(false, null)))
     }
 
     private fun getSummary(request: QuerySummaryData): List<GHReleaseSummary> {
