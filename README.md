@@ -86,7 +86,7 @@ curl -L 'https://api.adoptopenjdk.net/v2/binary/nightly/openjdk8?openjdk_impl=ho
 ```
 
 ##### latestAssets
-Returns the latest binary asset for every matching combination of os, architecture, binary_type, openjdk_impl, version, heap_size.
+Returns the latest binary asset for every matching combination of os, architecture, image_type, openjdk_impl, version, heap_size.
 
 i.e to find the latest jdk/jre for linux, x64, normal heap, hotspot:
 
@@ -97,7 +97,7 @@ curl -L 'https://api.adoptopenjdk.net/v2/latestAssets/nightly/openjdk8?os=linux&
   {
     "os": "linux",
     "architecture": "x64",
-    "binary_type": "jre",
+    "image_type": "jre",
     "openjdk_impl": "hotspot",
     "binary_name": "OpenJDK8U-jre_x64_linux_hotspot_2018-10-12-04-26.tar.gz",
     "binary_link": "https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u-2018-10-12-04-26/OpenJDK8U-jre_x64_linux_hotspot_2018-10-12-04-26.tar.gz",
@@ -110,7 +110,7 @@ curl -L 'https://api.adoptopenjdk.net/v2/latestAssets/nightly/openjdk8?os=linux&
   {
     "os": "linux",
     "architecture": "x64",
-    "binary_type": "jdk",
+    "image_type": "jdk",
     "openjdk_impl": "hotspot",
     "binary_name": "OpenJDK8U-jdk_x64_linux_hotspot_2018-10-12-04-26.tar.gz",
     "binary_link": "https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u-2018-10-12-04-26/OpenJDK8U-jdk_x64_linux_hotspot_2018-10-12-04-26.tar.gz",
