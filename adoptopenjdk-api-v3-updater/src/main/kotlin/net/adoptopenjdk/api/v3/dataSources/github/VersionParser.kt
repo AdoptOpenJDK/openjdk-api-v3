@@ -22,8 +22,7 @@ class VersionParser {
     private var opt: String? = null
     private var version: String? = null
     private var pre: String? = null
-    private var adopt_build_number: Int? = 1
-    private var semver: String? = null
+    private var adopt_build_number: Int? = null
 
     fun parse(publishName: String?, adoptBuildNumber: String? = null): VersionData {
         if (publishName != null) {
@@ -35,10 +34,7 @@ class VersionParser {
         if (adoptBuildNumber != null) {
             adopt_build_number = Integer.parseInt(adoptBuildNumber)
         }
-
-        semver = formSemver()
-
-        return VersionData(major!!, minor!!, security!!, pre, adopt_build_number!!, semver!!, build!!, opt, version!!)
+        return VersionData(major!!, minor!!, security!!, pre, adopt_build_number, build!!, opt, version!!)
     }
 
     private fun or0(matched: Matcher, groupName: String): Int {
@@ -61,7 +57,7 @@ class VersionParser {
 
     private fun matchAltPre223(versionString: String): Boolean {
         //1.8.0_202-internal-201903130451-b08
-        val pre223regex = """(?<version>1\.(?<major>[0-8])\.0(_(?<update>[0-9]+))?(-(?<additional>.*))?)"""
+        val pre223regex = """(?<version>1\.(?<major>[0-8])\.0(_(?<update>[0-9]+))?(-?(?<additional>.*))?)"""
         val matched = Pattern.compile(".*?$pre223regex.*?").matcher(versionString)
 
         if (matched.matches()) {
@@ -89,8 +85,17 @@ class VersionParser {
     }
 
     private fun matchPre223(versionString: String): Boolean {
-        val pre223regex = "(jdk\\-?)?(?<version>(?<major>[0-8]+)(u(?<update>[0-9]+))?(-b(?<build>[0-9]+))(_(?<opt>[-a-zA-Z0-9\\.]+))?)"
-        val matched = Pattern.compile(".*?$pre223regex.*?").matcher(versionString)
+
+        val majorMatcher = "(?<major>[0-8]+)"
+        val update = "u(?<update>[0-9]+)"
+        val buildMatcher = "-?b(?<build>[0-9]+)"
+        val optMatcher = "_(?<opt>[-a-zA-Z0-9\\.]+)"
+        val versionMatcher = "(?<version>$majorMatcher($update)($buildMatcher)?($optMatcher)?)"
+        val prefixMatcher = "(jdk\\-?)"
+
+        val pre223regex = ".*?$prefixMatcher?$versionMatcher.*?"
+
+        val matched = Pattern.compile(pre223regex).matcher(versionString)
 
         if (matched.matches()) {
             major = matched.group("major").toInt()
@@ -140,29 +145,5 @@ class VersionParser {
         return false
     }
 
-    // i.e 11.0.1+11.1
-    fun formSemver(): String? {
-        if (major != null) {
-            var semver = major.toString() + "." + minor + "." + security
-
-            if (pre != null) {
-                semver += "-" + pre!!
-            }
-
-
-            semver += "+"
-            semver += if (build != null) build else "0"
-            semver += "." + adopt_build_number!!
-
-            if (opt != null) {
-                semver += "." + opt!!
-            }
-
-            return semver
-        } else {
-            return null
-        }
-
-    }
 
 }

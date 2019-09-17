@@ -34,7 +34,4 @@ data class GHRelease @JsonCreator constructor(
         @JsonProperty("updatedAt") val updatedAt: String,
         @JsonProperty("releaseAssets") val releaseAssets: GHAssets,
         @JsonProperty("resourcePath") val resourcePath: String,
-        @JsonProperty("url") val url: String) {
-
-
-}
+        @JsonProperty("url") val url: String)

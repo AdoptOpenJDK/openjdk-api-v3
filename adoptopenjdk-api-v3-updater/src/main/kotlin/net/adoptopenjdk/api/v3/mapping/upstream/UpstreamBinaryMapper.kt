@@ -15,14 +15,18 @@ object UpstreamBinaryMapper : BinaryMapper() {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
+    private val EXCLUDES = listOf("sources", "debuginfo")
+
     suspend fun toBinaryList(assets: List<GHAsset>): List<Binary> {
         return assets
                 .filter(this::isArchive)
-                .filter({ !it.name.contains("sources") })
+                .filter({ !assetIsExcluded(it) })
                 .map { asset -> assetToBinary(asset) }
                 .map { binaryList -> binaryList.await() }
                 .filterNotNull()
     }
+
+    private fun assetIsExcluded(asset: GHAsset) = EXCLUDES.none({ exclude -> asset.name.contains(exclude) })
 
     private fun assetToBinary(asset: GHAsset): Deferred<Binary?> {
         return GlobalScope.async {

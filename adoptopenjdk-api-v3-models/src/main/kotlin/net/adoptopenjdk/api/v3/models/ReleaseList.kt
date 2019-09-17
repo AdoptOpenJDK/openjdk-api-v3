@@ -1,13 +1,10 @@
 package net.adoptopenjdk.api.v3.models
 
-import org.eclipse.microprofile.openapi.annotations.media.Schema
-
 class ReleaseList {
 
-    @Schema(required = true)
-    val releases: List<String>
+    val releases: Array<String>
 
-    constructor(releases: List<String>) {
+    constructor(releases: Array<String>) {
         this.releases = releases
     }
 

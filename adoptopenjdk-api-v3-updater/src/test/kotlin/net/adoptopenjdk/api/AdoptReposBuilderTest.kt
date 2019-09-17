@@ -37,8 +37,8 @@ class AdoptReposBuilderTest : BaseTest() {
         runBlocking {
             val repo = getInitialRepo()
             val toAdd = Release("foo", ReleaseType.ga, "a", "b", LocalDateTime.now(),
-                    LocalDateTime.now(), listOf(), 2, Vendor.adoptopenjdk,
-                    VersionData(1, 2, 3, "", 1, "", 4, "", ""))
+                    LocalDateTime.now(), arrayOf(), 2, Vendor.adoptopenjdk,
+                    VersionData(1, 2, 3, "", 1, 4, "", ""))
 
 
             val removedRepo = repo.addRelease(8, toAdd)
@@ -61,8 +61,8 @@ class AdoptReposBuilderTest : BaseTest() {
             val original = repo.getFeatureRelease(8)!!.releases.nodes.values.first()
 
             val toUpdate = Release(original.id, ReleaseType.ga, "a", "b", LocalDateTime.now(),
-                    LocalDateTime.now(), listOf(), 2, Vendor.adoptopenjdk,
-                    VersionData(1, 2, 3, "", 1, "", 4, "", ""))
+                    LocalDateTime.now(), arrayOf(), 2, Vendor.adoptopenjdk,
+                    VersionData(1, 2, 3, "", 1, 4, "", ""))
 
             val updatedRepo = repo.removeRelease(8, original)//.addRelease(8, toUpdate)
 

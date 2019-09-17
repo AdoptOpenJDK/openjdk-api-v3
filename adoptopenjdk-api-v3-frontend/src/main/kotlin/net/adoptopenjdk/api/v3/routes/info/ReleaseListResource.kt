@@ -23,7 +23,7 @@ import javax.ws.rs.core.MediaType
 class ReleaseListResource {
 
     @GET
-    @Path("release_list")
+    @Path("release_names")
     @Operation(summary = "Returns a list of all release names")
     fun get(
             @Parameter(name = "release_type", description = OpenApiDocs.RELEASE_TYPE, required = false)
@@ -54,10 +54,11 @@ class ReleaseListResource {
                 .map { it.release_name }
                 .toList()
 
-        return ReleaseList(releases)
+
+        return ReleaseList(releases.toTypedArray())
     }
 
-    @Path("release_version_list")
+    @Path("release_versions")
     @GET
     @Operation(summary = "Returns a list of all release versions")
     fun getVersions(
@@ -90,7 +91,7 @@ class ReleaseListResource {
                 .distinct()
                 .toList()
 
-        return ReleaseVersionList(releases)
+        return ReleaseVersionList(releases.toTypedArray())
     }
 
     private fun getReleases(release_type: ReleaseType?, vendor: Vendor?, version: String?): Sequence<Release> {

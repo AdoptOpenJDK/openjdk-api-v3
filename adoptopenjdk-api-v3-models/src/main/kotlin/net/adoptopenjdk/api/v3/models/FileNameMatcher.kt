@@ -18,11 +18,4 @@ interface FileNameMatcher {
                 .map { it.toLowerCase() }
                 .toList()
     }
-/*
-    fun valueOf():List<String> {
-        names
-                .filter {
-
-                }
-    }*/
 }

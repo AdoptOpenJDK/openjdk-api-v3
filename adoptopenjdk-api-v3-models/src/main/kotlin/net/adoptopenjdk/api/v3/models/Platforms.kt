@@ -1,6 +1,8 @@
 package net.adoptopenjdk.api.v3.models
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
+import org.eclipse.microprofile.openapi.annotations.media.Schema
 
 
 class Attributes {
@@ -80,11 +82,12 @@ class Platform {
 
 
 class Platforms {
-    val platforms: List<Platform>
+    @Schema(type = SchemaType.ARRAY, implementation = Platform::class)
+    val platforms: Array<Platform>
 
     constructor(
             @JsonProperty("platforms")
-            platforms: List<Platform>) {
+            platforms: Array<Platform>) {
         this.platforms = platforms
     }
 }

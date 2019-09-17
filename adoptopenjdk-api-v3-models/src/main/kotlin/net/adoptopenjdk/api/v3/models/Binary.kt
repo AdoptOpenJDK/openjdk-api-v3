@@ -8,28 +8,28 @@ class Binary {
 
     val os: OperatingSystem
 
-    @Schema(example = "x64", required = true)
+    @Schema(example = "x64")
     val architecture: Architecture
 
-    @Schema(example = "jdk", required = true)
+    @Schema(example = "jdk")
     val image_type: ImageType
 
-    @Schema(example = "openj9", required = true)
+    @Schema(example = "openj9")
     val jvm_impl: JvmImpl
 
-    @Schema(required = false, implementation = Package::class)
+    @Schema(implementation = Package::class)
     val `package`: Package?
 
-    @Schema(required = false, implementation = Installer::class)
+    @Schema(implementation = Installer::class)
     val installer: Installer?
 
-    @Schema(example = "normal", required = true)
+    @Schema(example = "normal")
     val heap_size: HeapSize
 
-    @Schema(example = "3899", required = true)
+    @Schema(example = "3899")
     val download_count: Long
 
-    @Schema(example = "2018-03-15T12:13:07.000Z", required = true)
+    @Schema(example = "2018-03-15T12:13:07.000Z")
     val updated_at: LocalDateTime
 
     @Schema(example = "dd28d6d2cde2b931caf94ac2422a2ad082ea62f0beee3bf7057317c53093de93")
