@@ -1,9 +1,7 @@
 package net.adoptopenjdk.api.v3.models
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema
-import java.time.LocalDateTime
 
-@Schema(hidden = true)
 open class Asset {
 
     @Schema(example = "OpenJDK8U-jre_x86-32_windows_hotspot_8u212b04.msi")

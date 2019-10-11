@@ -60,6 +60,19 @@ class VersionData {
 
     }
 
+    override fun hashCode(): Int {
+        var result = major
+        result = 31 * result + minor
+        result = 31 * result + security
+        result = 31 * result + (pre?.hashCode() ?: 0)
+        result = 31 * result + (adopt_build_number ?: 0)
+        result = 31 * result + (semver?.hashCode() ?: 0)
+        result = 31 * result + openjdk_version.hashCode()
+        result = 31 * result + build
+        result = 31 * result + (optional?.hashCode() ?: 0)
+        return result
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -77,19 +90,6 @@ class VersionData {
         if (optional != other.optional) return false
 
         return true
-    }
-
-    override fun hashCode(): Int {
-        var result = major
-        result = 31 * result + minor
-        result = 31 * result + security
-        result = 31 * result + (pre?.hashCode() ?: 0)
-        result = 31 * result + (adopt_build_number ?: 0)
-        result = 31 * result + (semver?.hashCode() ?: 0)
-        result = 31 * result + openjdk_version.hashCode()
-        result = 31 * result + build
-        result = 31 * result + (optional?.hashCode() ?: 0)
-        return result
     }
 
 }

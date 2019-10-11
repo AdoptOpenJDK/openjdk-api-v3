@@ -11,6 +11,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import net.adoptopenjdk.api.v3.*
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
+import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleasesSummary
@@ -18,8 +19,12 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepos
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.models.*
+import org.junit.AfterClass
+import org.junit.BeforeClass
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.LoggerFactory
 import java.net.http.HttpClient
@@ -37,6 +42,32 @@ abstract class BaseTest {
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
+
+
+        fun mockkHttpClient(): HttpClient {
+
+            val client = mockk<HttpClient>()
+            val checksumResponse = mockk<HttpResponse<String>>()
+
+
+            every { client.sendAsync(match({ it.uri().toString().endsWith("sha256.txt") }), any<HttpResponse.BodyHandler<String>>()) } returns CompletableFuture.completedFuture(checksumResponse)
+            every { checksumResponse.statusCode() } returns 200
+            every { checksumResponse.body() } returns "CAFE123 IAmAChecksum"
+
+            every { client.sendAsync(match({ it.uri().toString().endsWith("json") }), any<HttpResponse.BodyHandler<String>>()) } answers { arg ->
+
+                val regex = """.*openjdk([0-9]+).*""".toRegex()
+                val majorVersion = regex.find(arg.invocation.args.get(0).toString())!!.destructured.component1().toInt()
+
+                val metadataResponse = mockk<HttpResponse<String>>()
+                every { metadataResponse.statusCode() } returns 404
+                CompletableFuture.completedFuture(metadataResponse)
+            }
+
+            return client
+        }
+
+
         private var mongodExecutable: MongodExecutable? = null
 
         @JvmStatic
@@ -64,6 +95,7 @@ abstract class BaseTest {
 
             var adoptRepos = JsonMapper.mapper.readValue(GZIPInputStream(javaClass.classLoader.getResourceAsStream("example-data.json.gz")), AdoptRepos::class.java)
 
+            ApiPersistenceFactory.set(null)
             AdoptRepositoryFactory.adoptRepository = MockRepository(adoptRepos!!)
 
 
@@ -101,37 +133,13 @@ abstract class BaseTest {
             }
         }
 
-
-        fun mockkHttpClient(): HttpClient {
-
-            val client = mockk<HttpClient>()
-            val checksumResponse = mockk<HttpResponse<String>>()
-
-
-            every { client.sendAsync(match({ it.uri().toString().endsWith("sha256.txt") }), any<HttpResponse.BodyHandler<String>>()) } returns CompletableFuture.completedFuture(checksumResponse)
-            every { checksumResponse.statusCode() } returns 200
-            every { checksumResponse.body() } returns "CAFE123 IAmAChecksum"
-
-            every { client.sendAsync(match({ it.uri().toString().endsWith("json") }), any<HttpResponse.BodyHandler<String>>()) } answers { arg ->
-
-                val regex = """.*openjdk([0-9]+).*""".toRegex()
-                val majorVersion = regex.find(arg.invocation.args.get(0).toString())!!.destructured.component1().toInt()
-
-                val metadataResponse = mockk<HttpResponse<String>>()
-                every { metadataResponse.statusCode() } returns 404
-                CompletableFuture.completedFuture(metadataResponse)
-            }
-
-            return client
-        }
-
         @JvmStatic
         @AfterAll
         fun closeMongo() {
             mongodExecutable!!.stop()
         }
-
     }
+
 
     protected suspend fun getInitialRepo(): AdoptRepos {
         return AdoptReposBuilder.incrementalUpdate(AdoptReposBuilder.build(APIDataStore.variants.versions))

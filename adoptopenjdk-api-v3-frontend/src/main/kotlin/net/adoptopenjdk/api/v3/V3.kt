@@ -11,6 +11,9 @@ import org.eclipse.microprofile.openapi.annotations.info.Info
 import org.eclipse.microprofile.openapi.annotations.servers.Server
 import org.jboss.resteasy.plugins.interceptors.CorsFilter
 import javax.ws.rs.ApplicationPath
+import javax.ws.rs.container.ContainerRequestContext
+import javax.ws.rs.container.ContainerResponseContext
+import javax.ws.rs.container.ContainerResponseFilter
 import javax.ws.rs.core.Application
 
 object ServerConfig {
@@ -30,10 +33,12 @@ class V3 : Application() {
     private val cors: Set<Any>
 
     init {
-        val corsFilter = CorsFilter()
-        corsFilter.allowedOrigins.add("*")
 
-        cors = setOf(corsFilter)
+        cors = setOf( object: ContainerResponseFilter {
+            override fun filter(requestContext: ContainerRequestContext?, responseContext: ContainerResponseContext) {
+                responseContext.getHeaders().add("Access-Control-Allow-Origin", "*")
+            }
+        })
 
         resourceClasses = setOf(
                 AssetsResource::class.java,
