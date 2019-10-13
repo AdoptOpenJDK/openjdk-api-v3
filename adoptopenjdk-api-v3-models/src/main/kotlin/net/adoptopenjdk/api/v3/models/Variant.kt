@@ -2,8 +2,6 @@ package net.adoptopenjdk.api.v3.models
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-
-// Website only classes
 class Variant {
 
     val searchableName: String
@@ -49,25 +47,24 @@ class Variant {
 
     }
 }
-//TODO nest
+
 class Variants {
-    val variants: List<Variant>
 
-    val versions: List<Int>
+    val variants: Array<Variant>
+    val versions: Array<Int>
     val latestVersion: Int
-
-    val ltsVersions: List<Int>
+    val ltsVersions: Array<Int>
     val latestLtsVersion: Int
 
     constructor(
             @JsonProperty("variants")
-            variants: List<Variant>) {
+            variants: Array<Variant>) {
         this.variants = variants
 
-        versions = variants.map { it.version }.sorted().distinct()
+        versions = variants.map { it.version }.sorted().distinct().toTypedArray()
         latestVersion = versions.last()
 
-        ltsVersions = variants.filter { it.lts }.map { it.version }.sorted().distinct()
+        ltsVersions = variants.filter { it.lts }.map { it.version }.sorted().distinct().toTypedArray()
         latestLtsVersion = ltsVersions.last()
 
         variants

@@ -31,13 +31,6 @@ class APIDataStoreTest : BaseTest() {
             val repo = getInitialRepo()
             ApiPersistenceFactory.get().updateAllRepos(repo)
             val dbData = APIDataStore.loadDataFromDb()
-
-            var versions = repo.getFeatureRelease(8)!!.releases
-                    .getReleases()
-                    .filter { it.version_data.major != 8 }
-                    .toList()
-
-
             assertTrue(repo == dbData)
         }
     }

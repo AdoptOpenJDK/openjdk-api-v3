@@ -19,6 +19,4 @@ import java.time.format.DateTimeFormatter
 data class GHAssets @JsonCreator constructor(
 	@JsonProperty("nodes") val assets: List<GHAsset>,
 	@JsonProperty("pageInfo") val pageInfo: PageInfo
-) {
-
-}
+)

@@ -33,7 +33,7 @@ class AdoptReposTest : BaseTest() {
                 "c",
                 time,
                 time,
-                listOf(Binary(
+                arrayOf(Binary(
                         Package("a",
                                 "b",
                                 1L,
@@ -62,7 +62,6 @@ class AdoptReposTest : BaseTest() {
                         3,
                         "a",
                         4,
-                        "b",
                         5,
                         "c",
                         "d"

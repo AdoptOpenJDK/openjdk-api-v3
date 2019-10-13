@@ -26,7 +26,7 @@ class Releases {
     fun filterBinaries(binaryFilter: BinaryFilter): Releases {
         val filtered = getReleases()
                 .map {
-                    Release(it, it.binaries.filter { binaryFilter.test(it) })
+                    Release(it, it.binaries.filter { binaryFilter.test(it) }.toTypedArray())
                 }
         return Releases(filtered.toList())
     }

@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.timerTask
 
 object APIDataStore {
-    private lateinit var binaryRepos: AdoptRepos
+    private var binaryRepos: AdoptRepos
 
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
@@ -28,9 +28,10 @@ object APIDataStore {
         variants = JsonMapper.mapper.readValue(variantData, Variants::class.java)
 
         try {
-            loadDataFromDb()
+            binaryRepos = loadDataFromDb()
         } catch (e: Exception) {
-            LOGGER.error("Failed to read cache")
+            LOGGER.error("Failed to read db", e)
+            binaryRepos = AdoptRepos(listOf());
         }
 
         Executors

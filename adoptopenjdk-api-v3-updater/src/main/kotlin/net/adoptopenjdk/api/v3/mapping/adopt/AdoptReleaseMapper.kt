@@ -28,23 +28,23 @@ object AdoptReleaseMapper : ReleaseMapper() {
         val hasDate = Pattern.compile(dateMatcher).matcher(release.name)
         val release_type: ReleaseType = if (hasDate.matches()) ReleaseType.ea else ReleaseType.ga
 
-        val release_link = release.url
-        val release_name = release.name
+        val releaseLink = release.url
+        val releaseName = release.name
         val timestamp = parseDate(release.publishedAt)
         val updatedAt = parseDate(release.updatedAt)
-        val download_count = 1
+        val download_count = release.releaseAssets.assets.map { it.downloadCount }.sum()
         val vendor = Vendor.adoptopenjdk
 
 
         val metadata = getMetadata(release.releaseAssets)
 
-        val versionData = getVersionData(release, metadata, release_type, release_name)
+        val versionData = getVersionData(release, metadata, release_type, releaseName)
 
-        LOGGER.info("Getting binaries ${release_name}")
+        LOGGER.info("Getting binaries ${releaseName}")
         val binaries = AdoptBinaryMapper.toBinaryList(release.releaseAssets.assets, metadata)
-        LOGGER.info("Done Getting binaries ${release_name}")
+        LOGGER.info("Done Getting binaries ${releaseName}")
 
-        return Release(release.id, release_type, release_link, release_name, timestamp, updatedAt, binaries, download_count, vendor, versionData)
+        return Release(release.id, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), download_count, vendor, versionData)
     }
 
     private fun getVersionData(release: GHRelease, metadata: Map<GHAsset, GHMetaData>, release_type: ReleaseType, release_name: String): VersionData {
@@ -117,7 +117,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
 
         if (matched.matches()) {
             val featureNumber = matched.group("feature").toInt()
-            return VersionData(featureNumber, 0, 0, null, 0, "", 0, null, "")
+            return VersionData(featureNumber, 0, 0, null, 0, 0, null, "")
         } else {
             //TODO: Catch this sooner
             throw IllegalStateException("Failed to find feature version for ${release_name}")

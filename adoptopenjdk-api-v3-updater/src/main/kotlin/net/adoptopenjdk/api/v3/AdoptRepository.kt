@@ -71,6 +71,7 @@ object AdoptRepositoryImpl : AdoptRepository {
                 .getRepository(repoName)
                 .getReleases()
                 .map { getMapperForRepo(it.url).toAdoptRelease(it) }
+                .filterNotNull()
     }
 
     private suspend fun <E> getDataForEachRepo(version: Int, getFun: suspend (String) -> E): Deferred<List<E?>> {
