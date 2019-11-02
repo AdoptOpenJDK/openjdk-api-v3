@@ -31,7 +31,7 @@ object APIDataStore {
             binaryRepos = loadDataFromDb()
         } catch (e: Exception) {
             LOGGER.error("Failed to read db", e)
-            binaryRepos = AdoptRepos(listOf());
+            binaryRepos = AdoptRepos(listOf())
         }
 
         Executors

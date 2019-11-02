@@ -7,7 +7,6 @@ import net.adoptopenjdk.api.v3.dataSources.filters.BinaryFilter
 import net.adoptopenjdk.api.v3.dataSources.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.models.Release
 import java.time.LocalDateTime
-import java.time.ZonedDateTime
 
 class Releases {
 
@@ -81,6 +80,6 @@ class Releases {
 
 
     companion object {
-        val TIME_SORTER = Comparator.comparing { release: Release -> release.timestamp }
+        val TIME_SORTER: Comparator<Release> = Comparator.comparing { release: Release -> release.timestamp }
     }
 }

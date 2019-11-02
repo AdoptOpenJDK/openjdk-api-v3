@@ -135,9 +135,7 @@ class BinaryResource {
         val release = releases.sortedWith(comparator).lastOrNull()
 
         return formResponse(if (release == null) emptyList() else listOf(release))
-
     }
-
 
     private fun formResponse(releases: List<Release>): Response {
         if (releases.size == 0) {
@@ -145,7 +143,7 @@ class BinaryResource {
         } else if (releases.size > 1) {
             val versions = releases
                     .map { it.release_name }
-            return formErrorResponse(Response.Status.BAD_REQUEST, "Multiple releases match request: ${versions}")
+            return formErrorResponse(Response.Status.BAD_REQUEST, "Multiple releases match request: $versions")
         } else {
             val binaries = releases.get(0).binaries
             val packages = binaries
@@ -156,7 +154,7 @@ class BinaryResource {
                 return formErrorResponse(Response.Status.NOT_FOUND, "No binaries match the request")
             } else if (packages.size > 1) {
                 val names = packages.map { it.name }
-                return formErrorResponse(Response.Status.BAD_REQUEST, "Multiple binaries match request: ${names}")
+                return formErrorResponse(Response.Status.BAD_REQUEST, "Multiple binaries match request: $names")
             } else {
                 return Response.temporaryRedirect(URI.create(packages.first().link)).build()
             }
@@ -169,4 +167,5 @@ class BinaryResource {
                 .entity(JsonMapper.mapper.writeValueAsString(APIError(message)))
                 .build()
     }
+
 }

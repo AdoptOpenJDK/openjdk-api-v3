@@ -18,13 +18,9 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRelea
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
-import net.adoptopenjdk.api.v3.models.*
-import org.junit.AfterClass
-import org.junit.BeforeClass
+import net.adoptopenjdk.api.v3.models.Release
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.LoggerFactory
 import java.net.http.HttpClient
@@ -93,7 +89,7 @@ abstract class BaseTest {
 
             LOGGER.info("FMongo started")
 
-            var adoptRepos = JsonMapper.mapper.readValue(GZIPInputStream(javaClass.classLoader.getResourceAsStream("example-data.json.gz")), AdoptRepos::class.java)
+            val adoptRepos = JsonMapper.mapper.readValue(GZIPInputStream(javaClass.classLoader.getResourceAsStream("example-data.json.gz")), AdoptRepos::class.java)
 
             ApiPersistenceFactory.set(null)
             AdoptRepositoryFactory.adoptRepository = MockRepository(adoptRepos!!)

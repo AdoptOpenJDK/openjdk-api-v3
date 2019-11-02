@@ -94,7 +94,7 @@ object AdoptRepositoryImpl : AdoptRepository {
                 LOGGER.info("Done getting $repoName")
                 return@async releases
             } catch (e: Exception) {
-                LOGGER.error("Failed when fetching ${repoName}", e)
+                LOGGER.error("Failed when fetching $repoName", e)
                 return@async null
             }
         }

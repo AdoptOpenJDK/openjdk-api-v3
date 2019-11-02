@@ -2,6 +2,7 @@ package net.adoptopenjdk.api.v3
 
 import net.adoptopenjdk.api.v3.routes.AssetsResource
 import net.adoptopenjdk.api.v3.routes.BinaryResource
+import net.adoptopenjdk.api.v3.routes.VersionResource
 import net.adoptopenjdk.api.v3.routes.info.AvailableReleasesResource
 import net.adoptopenjdk.api.v3.routes.info.PlatformsResource
 import net.adoptopenjdk.api.v3.routes.info.ReleaseListResource
@@ -9,7 +10,6 @@ import net.adoptopenjdk.api.v3.routes.info.VariantsResource
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition
 import org.eclipse.microprofile.openapi.annotations.info.Info
 import org.eclipse.microprofile.openapi.annotations.servers.Server
-import org.jboss.resteasy.plugins.interceptors.CorsFilter
 import javax.ws.rs.ApplicationPath
 import javax.ws.rs.container.ContainerRequestContext
 import javax.ws.rs.container.ContainerResponseContext
@@ -34,7 +34,7 @@ class V3 : Application() {
 
     init {
 
-        cors = setOf( object: ContainerResponseFilter {
+        cors = setOf(object : ContainerResponseFilter {
             override fun filter(requestContext: ContainerRequestContext?, responseContext: ContainerResponseContext) {
                 responseContext.getHeaders().add("Access-Control-Allow-Origin", "*")
             }
@@ -46,7 +46,8 @@ class V3 : Application() {
                 AvailableReleasesResource::class.java,
                 PlatformsResource::class.java,
                 ReleaseListResource::class.java,
-                VariantsResource::class.java)
+                VariantsResource::class.java,
+                VersionResource::class.java)
     }
 
     override fun getSingletons(): Set<Any> {

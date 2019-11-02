@@ -27,7 +27,7 @@ class GraphQLGitHubSummaryClient : GraphQLGitHubInterface() {
                 { it.repository!!.releases.pageInfo.endCursor },
                 clazz = QuerySummaryData::class.java)
 
-        LOGGER.info("Done getting summary ${repoName}")
+        LOGGER.info("Done getting summary $repoName")
 
         return GHRepositorySummary(GHReleasesSummary(releases, PageInfo(false, null)))
     }

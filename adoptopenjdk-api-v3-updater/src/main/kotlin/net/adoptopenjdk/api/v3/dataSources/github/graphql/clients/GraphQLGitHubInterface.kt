@@ -9,10 +9,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.HasRateLimit
-import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
-import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.ReleaseQueryData
-import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAssets
-import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Files

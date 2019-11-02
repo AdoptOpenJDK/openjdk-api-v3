@@ -8,7 +8,6 @@ import net.adoptopenjdk.api.v3.mapping.BinaryMapper
 import net.adoptopenjdk.api.v3.mapping.adopt.AdoptBinaryMapper
 import net.adoptopenjdk.api.v3.models.*
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 
 object UpstreamBinaryMapper : BinaryMapper() {
 

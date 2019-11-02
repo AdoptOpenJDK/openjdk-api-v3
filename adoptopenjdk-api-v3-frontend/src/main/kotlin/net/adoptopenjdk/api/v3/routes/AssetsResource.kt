@@ -166,7 +166,7 @@ class AssetsResource {
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size)
 
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter)
-        return getPage(pageSize, page, releases)
+         return getPage(pageSize, page, releases)
     }
 
 

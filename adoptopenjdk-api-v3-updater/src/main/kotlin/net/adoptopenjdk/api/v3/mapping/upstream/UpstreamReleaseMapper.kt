@@ -1,16 +1,16 @@
 package net.adoptopenjdk.api.v3.mapping.upstream
 
-import net.adoptopenjdk.api.v3.dataSources.github.VersionParser
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.models.VersionData
+import net.adoptopenjdk.api.v3.parser.FailedToParse
+import net.adoptopenjdk.api.v3.parser.VersionParser
 import org.slf4j.LoggerFactory
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import java.net.URLDecoder
+import java.nio.charset.Charset
 
 object UpstreamReleaseMapper : ReleaseMapper() {
     @JvmStatic
@@ -26,26 +26,31 @@ object UpstreamReleaseMapper : ReleaseMapper() {
         val download_count = release.releaseAssets.assets.map { it.downloadCount }.sum()
         val vendor = Vendor.openjdk
 
-        LOGGER.info("Getting binaries ${release_name}")
+        LOGGER.info("Getting binaries $release_name")
         val binaries = UpstreamBinaryMapper.toBinaryList(release.releaseAssets.assets)
-        LOGGER.info("Done Getting binaries ${release_name}")
+        LOGGER.info("Done Getting binaries $release_name")
 
-        val versionData: VersionData
+        try {
+            val versionData: VersionData
 
-        if (release_type == ReleaseType.ga && binaries.size > 0) {
-            //Release names for ga do not have a full version name, so take it from the package
-            val pack = binaries.get(0).`package`
-            if (pack != null) {
-                versionData = getVersionData(pack.name)
+            if (release_type == ReleaseType.ga && binaries.size > 0) {
+                //Release names for ga do not have a full version name, so take it from the package
+                val pack = binaries.get(0).`package`
+                if (pack != null) {
+                    versionData = getVersionData(URLDecoder.decode(pack.link, Charset.defaultCharset()))
+                } else {
+                    LOGGER.error("Failed to parse version for $release_name")
+                    return null
+                }
             } else {
-                LOGGER.error("Failed to parse version for ${release_name}")
-                return null
+                versionData = getVersionData(release_name)
             }
-        } else {
-            versionData = getVersionData(release_name)
-        }
 
-        return Release(release.id, release_type, release_link, release_name, timestamp, updatedAt, binaries.toTypedArray(), download_count, vendor, versionData)
+            return Release(release.id, release_type, release_link, release_name, timestamp, updatedAt, binaries.toTypedArray(), download_count, vendor, versionData)
+        } catch (e: FailedToParse) {
+            LOGGER.error("Failed to parse $release_name")
+            return null
+        }
     }
 
     private fun getVersionData(release_name: String): VersionData {

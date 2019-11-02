@@ -12,10 +12,7 @@ import org.slf4j.LoggerFactory
 import java.net.URI
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
-import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 object AdoptBinaryMapper : BinaryMapper() {
 
@@ -74,10 +71,10 @@ object AdoptBinaryMapper : BinaryMapper() {
         val binary_checksum_link = getCheckSumLink(assets, binary_name)
         val binary_checksum: String?
 
-        if (binaryMetadata != null) {
-            binary_checksum = binaryMetadata.sha256
+        binary_checksum = if (binaryMetadata != null) {
+            binaryMetadata.sha256
         } else {
-            binary_checksum = getChecksum(binary_checksum_link)
+            getChecksum(binary_checksum_link)
         }
 
         return Package(binary_name, binary_link, binary_size, binary_checksum, binary_checksum_link)
@@ -171,7 +168,7 @@ object AdoptBinaryMapper : BinaryMapper() {
 
     private fun getChecksum(binary_checksum_link: String?): String? {
         if (binary_checksum_link != null && binary_checksum_link.isNotEmpty()) {
-            LOGGER.info("Pulling checksum for ${binary_checksum_link}")
+            LOGGER.info("Pulling checksum for $binary_checksum_link")
 
             val request = HttpRequest.newBuilder()
                     .uri(URI.create(binary_checksum_link))
