@@ -2,21 +2,6 @@ package net.adoptopenjdk.api.v3.dataSources.github.graphql.models
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
-import net.adoptopenjdk.api.v3.HttpClientFactory
-import net.adoptopenjdk.api.v3.JsonMapper
-import net.adoptopenjdk.api.v3.dataSources.github.VersionParser
-import net.adoptopenjdk.api.v3.models.Release
-import net.adoptopenjdk.api.v3.models.ReleaseType
-import net.adoptopenjdk.api.v3.models.Vendor
-import net.adoptopenjdk.api.v3.models.VersionData
-import org.slf4j.LoggerFactory
-import java.net.URI
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.regex.Pattern
 
 
 data class GHReleases @JsonCreator constructor(@JsonProperty("nodes") val releases: List<GHRelease>,

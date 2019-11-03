@@ -23,9 +23,9 @@ class TestResourceGenerator {
 
                 File("adoptopenjdk-api-v3-updater/src/test/resources/example-data.json.gz").delete()
 
-                val out = GZIPOutputStream(File("adoptopenjdk-api-v3-updater/src/test/resources/example-data.json.gz").outputStream())
-                JsonMapper.mapper.writerWithDefaultPrettyPrinter().writeValues(out).write(repo)
-                out.close()
+                GZIPOutputStream(File("adoptopenjdk-api-v3-updater/src/test/resources/example-data.json.gz").outputStream()).use { out ->
+                    JsonMapper.mapper.writerWithDefaultPrettyPrinter().writeValues(out).write(repo)
+                }
             }
         }
     }

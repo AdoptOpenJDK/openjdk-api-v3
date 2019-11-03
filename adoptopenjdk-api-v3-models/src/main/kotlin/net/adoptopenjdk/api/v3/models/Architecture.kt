@@ -7,7 +7,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema
 
 @Schema(type = SchemaType.STRING, enumeration = ["x64", "x32", "ppc64", "ppc64le", "s390x", "aarch64", "arm", "sparcv9"], example = "x64")
 enum class Architecture : FileNameMatcher {
-    x64(),
+    x64,
     x32("x86-32"),
     ppc64,
     ppc64le,
@@ -27,8 +27,7 @@ enum class Architecture : FileNameMatcher {
         @JvmStatic
         @JsonCreator
         fun forValue(value: String): Architecture {
-            return Architecture
-                    .values()
+            return values()
                     .filter { it.names.contains(value) }
                     .first()
         }

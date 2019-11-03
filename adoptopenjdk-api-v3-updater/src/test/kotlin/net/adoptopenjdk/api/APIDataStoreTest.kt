@@ -5,8 +5,8 @@ import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import org.junit.jupiter.api.Test
+import org.skyscreamer.jsonassert.JSONAssert
 import org.slf4j.LoggerFactory
-import kotlin.test.assertTrue
 
 
 class APIDataStoreTest : BaseTest() {
@@ -31,7 +31,10 @@ class APIDataStoreTest : BaseTest() {
             val repo = getInitialRepo()
             ApiPersistenceFactory.get().updateAllRepos(repo)
             val dbData = APIDataStore.loadDataFromDb()
-            assertTrue(repo == dbData)
+
+            JSONAssert.assertEquals(JsonMapper.mapper.writeValueAsString(dbData),
+                    JsonMapper.mapper.writeValueAsString(repo),
+                    true)
         }
     }
 

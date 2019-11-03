@@ -2,7 +2,6 @@ package net.adoptopenjdk.api.v3.routes.info
 
 import net.adoptopenjdk.api.v3.OpenApiDocs
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
-import net.adoptopenjdk.api.v3.dataSources.filters.BinaryFilter
 import net.adoptopenjdk.api.v3.dataSources.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.dataSources.filters.VersionRangeFilter
 import net.adoptopenjdk.api.v3.models.*
@@ -10,7 +9,6 @@ import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
-import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
 import javax.ws.rs.GET
 import javax.ws.rs.Path
@@ -97,9 +95,8 @@ class ReleaseListResource {
     private fun getReleases(release_type: ReleaseType?, vendor: Vendor?, version: String?): Sequence<Release> {
         val range = VersionRangeFilter(version)
         val releaseFilter = ReleaseFilter(release_type, null, null, vendor, range)
-        val filteredReleases = APIDataStore
+        return APIDataStore
                 .getAdoptRepos()
                 .getReleases(releaseFilter)
-        return filteredReleases
     }
 }

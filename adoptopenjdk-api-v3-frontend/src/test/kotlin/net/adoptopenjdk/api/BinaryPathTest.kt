@@ -8,13 +8,9 @@ import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.models.*
-import org.hamcrest.Matcher
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestFactory
-import java.util.stream.Stream
 
 
 @QuarkusTest

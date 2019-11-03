@@ -3,7 +3,6 @@ package net.adoptopenjdk.api.v3.dataSources.github.graphql.clients
 import io.aexp.nodes.graphql.GraphQLRequestEntity
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHReleaseResult
-import net.adoptopenjdk.api.v3.models.Release
 import org.slf4j.LoggerFactory
 
 
@@ -20,7 +19,7 @@ open class GraphQLGitHubReleaseClient : GraphQLGitHubReleaseRequest() {
 
         val result = queryApi(requestEntityBuilder, null, GHReleaseResult::class.java)
         if (result == null) {
-            LOGGER.error("Failed to fetch ${id}")
+            LOGGER.error("Failed to fetch $id")
             return null
         }
 

@@ -2,7 +2,6 @@ package net.adoptopenjdk.api.v3.dataSources.github.graphql.clients
 
 import io.aexp.nodes.graphql.GraphQLRequestEntity
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.*
-import net.adoptopenjdk.api.v3.models.Vendor
 import org.slf4j.LoggerFactory
 
 
@@ -23,7 +22,7 @@ open class GraphQLGitHubRepositoryClient : GraphQLGitHubReleaseRequest() {
                 { it.repository!!.releases.pageInfo.endCursor },
                 clazz = QueryData::class.java)
 
-        LOGGER.info("Done getting ${repoName}")
+        LOGGER.info("Done getting $repoName")
 
         return GHRepository(GHReleases(releases, PageInfo(false, null)))
     }

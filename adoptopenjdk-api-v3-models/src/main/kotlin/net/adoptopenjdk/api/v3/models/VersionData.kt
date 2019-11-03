@@ -49,7 +49,7 @@ class VersionData {
         }
 
         if (optional?.isNotEmpty() == true) {
-            metadata = metadata.plus(optional!!)
+            metadata = metadata.plus(optional)
         }
 
         if (metadata.isNotEmpty()) {
