@@ -17,27 +17,27 @@ class VersionParserTest {
     val testData = mapOf(
             Pair("OpenJDK 8u212 GA Release",
                     VersionTestData(
-                            VersionData(8, 0, 212, "", 1, 0, "", "8u212"),
-                            "8.0.212+1"
+                            VersionData(8, 0, 212, "", null, 0, "", "8u212"),
+                            "8.0.212"
                     )
             ),
 
             Pair("OpenJDK8U-jdk_x64_linux_8u222b10.tar.gz",
                     VersionTestData(
-                            VersionData(8, 0, 222, "", 1, 10, "", "8u222b10"),
-                            "8.0.222+10.1"
+                            VersionData(8, 0, 222, "", null, 10, "", "8u222b10"),
+                            "8.0.222+10"
                     )
             ),
             Pair("jdk8u222-b10",
                     VersionTestData(
-                            VersionData(8, 0, 222, "", 1, 10, "", "8u222-b10"),
-                            "8.0.222+10.1"
+                            VersionData(8, 0, 222, "", null, 10, "", "8u222-b10"),
+                            "8.0.222+10"
                     )
             ),
             Pair("jdk-9.0.4+11",
                     VersionTestData(
-                            VersionData(9, 0, 4, "", 1, 11, "", "9.0.4+11"),
-                            "9.0.4+11.1"
+                            VersionData(9, 0, 4, "", null, 11, "", "9.0.4+11"),
+                            "9.0.4+11"
                     )
             ),
 
@@ -56,29 +56,29 @@ class VersionParserTest {
 
             Pair("jdk-13+33_openj9-0.16.0",
                     VersionTestData(
-                            VersionData(13, 0, 0, "", 1, 33, "", "13+33"),
-                            "13.0.0+33.1"
+                            VersionData(13, 0, 0, "", null, 33, "", "13+33"),
+                            "13.0.0+33"
                     )
             ),
 
             Pair("jdk-13+33",
                     VersionTestData(
-                            VersionData(13, 0, 0, "", 1, 33, "", "13+33"),
-                            "13.0.0+33.1"
+                            VersionData(13, 0, 0, "", null, 33, "", "13+33"),
+                            "13.0.0+33"
                     )
             ),
 
             Pair("jdk8u152-b01-20172803",
                     VersionTestData(
-                            VersionData(8, 0, 152, "", 1, 1, "", "8u152-b01"),
-                            "8.0.152+1.1"
+                            VersionData(8, 0, 152, "", null, 1, "", "8u152-b01"),
+                            "8.0.152+1"
                     )
             ),
 
             Pair(URLDecoder.decode("https://github.com/AdoptOpenJDK/openjdk11-upstream-binaries/releases/tag/jdk-11.0.5%2B10", Charset.defaultCharset()),
                     VersionTestData(
-                            VersionData(11, 0, 5, "", 1, 10, "", "11.0.5+10"),
-                            "11.0.5+10.1"
+                            VersionData(11, 0, 5, "", null, 10, "", "11.0.5+10"),
+                            "11.0.5+10"
                     )
             ),
 
@@ -92,8 +92,8 @@ class VersionParserTest {
 
             Pair("jdk13u-2019-10-30-23-10",
                     VersionTestData(
-                            VersionData(13, 0, 0, "", 1, 0, "2019-10-30-23-10", "13u-2019-10-30-23-10"),
-                            "13.0.0+1.2019-10-30-23-10"
+                            VersionData(13, 0, 0, "", null, 0, "2019-10-30-23-10", "13u-2019-10-30-23-10"),
+                            "13.0.0+2019-10-30-23-10"
                     )
             )
     )

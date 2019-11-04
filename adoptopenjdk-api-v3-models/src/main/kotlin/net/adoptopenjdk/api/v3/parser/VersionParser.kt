@@ -153,12 +153,12 @@ class VersionParser {
         val matched = PRE_223_REGEX.matcher(versionString)
 
         if (matched.matches()) {
-            var major = getOrDefaultNumber(matched, "major")
-            var minor = 0
-            var security = getOrDefaultNumber(matched, "update")
-            var build: Int = 0
+            val major = getOrDefaultNumber(matched, "major")
+            val minor = 0
+            val security = getOrDefaultNumber(matched, "update")
+            var build = 0
             var opt: String? = null
-            var additional: String? = null
+            val additional: String?
             if (matched.group("additional") != null) {
                 additional = matched.group("additional")
 
@@ -172,7 +172,7 @@ class VersionParser {
                 }
             }
 
-            var version = matched.group("version")
+            val version = matched.group("version")
 
             val parsed = VersionData(major, minor, security, null, 1, build, opt, version)
             if (sanityCheck(parsed)) {
@@ -185,7 +185,7 @@ class VersionParser {
 
     private fun sanityCheck(parsed: VersionData): Boolean {
 
-        if (parsed.major != null && !(parsed.major in 101 downTo 7)) {
+        if (!(parsed.major in 101 downTo 7)) {
             //Sanity check as javas parser can match a single number
             // sane range is 8 to 100
             // TODO update me before 2062 and java 100 is released
@@ -194,7 +194,7 @@ class VersionParser {
         if (parsed.security != 0 || parsed.build != 0) {
             return true
         }
-        if (parsed.optional != null && parsed.optional!!.matches(DATE_TIME_MATCHER)) {
+        if (parsed.optional != null && parsed.optional.matches(DATE_TIME_MATCHER)) {
             return true
         }
         return false
@@ -213,7 +213,7 @@ class VersionParser {
                             pre = matched.group("pre")
                         }
                         val build = getOrDefaultNumber(matched, "build")
-                        val adopt_build_number = getOrDefaultNumber(matched, "adoptBuild", 1)
+                        val adopt_build_number = getOrDefaultNumber(matched, "adoptBuild")
                         var opt: String? = null
                         if (matched.group("opt") != null) {
                             opt = matched.group("opt")
