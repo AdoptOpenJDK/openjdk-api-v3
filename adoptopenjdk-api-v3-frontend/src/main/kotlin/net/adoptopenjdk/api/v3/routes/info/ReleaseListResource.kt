@@ -16,12 +16,12 @@ import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
 
 @Tag(name = "Release Info")
-@Path("info")
+@Path("/info")
 @Produces(MediaType.APPLICATION_JSON)
 class ReleaseListResource {
 
     @GET
-    @Path("release_names")
+    @Path("/release_names")
     @Operation(summary = "Returns a list of all release names")
     fun get(
             @Parameter(name = "release_type", description = OpenApiDocs.RELEASE_TYPE, required = false)
@@ -56,7 +56,7 @@ class ReleaseListResource {
         return ReleaseList(releases.toTypedArray())
     }
 
-    @Path("release_versions")
+    @Path("/release_versions")
     @GET
     @Operation(summary = "Returns a list of all release versions")
     fun getVersions(

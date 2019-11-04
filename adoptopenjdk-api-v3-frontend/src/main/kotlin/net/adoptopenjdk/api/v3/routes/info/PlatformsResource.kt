@@ -10,11 +10,12 @@ import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
 
 @Tag(name = "Release Info")
-@Path("info/platforms/")
+@Path("/info/platforms/")
 @Produces(MediaType.APPLICATION_JSON)
 class PlatformsResource {
 
     @GET
+    @Path("/platforms/")
     //Hide this path as it is only used internally by the website
     @Operation(summary = "Returns information about available platforms", hidden = true)
     fun get(): Platforms {
