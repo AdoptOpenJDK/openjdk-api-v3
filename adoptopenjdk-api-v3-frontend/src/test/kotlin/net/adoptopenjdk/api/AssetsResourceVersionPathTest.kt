@@ -11,9 +11,10 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
 
 
     fun getPath() = "/v3/assets/version"
-    val JAVA8_212 = "8.0.212+4.1"
+    val JAVA8_212 = "8.0.212+4"
     val RANGE_11_12 = "[11.0.0,12.0.0]"
-    val JAVA11 = "11.0.0+28.1"
+    val RANGE_8_METADATA = "[8.0.212+3,8.0.212+5]"
+    val JAVA11 = "11.0.0+28"
 
     override fun <T> runFilterTest(filterParamName: String, values: Array<T>): Stream<DynamicTest> {
 
@@ -21,6 +22,7 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
                 "[8.0.0,)",
                 JAVA8_212,
                 RANGE_11_12,
+                RANGE_8_METADATA,
                 JAVA11
         )
                 .flatMap { versionRange ->
@@ -34,12 +36,18 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
                 versionRange.equals(JAVA8_212) && element == Architecture.aarch64 ||
                 versionRange.equals(JAVA8_212) && element == Architecture.arm ||
                 versionRange.equals(JAVA8_212) && element == HeapSize.large ||
+                versionRange.equals(JAVA8_212) && element == ImageType.testimage ||
+
+                versionRange.equals(RANGE_8_METADATA) && element == Architecture.aarch64 ||
+                versionRange.equals(RANGE_8_METADATA) && element == Architecture.arm ||
+                versionRange.equals(RANGE_8_METADATA) && element == ImageType.testimage ||
+
                 versionRange.equals(RANGE_11_12) && element == OperatingSystem.solaris ||
                 versionRange.equals(RANGE_11_12) && element == Architecture.sparcv9 ||
+
                 versionRange.equals(JAVA11) && element == Architecture.x32 ||
                 versionRange.equals(JAVA11) && element == OperatingSystem.solaris ||
                 versionRange.equals(JAVA11) && element == Architecture.sparcv9 ||
-                versionRange.equals(JAVA8_212) && element == ImageType.testimage ||
                 versionRange.equals(JAVA11) && element == ImageType.testimage
     }
 }
