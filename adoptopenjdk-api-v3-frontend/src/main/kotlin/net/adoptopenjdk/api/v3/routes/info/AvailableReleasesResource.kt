@@ -10,11 +10,12 @@ import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
 
 @Tag(name = "Release Info")
-@Path("info/available_releases/")
+@Path("/info/")
 @Produces(MediaType.APPLICATION_JSON)
 class AvailableReleasesResource {
 
     @GET
+    @Path("/info/available_releases/")
     @Operation(summary = "Returns information about available releases")
     fun get(): ReleaseInfo {
         return ReleaseInfo(

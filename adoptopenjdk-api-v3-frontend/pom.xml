@@ -34,22 +34,6 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-openapi</artifactId>
             <version>${quarkus.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.smallrye</groupId>
-                    <artifactId>smallrye-open-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.smallrye</groupId>
-            <artifactId>smallrye-open-api-1.1</artifactId>
-            <version>1.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>1.5.3</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
@@ -240,6 +224,21 @@
                         <phase>none</phase>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.swagger</groupId>
+                <artifactId>swaggerhub-maven-plugin</artifactId>
+                <version>1.0.7</version>
+                <configuration>
+                    <api>API</api>
+                    <owner>AdoptOpenJDK</owner>
+                    <version>${project.version}</version>
+                    <inputFile>
+                        target/wiring-classes/META-INF/resources/quarkus-generated-openapi-doc.JSON
+                    </inputFile>
+                    <token>${SWAGGERHUB_APIKEY}</token>
+                    <uploadType>inputFile</uploadType>
+                </configuration>
             </plugin>
         </plugins>
     </build>

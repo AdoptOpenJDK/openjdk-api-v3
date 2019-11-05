@@ -26,7 +26,7 @@ object ServerConfig {
             Server(url = ServerConfig.SERVER)
         ],
         info = Info(title = "v3", version = "3.0.0-beta"))
-@ApplicationPath("v3")
+@ApplicationPath("/v3")
 class V3 : Application() {
 
     private val resourceClasses: Set<Class<out Any>>

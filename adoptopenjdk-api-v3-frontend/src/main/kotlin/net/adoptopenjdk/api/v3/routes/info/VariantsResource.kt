@@ -10,12 +10,12 @@ import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
 
 @Tag(name = "Release Info")
-@Path("info")
+@Path("/info")
 @Produces(MediaType.APPLICATION_JSON)
 class VariantsResource {
 
     @GET
-    @Path("variants")
+    @Path("/variants")
     //Hide this path as it is only used internally by the website
     @Operation(summary = "Returns information about available variants", hidden = true)
     fun get(): Variants {

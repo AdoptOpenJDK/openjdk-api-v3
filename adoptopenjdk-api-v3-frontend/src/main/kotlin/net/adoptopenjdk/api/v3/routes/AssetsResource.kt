@@ -22,12 +22,12 @@ import kotlin.math.min
 
 
 @Tag(name = "Assets")
-@Path("assets/")
+@Path("/assets/")
 @Produces(MediaType.APPLICATION_JSON)
 class AssetsResource {
 
     @GET
-    @Path("feature_releases/{feature_version}/{release_type}")
+    @Path("/feature_releases/{feature_version}/{release_type}")
     @Operation(summary = "Returns release information", description = "List of information about builds that match the current query")
     @APIResponses(value = [
         APIResponse(responseCode = "200", description = "search results matching criteria",
@@ -99,7 +99,7 @@ class AssetsResource {
     }
 
     @GET
-    @Path("version/{version}")
+    @Path("/version/{version}")
     @Operation(summary = "Returns release information about the specified version.", description = "List of information about builds that match the current query ")
     @APIResponses(value = [
         APIResponse(responseCode = "200", description = "search results matching criteria",
@@ -166,7 +166,7 @@ class AssetsResource {
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size)
 
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter)
-         return getPage(pageSize, page, releases)
+        return getPage(pageSize, page, releases)
     }
 
 
