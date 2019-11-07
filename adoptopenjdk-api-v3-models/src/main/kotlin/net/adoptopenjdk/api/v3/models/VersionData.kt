@@ -18,7 +18,7 @@ class VersionData {
     val build: Int
     val optional: String?
 
-    constructor(major: Int, minor: Int, security: Int, pre: String?, adopt_build_number: Int?, build: Int, optional: String?, openjdk_version: String) {
+    constructor(major: Int, minor: Int, security: Int, pre: String?, adopt_build_number: Int?, build: Int, optional: String?, openjdk_version: String, semver: String? = null) {
         this.major = major
         this.minor = minor
         this.security = security
@@ -27,7 +27,7 @@ class VersionData {
         this.build = build
         this.optional = if (optional?.isNotEmpty() == true) optional else null
         this.openjdk_version = openjdk_version
-        this.semver = formSemver()
+        this.semver = if (semver != null) semver else formSemver()
     }
 
 
