@@ -15,7 +15,7 @@ import javax.ws.rs.core.MediaType
 class AvailableReleasesResource {
 
     @GET
-    @Path("/info/available_releases/")
+    @Path("/available_releases/")
     @Operation(summary = "Returns information about available releases")
     fun get(): ReleaseInfo {
         return ReleaseInfo(

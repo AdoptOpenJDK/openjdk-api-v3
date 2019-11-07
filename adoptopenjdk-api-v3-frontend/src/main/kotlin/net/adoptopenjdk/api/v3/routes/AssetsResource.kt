@@ -2,6 +2,7 @@ package net.adoptopenjdk.api.v3.routes
 
 import net.adoptopenjdk.api.v3.OpenApiDocs
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
+import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.filters.BinaryFilter
 import net.adoptopenjdk.api.v3.dataSources.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.dataSources.filters.VersionRangeFilter
@@ -79,12 +80,17 @@ class AssetsResource {
 
             @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0"), required = false)
             @QueryParam("page")
-            page: Int?
+            page: Int?,
+
+            @Parameter(name = "sort_order", description = "Result sort order", schema = Schema(defaultValue = "DES"), required = false)
+            @QueryParam("sort_order")
+            sortOrder: SortOrder?
 
     ): List<Release> {
         if (release_type == null || version == null) {
             throw BadRequestException("Unrecognised type")
         }
+        val order = sortOrder ?: SortOrder.DES
 
         val releaseFilter = ReleaseFilter(release_type, version, null, vendor, null)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size)
@@ -94,7 +100,7 @@ class AssetsResource {
             throw NotFoundException()
         }
 
-        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(version, releaseFilter, binaryFilter)
+        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(version, releaseFilter, binaryFilter, order)
         return getPage(pageSize, page, releases)
     }
 
@@ -154,9 +160,14 @@ class AssetsResource {
 
             @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0"), required = false)
             @QueryParam("page")
-            page: Int?
+            page: Int?,
+
+            @Parameter(name = "sort_order", description = "Result sort order", schema = Schema(defaultValue = "DES"), required = false)
+            @QueryParam("sort_order")
+            sortOrder: SortOrder?
 
     ): List<Release> {
+        val order = sortOrder ?: SortOrder.DES
 
         // Require GA due to version range having no meaning for nightlies
 
@@ -165,7 +176,7 @@ class AssetsResource {
         val releaseFilter = ReleaseFilter(release_type, null, null, vendor, range)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size)
 
-        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter)
+        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, order)
         return getPage(pageSize, page, releases)
     }
 

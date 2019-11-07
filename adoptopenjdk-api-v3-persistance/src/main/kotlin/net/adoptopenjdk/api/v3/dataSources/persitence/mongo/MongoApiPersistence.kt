@@ -14,7 +14,6 @@ import org.litote.kmongo.coroutine.CoroutineCollection
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
 import org.slf4j.LoggerFactory
-import java.lang.Exception
 
 
 class MongoApiPersistence : ApiPersistence {

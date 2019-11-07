@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.filters.BinaryFilter
 import net.adoptopenjdk.api.v3.dataSources.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.models.Release
@@ -41,19 +42,18 @@ class AdoptRepos {
             .toMap())
 
 
-    fun getReleases(releaseFilter: ReleaseFilter): Sequence<Release> {
-        return allReleases.getReleases(releaseFilter)
+    fun getReleases(releaseFilter: ReleaseFilter, sortOrder: SortOrder): Sequence<Release> {
+        return allReleases.getReleases(releaseFilter, sortOrder)
     }
 
-    fun getFilteredReleases(version: Int, releaseFilter: ReleaseFilter, binaryFilter: BinaryFilter): Sequence<Release> {
-        val featureRelease = getFeatureRelease(version)
-        if (featureRelease == null) return emptySequence()
+    fun getFilteredReleases(version: Int, releaseFilter: ReleaseFilter, binaryFilter: BinaryFilter, sortOrder: SortOrder): Sequence<Release> {
+        val featureRelease = getFeatureRelease(version) ?: return emptySequence()
 
-        return getFilteredReleases(featureRelease.releases.getReleases(releaseFilter), binaryFilter)
+        return getFilteredReleases(featureRelease.releases.getReleases(releaseFilter, sortOrder), binaryFilter)
     }
 
-    fun getFilteredReleases(releaseFilter: ReleaseFilter, binaryFilter: BinaryFilter): Sequence<Release> {
-        return getFilteredReleases(allReleases.getReleases(releaseFilter), binaryFilter)
+    fun getFilteredReleases(releaseFilter: ReleaseFilter, binaryFilter: BinaryFilter, sortOrder: SortOrder): Sequence<Release> {
+        return getFilteredReleases(allReleases.getReleases(releaseFilter, sortOrder), binaryFilter)
     }
 
     fun getFilteredReleases(releases: Sequence<Release>, binaryFilter: BinaryFilter): Sequence<Release> {
