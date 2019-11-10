@@ -4,7 +4,7 @@
 If you are using v1 please move to the latest version (documented below) as soon as possible.
 
 **NOTICE:** [AdoptOpenJDK API v2](https://github.com/AdoptOpenJDK/openjdk-api/blob/master/README.md) has been deprecated and will be removed.
-If you are using v3 please move to the latest version (documented below) as soon as possible.
+If you are using v2 please move to the latest version (documented below) as soon as possible.
 
 ## Overview
 
