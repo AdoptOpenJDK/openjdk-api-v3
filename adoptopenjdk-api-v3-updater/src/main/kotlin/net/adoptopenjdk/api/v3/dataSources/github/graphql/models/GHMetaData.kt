@@ -1,9 +1,11 @@
 package net.adoptopenjdk.api.v3.dataSources.github.graphql.models
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import net.adoptopenjdk.api.v3.models.*
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class GHVersion @JsonCreator constructor(
         @JsonProperty("major") val major: Int,
         @JsonProperty("minor") val minor: Int,
@@ -12,14 +14,16 @@ data class GHVersion @JsonCreator constructor(
         @JsonProperty("adopt_build_number") val adopt_build_number: Int,
         @JsonProperty("version") val version: String,
         @JsonProperty("build") val build: Int,
-        @JsonProperty("opt") val opt: String?) {
+        @JsonProperty("opt") val opt: String?,
+        @JsonProperty("semver") val semver: String?) {
     fun toApiVersion(): VersionData {
-        return VersionData(major, minor, security, pre, adopt_build_number, build, opt, version)
+        return VersionData(major, minor, security, pre, adopt_build_number, build, opt, version, semver)
     }
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class GHMetaData @JsonCreator constructor(
-        @JsonProperty("WARNING") val warning: String,
+        @JsonProperty("WARNING") val warning: String?,
         @JsonProperty("os") val os: OperatingSystem,
         @JsonProperty("arch") val arch: Architecture,
         @JsonProperty("variant") val variant: JvmImpl,
