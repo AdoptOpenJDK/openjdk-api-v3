@@ -25,7 +25,7 @@ object UpstreamBinaryMapper : BinaryMapper() {
                 .filterNotNull()
     }
 
-    private fun assetIsExcluded(asset: GHAsset) = EXCLUDES.none({ exclude -> asset.name.contains(exclude) })
+    private fun assetIsExcluded(asset: GHAsset) = EXCLUDES.any({ exclude -> asset.name.contains(exclude) })
 
     private fun assetToBinary(asset: GHAsset): Deferred<Binary?> {
         return GlobalScope.async {
