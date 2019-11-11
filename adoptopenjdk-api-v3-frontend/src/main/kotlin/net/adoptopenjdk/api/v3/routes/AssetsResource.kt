@@ -199,7 +199,7 @@ class AssetsResource {
 
     @GET
     @Path("/latest/{feature_version}/{jvm_impl}")
-    @Operation(summary = "Returns list of latest assets for the given feature version and jvm impl", hidden = true)
+    @Operation(summary = "Returns list of latest assets for the given feature version and jvm impl")
     fun getLatestAssets(
 
             @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
