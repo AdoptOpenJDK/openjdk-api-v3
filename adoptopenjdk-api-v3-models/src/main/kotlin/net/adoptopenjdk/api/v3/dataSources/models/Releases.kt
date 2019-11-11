@@ -3,6 +3,7 @@ package net.adoptopenjdk.api.v3.dataSources.models
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.filters.BinaryFilter
 import net.adoptopenjdk.api.v3.dataSources.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.models.Release
@@ -22,8 +23,8 @@ class Releases {
         this.nodes = nodes
     }
 
-    fun filterBinaries(binaryFilter: BinaryFilter): Releases {
-        val filtered = getReleases()
+    fun filterBinaries(binaryFilter: BinaryFilter, sortOrder: SortOrder): Releases {
+        val filtered = getReleases(sortOrder)
                 .map {
                     Release(it, it.binaries.filter { binaryFilter.test(it) }.toTypedArray())
                 }
@@ -31,16 +32,26 @@ class Releases {
     }
 
     @JsonIgnore
-    fun getReleases(filter: ReleaseFilter): Sequence<Release> {
-        return getReleases()
+    fun getReleases(filter: ReleaseFilter, sortOrder: SortOrder): Sequence<Release> {
+        return getReleases(sortOrder)
                 .filter {
                     return@filter filter.test(it)
                 }
     }
 
     @JsonIgnore
+    fun getReleases(sortOrder: SortOrder): Sequence<Release> {
+        val sorter = if (sortOrder == SortOrder.DES) TIME_SORTER.reversed() else TIME_SORTER;
+
+        return nodes
+                .values
+                .sortedWith(sorter)
+                .asSequence()
+    }
+
+    @JsonIgnore
     fun getReleases(): Sequence<Release> {
-        return nodes.values.sortedWith(TIME_SORTER).asSequence()
+        return getReleases(SortOrder.ASC)
     }
 
     fun retain(ids: List<String>): Releases {

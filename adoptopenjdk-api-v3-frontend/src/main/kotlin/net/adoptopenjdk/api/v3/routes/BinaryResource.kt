@@ -3,6 +3,7 @@ package net.adoptopenjdk.api.v3.routes
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.OpenApiDocs
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
+import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.filters.BinaryFilter
 import net.adoptopenjdk.api.v3.dataSources.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.models.*
@@ -69,7 +70,7 @@ class BinaryResource {
 
         val releaseFilter = ReleaseFilter(null, null, release_name, vendor, null)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size)
-        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter).toList()
+        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DES).toList()
 
         return formResponse(releases)
 
@@ -121,7 +122,7 @@ class BinaryResource {
     ): Response {
         val releaseFilter = ReleaseFilter(release_type, version, null, vendor, null)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size)
-        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter).toList()
+        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DES).toList()
 
         val comparator = compareBy<Release> { it.version_data.major }
                 .thenBy { it.version_data.minor }
