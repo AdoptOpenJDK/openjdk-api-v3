@@ -2,15 +2,13 @@ package net.adoptopenjdk.api
 
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
+import io.vertx.core.json.JsonArray
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
-import net.adoptopenjdk.api.v3.models.Architecture
-import net.adoptopenjdk.api.v3.models.ImageType
-import net.adoptopenjdk.api.v3.models.JvmImpl
-import net.adoptopenjdk.api.v3.models.OperatingSystem
+import net.adoptopenjdk.api.v3.models.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
@@ -44,7 +42,7 @@ class LatestAssetsPathTest : BaseTest() {
 
         val binaryStr = body.prettyPrint()
 
-        val binaries = JsonMapper.mapper.readValue(binaryStr, List::class.java) as List<Map<String, String>>
+        val binaries = JsonArray(binaryStr)
 
         assert(hasEntryFor(binaries, OperatingSystem.linux, ImageType.jdk, Architecture.x64))
         assert(hasEntryFor(binaries, OperatingSystem.linux, ImageType.jre, Architecture.x64))
@@ -52,12 +50,13 @@ class LatestAssetsPathTest : BaseTest() {
         assert(hasEntryFor(binaries, OperatingSystem.windows, ImageType.jdk, Architecture.x64))
     }
 
-    private fun hasEntryFor(binaries: List<Map<String, String>>, os: OperatingSystem, imageType: ImageType, architecture: Architecture): Boolean {
+    private fun hasEntryFor(binaries: JsonArray, os: OperatingSystem, imageType: ImageType, architecture: Architecture): Boolean {
         val hasEntry = binaries
-                .filter({ binary ->
-                    binary.get("os") == os.name &&
-                            binary.get("image_type") == imageType.name &&
-                            binary.get("architecture") == architecture.name
+                .map { JsonMapper.mapper.readValue(it.toString(), BinaryAssetView::class.java) }
+                .filter({ release ->
+                    release.binary.os == os &&
+                            release.binary.image_type == imageType &&
+                            release.binary.architecture == architecture
 
                 })
                 .count() > 0
