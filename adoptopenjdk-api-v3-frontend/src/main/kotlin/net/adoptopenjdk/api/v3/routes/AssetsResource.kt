@@ -194,4 +194,40 @@ class AssetsResource {
         }
     }
 
+
+    data class binaryPermutation(val arch: Architecture, val heapSize: HeapSize, val imageType: ImageType, val os: OperatingSystem)
+
+    @GET
+    @Path("/latest_assets/{feature_version}/{jvm_impl}")
+    //Hide this path as it is only used internally by the website
+    @Operation(summary = "Returns list of latest assets for the given feature version and jvm impl", hidden = true)
+    fun getLatestAssets(
+
+            @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
+                    schema = Schema(defaultValue = "8"))
+            @PathParam("feature_version")
+            version: Int,
+
+            @Parameter(name = "jvm_impl", description = "JVM Implementation", required = true)
+            @PathParam("jvm_impl")
+            jvm_impl: JvmImpl
+
+    ): List<Binary> {
+        val releaseFilter = ReleaseFilter(ReleaseType.ga, version, null, Vendor.adoptopenjdk, null)
+        val binaryFilter = BinaryFilter(null, null, null, jvm_impl, null);
+        val repos = APIDataStore.getAdoptRepos().getFeatureRelease(version)
+
+        if (repos == null) {
+            throw NotFoundException()
+        }
+
+        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(version, releaseFilter, binaryFilter, SortOrder.ASC)
+
+        return releases
+                .flatMap { it.binaries.asSequence() }
+                .associateBy { binaryPermutation(it.architecture, it.heap_size, it.image_type, it.os) }
+                .values
+                .toList()
+    }
+
 }
