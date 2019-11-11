@@ -211,7 +211,7 @@ class AssetsResource {
             @PathParam("jvm_impl")
             jvm_impl: JvmImpl
 
-    ): List<Binary> {
+    ): List<BinaryAssetView> {
         val releaseFilter = ReleaseFilter(ReleaseType.ga, version, null, Vendor.adoptopenjdk, null)
         val binaryFilter = BinaryFilter(null, null, null, jvm_impl, null);
         val repos = APIDataStore.getAdoptRepos().getFeatureRelease(version)
@@ -223,9 +223,14 @@ class AssetsResource {
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(version, releaseFilter, binaryFilter, SortOrder.ASC)
 
         return releases
-                .flatMap { it.binaries.asSequence() }
-                .associateBy { binaryPermutation(it.architecture, it.heap_size, it.image_type, it.os) }
+                .flatMap { release ->
+                    release.binaries
+                            .asSequence()
+                            .map { Pair(release, it) }
+                }
+                .associateBy { binaryPermutation(it.second.architecture, it.second.heap_size, it.second.image_type, it.second.os) }
                 .values
+                .map { BinaryAssetView(it.first.release_name, it.second) }
                 .toList()
     }
 
