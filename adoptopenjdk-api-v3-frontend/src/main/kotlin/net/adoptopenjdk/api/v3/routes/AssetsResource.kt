@@ -198,8 +198,7 @@ class AssetsResource {
     data class binaryPermutation(val arch: Architecture, val heapSize: HeapSize, val imageType: ImageType, val os: OperatingSystem)
 
     @GET
-    @Path("/latest_assets/{feature_version}/{jvm_impl}")
-    //Hide this path as it is only used internally by the website
+    @Path("/latest/{feature_version}/{jvm_impl}")
     @Operation(summary = "Returns list of latest assets for the given feature version and jvm impl", hidden = true)
     fun getLatestAssets(
 
