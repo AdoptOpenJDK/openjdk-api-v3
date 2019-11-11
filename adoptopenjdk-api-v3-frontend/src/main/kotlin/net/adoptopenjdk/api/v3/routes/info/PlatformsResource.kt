@@ -10,7 +10,7 @@ import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
 
 @Tag(name = "Release Info")
-@Path("/info/platforms/")
+@Path("/info/")
 @Produces(MediaType.APPLICATION_JSON)
 class PlatformsResource {
 
