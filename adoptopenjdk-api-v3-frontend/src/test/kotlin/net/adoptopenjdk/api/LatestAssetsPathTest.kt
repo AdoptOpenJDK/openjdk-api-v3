@@ -32,7 +32,7 @@ class LatestAssetsPathTest : BaseTest() {
         }
     }
 
-    fun getPath() = "/v3/assets/latest_assets"
+    fun getPath() = "/v3/assets/latest"
 
     @Test
     fun latestAssetsReturnsSaneList() {
