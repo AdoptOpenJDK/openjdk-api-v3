@@ -45,12 +45,12 @@ class ReleaseListResource {
             @QueryParam("page")
             page: Int?,
 
-            @Parameter(name = "sort_order", description = "Result sort order", schema = Schema(defaultValue = "DES"), required = false)
+            @Parameter(name = "sort_order", description = "Result sort order", required = false)
             @QueryParam("sort_order")
             sortOrder: SortOrder?
 
     ): ReleaseList {
-        val order = if (sortOrder == null) SortOrder.DES else sortOrder;
+        val order = if (sortOrder == null) SortOrder.DESC else sortOrder;
 
         val filteredReleases = getReleases(release_type, vendor, version, order)
 
@@ -85,12 +85,12 @@ class ReleaseListResource {
             @QueryParam("page")
             page: Int?,
 
-            @Parameter(name = "sort_order", description = "Result sort order", schema = Schema(defaultValue = "DES"), required = false)
+            @Parameter(name = "sort_order", description = "Result sort order", required = false)
             @QueryParam("sort_order")
             sortOrder: SortOrder?
 
     ): ReleaseVersionList {
-        val order = sortOrder ?: SortOrder.DES
+        val order = sortOrder ?: SortOrder.DESC
 
         val filteredReleases = getReleases(release_type, vendor, version, order)
 

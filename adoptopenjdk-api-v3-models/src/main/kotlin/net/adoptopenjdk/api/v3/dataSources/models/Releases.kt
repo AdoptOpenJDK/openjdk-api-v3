@@ -41,7 +41,7 @@ class Releases {
 
     @JsonIgnore
     fun getReleases(sortOrder: SortOrder): Sequence<Release> {
-        val sorter = if (sortOrder == SortOrder.DES) TIME_SORTER.reversed() else TIME_SORTER;
+        val sorter = if (sortOrder == SortOrder.DESC) TIME_SORTER.reversed() else TIME_SORTER;
 
         return nodes
                 .values

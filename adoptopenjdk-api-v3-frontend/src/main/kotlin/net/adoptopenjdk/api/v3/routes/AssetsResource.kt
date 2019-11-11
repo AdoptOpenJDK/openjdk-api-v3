@@ -82,7 +82,7 @@ class AssetsResource {
             @QueryParam("page")
             page: Int?,
 
-            @Parameter(name = "sort_order", description = "Result sort order", schema = Schema(defaultValue = "DES"), required = false)
+            @Parameter(name = "sort_order", description = "Result sort order", required = false)
             @QueryParam("sort_order")
             sortOrder: SortOrder?
 
@@ -90,7 +90,7 @@ class AssetsResource {
         if (release_type == null || version == null) {
             throw BadRequestException("Unrecognised type")
         }
-        val order = sortOrder ?: SortOrder.DES
+        val order = sortOrder ?: SortOrder.DESC
 
         val releaseFilter = ReleaseFilter(release_type, version, null, vendor, null)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size)
@@ -162,12 +162,12 @@ class AssetsResource {
             @QueryParam("page")
             page: Int?,
 
-            @Parameter(name = "sort_order", description = "Result sort order", schema = Schema(defaultValue = "DES"), required = false)
+            @Parameter(name = "sort_order", description = "Result sort order", required = false)
             @QueryParam("sort_order")
             sortOrder: SortOrder?
 
     ): List<Release> {
-        val order = sortOrder ?: SortOrder.DES
+        val order = sortOrder ?: SortOrder.DESC
 
         // Require GA due to version range having no meaning for nightlies
 
@@ -198,8 +198,7 @@ class AssetsResource {
     data class binaryPermutation(val arch: Architecture, val heapSize: HeapSize, val imageType: ImageType, val os: OperatingSystem)
 
     @GET
-    @Path("/latest_assets/{feature_version}/{jvm_impl}")
-    //Hide this path as it is only used internally by the website
+    @Path("/latest/{feature_version}/{jvm_impl}")
     @Operation(summary = "Returns list of latest assets for the given feature version and jvm impl", hidden = true)
     fun getLatestAssets(
 

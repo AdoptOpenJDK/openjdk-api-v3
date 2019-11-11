@@ -77,7 +77,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
     @Test
     fun sortOrderDESIsHonoured() {
 
-        val times = getTimestamps(SortOrder.DES)
+        val times = getTimestamps(SortOrder.DESC)
 
         times
                 .fold(LocalDateTime.MAX, { previous, updatedAt ->
