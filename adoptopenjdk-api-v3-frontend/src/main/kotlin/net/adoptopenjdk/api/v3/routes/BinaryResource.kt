@@ -70,7 +70,7 @@ class BinaryResource {
 
         val releaseFilter = ReleaseFilter(null, null, release_name, vendor, null)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size)
-        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DES).toList()
+        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
 
         return formResponse(releases)
 
@@ -122,7 +122,7 @@ class BinaryResource {
     ): Response {
         val releaseFilter = ReleaseFilter(release_type, version, null, vendor, null)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size)
-        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DES).toList()
+        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
 
         val comparator = compareBy<Release> { it.version_data.major }
                 .thenBy { it.version_data.minor }

@@ -82,7 +82,7 @@ class AssetsResource {
             @QueryParam("page")
             page: Int?,
 
-            @Parameter(name = "sort_order", description = "Result sort order", schema = Schema(defaultValue = "DES"), required = false)
+            @Parameter(name = "sort_order", description = "Result sort order", required = false)
             @QueryParam("sort_order")
             sortOrder: SortOrder?
 
@@ -90,7 +90,7 @@ class AssetsResource {
         if (release_type == null || version == null) {
             throw BadRequestException("Unrecognised type")
         }
-        val order = sortOrder ?: SortOrder.DES
+        val order = sortOrder ?: SortOrder.DESC
 
         val releaseFilter = ReleaseFilter(release_type, version, null, vendor, null)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size)
@@ -162,12 +162,12 @@ class AssetsResource {
             @QueryParam("page")
             page: Int?,
 
-            @Parameter(name = "sort_order", description = "Result sort order", schema = Schema(defaultValue = "DES"), required = false)
+            @Parameter(name = "sort_order", description = "Result sort order", required = false)
             @QueryParam("sort_order")
             sortOrder: SortOrder?
 
     ): List<Release> {
-        val order = sortOrder ?: SortOrder.DES
+        val order = sortOrder ?: SortOrder.DESC
 
         // Require GA due to version range having no meaning for nightlies
 
