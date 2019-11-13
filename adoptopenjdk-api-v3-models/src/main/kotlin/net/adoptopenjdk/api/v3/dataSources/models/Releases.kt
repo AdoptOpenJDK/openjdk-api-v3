@@ -4,31 +4,31 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
-import net.adoptopenjdk.api.v3.dataSources.filters.BinaryFilter
 import net.adoptopenjdk.api.v3.dataSources.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.models.Release
 import java.time.LocalDateTime
+import java.util.*
+import kotlin.Comparator
 
 class Releases {
 
     @JsonProperty("nodes")
     val nodes: Map<String, Release>
 
+    @JsonIgnore
+    val nodeList: TreeSet<Release> = TreeSet(TIME_SORTER)
+
     constructor(nodes: List<Release>) {
-        this.nodes = nodes.map { it.id to it }.toMap()
+        this.nodes = nodes
+                .map { it.id to it }
+                .toMap()
+        nodeList.addAll(nodes)
     }
 
     @JsonCreator
     constructor(@JsonProperty("nodes") nodes: Map<String, Release>) {
         this.nodes = nodes
-    }
-
-    fun filterBinaries(binaryFilter: BinaryFilter, sortOrder: SortOrder): Releases {
-        val filtered = getReleases(sortOrder)
-                .map {
-                    Release(it, it.binaries.filter { binaryFilter.test(it) }.toTypedArray())
-                }
-        return Releases(filtered.toList())
+        nodeList.addAll(nodes.values)
     }
 
     @JsonIgnore
@@ -41,12 +41,9 @@ class Releases {
 
     @JsonIgnore
     fun getReleases(sortOrder: SortOrder): Sequence<Release> {
-        val sorter = if (sortOrder == SortOrder.DESC) TIME_SORTER.reversed() else TIME_SORTER;
+        val nodes = if (sortOrder == SortOrder.ASC) nodeList.iterator() else nodeList.descendingIterator()
 
-        return nodes
-                .values
-                .sortedWith(sorter)
-                .asSequence()
+        return nodes.asSequence()
     }
 
     @JsonIgnore
@@ -63,7 +60,7 @@ class Releases {
     }
 
     fun hasReleaseBeenUpdated(id: String, updatedAt: LocalDateTime): Boolean {
-        return nodes.get(id)?.updated_at?.equals(updatedAt) ?: true
+        return nodes[id]?.updated_at?.equals(updatedAt) ?: true
     }
 
     fun add(newReleases: List<Release>): Releases {
@@ -88,7 +85,6 @@ class Releases {
     override fun hashCode(): Int {
         return nodes.hashCode()
     }
-
 
     companion object {
         val TIME_SORTER: Comparator<Release> = Comparator.comparing { release: Release -> release.timestamp }

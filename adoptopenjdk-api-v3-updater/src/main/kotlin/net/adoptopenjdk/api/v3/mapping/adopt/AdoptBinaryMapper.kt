@@ -71,7 +71,7 @@ object AdoptBinaryMapper : BinaryMapper() {
         val binary_checksum_link = getCheckSumLink(assets, binary_name)
         val binary_checksum: String?
 
-        binary_checksum = if (binaryMetadata != null) {
+        binary_checksum = if (binaryMetadata != null && !binaryMetadata.sha256.isEmpty()) {
             binaryMetadata.sha256
         } else {
             getChecksum(binary_checksum_link)
