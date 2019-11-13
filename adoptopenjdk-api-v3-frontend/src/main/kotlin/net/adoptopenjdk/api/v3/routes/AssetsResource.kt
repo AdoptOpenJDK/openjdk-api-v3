@@ -213,13 +213,7 @@ class AssetsResource {
 
     ): List<BinaryAssetView> {
         val releaseFilter = ReleaseFilter(ReleaseType.ga, version, null, Vendor.adoptopenjdk, null)
-        val binaryFilter = BinaryFilter(null, null, null, jvm_impl, null);
-        val repos = APIDataStore.getAdoptRepos().getFeatureRelease(version)
-
-        if (repos == null) {
-            throw NotFoundException()
-        }
-
+        val binaryFilter = BinaryFilter(null, null, null, jvm_impl, null)
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(version, releaseFilter, binaryFilter, SortOrder.ASC)
 
         return releases
