@@ -6,7 +6,6 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHVersion
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.ImageType
-import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.OperatingSystem
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -18,7 +17,7 @@ class MetadataSerializationTest {
         return GHMetaData("a",
                 OperatingSystem.aix,
                 Architecture.aarch64,
-                JvmImpl.hotspot,
+                "hotspot",
                 GHVersion(
 
                         1, 2, 3,

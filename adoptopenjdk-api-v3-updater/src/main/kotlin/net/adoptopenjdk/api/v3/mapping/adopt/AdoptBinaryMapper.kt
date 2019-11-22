@@ -18,6 +18,8 @@ object AdoptBinaryMapper : BinaryMapper() {
 
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    val HOTSPOT_JFR = "hotspot-jfr"
+
 
     suspend fun toBinaryList(assets: List<GHAsset>, metadata: Map<GHAsset, GHMetaData>): List<Binary> {
         // probably whitelist rather than black list
@@ -132,6 +134,7 @@ object AdoptBinaryMapper : BinaryMapper() {
         val architecture = getEnumFromFileName(asset.name, Architecture.values())
         val binary_type = getEnumFromFileName(asset.name, ImageType.values(), ImageType.jdk)
         val jvm_impl = getEnumFromFileName(asset.name, JvmImpl.values(), JvmImpl.hotspot)
+        val project = getEnumFromFileName(asset.name, Project.values(), Project.jdk)
 
         return Binary(
                 pack,
@@ -143,7 +146,8 @@ object AdoptBinaryMapper : BinaryMapper() {
                 os,
                 architecture,
                 binary_type,
-                jvm_impl
+                jvm_impl,
+                project
         )
     }
 
@@ -151,6 +155,10 @@ object AdoptBinaryMapper : BinaryMapper() {
             binaryMetadata: GHMetaData, pack: Package, download_count: Long, updated_at: LocalDateTime,
             installer: Installer?, heap_size: HeapSize
     ): Binary {
+
+        //github metadata has concept of hotspot-jfr split this into
+        val variant = parseJvmImpl(binaryMetadata)
+        val project = parseProject(binaryMetadata)
 
         return Binary(
                 pack,
@@ -162,8 +170,25 @@ object AdoptBinaryMapper : BinaryMapper() {
                 binaryMetadata.os,
                 binaryMetadata.arch,
                 binaryMetadata.binary_type,
-                binaryMetadata.variant
+                variant,
+                project
         )
+    }
+
+    private fun parseProject(binaryMetadata: GHMetaData): Project {
+        return if (binaryMetadata.variant.equals(HOTSPOT_JFR)) {
+            Project.jfr
+        } else {
+            Project.jdk
+        }
+    }
+
+    private fun parseJvmImpl(binaryMetadata: GHMetaData): JvmImpl {
+        return if (binaryMetadata.variant.equals(HOTSPOT_JFR)) {
+            JvmImpl.hotspot
+        } else {
+            JvmImpl.valueOf(binaryMetadata.variant)
+        }
     }
 
     private fun getChecksum(binary_checksum_link: String?): String? {

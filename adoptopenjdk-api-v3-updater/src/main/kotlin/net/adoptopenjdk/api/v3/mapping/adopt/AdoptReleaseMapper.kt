@@ -69,7 +69,12 @@ object AdoptReleaseMapper : ReleaseMapper() {
         try {
             return listOf(VersionParser().parse(release_name))
         } catch (e: FailedToParse) {
-            return listOf(getFeatureVersion(release))
+            try {
+                return listOf(getFeatureVersion(release))
+            } catch (e: Exception) {
+                LOGGER.error("Failed to read feature data", e)
+                return emptyList()
+            }
         }
     }
 
@@ -111,17 +116,13 @@ object AdoptReleaseMapper : ReleaseMapper() {
             try {
                 return JsonMapper.mapper.readValue(metadata.body(), GHMetaData::class.java)
             } catch (e: Exception) {
-                e.printStackTrace()
+                LOGGER.error("Failed to read metadata", e);
             }
         }
         return null
     }
 
     private fun getFeatureVersion(release: GHRelease): VersionData {
-        try {
-            return VersionParser().parse(release.name)
-        } catch (e: FailedToParse) {
-            throw IllegalStateException("Failed to parse version for ${release.name}")
-        }
+        return VersionParser().parse(release.name)
     }
 }

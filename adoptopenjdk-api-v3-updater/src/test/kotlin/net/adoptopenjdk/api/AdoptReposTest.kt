@@ -49,7 +49,8 @@ class AdoptReposTest : BaseTest() {
                         OperatingSystem.linux,
                         Architecture.x64,
                         ImageType.jdk,
-                        JvmImpl.hotspot
+                        JvmImpl.hotspot,
+                        Project.jdk
                 )),
                 2,
                 Vendor.adoptopenjdk,

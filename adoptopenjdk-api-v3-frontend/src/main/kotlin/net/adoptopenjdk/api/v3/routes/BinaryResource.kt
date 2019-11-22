@@ -14,6 +14,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
+import org.jboss.resteasy.annotations.jaxrs.QueryParam
 import java.net.URI
 import javax.ws.rs.GET
 import javax.ws.rs.Path
@@ -65,11 +66,15 @@ class BinaryResource {
 
             @Parameter(name = "vendor", description = OpenApiDocs.VENDOR, required = true)
             @PathParam("vendor")
-            vendor: Vendor?
+            vendor: Vendor?,
+
+            @Parameter(name = "project", description = "Project", required = false)
+            @QueryParam("project")
+            project: Project?
     ): Response {
 
         val releaseFilter = ReleaseFilter(null, null, release_name, vendor, null)
-        val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size)
+        val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
 
         return formResponse(releases)
@@ -118,10 +123,14 @@ class BinaryResource {
 
             @Parameter(name = "vendor", description = OpenApiDocs.VENDOR, required = true)
             @PathParam("vendor")
-            vendor: Vendor?
+            vendor: Vendor?,
+
+            @Parameter(name = "project", description = "Project", required = false)
+            @QueryParam("project")
+            project: Project?
     ): Response {
         val releaseFilter = ReleaseFilter(release_type, version, null, vendor, null)
-        val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size)
+        val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
 
         val comparator = compareBy<Release> { it.version_data.major }

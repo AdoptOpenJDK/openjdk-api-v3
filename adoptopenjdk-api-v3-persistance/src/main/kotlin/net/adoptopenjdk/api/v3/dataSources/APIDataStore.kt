@@ -66,7 +66,7 @@ object APIDataStore {
         try {
             binaryRepos = loadDataFromDb()
         } catch (e: Exception) {
-            e.printStackTrace()
+            LOGGER.error("Failed to load db", e)
         }
     }
 }
