@@ -2,7 +2,7 @@ package net.adoptopenjdk.api.v3.models
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 
-class VersionData {
+class VersionData : Comparable<VersionData> {
 
     val major: Int
     val minor: Int
@@ -92,4 +92,17 @@ class VersionData {
         return true
     }
 
+    override fun compareTo(other: VersionData): Int {
+        return COMPARATOR.compare(this, other)
+    }
+
+    companion object {
+        val COMPARATOR = compareBy<VersionData> { it.major }
+                .thenBy { it.minor }
+                .thenBy { it.security }
+                .thenBy { it.pre }
+                .thenBy { it.build }
+                .thenBy { it.adopt_build_number }
+                .thenBy { it.optional }
+    }
 }

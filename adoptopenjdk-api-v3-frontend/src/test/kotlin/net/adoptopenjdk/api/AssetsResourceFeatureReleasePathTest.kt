@@ -2,20 +2,17 @@ package net.adoptopenjdk.api
 
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
-import junit.framework.Assert.assertTrue
+import junit.framework.Assert.fail
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.OperatingSystem
+import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.stream.Stream
 
 
@@ -63,43 +60,40 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
 
     @Test
     fun sortOrderASCIsHonoured() {
-
-        val times = getTimestamps(SortOrder.ASC)
-
-        times
-                .fold(LocalDateTime.MIN, { previous, updatedAt ->
-                    assertTrue("${previous} is after ${updatedAt}", updatedAt.isAfter(previous) || updatedAt.equals(previous))
-                    updatedAt
+        getReleases(SortOrder.ASC)
+                .fold(null, { previous: Release?, next: Release ->
+                    if (previous != null) {
+                        if (previous.version_data.compareTo(next.version_data) > 0) {
+                            fail("${previous.version_data} is before ${next.version_data}")
+                        }
+                    }
+                    next
                 })
 
     }
 
     @Test
     fun sortOrderDESIsHonoured() {
-
-        val times = getTimestamps(SortOrder.DESC)
-
-        times
-                .fold(LocalDateTime.MAX, { previous, updatedAt ->
-                    assertTrue("${previous} is before ${updatedAt}", updatedAt.isBefore(previous) || updatedAt.equals(previous))
-                    updatedAt
+        getReleases(SortOrder.DESC)
+                .fold(null, { previous: Release?, next: Release ->
+                    if (previous != null) {
+                        if (previous.version_data.compareTo(next.version_data) < 0) {
+                            fail("${previous.version_data} is before ${next.version_data}")
+                        }
+                    }
+                    next
                 })
 
     }
 
-    private fun getTimestamps(sortOrder: SortOrder): List<LocalDateTime> {
+    private fun getReleases(sortOrder: SortOrder): List<Release> {
         val body = RestAssured.given()
                 .`when`()
                 .get("${getPath()}/8/ga?sort_order=${sortOrder.name}")
                 .body
 
         val releasesStr = body.prettyPrint()
-
-        val releases = JsonMapper.mapper.readValue(releasesStr, List::class.java) as List<Map<String, String>>
-        val times = releases
-                .map { it.get("timestamp") }
-                .map { Instant.from(DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.of("UTC")).parse(it)).atZone(ZoneId.of("UTC")).toLocalDateTime() }
-        return times
+        return JsonMapper.mapper.readValue(releasesStr, JsonMapper.mapper.getTypeFactory().constructCollectionType(MutableList::class.java, Release::class.java))
     }
 
 
