@@ -41,6 +41,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
 
         try {
             val versionData = getVersionData(release, metadata, releaseName)
+            if (versionData == null) return null
 
             LOGGER.info("Getting binaries $releaseName")
             val binaries = AdoptBinaryMapper.toBinaryList(release.releaseAssets.assets, metadata)
@@ -53,7 +54,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
         }
     }
 
-    private fun getVersionData(release: GHRelease, metadata: Map<GHAsset, GHMetaData>, release_name: String): VersionData {
+    private fun getVersionData(release: GHRelease, metadata: Map<GHAsset, GHMetaData>, release_name: String): VersionData? {
         return metadata
                 .values
                 .map { it.version.toApiVersion() }
@@ -61,7 +62,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
                     //if we have no metadata resort to parsing release names
                     parseVersionInfo(release, release_name)
                 }
-                .first()
+                .firstOrNull()
 
     }
 
@@ -72,7 +73,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
             try {
                 return listOf(getFeatureVersion(release))
             } catch (e: Exception) {
-                LOGGER.error("Failed to read feature data", e)
+                LOGGER.warn("Failed to parse ${release.name}", e)
                 return emptyList()
             }
         }
@@ -116,7 +117,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
             try {
                 return JsonMapper.mapper.readValue(metadata.body(), GHMetaData::class.java)
             } catch (e: Exception) {
-                LOGGER.error("Failed to read metadata", e);
+                LOGGER.error("Failed to read metadata", e)
             }
         }
         return null
