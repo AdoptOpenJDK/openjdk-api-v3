@@ -93,7 +93,7 @@ class AssetsResource {
         val order = sortOrder ?: SortOrder.DESC
 
         val releaseFilter = ReleaseFilter(release_type, version, null, vendor, null)
-        val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size)
+        val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
         val repos = APIDataStore.getAdoptRepos().getFeatureRelease(version)
 
         if (repos == null) {
@@ -174,7 +174,7 @@ class AssetsResource {
         val range = VersionRangeFilter(version)
 
         val releaseFilter = ReleaseFilter(release_type, null, null, vendor, range)
-        val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size)
+        val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
 
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, order)
         return getPage(pageSize, page, releases)
@@ -213,7 +213,7 @@ class AssetsResource {
 
     ): List<BinaryAssetView> {
         val releaseFilter = ReleaseFilter(ReleaseType.ga, version, null, Vendor.adoptopenjdk, null)
-        val binaryFilter = BinaryFilter(null, null, null, jvm_impl, null)
+        val binaryFilter = BinaryFilter(null, null, null, jvm_impl, null, null)
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(version, releaseFilter, binaryFilter, SortOrder.ASC)
 
         return releases

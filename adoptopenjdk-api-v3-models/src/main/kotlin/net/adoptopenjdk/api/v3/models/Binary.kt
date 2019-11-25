@@ -35,6 +35,9 @@ class Binary {
     @Schema(example = "dd28d6d2cde2b931caf94ac2422a2ad082ea62f0beee3bf7057317c53093de93")
     val scm_ref: String?
 
+    @Schema(example = "jdk")
+    val project: Project
+
     constructor(
             `package`: Package?,
             download_count: Long,
@@ -45,7 +48,8 @@ class Binary {
             os: OperatingSystem,
             architecture: Architecture,
             image_type: ImageType,
-            jvm_impl: JvmImpl) {
+            jvm_impl: JvmImpl,
+            project: Project = Project.jdk) {
         this.`package` = `package`
         this.download_count = download_count
         this.updated_at = updated_at
@@ -56,6 +60,7 @@ class Binary {
         this.architecture = architecture
         this.image_type = image_type
         this.jvm_impl = jvm_impl
+        this.project = project
     }
 
     override fun equals(other: Any?): Boolean {
@@ -74,6 +79,7 @@ class Binary {
         if (download_count != other.download_count) return false
         if (updated_at != other.updated_at) return false
         if (scm_ref != other.scm_ref) return false
+        if (project != other.project) return false
 
         return true
     }
@@ -89,6 +95,7 @@ class Binary {
         result = 31 * result + download_count.hashCode()
         result = 31 * result + updated_at.hashCode()
         result = 31 * result + (scm_ref?.hashCode() ?: 0)
+        result = 31 * result + project.hashCode()
         return result
     }
 

@@ -3,7 +3,10 @@ package net.adoptopenjdk.api.v3.dataSources.github.graphql.models
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import net.adoptopenjdk.api.v3.models.*
+import net.adoptopenjdk.api.v3.models.Architecture
+import net.adoptopenjdk.api.v3.models.ImageType
+import net.adoptopenjdk.api.v3.models.OperatingSystem
+import net.adoptopenjdk.api.v3.models.VersionData
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GHVersion @JsonCreator constructor(
@@ -26,7 +29,7 @@ data class GHMetaData @JsonCreator constructor(
         @JsonProperty("WARNING") val warning: String?,
         @JsonProperty("os") val os: OperatingSystem,
         @JsonProperty("arch") val arch: Architecture,
-        @JsonProperty("variant") val variant: JvmImpl,
+        @JsonProperty("variant") val variant: String,
         @JsonProperty("version") val version: GHVersion,
         @JsonProperty("scmRef") val scmRef: String,
         @JsonProperty("version_data") val version_data: String,

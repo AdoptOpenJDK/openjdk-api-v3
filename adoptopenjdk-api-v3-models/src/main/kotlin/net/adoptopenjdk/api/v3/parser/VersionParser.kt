@@ -87,7 +87,7 @@ class VersionParser {
 
     fun parse(publishName: String?): VersionData {
         if (publishName == null) {
-            throw FailedToParse()
+            throw FailedToParse("null name")
         }
         try {
             var version = matchVersion(publishName)
@@ -106,7 +106,7 @@ class VersionParser {
             }
         } catch (e: Exception) {
         }
-        throw FailedToParse()
+        throw FailedToParse("Failed to parse ${publishName}")
     }
 
     private fun parseWithJavaClass(publishName: String): VersionData? {
@@ -230,4 +230,4 @@ class VersionParser {
     }
 }
 
-class FailedToParse : Exception()
+class FailedToParse(message: String) : Exception(message)
