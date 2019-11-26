@@ -35,7 +35,7 @@ object UpstreamBinaryMapper : BinaryMapper() {
 
                 val os = getEnumFromFileName(asset.name, OperatingSystem.values())
                 val architecture = getEnumFromFileName(asset.name, Architecture.values())
-                val imageType = getEnumFromFileName(asset.name, ImageType.values())
+                val imageType = getEnumFromFileName(asset.name, ImageType.values(), ImageType.jdk)
                 val updatedAt = getUpdatedTime(asset)
 
                 Binary(
