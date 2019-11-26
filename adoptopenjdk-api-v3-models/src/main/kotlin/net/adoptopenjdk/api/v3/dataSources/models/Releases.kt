@@ -16,7 +16,7 @@ class Releases {
     val nodes: Map<String, Release>
 
     @JsonIgnore
-    val nodeList: TreeSet<Release> = TreeSet(TIME_SORTER)
+    val nodeList: TreeSet<Release> = TreeSet(VERSION_THEN_TIME_SORTER)
 
     constructor(nodes: List<Release>) {
         this.nodes = nodes
@@ -87,6 +87,10 @@ class Releases {
     }
 
     companion object {
-        val TIME_SORTER: Comparator<Release> = Comparator.comparing { release: Release -> release.timestamp }
+        val VERSION_THEN_TIME_SORTER: Comparator<Release> = Comparator
+                .comparing { release: Release -> release.version_data }
+                .thenComparing { release: Release -> release.timestamp }
+                .thenComparing { release: Release -> release.release_name }
+                .thenComparing { release: Release -> release.id }
     }
 }
