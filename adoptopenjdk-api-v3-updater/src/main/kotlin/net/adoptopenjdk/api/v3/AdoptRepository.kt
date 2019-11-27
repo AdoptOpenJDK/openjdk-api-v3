@@ -78,6 +78,7 @@ object AdoptRepositoryImpl : AdoptRepository {
         LOGGER.info("getting $version")
         return GlobalScope.async {
             return@async listOf(
+                    getRepoDataAsync("openjdk$version-openj9-releases", getFun),
                     getRepoDataAsync("openjdk$version-openj9-nightly", getFun),
                     getRepoDataAsync("openjdk$version-nightly", getFun),
                     getRepoDataAsync("openjdk$version-binaries", getFun),
