@@ -7,7 +7,15 @@ import net.adoptopenjdk.api.v3.HttpClientFactory
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
 import net.adoptopenjdk.api.v3.mapping.BinaryMapper
-import net.adoptopenjdk.api.v3.models.*
+import net.adoptopenjdk.api.v3.models.Architecture
+import net.adoptopenjdk.api.v3.models.Binary
+import net.adoptopenjdk.api.v3.models.HeapSize
+import net.adoptopenjdk.api.v3.models.ImageType
+import net.adoptopenjdk.api.v3.models.Installer
+import net.adoptopenjdk.api.v3.models.JvmImpl
+import net.adoptopenjdk.api.v3.models.OperatingSystem
+import net.adoptopenjdk.api.v3.models.Package
+import net.adoptopenjdk.api.v3.models.Project
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.net.http.HttpRequest
@@ -107,14 +115,19 @@ object AdoptBinaryMapper : BinaryMapper() {
         }
     }
 
-
     private fun getCheckSumLink(assets: List<GHAsset>, binary_name: String): String? {
+        val nameWithoutExtension = removeExtensionFromName(binary_name)
+
         return assets
                 .firstOrNull { asset ->
                     asset.name.equals("${binary_name}.sha256.txt") ||
-                            (binary_name.split(".")[0] + ".sha256.txt").equals(asset.name)
-                }
-                ?.downloadUrl
+                            (binary_name.split(".")[0] + ".sha256.txt").equals(asset.name) ||
+                            ("${nameWithoutExtension}.sha256.txt").equals(asset.name)
+                }?.downloadUrl
+    }
+
+    private fun removeExtensionFromName(binary_name: String): String {
+        return BINARY_ASSET_WHITELIST.foldRight(binary_name, { extension, name -> name.removeSuffix(extension) })
     }
 
     private fun isArchive(asset: GHAsset) =
@@ -192,22 +205,26 @@ object AdoptBinaryMapper : BinaryMapper() {
     }
 
     private fun getChecksum(binary_checksum_link: String?): String? {
-        if (binary_checksum_link != null && binary_checksum_link.isNotEmpty()) {
-            LOGGER.info("Pulling checksum for $binary_checksum_link")
+        try {
+            if (binary_checksum_link != null && binary_checksum_link.isNotEmpty()) {
+                LOGGER.info("Pulling checksum for $binary_checksum_link")
 
-            val request = HttpRequest.newBuilder()
-                    .uri(URI.create(binary_checksum_link))
-                    .build()
+                val request = HttpRequest.newBuilder()
+                        .uri(URI.create(binary_checksum_link))
+                        .build()
 
-            val checksum =
-                    HttpClientFactory.getHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString()).get()
+                val checksum =
+                        HttpClientFactory.getHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString()).get()
 
-            if (checksum.statusCode() == 200 && checksum.body() != null) {
-                val tokens = checksum.body().split(" ")
-                if (tokens.size > 1) {
-                    return tokens[0]
+                if (checksum.statusCode() == 200 && checksum.body() != null) {
+                    val tokens = checksum.body().split(" ")
+                    if (tokens.size > 1) {
+                        return tokens[0]
+                    }
                 }
             }
+        } catch (e: Exception) {
+            LOGGER.warn("Failed to fetch checksum ${binary_checksum_link}", e)
         }
         return null
     }

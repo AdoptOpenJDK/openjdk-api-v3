@@ -5,7 +5,12 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHVersion
 import net.adoptopenjdk.api.v3.mapping.adopt.AdoptBinaryMapper
-import net.adoptopenjdk.api.v3.models.*
+import net.adoptopenjdk.api.v3.models.Architecture
+import net.adoptopenjdk.api.v3.models.Binary
+import net.adoptopenjdk.api.v3.models.ImageType
+import net.adoptopenjdk.api.v3.models.JvmImpl
+import net.adoptopenjdk.api.v3.models.OperatingSystem
+import net.adoptopenjdk.api.v3.models.Project
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -25,6 +30,43 @@ class AdoptBinaryMapperTest {
             "",
             1L,
             "2013-02-27T19:35:32Z"))
+
+    @Test
+    fun oldChecksumIsFound() {
+        runBlocking {
+            val binaryList = AdoptBinaryMapper.toBinaryList(listOf(GHAsset(
+                    "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.tar.gz",
+                    1L,
+                    "",
+                    1L,
+                    "2013-02-27T19:35:32Z"),
+                    GHAsset(
+                            "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.sha256.txt",
+                            1L,
+                            "a-download-link",
+                            1L,
+                            "2013-02-27T19:35:32Z")), emptyMap())
+
+            assertEquals("a-download-link", binaryList.get(0).`package`!!.checksum_link)
+        }
+    }
+
+    @Test
+    fun parsesOldOpenj9() {
+        runBlocking {
+            val binaryList = AdoptBinaryMapper.toBinaryList(listOf(GHAsset(
+                    "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.tar.gz",
+                    1L,
+                    "",
+                    1L,
+                    "2013-02-27T19:35:32Z")), emptyMap())
+
+            assertEquals(JvmImpl.openj9, binaryList.get(0).jvm_impl)
+            assertEquals(Architecture.ppc64le, binaryList.get(0).architecture)
+            assertEquals(OperatingSystem.linux, binaryList.get(0).os)
+            assertEquals(Project.jdk, binaryList.get(0).project)
+        }
+    }
 
     @Test
     fun parsesJfrFromName() {
