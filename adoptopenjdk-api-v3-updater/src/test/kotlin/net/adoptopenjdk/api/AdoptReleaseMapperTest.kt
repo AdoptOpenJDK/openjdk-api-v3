@@ -6,7 +6,9 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAssets
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.mapping.adopt.AdoptReleaseMapper
+import net.adoptopenjdk.api.v3.models.ReleaseType
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 
@@ -30,6 +32,21 @@ class AdoptReleaseMapperTest {
             val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
 
             assertNull(release)
+        }
+    }
+
+
+    @Test
+    fun obaysReleaseTypeforBinaryRepos() {
+        runBlocking {
+
+            val source = GHAssets(listOf(jdk), PageInfo(false, ""))
+
+            val ghRelease = GHRelease("1", "jdk9u-2018-09-27-08-50", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz");
+
+            val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
+
+            assertEquals(ReleaseType.ea, release!!.release_type)
         }
     }
 }

@@ -24,10 +24,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
     override suspend fun toAdoptRelease(release: GHRelease): Release? {
-        //TODO fix me before the year 2100
-        val dateMatcher = """.*(20[0-9]{2}-[0-9]{2}-[0-9]{2}|20[0-9]{6}).*"""
-        val hasDate = Pattern.compile(dateMatcher).matcher(release.name)
-        val release_type: ReleaseType = if (hasDate.matches()) ReleaseType.ea else ReleaseType.ga
+        val release_type: ReleaseType = formReleaseType(release)
 
         val releaseLink = release.url
         val releaseName = release.name
@@ -52,6 +49,28 @@ object AdoptReleaseMapper : ReleaseMapper() {
             LOGGER.error("Failed to parse $releaseName")
             return null
         }
+    }
+
+    private fun formReleaseType(release: GHRelease): ReleaseType {
+        //TODO fix me before the year 2100
+        val dateMatcher = """.*(20[0-9]{2}-[0-9]{2}-[0-9]{2}|20[0-9]{6}).*"""
+        val hasDate = Pattern.compile(dateMatcher).matcher(release.name)
+        val release_type: ReleaseType =
+                if (release.url.matches(Regex(".*/openjdk[0-9]+-binaries/.*"))) {
+                    //Can trust isPrerelease from -binaries repos
+                    if (release.isPrerelease) {
+                        ReleaseType.ea
+                    } else {
+                        ReleaseType.ga
+                    }
+                } else {
+                    if (hasDate.matches()) {
+                        ReleaseType.ea
+                    } else {
+                        ReleaseType.ga
+                    }
+                }
+        return release_type
     }
 
     private fun getVersionData(release: GHRelease, metadata: Map<GHAsset, GHMetaData>, release_name: String): VersionData? {
