@@ -101,7 +101,7 @@ open class GraphQLGitHubInterface {
             // then scale up to 100 seconds at rate limit == 1
             val delayTime = 100000 - 100 * Integer.max(1, rateLimitData.remaining)
             LOGGER.info("Remaining data getting low ${rateLimitData.remaining} ${rateLimitData.cost} ${delayTime}")
-            delay((TimeUnit.SECONDS.toMillis(delayTime.toLong())))
+            delay(delayTime.toLong())
         }
         LOGGER.info("RateLimit ${rateLimitData.remaining} ${rateLimitData.cost}")
     }
