@@ -70,7 +70,7 @@ open class GraphQLGitHubInterface {
 
         if (result == null || repoDoesNotExist(result)) return listOf()
 
-        printRateLimit(result)
+        selfRateLimit(result)
 
         val newData = extract(result.response)
 
@@ -92,11 +92,16 @@ open class GraphQLGitHubInterface {
         return false
     }
 
-    private fun <F : HasRateLimit> printRateLimit(result: GraphQLResponseEntity<F>) {
+    private suspend fun <F : HasRateLimit> selfRateLimit(result: GraphQLResponseEntity<F>) {
         val rateLimitData = result.response.rateLimit
 
         if (rateLimitData.remaining < 1000) {
-            LOGGER.info("Remaining data getting low ${rateLimitData.remaining} ${rateLimitData.cost}")
+
+            // scale delay, sleep for 1 second at rate limit == 1000
+            // then scale up to 100 seconds at rate limit == 1
+            val delayTime = 100000 - 100 * Integer.max(1, rateLimitData.remaining)
+            LOGGER.info("Remaining data getting low ${rateLimitData.remaining} ${rateLimitData.cost} ${delayTime}")
+            delay(delayTime.toLong())
         }
         LOGGER.info("RateLimit ${rateLimitData.remaining} ${rateLimitData.cost}")
     }
