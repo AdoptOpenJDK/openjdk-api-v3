@@ -6,10 +6,10 @@ import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.Variants
+import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.timerTask
-import org.slf4j.LoggerFactory
 
 class V3Updater {
     private var database: ApiPersistence
@@ -50,12 +50,12 @@ class V3Updater {
 
         var incrementalUpdateDelay = 0
         if (instantFullUpdate) {
-            //if doing a full update wait 30 min before starting
-            incrementalUpdateDelay = 30
+            //if doing a full update wait 120 min before starting
+            incrementalUpdateDelay = 120
         }
         executor.scheduleWithFixedDelay(timerTask {
             incrementalUpdate()
-        }, incrementalUpdateDelay.toLong(), 1, TimeUnit.MINUTES)
+        }, incrementalUpdateDelay.toLong(), 3, TimeUnit.MINUTES)
 
     }
 
