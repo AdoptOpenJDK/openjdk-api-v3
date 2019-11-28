@@ -4,6 +4,7 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
+import net.adoptopenjdk.api.v3.models.SourcePackage
 import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.models.VersionData
 import net.adoptopenjdk.api.v3.parser.FailedToParse
@@ -46,11 +47,22 @@ object UpstreamReleaseMapper : ReleaseMapper() {
                 versionData = getVersionData(release_name)
             }
 
-            return Release(release.id, release_type, release_link, release_name, timestamp, updatedAt, binaries.toTypedArray(), download_count, vendor, versionData)
+            val sourcePackage = getSourcePackage(release)
+
+            return Release(release.id, release_type, release_link, release_name, timestamp, updatedAt, binaries.toTypedArray(), download_count, vendor, versionData, sourcePackage)
         } catch (e: FailedToParse) {
             LOGGER.error("Failed to parse $release_name")
             return null
         }
+    }
+
+    private fun getSourcePackage(release: GHRelease): SourcePackage? {
+        return release.releaseAssets
+                .assets
+                .filter { it.name.endsWith("tar.gz") }
+                .filter { it.name.contains("-sources") }
+                .map { SourcePackage(it.name, it.downloadUrl, it.size) }
+                .firstOrNull()
     }
 
     private fun getVersionData(release_name: String): VersionData {

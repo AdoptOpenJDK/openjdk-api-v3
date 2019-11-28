@@ -39,6 +39,8 @@ class Release {
 
     val version_data: VersionData
 
+    val source: SourcePackage?
+
     @JsonCreator
     constructor(
             @JsonProperty("id") id: String,
@@ -50,7 +52,8 @@ class Release {
             @JsonProperty("binaries") binaries: Array<Binary>,
             @JsonProperty("download_count") download_count: Long,
             @JsonProperty("vendor") vendor: Vendor,
-            @JsonProperty("version_data") version_data: VersionData) {
+            @JsonProperty("version_data") version_data: VersionData,
+            @JsonProperty("source") source: SourcePackage? = null) {
         this.id = id
         this.release_type = release_type
         this.release_link = release_link
@@ -61,6 +64,7 @@ class Release {
         this.download_count = download_count
         this.vendor = vendor
         this.version_data = version_data
+        this.source = source
     }
 
     constructor(release: Release, binaries: Array<Binary>) {
@@ -74,6 +78,7 @@ class Release {
         this.download_count = release.download_count
         this.vendor = release.vendor
         this.version_data = release.version_data
+        this.source = release.source;
     }
 
     fun filterBinaries(binaryFilter: BinaryFilter): Release {
@@ -96,6 +101,7 @@ class Release {
         if (release_type != other.release_type) return false
         if (vendor != other.vendor) return false
         if (version_data != other.version_data) return false
+        if (source != other.source) return false
 
         return true
     }
@@ -106,12 +112,12 @@ class Release {
         result = 31 * result + release_name.hashCode()
         result = 31 * result + timestamp.hashCode()
         result = 31 * result + updated_at.hashCode()
-        result = 31 * result + binaries.hashCode()
+        result = 31 * result + binaries.contentHashCode()
         result = 31 * result + download_count.hashCode()
         result = 31 * result + release_type.hashCode()
         result = 31 * result + vendor.hashCode()
         result = 31 * result + version_data.hashCode()
+        result = 31 * result + (source?.hashCode() ?: 0)
         return result
     }
-
 }
