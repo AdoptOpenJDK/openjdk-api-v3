@@ -66,7 +66,7 @@ object UpstreamReleaseMapper : ReleaseMapper() {
     }
 
     private fun getVersionData(release_name: String): VersionData {
-        return VersionParser().parse(release_name)
+        return VersionParser.parse(release_name)
 
     }
 
