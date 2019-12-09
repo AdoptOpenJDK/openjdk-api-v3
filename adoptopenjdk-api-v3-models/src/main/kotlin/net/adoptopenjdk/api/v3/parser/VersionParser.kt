@@ -8,82 +8,79 @@ import java.util.regex.Pattern
 
 //This is a port of the Groovy VersionParser in the openjdk-build project
 //Should probably look at exporting it as a common lib rather than having 2 implementations
-class VersionParser {
+object VersionParser {
 
-    companion object {
-        @JvmStatic
-        private val LOGGER = LoggerFactory.getLogger(this::class.java)
-
-        private fun pre223(): String {
-            val majorMatcher = "(?<major>[0-8]+)"
-            val security = "u(?<security>[0-9]+)"
-            val buildMatcher = "-?b(?<build>[0-9]+)"
-            val optMatcher = "_(?<opt>[-a-zA-Z0-9\\.]+)"
-            val versionMatcher = "(?<version>$majorMatcher($security)($buildMatcher)?($optMatcher)?)"
-            val prefixMatcher = "(jdk\\-?)"
-
-            return "$prefixMatcher?$versionMatcher"
-        }
-
-        private fun adoptSemver(): String {
-            val vnumRegex = """(?<major>[0-9]+)\.(?<minor>[0-9]+)\.(?<security>[0-9]+)"""
-            val preRegex = "(?<pre>[a-zA-Z0-9]+)"
-            val buildRegex = "(?<build>[0-9]+)(\\.(?<adoptBuild>[0-9]+))?"
-            val optRegex = "(?<opt>[-a-zA-Z0-9\\.]+)"
-
-            return "(?:jdk\\-)?(?<version>$vnumRegex(\\-$preRegex)?\\+$buildRegex(\\-$optRegex)?)"
-        }
-
-        //Identical to java version but with adoptbuild number
-        // i.e allow . in the build number
-        private fun jep223WithAdoptBuildNum(): List<String> {
-            //Regexes based on those in http://openjdk.java.net/jeps/223
-            // Technically the standard supports an arbitrary number of numbers, we will support 3 for now
-            val vnumRegex = """(?<major>[0-9]+)(\.(?<minor>[0-9]+))?(\.(?<security>[0-9]+))?"""
-            val preRegex = "(?<pre>[a-zA-Z0-9]+)"
-            val buildRegex = "(?<build>[0-9]+)(\\.(?<adoptBuild>[0-9]+))?"
-            val optRegex = "(?<opt>[-a-zA-Z0-9\\.]+)"
-
-            return Arrays.asList(
-                    "(?:jdk\\-)?(?<version>$vnumRegex(\\-$preRegex)?\\+$buildRegex(\\-$optRegex)?)",
-                    "(?:jdk\\-)?(?<version>$vnumRegex\\-$preRegex(\\-$optRegex)?)",
-                    "(?:jdk\\-)?(?<version>$vnumRegex(\\+\\-$optRegex)?)")
-        }
-
-        private fun jep223(): List<String> {
-            //Regexes based on those in http://openjdk.java.net/jeps/223
-            // Technically the standard supports an arbitrary number of numbers, we will support 3 for now
-            val vnumRegex = """(?<major>[0-9]+)(\.(?<minor>[0-9]+))?(\.(?<security>[0-9]+))?"""
-            val preRegex = "(?<pre>[a-zA-Z0-9]+)"
-            val buildRegex = "(?<build>[0-9]+)"
-            val optRegex = "(?<opt>[-a-zA-Z0-9\\.]+)"
-
-            return Arrays.asList(
-                    "(?:jdk\\-)?(?<version>$vnumRegex(\\-$preRegex)?\\+$buildRegex(\\-$optRegex)?)",
-                    "(?:jdk\\-)?(?<version>$vnumRegex\\-$preRegex(\\-$optRegex)?)",
-                    "(?:jdk\\-)?(?<version>$vnumRegex(\\+\\-$optRegex)?)")
-        }
+    @JvmStatic
+    private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    private val REGEXES: List<Pattern> = getRegexes()
+    private val DATE_TIME_MATCHER: Regex = Regex("^[0-9]{4}(-[0-9]{1,2}){4}$")
+    private val PRE_223_REGEX: Pattern = Pattern.compile(""".*?(?<version>1\.(?<major>[0-8])\.0(_(?<update>[0-9]+))?(-?(?<additional>.*))?).*?""")
 
 
-        private fun adoptNightly(): String {
-            return """jdk(?<version>(?<major>[0-9]+)[-u]+(?<opt>[-0-9]+))"""
-        }
+    private fun pre223(): String {
+        val majorMatcher = "(?<major>[0-8]+)"
+        val security = "u(?<security>[0-9]+)"
+        val buildMatcher = "-?b(?<build>[0-9]+)"
+        val optMatcher = "_(?<opt>[-a-zA-Z0-9\\.]+)"
+        val versionMatcher = "(?<version>$majorMatcher($security)($buildMatcher)?($optMatcher)?)"
+        val prefixMatcher = "(jdk\\-?)"
 
-        private fun getRegexes(): List<Pattern> {
-            val regexes = mutableListOf(adoptSemver())
-            regexes.addAll(jep223WithAdoptBuildNum())
-            regexes.addAll(jep223())
-            regexes.add(pre223())
-            regexes.add(adoptNightly())
-
-            return regexes.map { regex -> Pattern.compile(".*?$regex.*?") }
-        }
-
-        val REGEXES: List<Pattern> = getRegexes()
-        val DATE_TIME_MATCHER: Regex = Regex("^[0-9]{4}(-[0-9]{1,2}){4}$")
-        val PRE_223_REGEX: Pattern = Pattern.compile(""".*?(?<version>1\.(?<major>[0-8])\.0(_(?<update>[0-9]+))?(-?(?<additional>.*))?).*?""")
+        return "$prefixMatcher?$versionMatcher"
     }
 
+    private fun adoptSemver(): String {
+        val vnumRegex = """(?<major>[0-9]+)\.(?<minor>[0-9]+)\.(?<security>[0-9]+)"""
+        val preRegex = "(?<pre>[a-zA-Z0-9]+)"
+        val buildRegex = "(?<build>[0-9]+)(\\.(?<adoptBuild>[0-9]+))?"
+        val optRegex = "(?<opt>[-a-zA-Z0-9\\.]+)"
+
+        return "(?:jdk\\-)?(?<version>$vnumRegex(\\-$preRegex)?\\+$buildRegex(\\-$optRegex)?)"
+    }
+
+    //Identical to java version but with adoptbuild number
+    // i.e allow . in the build number
+    private fun jep223WithAdoptBuildNum(): List<String> {
+        //Regexes based on those in http://openjdk.java.net/jeps/223
+        // Technically the standard supports an arbitrary number of numbers, we will support 3 for now
+        val vnumRegex = """(?<major>[0-9]+)(\.(?<minor>[0-9]+))?(\.(?<security>[0-9]+))?"""
+        val preRegex = "(?<pre>[a-zA-Z0-9]+)"
+        val buildRegex = "(?<build>[0-9]+)(\\.(?<adoptBuild>[0-9]+))?"
+        val optRegex = "(?<opt>[-a-zA-Z0-9\\.]+)"
+
+        return Arrays.asList(
+                "(?:jdk\\-)?(?<version>$vnumRegex(\\-$preRegex)?\\+$buildRegex(\\-$optRegex)?)",
+                "(?:jdk\\-)?(?<version>$vnumRegex\\-$preRegex(\\-$optRegex)?)",
+                "(?:jdk\\-)?(?<version>$vnumRegex(\\+\\-$optRegex)?)")
+    }
+
+    private fun jep223(): List<String> {
+        //Regexes based on those in http://openjdk.java.net/jeps/223
+        // Technically the standard supports an arbitrary number of numbers, we will support 3 for now
+        val vnumRegex = """(?<major>[0-9]+)(\.(?<minor>[0-9]+))?(\.(?<security>[0-9]+))?"""
+        val preRegex = "(?<pre>[a-zA-Z0-9]+)"
+        val buildRegex = "(?<build>[0-9]+)"
+        val optRegex = "(?<opt>[-a-zA-Z0-9\\.]+)"
+
+        return Arrays.asList(
+                "(?:jdk\\-)?(?<version>$vnumRegex(\\-$preRegex)?\\+$buildRegex(\\-$optRegex)?)",
+                "(?:jdk\\-)?(?<version>$vnumRegex\\-$preRegex(\\-$optRegex)?)",
+                "(?:jdk\\-)?(?<version>$vnumRegex(\\+\\-$optRegex)?)")
+    }
+
+
+    private fun adoptNightly(): String {
+        return """jdk(?<version>(?<major>[0-9]+)[-u]+(?<opt>[-0-9]+))"""
+    }
+
+    private fun getRegexes(): List<Pattern> {
+        val regexes = mutableListOf(adoptSemver())
+        regexes.addAll(jep223WithAdoptBuildNum())
+        regexes.addAll(jep223())
+        regexes.add(pre223())
+        regexes.add(adoptNightly())
+
+        return regexes.map { regex -> Pattern.compile(".*?$regex.*?") }
+    }
 
     fun parse(publishName: String?): VersionData {
         if (publishName == null) {

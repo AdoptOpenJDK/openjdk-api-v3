@@ -87,7 +87,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
 
     private fun parseVersionInfo(release: GHRelease, release_name: String): List<VersionData> {
         try {
-            return listOf(VersionParser().parse(release_name))
+            return listOf(VersionParser.parse(release_name))
         } catch (e: FailedToParse) {
             try {
                 return listOf(getFeatureVersion(release))
@@ -143,6 +143,6 @@ object AdoptReleaseMapper : ReleaseMapper() {
     }
 
     private fun getFeatureVersion(release: GHRelease): VersionData {
-        return VersionParser().parse(release.name)
+        return VersionParser.parse(release.name)
     }
 }

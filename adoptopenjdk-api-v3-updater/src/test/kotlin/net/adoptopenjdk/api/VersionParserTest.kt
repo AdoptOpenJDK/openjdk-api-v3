@@ -3,10 +3,13 @@ package net.adoptopenjdk.api
 import net.adoptopenjdk.api.v3.models.VersionData
 import net.adoptopenjdk.api.v3.parser.VersionParser
 import org.junit.jupiter.api.DynamicTest
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import java.net.URLDecoder
 import java.nio.charset.Charset
+import java.util.*
 import java.util.stream.Stream
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 
@@ -103,11 +106,27 @@ class VersionParserTest {
         return testData
                 .map { v ->
                     DynamicTest.dynamicTest(v.key) {
-                        val parsed = VersionParser().parse(v.key)
+                        val parsed = VersionParser.parse(v.key)
                         assertTrue(v.value.version.equals(parsed), "Should be ${v.value.version.semver}, was ${parsed.semver}")
                         assertTrue(v.value.semver.equals(parsed.semver), "Should be ${v.value.semver}, was ${parsed.semver}")
                     }
                 }
                 .stream()
+    }
+
+    @Test
+    fun sortOrderIsCorrect() {
+        val first = VersionParser.parse("jdk-13.0.1+9.1_openj9-0.17.0")
+        val second = VersionParser.parse("jdk-13.0.1+9_openj9-0.17.0")
+        val third = VersionParser.parse("jdk-13+33_openj9-0.16.0")
+
+        val sorted = TreeSet<VersionData>()
+        sorted.add(first)
+        sorted.add(third)
+        sorted.add(second)
+
+        assertEquals(first, sorted.toList()[2])
+        assertEquals(second, sorted.toList()[1])
+        assertEquals(third, sorted.toList()[0])
     }
 }

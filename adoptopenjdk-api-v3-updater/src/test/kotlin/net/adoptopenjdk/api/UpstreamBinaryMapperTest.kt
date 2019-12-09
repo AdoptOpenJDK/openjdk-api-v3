@@ -11,13 +11,21 @@ import kotlin.test.assertEquals
 class UpstreamBinaryMapperTest {
 
     private fun getAssetList(names: List<String>): List<GHAsset> {
-        return names.map { name ->
-            GHAsset(
-                    name,
-                    1L,
-                    "",
-                    1L,
-                    "2013-02-27T19:35:32Z")
+        return names.flatMap { name ->
+            listOf(
+                    GHAsset(
+                            name,
+                            1L,
+                            "",
+                            1L,
+                            "2013-02-27T19:35:32Z"),
+                    GHAsset(
+                            name + ".sign",
+                            1L,
+                            "a-signature-link to ${name}",
+                            1L,
+                            "2013-02-27T19:35:32Z")
+            )
         }
     }
 
@@ -56,6 +64,21 @@ class UpstreamBinaryMapperTest {
             assertEquals(ImageType.jdk, binaryList.get(1).image_type)
             assertEquals(ImageType.testimage, binaryList.get(2).image_type)
             assertEquals(ImageType.jre, binaryList.get(3).image_type)
+        }
+
+    }
+
+
+    @Test
+    fun addsSignatureLink() {
+
+        val assets = getAssetList(listOf(
+                "OpenJDK11U-x64_linux_11.0.3_7.tar.gz"
+        ))
+
+        runBlocking {
+            val binaryList = UpstreamBinaryMapper.toBinaryList(assets)
+            assertEquals("a-signature-link to OpenJDK11U-x64_linux_11.0.3_7.tar.gz", binaryList.get(0).`package`?.signature_link)
         }
 
     }

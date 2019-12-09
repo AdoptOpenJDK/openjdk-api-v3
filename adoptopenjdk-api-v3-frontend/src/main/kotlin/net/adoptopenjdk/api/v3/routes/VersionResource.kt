@@ -36,7 +36,7 @@ class VersionResource {
             throw BadRequestException("Must provide a version parameter")
         }
         try {
-            return VersionParser().parse(version)
+            return VersionParser.parse(version)
         } catch (e: FailedToParse) {
             throw BadRequestException("Unable to parse version")
         }

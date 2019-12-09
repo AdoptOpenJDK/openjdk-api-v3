@@ -30,7 +30,7 @@ class VersionPathTest {
     @Test
     fun parsesVersion() {
 
-        val parsed = VersionParser().parse("jdk-11.0.5+10")
+        val parsed = VersionParser.parse("jdk-11.0.5+10")
 
         RestAssured.given()
                 .`when`()
