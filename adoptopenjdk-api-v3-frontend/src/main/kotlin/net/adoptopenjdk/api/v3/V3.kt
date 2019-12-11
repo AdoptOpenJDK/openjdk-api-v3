@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api.v3
 
+import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.routes.AssetsResource
 import net.adoptopenjdk.api.v3.routes.BinaryResource
 import net.adoptopenjdk.api.v3.routes.VersionResource
@@ -39,6 +40,9 @@ class V3 : Application() {
                 responseContext.getHeaders().add("Access-Control-Allow-Origin", "*")
             }
         })
+
+        //Eagerly fetch repo from db on app startup
+        APIDataStore.getAdoptRepos()
 
         resourceClasses = setOf(
                 AssetsResource::class.java,
