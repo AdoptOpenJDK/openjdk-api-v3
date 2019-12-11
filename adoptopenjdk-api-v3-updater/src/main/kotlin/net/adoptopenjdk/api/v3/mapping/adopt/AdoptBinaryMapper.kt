@@ -26,31 +26,30 @@ object AdoptBinaryMapper : BinaryMapper() {
 
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
-    val HOTSPOT_JFR = "hotspot-jfr"
+    private const val HOTSPOT_JFR = "hotspot-jfr"
 
 
     suspend fun toBinaryList(assets: List<GHAsset>, metadata: Map<GHAsset, GHMetaData>): List<Binary> {
         // probably whitelist rather than black list
         return assets
                 .filter(this::isArchive)
-                .map { asset -> assetToBinary(asset, metadata, assets) }
-                .map { binaryList -> binaryList.await() }
-                .filterNotNull()
+                .map { asset -> assetToBinaryAsync(asset, metadata, assets) }
+                .mapNotNull { it.await() }
     }
 
-    private fun assetToBinary(
+    private fun assetToBinaryAsync(
             asset: GHAsset,
             metadata: Map<GHAsset, GHMetaData>,
             assets: List<GHAsset>
     ): Deferred<Binary?> {
         return GlobalScope.async {
             try {
-                val download_count = asset.downloadCount
-                val updated_at = getUpdatedTime(asset)
+                val downloadCount = asset.downloadCount
+                val updatedAt = getUpdatedTime(asset)
 
-                val binaryMetadata = metadata.get(asset)
+                val binaryMetadata = metadata[asset]
 
-                val heap_size = getEnumFromFileName(asset.name, HeapSize.values(), HeapSize.normal)
+                val heapSize = getEnumFromFileName(asset.name, HeapSize.values(), HeapSize.normal)
 
                 val installer = getInstaller(asset, assets)
                 val pack = getPackage(assets, asset, binaryMetadata)
@@ -60,13 +59,13 @@ object AdoptBinaryMapper : BinaryMapper() {
                     return@async binaryFromMetadata(
                             binaryMetadata,
                             pack,
-                            download_count,
-                            updated_at,
+                            downloadCount,
+                            updatedAt,
                             installer,
-                            heap_size
+                            heapSize
                     )
                 } else {
-                    return@async binaryFromName(asset, pack, download_count, updated_at, installer, heap_size)
+                    return@async binaryFromName(asset, pack, downloadCount, updatedAt, installer, heapSize)
                 }
             } catch (e: Exception) {
                 return@async null
@@ -75,35 +74,34 @@ object AdoptBinaryMapper : BinaryMapper() {
     }
 
     private fun getPackage(assets: List<GHAsset>, asset: GHAsset, binaryMetadata: GHMetaData?): Package {
-        val binary_name = asset.name
-        val binary_link = asset.downloadUrl
-        val binary_size = asset.size
-        val binary_checksum_link = getCheckSumLink(assets, binary_name)
-        val binary_checksum: String?
+        val binaryName = asset.name
+        val binaryLink = asset.downloadUrl
+        val binarySize = asset.size
+        val binaryChecksumLink = getCheckSumLink(assets, binaryName)
+        val binaryChecksum: String?
 
-        binary_checksum = if (binaryMetadata != null && !binaryMetadata.sha256.isEmpty()) {
+        binaryChecksum = if (binaryMetadata != null && binaryMetadata.sha256.isNotEmpty()) {
             binaryMetadata.sha256
         } else {
-            getChecksum(binary_checksum_link)
+            getChecksum(binaryChecksumLink)
         }
 
-        return Package(binary_name, binary_link, binary_size, binary_checksum, binary_checksum_link)
+        return Package(binaryName, binaryLink, binarySize, binaryChecksum, binaryChecksumLink)
     }
 
-    private fun getInstaller(asset: GHAsset, assets: List<GHAsset>): Installer? {
+    private fun getInstaller(ghAsset: GHAsset, assets: List<GHAsset>): Installer? {
 
         val nameWithoutExtension =
-                BINARY_ASSET_WHITELIST.fold(asset.name, { assetName, extension -> assetName.replace(extension, "") })
+                BINARY_ASSET_WHITELIST.fold(ghAsset.name, { assetName, extension -> assetName.replace(extension, "") })
 
         val installer = assets
                 .filter { it.name.startsWith(nameWithoutExtension) }
-                .filter { asset ->
+                .firstOrNull { asset ->
                     INSTALLER_EXTENSIONS.any { asset.name.endsWith(it) }
                 }
-                .firstOrNull()
 
-        if (installer == null) {
-            return null
+        return if (installer == null) {
+            null
         } else {
             val link = getCheckSumLink(assets, installer.name)
             var checksum: String? = null
@@ -111,7 +109,7 @@ object AdoptBinaryMapper : BinaryMapper() {
                 checksum = getChecksum(link)
             }
 
-            return Installer(installer.name, installer.downloadUrl, installer.size, checksum, link)
+            Installer(installer.name, installer.downloadUrl, installer.size, checksum, link)
         }
     }
 
@@ -120,9 +118,9 @@ object AdoptBinaryMapper : BinaryMapper() {
 
         return assets
                 .firstOrNull { asset ->
-                    asset.name.equals("${binary_name}.sha256.txt") ||
-                            (binary_name.split(".")[0] + ".sha256.txt").equals(asset.name) ||
-                            ("${nameWithoutExtension}.sha256.txt").equals(asset.name)
+                    asset.name == "${binary_name}.sha256.txt" ||
+                            binary_name.split(".")[0] + ".sha256.txt" == asset.name ||
+                            "${nameWithoutExtension}.sha256.txt" == asset.name
                 }?.downloadUrl
     }
 
@@ -130,9 +128,7 @@ object AdoptBinaryMapper : BinaryMapper() {
         return BINARY_ASSET_WHITELIST.foldRight(binary_name, { extension, name -> name.removeSuffix(extension) })
     }
 
-    private fun isArchive(asset: GHAsset) =
-            ARCHIVE_WHITELIST.filter { asset.name.endsWith(it) }.isNotEmpty()
-
+    private fun isArchive(asset: GHAsset) = ARCHIVE_WHITELIST.any { asset.name.endsWith(it) }
 
     private fun binaryFromName(
             asset: GHAsset,
@@ -142,24 +138,24 @@ object AdoptBinaryMapper : BinaryMapper() {
             installer: Installer?,
             heap_size: HeapSize
     ): Binary {
-        val scm_ref = null
+        val scmRef = null
         val os = getEnumFromFileName(asset.name, OperatingSystem.values())
         val architecture = getEnumFromFileName(asset.name, Architecture.values())
-        val binary_type = getEnumFromFileName(asset.name, ImageType.values(), ImageType.jdk)
-        val jvm_impl = getEnumFromFileName(asset.name, JvmImpl.values(), JvmImpl.hotspot)
+        val binaryType = getEnumFromFileName(asset.name, ImageType.values(), ImageType.jdk)
+        val jvmImpl = getEnumFromFileName(asset.name, JvmImpl.values(), JvmImpl.hotspot)
         val project = getEnumFromFileName(asset.name, Project.values(), Project.jdk)
 
         return Binary(
                 pack,
                 download_count,
                 updated_at,
-                scm_ref,
+                scmRef,
                 installer,
                 heap_size,
                 os,
                 architecture,
-                binary_type,
-                jvm_impl,
+                binaryType,
+                jvmImpl,
                 project
         )
     }
@@ -189,7 +185,7 @@ object AdoptBinaryMapper : BinaryMapper() {
     }
 
     private fun parseProject(binaryMetadata: GHMetaData): Project {
-        return if (binaryMetadata.variant.equals(HOTSPOT_JFR)) {
+        return if (binaryMetadata.variant == HOTSPOT_JFR) {
             Project.jfr
         } else {
             Project.jdk
@@ -197,7 +193,7 @@ object AdoptBinaryMapper : BinaryMapper() {
     }
 
     private fun parseJvmImpl(binaryMetadata: GHMetaData): JvmImpl {
-        return if (binaryMetadata.variant.equals(HOTSPOT_JFR)) {
+        return if (binaryMetadata.variant == HOTSPOT_JFR) {
             JvmImpl.hotspot
         } else {
             JvmImpl.valueOf(binaryMetadata.variant)
@@ -206,7 +202,7 @@ object AdoptBinaryMapper : BinaryMapper() {
 
     private fun getChecksum(binary_checksum_link: String?): String? {
         try {
-            if (binary_checksum_link != null && binary_checksum_link.isNotEmpty()) {
+            if (!(binary_checksum_link == null || binary_checksum_link.isEmpty())) {
                 LOGGER.info("Pulling checksum for $binary_checksum_link")
 
                 val request = HttpRequest.newBuilder()
@@ -224,7 +220,7 @@ object AdoptBinaryMapper : BinaryMapper() {
                 }
             }
         } catch (e: Exception) {
-            LOGGER.warn("Failed to fetch checksum ${binary_checksum_link}", e)
+            LOGGER.warn("Failed to fetch checksum $binary_checksum_link", e)
         }
         return null
     }

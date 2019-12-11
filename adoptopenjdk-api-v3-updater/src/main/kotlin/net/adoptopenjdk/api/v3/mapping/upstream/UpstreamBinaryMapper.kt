@@ -26,18 +26,17 @@ object UpstreamBinaryMapper : BinaryMapper() {
     suspend fun toBinaryList(assets: List<GHAsset>): List<Binary> {
         return assets
                 .filter(this::isArchive)
-                .filter({ !assetIsExcluded(it) })
-                .map { asset -> assetToBinary(asset, assets) }
-                .map { binaryList -> binaryList.await() }
-                .filterNotNull()
+                .filter { !assetIsExcluded(it) }
+                .map { asset -> assetToBinaryAsync(asset, assets) }
+                .mapNotNull { it.await() }
     }
 
-    private fun assetIsExcluded(asset: GHAsset) = EXCLUDES.any({ exclude -> asset.name.contains(exclude) })
+    private fun assetIsExcluded(asset: GHAsset) = EXCLUDES.any { exclude -> asset.name.contains(exclude) }
 
-    private fun assetToBinary(asset: GHAsset, assets: List<GHAsset>): Deferred<Binary?> {
+    private fun assetToBinaryAsync(asset: GHAsset, assets: List<GHAsset>): Deferred<Binary?> {
         return GlobalScope.async {
             try {
-                val signatureLink = getSignatureLink(assets, asset.name);
+                val signatureLink = getSignatureLink(assets, asset.name)
                 val pack = Package(asset.name, asset.downloadUrl, asset.size, null, null, signatureLink)
 
                 val os = getEnumFromFileName(asset.name, OperatingSystem.values())
@@ -66,13 +65,13 @@ object UpstreamBinaryMapper : BinaryMapper() {
     }
 
     private fun isArchive(asset: GHAsset) =
-            AdoptBinaryMapper.ARCHIVE_WHITELIST.filter { asset.name.endsWith(it) }.isNotEmpty()
+            AdoptBinaryMapper.ARCHIVE_WHITELIST.any { asset.name.endsWith(it) }
 
 
     private fun getSignatureLink(assets: List<GHAsset>, binary_name: String): String? {
         return assets
                 .firstOrNull { asset ->
-                    asset.name.equals("${binary_name}.sign")
+                    asset.name == "${binary_name}.sign"
                 }?.downloadUrl
     }
 
