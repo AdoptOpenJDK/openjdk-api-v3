@@ -56,7 +56,7 @@ class AdoptRepos {
         return getFilteredReleases(allReleases.getReleases(releaseFilter, sortOrder), binaryFilter)
     }
 
-    fun getFilteredReleases(releases: Sequence<Release>, binaryFilter: BinaryFilter): Sequence<Release> {
+    private fun getFilteredReleases(releases: Sequence<Release>, binaryFilter: BinaryFilter): Sequence<Release> {
         return releases
                 .map { release ->
                     release.filterBinaries(binaryFilter)

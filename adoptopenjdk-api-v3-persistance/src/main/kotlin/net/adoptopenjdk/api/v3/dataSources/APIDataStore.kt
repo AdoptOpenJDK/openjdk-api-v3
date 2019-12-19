@@ -24,6 +24,7 @@ object APIDataStore {
 
         val platformData = this.javaClass.getResource("/JSON/platforms.json").readText()
         platforms = JsonMapper.mapper.readValue(platformData, Platforms::class.java)
+
         val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
         variants = JsonMapper.mapper.readValue(variantData, Variants::class.java)
 

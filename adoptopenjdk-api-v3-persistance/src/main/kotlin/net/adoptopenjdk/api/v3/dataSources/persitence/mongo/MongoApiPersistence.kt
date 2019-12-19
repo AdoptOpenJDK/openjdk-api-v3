@@ -7,6 +7,8 @@ import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
+import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.DownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.Release
 import org.bson.Document
 import org.litote.kmongo.coroutine.CoroutineClient
@@ -19,6 +21,8 @@ import org.slf4j.LoggerFactory
 class MongoApiPersistence : ApiPersistence {
 
     val releasesCollection: CoroutineCollection<Release>
+    val githubStatsCollection: CoroutineCollection<DownloadStatsDbEntry>
+    val dockerStatsCollection: CoroutineCollection<DockerDownloadStatsDbEntry>
     val client: CoroutineClient
 
     companion object {
@@ -53,8 +57,20 @@ class MongoApiPersistence : ApiPersistence {
                 //TODO add indexes
                 database.createCollection("release")
             }
+
+            if (!database.listCollectionNames().contains("githubStats")) {
+                //TODO add indexes
+                database.createCollection("githubStats")
+            }
+
+            if (!database.listCollectionNames().contains("dockerStats")) {
+                //TODO add indexes
+                database.createCollection("dockerStats")
+            }
         }
-        releasesCollection = database.getCollection()
+        releasesCollection = database.getCollection("release")
+        githubStatsCollection = database.getCollection("githubStats")
+        dockerStatsCollection = database.getCollection("dockerStats")
     }
 
     override suspend fun updateAllRepos(repos: AdoptRepos) {
@@ -99,7 +115,15 @@ class MongoApiPersistence : ApiPersistence {
                 .toList()
 
         return FeatureRelease(featureVersion, Releases(releases))
+    }
 
+    override suspend fun addDownloadStatsEntries(stats: List<DownloadStatsDbEntry>) {
+        githubStatsCollection.insertMany(stats)
+    }
+
+    override suspend fun getStatsForFeatureVersion(featureVersion: Int): List<DownloadStatsDbEntry> {
+        return githubStatsCollection.find(Document("version.major", featureVersion))
+                .toList()
     }
 
     private fun majorVersionMatcher(featureVersion: Int) = Document("version_data.major", featureVersion)
