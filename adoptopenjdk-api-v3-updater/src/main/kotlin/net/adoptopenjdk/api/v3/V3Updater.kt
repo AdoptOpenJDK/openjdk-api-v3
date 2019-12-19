@@ -6,6 +6,7 @@ import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.Variants
+import net.adoptopenjdk.api.v3.stats.DownloadStatsCalculator
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -13,8 +14,9 @@ import kotlin.concurrent.timerTask
 
 class V3Updater {
     private var database: ApiPersistence
-    val variants: Variants
-    var repo: AdoptRepos
+    private val variants: Variants
+    private var repo: AdoptRepos
+    private val downloadStatsCalculator: DownloadStatsCalculator = DownloadStatsCalculator()
 
     companion object {
         @JvmStatic
@@ -64,6 +66,7 @@ class V3Updater {
         try {
             runBlocking {
                 repo = AdoptReposBuilder.build(variants.versions)
+                downloadStatsCalculator.saveStats(repo)
                 database.updateAllRepos(repo)
             }
         } catch (e: Exception) {
