@@ -4,6 +4,7 @@ import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.Vendor
 import java.time.LocalDateTime
 
 class GithubDownloadStatsCalculator {
@@ -19,6 +20,7 @@ class GithubDownloadStatsCalculator {
                     val total = featureRelease
                             .releases
                             .getReleases()
+                            .filter { it.vendor == Vendor.adoptopenjdk }
                             .sumBy { it.download_count.toInt() }
 
                     GithubDownloadStatsDbEntry(date,
