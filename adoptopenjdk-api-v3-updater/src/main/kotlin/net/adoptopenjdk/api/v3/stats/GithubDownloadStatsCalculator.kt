@@ -3,10 +3,10 @@ package net.adoptopenjdk.api.v3.stats
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
-import net.adoptopenjdk.api.v3.models.DownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
 import java.time.LocalDateTime
 
-class DownloadStatsCalculator {
+class GithubDownloadStatsCalculator {
     private val database: ApiPersistence = ApiPersistenceFactory.get()
 
     suspend fun saveStats(repos: AdoptRepos) {
@@ -21,12 +21,12 @@ class DownloadStatsCalculator {
                             .getReleases()
                             .sumBy { it.download_count.toInt() }
 
-                    DownloadStatsDbEntry(date,
+                    GithubDownloadStatsDbEntry(date,
                             total.toLong(),
                             featureRelease.featureVersion)
                 }
                 .toList()
 
-        database.addDownloadStatsEntries(stats)
+        database.addGithubDownloadStatsEntries(stats)
     }
 }

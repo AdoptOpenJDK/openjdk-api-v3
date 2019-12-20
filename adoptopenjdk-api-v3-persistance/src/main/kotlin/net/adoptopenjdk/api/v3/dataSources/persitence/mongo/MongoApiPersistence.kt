@@ -8,7 +8,7 @@ import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
-import net.adoptopenjdk.api.v3.models.DownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.Release
 import org.bson.Document
 import org.litote.kmongo.coroutine.CoroutineClient
@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory
 class MongoApiPersistence : ApiPersistence {
 
     val releasesCollection: CoroutineCollection<Release>
-    val githubStatsCollection: CoroutineCollection<DownloadStatsDbEntry>
+    val githubStatsCollection: CoroutineCollection<GithubDownloadStatsDbEntry>
     val dockerStatsCollection: CoroutineCollection<DockerDownloadStatsDbEntry>
     val client: CoroutineClient
 
@@ -117,13 +117,17 @@ class MongoApiPersistence : ApiPersistence {
         return FeatureRelease(featureVersion, Releases(releases))
     }
 
-    override suspend fun addDownloadStatsEntries(stats: List<DownloadStatsDbEntry>) {
+    override suspend fun addGithubDownloadStatsEntries(stats: List<GithubDownloadStatsDbEntry>) {
         githubStatsCollection.insertMany(stats)
     }
 
-    override suspend fun getStatsForFeatureVersion(featureVersion: Int): List<DownloadStatsDbEntry> {
+    override suspend fun getStatsForFeatureVersion(featureVersion: Int): List<GithubDownloadStatsDbEntry> {
         return githubStatsCollection.find(Document("version.major", featureVersion))
                 .toList()
+    }
+
+    override suspend fun addDockerDownloadStatsEntries(stats: List<DockerDownloadStatsDbEntry>) {
+        dockerStatsCollection.insertMany(stats)
     }
 
     private fun majorVersionMatcher(featureVersion: Int) = Document("version_data.major", featureVersion)

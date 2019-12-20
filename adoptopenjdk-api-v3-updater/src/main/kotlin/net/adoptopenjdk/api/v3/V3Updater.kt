@@ -6,7 +6,7 @@ import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.Variants
-import net.adoptopenjdk.api.v3.stats.DownloadStatsCalculator
+import net.adoptopenjdk.api.v3.stats.StatsInterface
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -16,7 +16,7 @@ class V3Updater {
     private var database: ApiPersistence
     private val variants: Variants
     private var repo: AdoptRepos
-    private val downloadStatsCalculator: DownloadStatsCalculator = DownloadStatsCalculator()
+    private val statsInterface: StatsInterface
 
     companion object {
         @JvmStatic
@@ -32,11 +32,12 @@ class V3Updater {
         val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
         variants = JsonMapper.mapper.readValue(variantData, Variants::class.java)
         database = ApiPersistenceFactory.get()
-        try {
-            repo = APIDataStore.loadDataFromDb()
+        repo = try {
+            APIDataStore.loadDataFromDb()
         } catch (e: java.lang.Exception) {
-            repo = AdoptRepos(emptyList())
+            AdoptRepos(emptyList())
         }
+        statsInterface = StatsInterface()
     }
 
     fun run(instantFullUpdate: Boolean) {
@@ -66,8 +67,8 @@ class V3Updater {
         try {
             runBlocking {
                 repo = AdoptReposBuilder.build(variants.versions)
-                downloadStatsCalculator.saveStats(repo)
                 database.updateAllRepos(repo)
+                statsInterface.update(repo)
             }
         } catch (e: Exception) {
             LOGGER.error("Failed to perform full update", e)
