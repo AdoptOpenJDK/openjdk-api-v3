@@ -60,7 +60,7 @@ class DockerStatsInterface {
         do {
             val stats = getStatsForUrl(next)
 
-            if (stats.containsKey("next")) {
+            if (stats.containsKey("next") && stats.getString("next") != null) {
                 next = stats.getString("next")
             }
 

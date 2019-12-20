@@ -9,7 +9,11 @@ import de.flapdoodle.embed.process.runtime.Network
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import net.adoptopenjdk.api.v3.*
+import net.adoptopenjdk.api.v3.AdoptReposBuilder
+import net.adoptopenjdk.api.v3.AdoptRepository
+import net.adoptopenjdk.api.v3.AdoptRepositoryFactory
+import net.adoptopenjdk.api.v3.HttpClientFactory
+import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
@@ -33,7 +37,6 @@ import kotlin.random.Random
 
 @ExtendWith(MockKExtension::class)
 abstract class BaseTest {
-
 
     companion object {
         @JvmStatic

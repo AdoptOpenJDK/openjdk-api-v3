@@ -4,6 +4,6 @@ import java.time.LocalDateTime
 
 class DockerDownloadStatsDbEntry(
         val date: LocalDateTime,
-        val downloads: Long,
+        val pulls: Long,
         val repo: String
 )
