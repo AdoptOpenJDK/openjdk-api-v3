@@ -8,6 +8,7 @@ import net.adoptopenjdk.api.v3.routes.info.AvailableReleasesResource
 import net.adoptopenjdk.api.v3.routes.info.PlatformsResource
 import net.adoptopenjdk.api.v3.routes.info.ReleaseListResource
 import net.adoptopenjdk.api.v3.routes.info.VariantsResource
+import net.adoptopenjdk.api.v3.routes.stats.DownloadStatsResource
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition
 import org.eclipse.microprofile.openapi.annotations.info.Info
 import org.eclipse.microprofile.openapi.annotations.servers.Server
@@ -51,7 +52,8 @@ class V3 : Application() {
                 PlatformsResource::class.java,
                 ReleaseListResource::class.java,
                 VariantsResource::class.java,
-                VersionResource::class.java)
+                VersionResource::class.java,
+                DownloadStatsResource::class.java)
     }
 
     override fun getSingletons(): Set<Any> {

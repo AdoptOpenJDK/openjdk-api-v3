@@ -11,5 +11,7 @@ interface ApiPersistence {
 
     suspend fun addGithubDownloadStatsEntries(stats: List<GithubDownloadStatsDbEntry>)
     suspend fun getStatsForFeatureVersion(featureVersion: Int): List<GithubDownloadStatsDbEntry>
+    suspend fun getLatestGithubStatsForFeatureVersion(featureVersion: Int): GithubDownloadStatsDbEntry?
     suspend fun addDockerDownloadStatsEntries(stats: List<DockerDownloadStatsDbEntry>)
+    suspend fun getLatestAllDockerStats(): List<DockerDownloadStatsDbEntry>
 }
