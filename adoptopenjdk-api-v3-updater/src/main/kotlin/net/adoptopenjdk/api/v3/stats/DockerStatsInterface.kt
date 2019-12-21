@@ -24,7 +24,7 @@ class DockerStatsInterface {
 
     suspend fun updateDb() {
         try {
-            val stats = mutableListOf<DockerDownloadStatsDbEntry>();
+            val stats = mutableListOf<DockerDownloadStatsDbEntry>()
 
             stats.addAll(getDownloadStats())
             stats.add(pullOfficalStats())
@@ -54,21 +54,14 @@ class DockerStatsInterface {
     }
 
     private fun pullAllStats(): ArrayList<JsonObject> {
-        var next: String = downloadStatsUrl
+        var next: String? = downloadStatsUrl
 
         val results = ArrayList<JsonObject>()
-        do {
+        while (next != null) {
             val stats = getStatsForUrl(next)
-
-            if (stats.containsKey("next") && stats.getString("next") != null) {
-                next = stats.getString("next")
-            }
-
             results.addAll(stats.getJsonArray("results").map { it as JsonObject })
-
-        } while (stats.containsKey("next"))
-
-
+            next = stats.getString("next")
+        }
         return results
     }
 

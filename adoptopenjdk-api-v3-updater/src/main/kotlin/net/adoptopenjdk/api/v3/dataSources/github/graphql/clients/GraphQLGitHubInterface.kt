@@ -35,7 +35,7 @@ open class GraphQLGitHubInterface {
     private val BASE_URL = "https://api.github.com/graphql"
     private val TOKEN: String = readToken()
 
-    protected fun request(query: String): GraphQLRequestEntity.RequestBuilder {
+    fun request(query: String): GraphQLRequestEntity.RequestBuilder {
         return GraphQLRequestEntity.Builder()
                 .url(BASE_URL)
                 .headers(mapOf(

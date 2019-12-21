@@ -75,6 +75,13 @@ abstract class BaseTest {
             System.setProperty("GITHUB_TOKEN", "stub-token")
             HttpClientFactory.client = mockkHttpClient()
 
+            startFongo()
+            LOGGER.info("Done startup")
+
+        }
+
+        @JvmStatic
+        fun startFongo() {
             val starter = MongodStarter.getDefaultInstance()
 
             val bindIp = "localhost"
@@ -96,10 +103,6 @@ abstract class BaseTest {
 
             ApiPersistenceFactory.set(null)
             AdoptRepositoryFactory.adoptRepository = MockRepository(adoptRepos!!)
-
-
-            LOGGER.info("Done startup")
-
         }
 
         fun MockRepository(adoptRepos: AdoptRepos): AdoptRepository {
