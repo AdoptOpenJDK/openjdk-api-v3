@@ -25,8 +25,8 @@ class UpstreamReleaseMapperTest {
             val release = UpstreamReleaseMapper.toAdoptRelease(ghRelease)
 
             assertEquals(ghRelease.releaseAssets.assets.get(0).downloadUrl, release!!.source!!.link)
-            assertEquals(ghRelease.releaseAssets.assets.get(0).name, release!!.source!!.name)
-            assertEquals(ghRelease.releaseAssets.assets.get(0).size, release!!.source!!.size)
+            assertEquals(ghRelease.releaseAssets.assets.get(0).name, release.source!!.name)
+            assertEquals(ghRelease.releaseAssets.assets.get(0).size, release.source!!.size)
         }
     }
 }

@@ -17,7 +17,7 @@ class DockerStatsInterfaceTest {
         @JvmStatic
         @BeforeAll
         @Override
-        public fun startDb() {
+        fun startDb() {
 
             HttpClientFactory.client = HttpClient
                     .newBuilder()

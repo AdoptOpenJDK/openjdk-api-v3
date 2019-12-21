@@ -3,9 +3,9 @@ package net.adoptopenjdk.api.v3.mapping.adopt
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
-import net.adoptopenjdk.api.v3.HttpClientFactory
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
+import net.adoptopenjdk.api.v3.dataSources.mongo.CachedHtmlClient
 import net.adoptopenjdk.api.v3.mapping.BinaryMapper
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Binary
@@ -17,9 +17,6 @@ import net.adoptopenjdk.api.v3.models.OperatingSystem
 import net.adoptopenjdk.api.v3.models.Package
 import net.adoptopenjdk.api.v3.models.Project
 import org.slf4j.LoggerFactory
-import java.net.URI
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.time.LocalDateTime
 
 object AdoptBinaryMapper : BinaryMapper() {
@@ -27,6 +24,7 @@ object AdoptBinaryMapper : BinaryMapper() {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
     private const val HOTSPOT_JFR = "hotspot-jfr"
+    private val githubHtmlDataPuller = CachedHtmlClient()
 
 
     suspend fun toBinaryList(assets: List<GHAsset>, metadata: Map<GHAsset, GHMetaData>): List<Binary> {
@@ -73,7 +71,7 @@ object AdoptBinaryMapper : BinaryMapper() {
         }
     }
 
-    private fun getPackage(assets: List<GHAsset>, asset: GHAsset, binaryMetadata: GHMetaData?): Package {
+    private suspend fun getPackage(assets: List<GHAsset>, asset: GHAsset, binaryMetadata: GHMetaData?): Package {
         val binaryName = asset.name
         val binaryLink = asset.downloadUrl
         val binarySize = asset.size
@@ -89,7 +87,7 @@ object AdoptBinaryMapper : BinaryMapper() {
         return Package(binaryName, binaryLink, binarySize, binaryChecksum, binaryChecksumLink)
     }
 
-    private fun getInstaller(ghAsset: GHAsset, assets: List<GHAsset>): Installer? {
+    private suspend fun getInstaller(ghAsset: GHAsset, assets: List<GHAsset>): Installer? {
 
         val nameWithoutExtension =
                 BINARY_ASSET_WHITELIST.fold(ghAsset.name, { assetName, extension -> assetName.replace(extension, "") })
@@ -200,20 +198,14 @@ object AdoptBinaryMapper : BinaryMapper() {
         }
     }
 
-    private fun getChecksum(binary_checksum_link: String?): String? {
+    private suspend fun getChecksum(binary_checksum_link: String?): String? {
         try {
             if (!(binary_checksum_link == null || binary_checksum_link.isEmpty())) {
                 LOGGER.info("Pulling checksum for $binary_checksum_link")
 
-                val request = HttpRequest.newBuilder()
-                        .uri(URI.create(binary_checksum_link))
-                        .build()
-
-                val checksum =
-                        HttpClientFactory.getHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString()).get()
-
-                if (checksum.statusCode() == 200 && checksum.body() != null) {
-                    val tokens = checksum.body().split(" ")
+                val checksum = githubHtmlDataPuller.getUrl(binary_checksum_link);
+                if (checksum != null) {
+                    val tokens = checksum.split(" ")
                     if (tokens.size > 1) {
                         return tokens[0]
                     }

@@ -11,11 +11,21 @@ import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.OperatingSystem
 import net.adoptopenjdk.api.v3.models.Project
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 
 class AdoptBinaryMapperTest {
+
+    companion object {
+        @JvmStatic
+        @BeforeAll
+        public fun setup() {
+            BaseTest.startFongo()
+        }
+    }
+
 
     val jdk = GHAsset(
             "OpenJDK8U-jre_x64_linux_hotspot-jfr_2019-11-21-10-26.tar.gz",

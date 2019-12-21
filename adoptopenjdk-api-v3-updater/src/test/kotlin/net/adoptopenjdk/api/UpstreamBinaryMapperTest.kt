@@ -4,11 +4,21 @@ import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.mapping.upstream.UpstreamBinaryMapper
 import net.adoptopenjdk.api.v3.models.ImageType
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 
 class UpstreamBinaryMapperTest {
+
+    companion object {
+        @JvmStatic
+        @BeforeAll
+        public fun setup() {
+            BaseTest.startFongo()
+            BaseTest.mockRepo()
+        }
+    }
 
     private fun getAssetList(names: List<String>): List<GHAsset> {
         return names.flatMap { name ->
