@@ -1,4 +1,4 @@
-name: CI
+name: Build
 
 on: [push]
 
@@ -8,6 +8,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '11.0.3'
+        java-package: jdk
+        architecture: x64
     - uses: actions/checkout@v1
     - name: Build app
       run: ./mvnw clean install
