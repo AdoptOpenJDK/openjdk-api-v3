@@ -22,19 +22,24 @@ open class Asset {
     @Schema(example = "https://github.com/AdoptOpenJDK/openjdk11-upstream-binaries/releases/download/jdk-11.0.5%2B10/OpenJDK11U-jdk_x64_linux_11.0.5_10.tar.gz.sign")
     val signature_link: String?
 
+    @Schema(example = "2")
+    val download_count: Long
+
     constructor(
             name: String,
             link: String,
             size: Long,
             checksum: String?,
             checksum_link: String?,
-            signature_link: String?) {
+            signature_link: String?,
+            download_count: Long) {
         this.name = name
         this.link = link
         this.size = size
         this.checksum = checksum
         this.checksum_link = checksum_link
         this.signature_link = signature_link
+        this.download_count = download_count
     }
 
     override fun equals(other: Any?): Boolean {

@@ -68,13 +68,13 @@ class DownloadStatsPathTest : BaseTest() {
 
                         override fun matchesSafely(p0: String?): Boolean {
                             val stats = JsonMapper.mapper.readValue(p0, DownloadStats::class.java)
-                            return stats.total_downloads.total == 120L &&
-                                    stats.total_downloads.docker_pulls == 70L &&
-                                    stats.total_downloads.github_downloads == 50L &&
+                            return stats.total_downloads.total == 170L &&
+                                    stats.total_downloads.docker_pulls == 100L &&
+                                    stats.total_downloads.github_downloads == 70L &&
                                     stats.github_downloads[8] == 30L &&
-                                    stats.github_downloads[9] == 20L &&
-                                    stats.docker_pulls["a-repo-name"] == 40L &&
-                                    stats.docker_pulls["b-repo-name"] == 30L
+                                    stats.github_downloads[9] == 40L &&
+                                    stats.docker_pulls["a-repo-name"] == 60L &&
+                                    stats.docker_pulls["b-repo-name"] == 40L
                         }
                     })
         }
@@ -141,7 +141,9 @@ class DownloadStatsPathTest : BaseTest() {
 
                         override fun matchesSafely(p0: String?): Boolean {
                             val stats = JsonMapper.mapper.readValue(p0, List::class.java)
-                            return stats.isNotEmpty()
+                            return stats.isNotEmpty() &&
+                                    (stats[1] as Map<String, *>).get("total") == 170 &&
+                                    (stats[1] as Map<String, *>).get("daily") == 30
                         }
                     })
         }
@@ -173,6 +175,16 @@ class DownloadStatsPathTest : BaseTest() {
                 ),
                 GithubDownloadStatsDbEntry(
                         LocalDateTime.now().minusDays(1),
+                        40,
+                        9
+                ),
+                GithubDownloadStatsDbEntry(
+                        LocalDateTime.now().minusDays(1).minusMinutes(1),
+                        25,
+                        8
+                ),
+                GithubDownloadStatsDbEntry(
+                        LocalDateTime.now().minusDays(1),
                         30,
                         8
                 )
@@ -194,6 +206,16 @@ class DownloadStatsPathTest : BaseTest() {
                 DockerDownloadStatsDbEntry(
                         LocalDateTime.now().minusDays(1),
                         40,
+                        "b-repo-name"
+                ),
+                DockerDownloadStatsDbEntry(
+                        LocalDateTime.now().minusDays(1).minusMinutes(1),
+                        50,
+                        "a-repo-name"
+                ),
+                DockerDownloadStatsDbEntry(
+                        LocalDateTime.now().minusDays(1),
+                        60,
                         "a-repo-name"
                 )
         )
