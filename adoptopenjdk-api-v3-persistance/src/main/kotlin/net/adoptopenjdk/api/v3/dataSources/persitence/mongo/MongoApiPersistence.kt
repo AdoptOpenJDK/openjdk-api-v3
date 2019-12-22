@@ -2,7 +2,6 @@ package net.adoptopenjdk.api.v3.dataSources.persitence.mongo
 
 import com.mongodb.client.model.InsertManyOptions
 import com.mongodb.reactivestreams.client.ClientSession
-import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
@@ -11,65 +10,18 @@ import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.Release
 import org.bson.Document
-import org.litote.kmongo.coroutine.CoroutineClient
 import org.litote.kmongo.coroutine.CoroutineCollection
-import org.litote.kmongo.coroutine.coroutine
-import org.litote.kmongo.reactivestreams.KMongo
 import org.slf4j.LoggerFactory
 
 
-class MongoApiPersistence : ApiPersistence {
-
-    private val releasesCollection: CoroutineCollection<Release>
-    private val githubStatsCollection: CoroutineCollection<GithubDownloadStatsDbEntry>
-    private val dockerStatsCollection: CoroutineCollection<DockerDownloadStatsDbEntry>
-    private val client: CoroutineClient
+class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient), ApiPersistence {
+    private val releasesCollection: CoroutineCollection<Release> = createCollection(database, "release")
+    private val githubStatsCollection: CoroutineCollection<GithubDownloadStatsDbEntry> = createCollection(database, "githubStats")
+    private val dockerStatsCollection: CoroutineCollection<DockerDownloadStatsDbEntry> = createCollection(database, "dockerStats")
 
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
-    }
-
-    init {
-        val dbName = System.getenv("MONGODB_DBNAME") ?: "api-data"
-        val username = System.getenv("MONGODB_USER")
-        val password = System.getenv("MONGODB_PASSWORD")
-        val host = System.getenv("MONGODB_HOST") ?: "localhost"
-        val port = System.getenv("MONGODB_PORT") ?: "27017"
-
-        LOGGER.info("Connecting to mongodb://${username}:a-password@${host}:${port}/${dbName}")
-        var uri = if (username != null && password != null) {
-            "mongodb://${username}:${password}@${host}:${port}/${dbName}"
-        } else {
-            "mongodb://${host}:${port}"
-        }
-
-        if (System.getProperty("MONGO_DB") != null) {
-            uri = System.getProperty("MONGO_DB")
-        }
-
-        client = KMongo.createClient(uri).coroutine
-        val database = client.getDatabase(dbName)
-
-        runBlocking {
-            if (!database.listCollectionNames().contains("release")) {
-                //TODO add indexes
-                database.createCollection("release")
-            }
-
-            if (!database.listCollectionNames().contains("githubStats")) {
-                //TODO add indexes
-                database.createCollection("githubStats")
-            }
-
-            if (!database.listCollectionNames().contains("dockerStats")) {
-                //TODO add indexes
-                database.createCollection("dockerStats")
-            }
-        }
-        releasesCollection = database.getCollection("release")
-        githubStatsCollection = database.getCollection("githubStats")
-        dockerStatsCollection = database.getCollection("dockerStats")
     }
 
     override suspend fun updateAllRepos(repos: AdoptRepos) {
@@ -150,7 +102,6 @@ class MongoApiPersistence : ApiPersistence {
                             .first()
                 }
                 .toList()
-
     }
 
     private fun majorVersionMatcher(featureVersion: Int) = Document("version_data.major", featureVersion)

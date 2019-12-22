@@ -20,16 +20,16 @@ object UpstreamReleaseMapper : ReleaseMapper() {
     override suspend fun toAdoptRelease(release: GHRelease): Release? {
         val release_type: ReleaseType = if (release.name.contains(" GA ")) ReleaseType.ga else ReleaseType.ea
 
-        val release_link = release.url
-        val release_name = release.name
+        val releaseLink = release.url
+        val releaseName = release.name
         val timestamp = parseDate(release.publishedAt)
         val updatedAt = parseDate(release.updatedAt)
-        val download_count = release.releaseAssets.assets.map { it.downloadCount }.sum()
+        val downloadCount = release.releaseAssets.assets.map { it.downloadCount }.sum()
         val vendor = Vendor.openjdk
 
-        LOGGER.info("Getting binaries $release_name")
+        LOGGER.info("Getting binaries $releaseName")
         val binaries = UpstreamBinaryMapper.toBinaryList(release.releaseAssets.assets)
-        LOGGER.info("Done Getting binaries $release_name")
+        LOGGER.info("Done Getting binaries $releaseName")
 
         try {
             val versionData: VersionData
@@ -40,18 +40,18 @@ object UpstreamReleaseMapper : ReleaseMapper() {
                 if (pack != null) {
                     versionData = getVersionData(URLDecoder.decode(pack.link, Charset.defaultCharset()))
                 } else {
-                    LOGGER.error("Failed to parse version for $release_name")
+                    LOGGER.error("Failed to parse version for $releaseName")
                     return null
                 }
             } else {
-                versionData = getVersionData(release_name)
+                versionData = getVersionData(releaseName)
             }
 
             val sourcePackage = getSourcePackage(release)
 
-            return Release(release.id, release_type, release_link, release_name, timestamp, updatedAt, binaries.toTypedArray(), download_count, vendor, versionData, sourcePackage)
+            return Release(release.id, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, versionData, sourcePackage)
         } catch (e: FailedToParse) {
-            LOGGER.error("Failed to parse $release_name")
+            LOGGER.error("Failed to parse $releaseName")
             return null
         }
     }

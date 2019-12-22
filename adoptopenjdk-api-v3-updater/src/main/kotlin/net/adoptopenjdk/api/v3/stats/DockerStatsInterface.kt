@@ -43,7 +43,6 @@ class DockerStatsInterface {
                 .map {
                     DockerDownloadStatsDbEntry(now, it.getLong("pull_count"), it.getString("name"))
                 }
-
     }
 
     private fun pullOfficalStats(): DockerDownloadStatsDbEntry {

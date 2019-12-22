@@ -22,6 +22,7 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRelea
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
+import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoClientFactory
 import net.adoptopenjdk.api.v3.models.Release
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -76,8 +77,17 @@ abstract class BaseTest {
             HttpClientFactory.client = mockkHttpClient()
 
             startFongo()
+
+            mockRepo()
             LOGGER.info("Done startup")
 
+        }
+
+        @JvmStatic
+        fun mockRepo() {
+            val adoptRepos = JsonMapper.mapper.readValue(GZIPInputStream(javaClass.classLoader.getResourceAsStream("example-data.json.gz")), AdoptRepos::class.java)
+
+            AdoptRepositoryFactory.adoptRepository = MockRepository(adoptRepos!!)
         }
 
         @JvmStatic
@@ -97,12 +107,10 @@ abstract class BaseTest {
             mongodExecutable = starter.prepare(mongodConfig)
             mongodExecutable!!.start()
 
+            ApiPersistenceFactory.set(null)
+            MongoClientFactory.set(null)
             LOGGER.info("FMongo started")
 
-            val adoptRepos = JsonMapper.mapper.readValue(GZIPInputStream(javaClass.classLoader.getResourceAsStream("example-data.json.gz")), AdoptRepos::class.java)
-
-            ApiPersistenceFactory.set(null)
-            AdoptRepositoryFactory.adoptRepository = MockRepository(adoptRepos!!)
         }
 
         fun MockRepository(adoptRepos: AdoptRepos): AdoptRepository {
