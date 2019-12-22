@@ -5,11 +5,15 @@ import io.restassured.RestAssured
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoApiPersistence.Companion.DOCKER_STATS_DB
+import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoApiPersistence.Companion.GITHUB_STATS_DB
+import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoClientFactory
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.DownloadStats
 import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
@@ -17,13 +21,19 @@ import java.time.LocalDateTime
 @QuarkusTest
 class DownloadStatsPathTest : BaseTest() {
 
+    companion object {
+        @JvmStatic
+        @BeforeAll
+        fun before() {
+            populateDb()
+        }
+    }
 
     @Test
     fun whenEmptyResultIsSane() {
-
         runBlocking {
-            val persistance = ApiPersistenceFactory.get()
-
+            MongoClientFactory.get().database.dropCollection(GITHUB_STATS_DB)
+            MongoClientFactory.get().database.dropCollection(DOCKER_STATS_DB)
             RestAssured.given()
                     .`when`()
                     .get("/v3/stats/downloads/total")
@@ -44,19 +54,8 @@ class DownloadStatsPathTest : BaseTest() {
 
     @Test
     fun totalDownloadReturnsSaneData() {
-
         runBlocking {
-            val persistance = ApiPersistenceFactory.get()
-
-            persistance.addDockerDownloadStatsEntries(
-                    createDockerStatsWithRepoName()
-            )
-
-            persistance.addGithubDownloadStatsEntries(
-                    createGithubData()
-            )
-
-
+            mockStats()
             RestAssured.given()
                     .`when`()
                     .get("/v3/stats/downloads/total")
@@ -79,6 +78,85 @@ class DownloadStatsPathTest : BaseTest() {
                         }
                     })
         }
+    }
+
+
+    @Test
+    fun totalVersionReturnsSaneData() {
+        runBlocking {
+            mockStats()
+            RestAssured.given()
+                    .`when`()
+                    .get("/v3/stats/downloads/total/8")
+                    .then()
+                    .body(object : TypeSafeMatcher<String>() {
+
+                        override fun describeTo(description: Description?) {
+                            description!!.appendText("json")
+                        }
+
+                        override fun matchesSafely(p0: String?): Boolean {
+                            val stats = JsonMapper.mapper.readValue(p0, Map::class.java)
+                            return stats.isNotEmpty() && !stats.containsValue(0L)
+                        }
+                    })
+        }
+    }
+
+    @Test
+    fun totalTagReturnsSaneData() {
+        runBlocking {
+            mockStats()
+            RestAssured.given()
+                    .`when`()
+                    .get("/v3/stats/downloads/total/8/jdk8u232-b09")
+                    .then()
+                    .body(object : TypeSafeMatcher<String>() {
+
+                        override fun describeTo(description: Description?) {
+                            description!!.appendText("json")
+                        }
+
+                        override fun matchesSafely(p0: String?): Boolean {
+                            val stats = JsonMapper.mapper.readValue(p0, Map::class.java)
+                            return stats.isNotEmpty() && !stats.containsValue(0L)
+                        }
+                    })
+        }
+    }
+
+    @Test
+    fun trackingReturnsSaneData() {
+        runBlocking {
+            mockStats()
+            RestAssured.given()
+                    .`when`()
+                    .get("/v3/stats/downloads/tracking")
+                    .then()
+                    .body(object : TypeSafeMatcher<String>() {
+
+                        override fun describeTo(description: Description?) {
+                            description!!.appendText("json")
+                        }
+
+                        override fun matchesSafely(p0: String?): Boolean {
+                            val stats = JsonMapper.mapper.readValue(p0, List::class.java)
+                            return stats.isNotEmpty()
+                        }
+                    })
+        }
+    }
+
+    private suspend fun mockStats() {
+        val persistance = ApiPersistenceFactory.get()
+
+        persistance.addDockerDownloadStatsEntries(
+                createDockerStatsWithRepoName()
+        )
+
+        persistance.addGithubDownloadStatsEntries(
+                createGithubData()
+        )
     }
 
     private fun createGithubData(): List<GithubDownloadStatsDbEntry> {

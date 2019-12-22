@@ -18,7 +18,7 @@ class Binary {
     val jvm_impl: JvmImpl
 
     @Schema(implementation = Package::class)
-    val `package`: Package?
+    val `package`: Package
 
     @Schema(implementation = Installer::class)
     val installer: Installer?
@@ -39,7 +39,7 @@ class Binary {
     val project: Project
 
     constructor(
-            `package`: Package?,
+            `package`: Package,
             download_count: Long,
             updated_at: LocalDateTime,
             scm_ref: String?,

@@ -2,11 +2,11 @@ package net.adoptopenjdk.api
 
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
-import kotlinx.coroutines.runBlocking
-import net.adoptopenjdk.api.v3.AdoptReposBuilder
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
-import net.adoptopenjdk.api.v3.models.*
+import net.adoptopenjdk.api.v3.models.Architecture
+import net.adoptopenjdk.api.v3.models.HeapSize
+import net.adoptopenjdk.api.v3.models.ImageType
+import net.adoptopenjdk.api.v3.models.JvmImpl
+import net.adoptopenjdk.api.v3.models.OperatingSystem
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DynamicTest
@@ -20,14 +20,8 @@ abstract class AssetsPathTest : BaseTest() {
     companion object {
         @JvmStatic
         @BeforeAll
-        fun populateDb() {
-            runBlocking {
-                val repo = AdoptReposBuilder.build(APIDataStore.variants.versions)
-                //Reset connection
-                ApiPersistenceFactory.set(null)
-                ApiPersistenceFactory.get().updateAllRepos(repo)
-                APIDataStore.loadDataFromDb()
-            }
+        fun before() {
+            populateDb()
         }
     }
 
@@ -60,7 +54,7 @@ abstract class AssetsPathTest : BaseTest() {
     }
 
 
-    protected fun <T> createTest(values: Array<T>, path: String, filterParamName: String, exclude: (element: T) -> Boolean = { a -> false }): List<DynamicTest> {
+    protected fun <T> createTest(values: Array<T>, path: String, filterParamName: String, exclude: (element: T) -> Boolean = { false }): List<DynamicTest> {
         return values
                 .filter { !exclude(it) }
                 .map { value ->

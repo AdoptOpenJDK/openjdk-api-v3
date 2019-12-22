@@ -11,7 +11,7 @@ class VersionData : Comparable<VersionData> {
     val adopt_build_number: Int?
 
     @Schema(example = "11.0.0+28")
-    val semver: String?
+    val semver: String
 
     @Schema(example = "11.0.4+10-201907081820")
     val openjdk_version: String
@@ -27,12 +27,12 @@ class VersionData : Comparable<VersionData> {
         this.build = build
         this.optional = if (optional?.isNotEmpty() == true) optional else null
         this.openjdk_version = openjdk_version
-        this.semver = if (semver != null) semver else formSemver()
+        this.semver = semver ?: formSemver()
     }
 
 
     // i.e 11.0.1+11.1
-    fun formSemver(): String? {
+    fun formSemver(): String {
         var semver = major.toString() + "." + minor + "." + security
 
         if (pre?.isNotEmpty() == true) {
