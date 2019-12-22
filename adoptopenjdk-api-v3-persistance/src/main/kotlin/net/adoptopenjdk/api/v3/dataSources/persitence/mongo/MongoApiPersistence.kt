@@ -12,16 +12,20 @@ import net.adoptopenjdk.api.v3.models.Release
 import org.bson.Document
 import org.litote.kmongo.coroutine.CoroutineCollection
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
 
 class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient), ApiPersistence {
-    private val releasesCollection: CoroutineCollection<Release> = createCollection(database, "release")
-    private val githubStatsCollection: CoroutineCollection<GithubDownloadStatsDbEntry> = createCollection(database, "githubStats")
-    private val dockerStatsCollection: CoroutineCollection<DockerDownloadStatsDbEntry> = createCollection(database, "dockerStats")
+    private val releasesCollection: CoroutineCollection<Release> = createCollection(database, RELEASE_DB)
+    private val githubStatsCollection: CoroutineCollection<GithubDownloadStatsDbEntry> = createCollection(database, GITHUB_STATS_DB)
+    private val dockerStatsCollection: CoroutineCollection<DockerDownloadStatsDbEntry> = createCollection(database, DOCKER_STATS_DB)
 
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
+        const val RELEASE_DB = "release"
+        const val GITHUB_STATS_DB = "githubStats"
+        const val DOCKER_STATS_DB = "dockerStats"
     }
 
     override suspend fun updateAllRepos(repos: AdoptRepos) {
@@ -83,6 +87,20 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
                 .sort(Document("date", -1))
                 .limit(1)
                 .first()
+    }
+
+    override suspend fun getGithubStatsSince(since: LocalDateTime): List<GithubDownloadStatsDbEntry> {
+        return githubStatsCollection
+                .find(Document("date", Document("\$gt", since)))
+                .sort(Document("date", 1))
+                .toList()
+    }
+
+    override suspend fun getDockerStatsSince(since: LocalDateTime): List<DockerDownloadStatsDbEntry> {
+        return dockerStatsCollection
+                .find(Document("date", Document("\$gt", since)))
+                .sort(Document("date", 1))
+                .toList()
     }
 
     override suspend fun addDockerDownloadStatsEntries(stats: List<DockerDownloadStatsDbEntry>) {

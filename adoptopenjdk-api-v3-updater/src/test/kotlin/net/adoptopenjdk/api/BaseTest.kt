@@ -9,6 +9,7 @@ import de.flapdoodle.embed.process.runtime.Network
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.AdoptRepository
 import net.adoptopenjdk.api.v3.AdoptRepositoryFactory
@@ -75,9 +76,7 @@ abstract class BaseTest {
         fun startDb() {
             System.setProperty("GITHUB_TOKEN", "stub-token")
             HttpClientFactory.client = mockkHttpClient()
-
             startFongo()
-
             mockRepo()
             LOGGER.info("Done startup")
 
@@ -111,6 +110,17 @@ abstract class BaseTest {
             MongoClientFactory.set(null)
             LOGGER.info("FMongo started")
 
+        }
+
+        @JvmStatic
+        fun populateDb() {
+            runBlocking {
+                val repo = AdoptReposBuilder.build(APIDataStore.variants.versions)
+                //Reset connection
+                ApiPersistenceFactory.set(null)
+                ApiPersistenceFactory.get().updateAllRepos(repo)
+                APIDataStore.loadDataFromDb()
+            }
         }
 
         fun MockRepository(adoptRepos: AdoptRepos): AdoptRepository {
