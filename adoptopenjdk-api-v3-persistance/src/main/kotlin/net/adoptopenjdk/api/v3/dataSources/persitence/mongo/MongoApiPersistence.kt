@@ -16,7 +16,6 @@ import java.time.LocalDateTime
 
 
 class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient), ApiPersistence {
-
     private val releasesCollection: CoroutineCollection<Release> = createCollection(database, RELEASE_DB)
     private val githubStatsCollection: CoroutineCollection<GithubDownloadStatsDbEntry> = createCollection(database, GITHUB_STATS_DB)
     private val dockerStatsCollection: CoroutineCollection<DockerDownloadStatsDbEntry> = createCollection(database, DOCKER_STATS_DB)
@@ -24,7 +23,6 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
-
         const val RELEASE_DB = "release"
         const val GITHUB_STATS_DB = "githubStats"
         const val DOCKER_STATS_DB = "dockerStats"
