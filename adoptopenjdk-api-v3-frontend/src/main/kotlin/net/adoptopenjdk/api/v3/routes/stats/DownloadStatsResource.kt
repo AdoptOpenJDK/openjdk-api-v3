@@ -5,6 +5,7 @@ import kotlinx.coroutines.launch
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
+import net.adoptopenjdk.api.v3.models.DbStatsEntry
 import net.adoptopenjdk.api.v3.models.DownloadDiff
 import net.adoptopenjdk.api.v3.models.DownloadStats
 import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
@@ -89,8 +90,11 @@ class DownloadStatsResource {
 
         return getAdoptReleases(release)
                 .filter { it.release_type == ReleaseType.ga }
-                .groupBy { it.version_data }
-                .map { grouped -> Pair(grouped.key.semver, grouped.value.map { it.download_count }.sum()) }
+                .map { grouped ->
+                    Pair(grouped.release_name, grouped.binaries.map {
+                        it.download_count + ((it.installer?.download_count) ?: 0L)
+                    }.sum())
+                }
                 .toMap()
     }
 
@@ -114,7 +118,14 @@ class DownloadStatsResource {
         return getAdoptReleases(release)
                 .filter { it.release_name == releaseName }
                 .flatMap { it.binaries.asSequence() }
-                .map { Pair(it.`package`.name, it.download_count) }
+                .flatMap {
+                    val archive = Pair(it.`package`.name, it.download_count)
+                    if (it.installer != null) {
+                        sequenceOf(archive, Pair(it.installer!!.name, it.installer!!.download_count))
+                    } else {
+                        sequenceOf(archive)
+                    }
+                }
                 .toMap()
     }
 
@@ -130,12 +141,13 @@ class DownloadStatsResource {
     @Operation(summary = "Get download stats for feature verson", description = "stats", hidden = true)
     @Schema(hidden = true)
     fun tracking(
-            @Parameter(name = "feature_version", description = "Feature version (i.e 8, 9, 10...)", schema = Schema(defaultValue = "30"), required = false)
-            @QueryParam("feature_version")
+            @Parameter(name = "days", description = "Number of days to display", schema = Schema(defaultValue = "30"), required = false)
+            @QueryParam("days")
             days: Int?
     ): CompletionStage<List<DownloadDiff>> {
         return runAsync {
-            val daysSince = days ?: 30
+            //need +1 as for a diff you need num days +1 from db
+            val daysSince = (days ?: 30) + 1
             val since = LocalDateTime.now().minusDays(min(180, daysSince).toLong())
             val githubGrouped = getGithubDownloadStatsByDate(since)
             val dockerGrouped = getDockerDownloadStatsByDate(since)
@@ -165,20 +177,24 @@ class DownloadStatsResource {
     }
 
     private suspend fun getGithubDownloadStatsByDate(since: LocalDateTime): List<Pair<LocalDate, Long>> {
-        val githubStats = dataStore.getGithubStatsSince(since)
-
-        val githubGrouped = githubStats
-                .groupBy { it.date.toLocalDate() }
-                .map { grouped -> Pair(grouped.key, grouped.value.maxBy { it.date }!!.downloads) }
-        return githubGrouped
+        return sumDailyStats(dataStore.getGithubStatsSince(since))
     }
 
     private suspend fun getDockerDownloadStatsByDate(since: LocalDateTime): List<Pair<LocalDate, Long>> {
-        val dockerStats = dataStore.getDockerStatsSince(since)
+        return sumDailyStats(dataStore.getDockerStatsSince(since))
+    }
 
-        val dockerGrouped = dockerStats
+    private fun <T> sumDailyStats(dockerStats: List<DbStatsEntry<T>>): List<Pair<LocalDate, Long>> {
+        return dockerStats
                 .groupBy { it.date.toLocalDate() }
-                .map { grouped -> Pair(grouped.key, grouped.value.maxBy { it.date }!!.pulls) }
-        return dockerGrouped
+                .map { grouped -> Pair(grouped.key, formTotalDownloads(grouped.value)) }
+    }
+
+    private fun <T> formTotalDownloads(grouped: List<DbStatsEntry<T>>): Long {
+        return grouped
+                .groupBy { it.getId() }
+                .map { grouped -> grouped.value.maxBy { it.date } }
+                .map { it!!.getMetric() }
+                .sum()
     }
 }

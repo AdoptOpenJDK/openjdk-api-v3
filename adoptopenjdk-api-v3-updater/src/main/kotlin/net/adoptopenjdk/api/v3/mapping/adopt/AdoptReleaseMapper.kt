@@ -93,7 +93,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
             try {
                 listOf(getFeatureVersion(release))
             } catch (e: Exception) {
-                LOGGER.warn("Failed to parse ${release.name}", e)
+                LOGGER.warn("Failed to parse ${release.name}")
                 emptyList()
             }
         }

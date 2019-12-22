@@ -84,7 +84,7 @@ object AdoptBinaryMapper : BinaryMapper() {
             getChecksum(binaryChecksumLink)
         }
 
-        return Package(binaryName, binaryLink, binarySize, binaryChecksum, binaryChecksumLink)
+        return Package(binaryName, binaryLink, binarySize, binaryChecksum, binaryChecksumLink, asset.downloadCount)
     }
 
     private suspend fun getInstaller(ghAsset: GHAsset, assets: List<GHAsset>): Installer? {
@@ -107,7 +107,7 @@ object AdoptBinaryMapper : BinaryMapper() {
                 checksum = getChecksum(link)
             }
 
-            Installer(installer.name, installer.downloadUrl, installer.size, checksum, link)
+            Installer(installer.name, installer.downloadUrl, installer.size, checksum, link, installer.downloadCount)
         }
     }
 
