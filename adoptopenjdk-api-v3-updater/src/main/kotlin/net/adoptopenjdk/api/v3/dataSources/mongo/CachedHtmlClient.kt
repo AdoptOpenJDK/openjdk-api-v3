@@ -1,7 +1,9 @@
 package net.adoptopenjdk.api.v3.dataSources.mongo
 
+import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.adoptopenjdk.api.v3.HttpClientFactory
@@ -19,15 +21,15 @@ class CachedHtmlClient {
     private val internalDbStore = InternalDbStoreFactory.get()
 
     suspend fun getUrl(url: String): String? {
-        val metadata = internalDbStore.getCachedWebpage(url)
-        return if (metadata == null) {
+        val cachedEntry = internalDbStore.getCachedWebpage(url)
+        return if (cachedEntry == null) {
             getData(url)
         } else {
             //Do refresh in the background
             GlobalScope.launch(Dispatchers.IO) {
                 getData(url)
             }
-            metadata
+            cachedEntry.data
         }
     }
 
@@ -37,15 +39,24 @@ class CachedHtmlClient {
                     .uri(URI.create(url))
                     .build()
 
-            val data = HttpClientFactory.getHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString()).get()
-
-            if (data.statusCode() == 200 && data.body() != null) {
+            //Retry up to 10 times
+            for (retryCount in 1..10) {
                 try {
-                    val body = data.body()
-                    internalDbStore.putCachedWebpage(url, body)
-                    return@withContext body
+                    val data = HttpClientFactory.getHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString()).get()
+
+                    if (data.statusCode() == 200 && data.body() != null) {
+                        val body = data.body()
+                        internalDbStore.putCachedWebpage(url, body)
+                        return@withContext body
+                    } else if (data.statusCode() == NOT_FOUND.code()) {
+                        internalDbStore.putCachedWebpage(url, null)
+                        return@withContext null
+                    } else {
+                        LOGGER.error("Url status code ${data.statusCode()} ${retryCount} ${url}")
+                    }
                 } catch (e: Exception) {
-                    LOGGER.error("Failed to read data", e)
+                    LOGGER.error("Failed to read data retrying ${retryCount} ${url}")
+                    delay(1000)
                 }
             }
             return@withContext null
