@@ -201,7 +201,7 @@ object AdoptBinaryMapper : BinaryMapper() {
     private suspend fun getChecksum(binary_checksum_link: String?): String? {
         try {
             if (!(binary_checksum_link == null || binary_checksum_link.isEmpty())) {
-                LOGGER.info("Pulling checksum for $binary_checksum_link")
+                LOGGER.debug("Pulling checksum for $binary_checksum_link")
 
                 val checksum = githubHtmlDataPuller.getUrl(binary_checksum_link);
                 if (checksum != null) {

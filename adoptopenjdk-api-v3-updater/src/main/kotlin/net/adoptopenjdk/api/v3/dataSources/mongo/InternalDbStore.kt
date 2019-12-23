@@ -25,7 +25,7 @@ object InternalDbStoreFactory {
 class InternalDbStore : MongoInterface(MongoClientFactory.get()) {
     private val webCache: CoroutineCollection<CacheDbEntry> = createCollection(database, "web-cache")
 
-    suspend fun putCachedWebpage(url: String, data: String) {
+    suspend fun putCachedWebpage(url: String, data: String?) {
         webCache.updateOne(
                 Document("url", url),
                 CacheDbEntry(url, data),
@@ -33,7 +33,7 @@ class InternalDbStore : MongoInterface(MongoClientFactory.get()) {
                 false)
     }
 
-    suspend fun getCachedWebpage(url: String): String? {
-        return webCache.findOne(Document("url", url))?.data
+    suspend fun getCachedWebpage(url: String): CacheDbEntry? {
+        return webCache.findOne(Document("url", url))
     }
 }
