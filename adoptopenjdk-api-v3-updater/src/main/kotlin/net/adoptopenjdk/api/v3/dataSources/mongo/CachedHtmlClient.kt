@@ -1,6 +1,7 @@
 package net.adoptopenjdk.api.v3.dataSources.mongo
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.adoptopenjdk.api.v3.HttpClientFactory
 import org.slf4j.LoggerFactory
@@ -39,10 +40,22 @@ class CachedHtmlClient {
                     .uri(URI.create(url))
                     .build()
 
-            val data = HttpClientFactory.getHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString()).get()
+            //Retry up to 10 times
+            for (retryCount in 1..10) {
+                try {
+                    val data = HttpClientFactory.getHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString()).get()
 
-            if (data.statusCode() == 200 && data.body() != null) {
-                return@withContext data.body()
+                    if (data.statusCode() == 200 && data.body() != null) {
+                        return@withContext data.body()
+                    } else if (data.statusCode() == 404) {
+                        return@withContext null
+                    } else {
+                        LOGGER.error("Url status code ${data.statusCode()} ${retryCount} ${url}")
+                    }
+                } catch (e: Exception) {
+                    LOGGER.error("Failed to read data retrying ${retryCount} ${url}")
+                    delay(1000)
+                }
             }
 
             /*
