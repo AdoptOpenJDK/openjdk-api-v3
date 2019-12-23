@@ -1,10 +1,6 @@
 package net.adoptopenjdk.api.v3.dataSources.mongo
 
-import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.adoptopenjdk.api.v3.HttpClientFactory
 import org.slf4j.LoggerFactory
@@ -18,9 +14,12 @@ class CachedHtmlClient {
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
     }
 
-    private val internalDbStore = InternalDbStoreFactory.get()
+    //private val internalDbStore = InternalDbStoreFactory.get()
 
     suspend fun getUrl(url: String): String? {
+        return getData(url)
+
+        /*
         val cachedEntry = internalDbStore.getCachedWebpage(url)
         return if (cachedEntry == null) {
             getData(url)
@@ -31,10 +30,23 @@ class CachedHtmlClient {
             }
             cachedEntry.data
         }
+         */
     }
 
     private suspend fun getData(url: String): String? {
         return withContext(Dispatchers.IO) {
+            val request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .build()
+
+            val data = HttpClientFactory.getHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString()).get()
+
+            if (data.statusCode() == 200 && data.body() != null) {
+                return@withContext data.body()
+            }
+
+            /*
+
             val request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .build()
@@ -59,6 +71,7 @@ class CachedHtmlClient {
                     delay(1000)
                 }
             }
+            */
             return@withContext null
         }
     }
