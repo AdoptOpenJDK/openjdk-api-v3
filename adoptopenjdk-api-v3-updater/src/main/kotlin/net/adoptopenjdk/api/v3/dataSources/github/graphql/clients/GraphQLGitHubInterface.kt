@@ -34,6 +34,7 @@ open class GraphQLGitHubInterface {
 
     private val BASE_URL = "https://api.github.com/graphql"
     private val TOKEN: String = readToken()
+    private val THRESHOLD_START = System.getenv("GITHUB_THRESHOLD")?.toFloatOrNull() ?: 1000f
 
     fun request(query: String): GraphQLRequestEntity.RequestBuilder {
         return GraphQLRequestEntity.Builder()
@@ -95,11 +96,12 @@ open class GraphQLGitHubInterface {
     private suspend fun <F : HasRateLimit> selfRateLimit(result: GraphQLResponseEntity<F>) {
         val rateLimitData = result.response.rateLimit
 
-        if (rateLimitData.remaining < 1000) {
+        if (rateLimitData.remaining < THRESHOLD_START) {
 
             // scale delay, sleep for 1 second at rate limit == 1000
             // then scale up to 100 seconds at rate limit == 1
-            val delayTime = 100000 - 100 * Integer.max(1, rateLimitData.remaining)
+            val delayTime = 100f * (THRESHOLD_START - Integer.max(1, rateLimitData.remaining)) / THRESHOLD_START
+
             LOGGER.info("Remaining data getting low ${rateLimitData.remaining} ${rateLimitData.cost} ${delayTime}")
             delay(delayTime.toLong())
         }
