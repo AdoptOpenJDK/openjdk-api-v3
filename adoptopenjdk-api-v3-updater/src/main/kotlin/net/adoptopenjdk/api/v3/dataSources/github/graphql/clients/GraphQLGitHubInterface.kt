@@ -103,7 +103,7 @@ open class GraphQLGitHubInterface {
             val delayTime = 100f * (THRESHOLD_START - Integer.max(1, rateLimitData.remaining)) / THRESHOLD_START
 
             LOGGER.info("Remaining data getting low ${rateLimitData.remaining} ${rateLimitData.cost} ${delayTime}")
-            delay(delayTime.toLong())
+            delay(1000 * delayTime.toLong())
         }
         LOGGER.info("RateLimit ${rateLimitData.remaining} ${rateLimitData.cost}")
     }
