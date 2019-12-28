@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api.v3
 
+import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
@@ -11,6 +12,8 @@ object AdoptReposBuilder {
 
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
+
+    private val excluded: MutableSet<String> = HashSet()
 
     suspend fun incrementalUpdate(repo: AdoptRepos): AdoptRepos {
         val updated = repo
@@ -50,25 +53,30 @@ object AdoptReposBuilder {
 
     private suspend fun getUpdatedReleases(summary: GHRepositorySummary, pruned: FeatureRelease): List<Release> {
         return summary.releases.releases
+                .filter { !excluded.contains(it.id) }
                 .filter { !pruned.releases.hasReleaseBeenUpdated(it.id, it.getUpdatedTime()) }
-                .map {
-                    AdoptRepositoryFactory.adoptRepository.getReleaseById(it.id)
-                }
-                .filterNotNull()
-
+                .mapNotNull { getReleaseById(it) }
     }
 
     private suspend fun getNewReleases(summary: GHRepositorySummary, currentRelease: FeatureRelease): List<Release> {
         return summary.releases.releases
+                .filter { !excluded.contains(it.id) }
                 .filter { !currentRelease.releases.hasReleaseId(it.id) }
-                .map {
-                    AdoptRepositoryFactory.adoptRepository.getReleaseById(it.id)
-                }.filterNotNull()
+                .mapNotNull { getReleaseById(it) }
+    }
 
+    private suspend fun getReleaseById(it: GHReleaseSummary): Release? {
+        val release = AdoptRepositoryFactory.adoptRepository.getReleaseById(it.id)
+        if (release == null) {
+            LOGGER.info("Excluding ${it.id} from update")
+            excluded.add(it.id)
+        }
+        return release
     }
 
 
     suspend fun build(versions: Array<Int>): AdoptRepos {
+        excluded.clear()
         //Fetch repos in parallel
         val reposMap = versions
                 .reversed()
