@@ -99,8 +99,8 @@ open class GraphQLGitHubInterface {
         if (rateLimitData.remaining < THRESHOLD_START) {
 
             // scale delay, sleep for 1 second at rate limit == 1000
-            // then scale up to 100 seconds at rate limit == 1
-            val delayTime = 100f * (THRESHOLD_START - Integer.max(1, rateLimitData.remaining)) / THRESHOLD_START
+            // then scale up to 200 seconds at rate limit == 1
+            val delayTime = 200f * (THRESHOLD_START - Integer.max(1, rateLimitData.remaining)) / THRESHOLD_START
 
             LOGGER.info("Remaining data getting low ${rateLimitData.remaining} ${rateLimitData.cost} ${delayTime}")
             delay(1000 * delayTime.toLong())
