@@ -1,6 +1,7 @@
 package net.adoptopenjdk.api.v3.dataSources.mongo
 
 import io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
@@ -11,28 +12,41 @@ import java.net.URI
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.util.concurrent.Executors
+import java.util.concurrent.LinkedBlockingQueue
 import kotlin.coroutines.suspendCoroutine
 
-class CachedHtmlClient {
-    companion object {
-        @JvmStatic
-        private val LOGGER = LoggerFactory.getLogger(this::class.java)
+object CachedHtmlClient {
+    @JvmStatic
+    private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-        @JvmStatic
-        private val backgroundHtmlDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
-    }
+    @JvmStatic
+    private val backgroundHtmlDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
     private val internalDbStore = InternalDbStoreFactory.get()
+
+    //List of urls to be refreshed in the background
+    private val workList = LinkedBlockingQueue<String>()
+
+    init {
+        //Do refresh in the background
+        GlobalScope.launch(backgroundHtmlDispatcher, block = cacheRefreshDaemonThread())
+    }
+
+    private fun cacheRefreshDaemonThread(): suspend CoroutineScope.() -> Unit {
+        return {
+            while (true) {
+                val url = workList.take()
+                getData(url)
+            }
+        }
+    }
 
     suspend fun getUrl(url: String): String? {
         val cachedEntry = internalDbStore.getCachedWebpage(url)
         return if (cachedEntry == null) {
             getData(url)
         } else {
-            //Do refresh in the background
-            GlobalScope.launch(backgroundHtmlDispatcher) {
-                getData(url)
-            }
+            workList.offer(url)
             cachedEntry.data
         }
     }
