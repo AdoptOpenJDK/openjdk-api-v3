@@ -24,8 +24,6 @@ object AdoptBinaryMapper : BinaryMapper() {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
     private const val HOTSPOT_JFR = "hotspot-jfr"
-    private val githubHtmlDataPuller = CachedHtmlClient()
-
 
     suspend fun toBinaryList(assets: List<GHAsset>, metadata: Map<GHAsset, GHMetaData>): List<Binary> {
         // probably whitelist rather than black list
@@ -203,7 +201,7 @@ object AdoptBinaryMapper : BinaryMapper() {
             if (!(binary_checksum_link == null || binary_checksum_link.isEmpty())) {
                 LOGGER.debug("Pulling checksum for $binary_checksum_link")
 
-                val checksum = githubHtmlDataPuller.getUrl(binary_checksum_link);
+                val checksum = CachedHtmlClient.getUrl(binary_checksum_link);
                 if (checksum != null) {
                     val tokens = checksum.split(" ")
                     if (tokens.size > 1) {

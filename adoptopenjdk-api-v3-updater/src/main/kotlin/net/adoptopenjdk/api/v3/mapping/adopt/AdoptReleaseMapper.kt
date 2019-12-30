@@ -22,8 +22,6 @@ object AdoptReleaseMapper : ReleaseMapper() {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-    private val githubHtmlDataPuller = CachedHtmlClient()
-
     override suspend fun toAdoptRelease(release: GHRelease): Release? {
         val release_type: ReleaseType = formReleaseType(release)
 
@@ -116,7 +114,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
                     metadataAsset.name.startsWith(it.name)
                 }
 
-        val metadataString = githubHtmlDataPuller.getUrl(metadataAsset.downloadUrl)
+        val metadataString = CachedHtmlClient.getUrl(metadataAsset.downloadUrl)
         if (binaryAsset != null && metadataString != null) {
             try {
                 withContext(Dispatchers.IO) {
