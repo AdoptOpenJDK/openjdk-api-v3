@@ -21,6 +21,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.math.max
 import kotlin.system.exitProcess
 
 
@@ -107,7 +108,8 @@ open class GraphQLGitHubInterface {
             do {
                 // scale delay, sleep for 1 second at rate limit == 1000
                 // then scale up to 400 seconds at rate limit == 1
-                val delayTime = 400f * (THRESHOLD_START - Integer.max(1, quota)) / THRESHOLD_START
+                val delayTime = max(10f, 400f * (THRESHOLD_START - Integer.max(1, quota)) / THRESHOLD_START)
+
                 LOGGER.info("Remaining data getting low ${quota} ${rateLimitData.cost} ${delayTime}")
                 delay(1000 * delayTime.toLong())
 
@@ -118,13 +120,15 @@ open class GraphQLGitHubInterface {
     }
 
     private suspend fun getRemainingQuota(): Int {
-        return suspendCoroutine<Int> { continuation ->
+        return suspendCoroutine { continuation ->
             val request = HttpRequest.newBuilder()
                     .uri(URI.create("https://api.github.com/rate_limit"))
                     .setHeader("Authorization", "token ${TOKEN}")
                     .build()
 
-            HttpClientFactory.getHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString())
+            HttpClientFactory
+                    .getHttpClient()
+                    .sendAsync(request, HttpResponse.BodyHandlers.ofString())
                     .handle { result, error ->
                         if (error != null) {
                             LOGGER.error("Failed to read remaining quota", error)
