@@ -35,7 +35,6 @@ class V3 : Application() {
     private val cors: Set<Any>
 
     init {
-
         cors = setOf(object : ContainerResponseFilter {
             override fun filter(requestContext: ContainerRequestContext?, responseContext: ContainerResponseContext) {
                 responseContext.getHeaders().add("Access-Control-Allow-Origin", "*")

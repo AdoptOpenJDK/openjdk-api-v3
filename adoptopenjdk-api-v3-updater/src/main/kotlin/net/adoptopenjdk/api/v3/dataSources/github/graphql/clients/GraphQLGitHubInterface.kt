@@ -5,15 +5,22 @@ import io.aexp.nodes.graphql.GraphQLResponseEntity
 import io.aexp.nodes.graphql.GraphQLTemplate
 import io.aexp.nodes.graphql.Variable
 import io.aexp.nodes.graphql.exceptions.GraphQLException
+import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import net.adoptopenjdk.api.v3.HttpClientFactory
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.HasRateLimit
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.net.URI
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.nio.file.Files
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlin.system.exitProcess
 
 
@@ -95,17 +102,52 @@ open class GraphQLGitHubInterface {
 
     private suspend fun <F : HasRateLimit> selfRateLimit(result: GraphQLResponseEntity<F>) {
         val rateLimitData = result.response.rateLimit
-
         if (rateLimitData.remaining < THRESHOLD_START) {
+            var quota = getRemainingQuota()
+            do {
+                // scale delay, sleep for 1 second at rate limit == 1000
+                // then scale up to 400 seconds at rate limit == 1
+                val delayTime = 400f * (THRESHOLD_START - Integer.max(1, quota)) / THRESHOLD_START
+                LOGGER.info("Remaining data getting low ${quota} ${rateLimitData.cost} ${delayTime}")
+                delay(1000 * delayTime.toLong())
 
-            // scale delay, sleep for 1 second at rate limit == 1000
-            // then scale up to 200 seconds at rate limit == 1
-            val delayTime = 200f * (THRESHOLD_START - Integer.max(1, rateLimitData.remaining)) / THRESHOLD_START
-
-            LOGGER.info("Remaining data getting low ${rateLimitData.remaining} ${rateLimitData.cost} ${delayTime}")
-            delay(1000 * delayTime.toLong())
+                quota = getRemainingQuota()
+            } while (quota < THRESHOLD_START)
         }
         LOGGER.info("RateLimit ${rateLimitData.remaining} ${rateLimitData.cost}")
+    }
+
+    private suspend fun getRemainingQuota(): Int {
+        return suspendCoroutine<Int> { continuation ->
+            val request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.github.com/rate_limit"))
+                    .setHeader("Authorization", "token ${TOKEN}")
+                    .build()
+
+            HttpClientFactory.getHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                    .handle { result, error ->
+                        if (error != null) {
+                            LOGGER.error("Failed to read remaining quota", error)
+                        } else if (result?.body() == null) {
+                            LOGGER.error("Failed to read remaining quota")
+                        } else {
+                            try {
+                                val json = JsonObject(result.body())
+                                val remainingQuota = json.getJsonObject("resources")
+                                        ?.getJsonObject("graphql")
+                                        ?.getInteger("remaining")
+                                if (remainingQuota != null) {
+                                    continuation.resume(remainingQuota)
+                                    return@handle
+                                }
+                            } catch (e: Exception) {
+                                LOGGER.error("Failed to read remaining quota", e)
+                            }
+                        }
+
+                        continuation.resume(0)
+                    }
+        }
     }
 
     protected suspend fun <F : HasRateLimit> queryApi(requestEntityBuilder: GraphQLRequestEntity.RequestBuilder, cursor: String?, clazz: Class<F>): GraphQLResponseEntity<F>? {
