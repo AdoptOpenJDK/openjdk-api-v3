@@ -13,6 +13,7 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.suspendCoroutine
 
 object CachedHtmlClient {
@@ -53,25 +54,29 @@ object CachedHtmlClient {
 
     private suspend fun get(request: HttpRequest): String {
         return suspendCoroutine { continuation ->
-            val data = HttpClientFactory.getHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString())
+            val data = HttpClientFactory
+                    .getHttpClient()
+                    .sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                    .orTimeout(5, TimeUnit.SECONDS)
 
-            data.handle { result, error ->
-                when {
-                    error != null -> {
-                        LOGGER.error("Failed to read data")
-                        continuation.resumeWith(Result.failure(error))
+            data
+                    .handle { result, error ->
+                        when {
+                            error != null -> {
+                                LOGGER.error("Failed to read data")
+                                continuation.resumeWith(Result.failure(error))
+                            }
+                            result.statusCode() == NOT_FOUND.code() -> {
+                                continuation.resumeWith(Result.failure(NotFoundException()))
+                            }
+                            result.body() == null -> {
+                                continuation.resumeWith(Result.failure(NoDataException()))
+                            }
+                            else -> {
+                                continuation.resumeWith(Result.success(result.body()))
+                            }
+                        }
                     }
-                    result.statusCode() == NOT_FOUND.code() -> {
-                        continuation.resumeWith(Result.failure(NotFoundException()))
-                    }
-                    result.body() == null -> {
-                        continuation.resumeWith(Result.failure(NoDataException()))
-                    }
-                    else -> {
-                        continuation.resumeWith(Result.success(result.body()))
-                    }
-                }
-            }
         }
     }
 
@@ -83,6 +88,7 @@ object CachedHtmlClient {
         //Retry up to 10 times
         for (retryCount in 1..10) {
             try {
+                LOGGER.info("Getting $url")
                 val body = get(request)
                 internalDbStore.putCachedWebpage(url, body)
                 return body
