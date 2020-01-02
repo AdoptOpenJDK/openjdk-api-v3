@@ -20,7 +20,7 @@ object CachedHtmlClient {
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
     @JvmStatic
-    private val backgroundHtmlDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    private val backgroundHtmlDispatcher = Executors.newFixedThreadPool(10).asCoroutineDispatcher()
 
     private val internalDbStore = InternalDbStoreFactory.get()
 
