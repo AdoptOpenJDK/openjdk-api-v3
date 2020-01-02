@@ -6,9 +6,9 @@ import io.aexp.nodes.graphql.GraphQLTemplate
 import io.aexp.nodes.graphql.Variable
 import io.aexp.nodes.graphql.exceptions.GraphQLException
 import io.vertx.core.json.JsonObject
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import net.adoptopenjdk.api.v3.HttpClientFactory
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.HasRateLimit
 import org.slf4j.LoggerFactory
@@ -17,9 +17,11 @@ import java.net.URI
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.nio.file.Files
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.max
 import kotlin.system.exitProcess
@@ -43,6 +45,7 @@ open class GraphQLGitHubInterface {
     private val BASE_URL = "https://api.github.com/graphql"
     private val TOKEN: String = readToken()
     private val THRESHOLD_START = System.getenv("GITHUB_THRESHOLD")?.toFloatOrNull() ?: 1000f
+    private val THRESHOLD_HARD_FLOOR = System.getenv("GITHUB_THRESHOLD_HARD_FLOOR")?.toFloatOrNull() ?: 200f
 
     fun request(query: String): GraphQLRequestEntity.RequestBuilder {
         return GraphQLRequestEntity.Builder()
@@ -106,51 +109,64 @@ open class GraphQLGitHubInterface {
         if (rateLimitData.remaining < THRESHOLD_START) {
             var quota = getRemainingQuota()
             do {
-                // scale delay, sleep for 1 second at rate limit == 1000
-                // then scale up to 400 seconds at rate limit == 1
-                val delayTime = max(10f, 400f * (THRESHOLD_START - Integer.max(1, quota)) / THRESHOLD_START)
-
-                LOGGER.info("Remaining data getting low ${quota} ${rateLimitData.cost} ${delayTime}")
-                delay(1000 * delayTime.toLong())
+                val delayTime = max(10, quota.second)
+                LOGGER.info("Remaining data getting low $quota ${rateLimitData.cost} $delayTime")
+                delay(1000 * delayTime)
 
                 quota = getRemainingQuota()
-            } while (quota < THRESHOLD_START)
+            } while (quota.first < THRESHOLD_START)
         }
         LOGGER.info("RateLimit ${rateLimitData.remaining} ${rateLimitData.cost}")
     }
 
-    private suspend fun getRemainingQuota(): Int {
-        return suspendCoroutine { continuation ->
-            val request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.github.com/rate_limit"))
-                    .setHeader("Authorization", "token ${TOKEN}")
-                    .build()
+    private suspend fun getRemainingQuota(): Pair<Int, Long> {
+        try {
+            return suspendCoroutine { continuation ->
+                val request = HttpRequest.newBuilder()
+                        .uri(URI.create("https://api.github.com/rate_limit"))
+                        .setHeader("Authorization", "token $TOKEN")
+                        .build()
 
-            HttpClientFactory
-                    .getHttpClient()
-                    .sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                    .handle { result, error ->
-                        if (error != null) {
-                            LOGGER.error("Failed to read remaining quota", error)
-                        } else if (result?.body() == null) {
-                            LOGGER.error("Failed to read remaining quota")
-                        } else {
-                            try {
-                                val json = JsonObject(result.body())
-                                val remainingQuota = json.getJsonObject("resources")
-                                        ?.getJsonObject("graphql")
-                                        ?.getInteger("remaining")
-                                if (remainingQuota != null) {
-                                    continuation.resume(remainingQuota)
-                                    return@handle
+                HttpClientFactory
+                        .getHttpClient()
+                        .sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                        .handle { result, error ->
+                            if (error != null) {
+                                continuation.resumeWith(Result.failure(error))
+                            } else if (result?.body() != null) {
+                                try {
+                                    val json = JsonObject(result.body())
+                                    val remainingQuota = json.getJsonObject("resources")
+                                            ?.getJsonObject("graphql")
+                                            ?.getInteger("remaining")
+                                    val resetTime = json.getJsonObject("resources")
+                                            ?.getJsonObject("graphql")
+                                            ?.getLong("reset")
+
+                                    if (resetTime != null && remainingQuota != null) {
+                                        val delayTime = if (remainingQuota > THRESHOLD_HARD_FLOOR) {
+                                            // scale delay, sleep for 1 second at rate limit == 1000
+                                            // then scale up to 400 seconds at rate limit == 1
+                                            (400f * (THRESHOLD_START - Integer.max(1, remainingQuota)) / THRESHOLD_START).toLong()
+                                        } else {
+                                            val reset = LocalDateTime.ofEpochSecond(resetTime, 0, ZoneOffset.UTC)
+                                            LOGGER.info("Remaining quota VERY LOW $remainingQuota delaying til $reset")
+                                            ChronoUnit.SECONDS.between(LocalDateTime.now(ZoneOffset.UTC), reset)
+                                        }
+
+                                        continuation.resumeWith(Result.success(Pair(remainingQuota, delayTime)))
+                                    }
+                                } catch (e: Exception) {
+                                    continuation.resumeWith(Result.failure(e))
                                 }
-                            } catch (e: Exception) {
-                                LOGGER.error("Failed to read remaining quota", e)
                             }
-                        }
 
-                        continuation.resume(0)
-                    }
+                            continuation.resumeWith(Result.failure(Exception("Failed to read remaining quota")))
+                        }
+            }
+        } catch (e: Exception) {
+            LOGGER.error("Failed to read remaining quota", e)
+            return Pair(0, 100)
         }
     }
 
@@ -163,9 +179,9 @@ open class GraphQLGitHubInterface {
         var retryCount = 0
         while (result == null) {
             try {
-                GlobalScope.async {
+                withContext(Dispatchers.Default) {
                     result = GraphQLTemplate(Int.MAX_VALUE, Int.MAX_VALUE).query(query, clazz)
-                }.await()
+                }
             } catch (e: GraphQLException) {
                 if (e.status == "403" || e.status == "502") {
                     // Normally get these due to tmp ban due to rate limiting

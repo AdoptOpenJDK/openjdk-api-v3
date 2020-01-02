@@ -2,7 +2,6 @@ package net.adoptopenjdk.api
 
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
-import net.adoptopenjdk.api.v3.HttpClientFactory
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.models.Variants
 import java.io.File
@@ -13,8 +12,8 @@ class TestResourceGenerator {
         @JvmStatic
         fun main(args: Array<String>) {
             runBlocking {
-                val mock = BaseTest.mockkHttpClient()
-                HttpClientFactory.client = mock
+                //val mock = BaseTest.mockkHttpClient()
+                //HttpClientFactory.client = mock
                 BaseTest.startFongo()
 
 
