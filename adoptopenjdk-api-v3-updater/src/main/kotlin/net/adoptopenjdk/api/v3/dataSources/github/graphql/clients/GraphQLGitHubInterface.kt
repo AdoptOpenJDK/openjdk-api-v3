@@ -163,6 +163,7 @@ open class GraphQLGitHubInterface {
 
                             continuation.resumeWith(Result.failure(Exception("Failed to read remaining quota")))
                         }
+                        .orTimeout(5, TimeUnit.SECONDS)
             }
         } catch (e: Exception) {
             LOGGER.error("Failed to read remaining quota", e)
