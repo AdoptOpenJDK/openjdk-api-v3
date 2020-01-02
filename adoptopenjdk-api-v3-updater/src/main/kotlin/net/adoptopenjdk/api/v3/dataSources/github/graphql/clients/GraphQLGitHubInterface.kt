@@ -22,6 +22,8 @@ import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.max
 import kotlin.system.exitProcess
@@ -122,48 +124,52 @@ open class GraphQLGitHubInterface {
     private suspend fun getRemainingQuota(): Pair<Int, Long> {
         try {
             return suspendCoroutine { continuation ->
-                val request = HttpRequest.newBuilder()
-                        .uri(URI.create("https://api.github.com/rate_limit"))
-                        .setHeader("Authorization", "token $TOKEN")
-                        .build()
+                try {
+                    val request = HttpRequest.newBuilder()
+                            .uri(URI.create("https://api.github.com/rate_limit"))
+                            .setHeader("Authorization", "token $TOKEN")
+                            .build()
 
-                HttpClientFactory
-                        .getHttpClient()
-                        .sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                        .handle { result, error ->
-                            if (error != null) {
-                                continuation.resumeWith(Result.failure(error))
-                            } else if (result?.body() != null) {
-                                try {
-                                    val json = JsonObject(result.body())
-                                    val remainingQuota = json.getJsonObject("resources")
-                                            ?.getJsonObject("graphql")
-                                            ?.getInteger("remaining")
-                                    val resetTime = json.getJsonObject("resources")
-                                            ?.getJsonObject("graphql")
-                                            ?.getLong("reset")
+                    HttpClientFactory
+                            .getHttpClient()
+                            .sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                            .handle { result, error ->
+                                if (error != null) {
+                                    continuation.resumeWithException(error)
+                                } else if (result?.body() != null) {
+                                    try {
+                                        val json = JsonObject(result.body())
+                                        val remainingQuota = json.getJsonObject("resources")
+                                                ?.getJsonObject("graphql")
+                                                ?.getInteger("remaining")
+                                        val resetTime = json.getJsonObject("resources")
+                                                ?.getJsonObject("graphql")
+                                                ?.getLong("reset")
 
-                                    if (resetTime != null && remainingQuota != null) {
-                                        val delayTime = if (remainingQuota > THRESHOLD_HARD_FLOOR) {
-                                            // scale delay, sleep for 1 second at rate limit == 1000
-                                            // then scale up to 400 seconds at rate limit == 1
-                                            (400f * (THRESHOLD_START - Integer.max(1, remainingQuota)) / THRESHOLD_START).toLong()
-                                        } else {
-                                            val reset = LocalDateTime.ofEpochSecond(resetTime, 0, ZoneOffset.UTC)
-                                            LOGGER.info("Remaining quota VERY LOW $remainingQuota delaying til $reset")
-                                            ChronoUnit.SECONDS.between(LocalDateTime.now(ZoneOffset.UTC), reset)
+                                        if (resetTime != null && remainingQuota != null) {
+                                            val delayTime = if (remainingQuota > THRESHOLD_HARD_FLOOR) {
+                                                // scale delay, sleep for 1 second at rate limit == 1000
+                                                // then scale up to 400 seconds at rate limit == 1
+                                                (400f * (THRESHOLD_START - remainingQuota) / THRESHOLD_START).toLong()
+                                            } else {
+                                                val reset = LocalDateTime.ofEpochSecond(resetTime, 0, ZoneOffset.UTC)
+                                                LOGGER.info("Remaining quota VERY LOW $remainingQuota delaying til $reset")
+                                                ChronoUnit.SECONDS.between(LocalDateTime.now(ZoneOffset.UTC), reset)
+                                            }
+
+                                            continuation.resume(Pair(remainingQuota, delayTime))
                                         }
-
-                                        continuation.resumeWith(Result.success(Pair(remainingQuota, delayTime)))
+                                    } catch (e: Exception) {
+                                        continuation.resumeWithException(e)
                                     }
-                                } catch (e: Exception) {
-                                    continuation.resumeWith(Result.failure(e))
                                 }
-                            }
 
-                            continuation.resumeWith(Result.failure(Exception("Failed to read remaining quota")))
-                        }
-                        .orTimeout(5, TimeUnit.SECONDS)
+                                continuation.resumeWithException(Exception("Failed to read remaining quota"))
+                            }
+                            .orTimeout(5, TimeUnit.SECONDS)
+                } catch (e: Exception) {
+                    continuation.resumeWithException(e)
+                }
             }
         } catch (e: Exception) {
             LOGGER.error("Failed to read remaining quota", e)
