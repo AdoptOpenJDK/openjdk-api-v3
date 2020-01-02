@@ -68,8 +68,18 @@ class DockerStatsInterface {
         val request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .build()
-        val stats = HttpClientFactory.getHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString()).get()
-        return JsonObject(stats.body())
+
+        val response = HttpClientFactory
+                .getHttpClient()
+                .send(request, HttpResponse.BodyHandlers.ofString())
+
+        if (response.statusCode() == 200 && response.body() != null) {
+            return JsonObject(response.body())
+        } else {
+            throw Exception("Failed to read data for $url")
+        }
+
+
     }
 
 }

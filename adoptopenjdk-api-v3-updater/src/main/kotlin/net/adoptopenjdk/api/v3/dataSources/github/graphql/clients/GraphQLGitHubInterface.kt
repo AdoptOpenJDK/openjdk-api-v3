@@ -133,40 +133,21 @@ open class GraphQLGitHubInterface {
                     HttpClientFactory
                             .getHttpClient()
                             .sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                            .orTimeout(5, TimeUnit.SECONDS)
                             .handle { result, error ->
+
                                 if (error != null) {
                                     continuation.resumeWithException(error)
-                                } else if (result?.body() != null) {
+                                } else if (result?.body() == null) {
+                                    continuation.resumeWithException(Exception("Failed to read remaining quota"))
+                                } else {
                                     try {
-                                        val json = JsonObject(result.body())
-                                        val remainingQuota = json.getJsonObject("resources")
-                                                ?.getJsonObject("graphql")
-                                                ?.getInteger("remaining")
-                                        val resetTime = json.getJsonObject("resources")
-                                                ?.getJsonObject("graphql")
-                                                ?.getLong("reset")
-
-                                        if (resetTime != null && remainingQuota != null) {
-                                            val delayTime = if (remainingQuota > THRESHOLD_HARD_FLOOR) {
-                                                // scale delay, sleep for 1 second at rate limit == 1000
-                                                // then scale up to 400 seconds at rate limit == 1
-                                                (400f * (THRESHOLD_START - remainingQuota) / THRESHOLD_START).toLong()
-                                            } else {
-                                                val reset = LocalDateTime.ofEpochSecond(resetTime, 0, ZoneOffset.UTC)
-                                                LOGGER.info("Remaining quota VERY LOW $remainingQuota delaying til $reset")
-                                                ChronoUnit.SECONDS.between(LocalDateTime.now(ZoneOffset.UTC), reset)
-                                            }
-
-                                            continuation.resume(Pair(remainingQuota, delayTime))
-                                        }
+                                        continuation.resume(processResponse(result))
                                     } catch (e: Exception) {
                                         continuation.resumeWithException(e)
                                     }
                                 }
-
-                                continuation.resumeWithException(Exception("Failed to read remaining quota"))
                             }
-                            .orTimeout(5, TimeUnit.SECONDS)
                 } catch (e: Exception) {
                     continuation.resumeWithException(e)
                 }
@@ -174,6 +155,32 @@ open class GraphQLGitHubInterface {
         } catch (e: Exception) {
             LOGGER.error("Failed to read remaining quota", e)
             return Pair(0, 100)
+        }
+    }
+
+    private fun processResponse(result: HttpResponse<String>): Pair<Int, Long> {
+        val json = JsonObject(result.body())
+        val remainingQuota = json.getJsonObject("resources")
+                ?.getJsonObject("graphql")
+                ?.getInteger("remaining")
+        val resetTime = json.getJsonObject("resources")
+                ?.getJsonObject("graphql")
+                ?.getLong("reset")
+
+        if (resetTime != null && remainingQuota != null) {
+            val delayTime = if (remainingQuota > THRESHOLD_HARD_FLOOR) {
+                // scale delay, sleep for 1 second at rate limit == 1000
+                // then scale up to 400 seconds at rate limit == 1
+                (400f * (THRESHOLD_START - remainingQuota) / THRESHOLD_START).toLong()
+            } else {
+                val reset = LocalDateTime.ofEpochSecond(resetTime, 0, ZoneOffset.UTC)
+                LOGGER.info("Remaining quota VERY LOW $remainingQuota delaying til $reset")
+                ChronoUnit.SECONDS.between(LocalDateTime.now(ZoneOffset.UTC), reset)
+            }
+
+            return Pair(remainingQuota, delayTime)
+        } else {
+            throw Exception("Unable to parse graphql data")
         }
     }
 
