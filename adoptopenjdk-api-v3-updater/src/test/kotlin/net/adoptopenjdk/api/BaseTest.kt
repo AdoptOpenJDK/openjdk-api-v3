@@ -75,7 +75,7 @@ abstract class BaseTest {
         @BeforeAll
         fun startDb() {
             System.setProperty("GITHUB_TOKEN", "stub-token")
-            HttpClientFactory.client = mockkHttpClient()
+            HttpClientFactory.setClient(mockkHttpClient())
             startFongo()
             mockRepo()
             LOGGER.info("Done startup")

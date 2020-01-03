@@ -7,7 +7,7 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAssets
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
-import net.adoptopenjdk.api.v3.dataSources.mongo.CachedHtmlClient
+import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGithubHtmlClient
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
@@ -114,7 +114,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
                     metadataAsset.name.startsWith(it.name)
                 }
 
-        val metadataString = CachedHtmlClient.getUrl(metadataAsset.downloadUrl)
+        val metadataString = CachedGithubHtmlClient.getUrl(metadataAsset.downloadUrl)
         if (binaryAsset != null && metadataString != null) {
             try {
                 withContext(Dispatchers.IO) {

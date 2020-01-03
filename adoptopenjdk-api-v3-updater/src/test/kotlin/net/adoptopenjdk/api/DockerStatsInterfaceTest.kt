@@ -19,12 +19,12 @@ class DockerStatsInterfaceTest {
         @Override
         fun startDb() {
 
-            HttpClientFactory.client = HttpClient
+            HttpClientFactory.setClient(HttpClient
                     .newBuilder()
                     .followRedirects(HttpClient.Redirect.ALWAYS)
                     .connectTimeout(Duration.ofSeconds(10))
                     .executor(Executors.newFixedThreadPool(6))
-                    .build()
+                    .build())
 
             BaseTest.startFongo()
         }

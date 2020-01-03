@@ -10,23 +10,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.adoptopenjdk.api.v3.HttpClientFactory
+import net.adoptopenjdk.api.v3.dataSources.github.GithubAuth
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.HasRateLimit
 import org.slf4j.LoggerFactory
-import java.io.File
 import java.net.URI
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
-import java.nio.file.Files
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
-import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.max
-import kotlin.system.exitProcess
 
 
 open class GraphQLGitHubInterface {
@@ -45,7 +42,7 @@ open class GraphQLGitHubInterface {
     protected val OWNER = "AdoptOpenJDK"
 
     private val BASE_URL = "https://api.github.com/graphql"
-    private val TOKEN: String = readToken()
+    private val TOKEN: String = GithubAuth.readToken()
     private val THRESHOLD_START = System.getenv("GITHUB_THRESHOLD")?.toFloatOrNull() ?: 1000f
     private val THRESHOLD_HARD_FLOOR = System.getenv("GITHUB_THRESHOLD_HARD_FLOOR")?.toFloatOrNull() ?: 200f
 
@@ -133,7 +130,7 @@ open class GraphQLGitHubInterface {
                     HttpClientFactory
                             .getHttpClient()
                             .sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                            .orTimeout(5, TimeUnit.SECONDS)
+                            .orTimeout(10, TimeUnit.SECONDS)
                             .handle { result, error ->
 
                                 if (error != null) {
@@ -223,32 +220,4 @@ open class GraphQLGitHubInterface {
         LOGGER.warn("Cursor $cursor")
     }
 
-
-    private fun readToken(): String {
-        var token = System.getenv("GITHUB_TOKEN")
-        if (token == null) {
-            token = System.getProperty("GITHUB_TOKEN")
-        }
-
-        if (token == null) {
-
-            val userHome = System.getProperty("user.home")
-
-            // e.g /home/foo/.adopt_api/token.properties
-            val propertiesFile = File(userHome + File.separator + ".adopt_api" + File.separator + "token.properties")
-
-            if (propertiesFile.exists()) {
-
-                val properties = Properties()
-                properties.load(Files.newInputStream(propertiesFile.toPath()))
-                token = properties.getProperty("token")
-            }
-
-        }
-        if (token == null) {
-            LOGGER.error("Could not find GITHUB_TOKEN")
-            exitProcess(1)
-        }
-        return token
-    }
 }
