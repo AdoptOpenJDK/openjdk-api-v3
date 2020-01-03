@@ -26,7 +26,7 @@ object CachedGithubHtmlClient {
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
     @JvmStatic
-    private val backgroundHtmlDispatcher = Executors.newFixedThreadPool(10).asCoroutineDispatcher()
+    private val backgroundHtmlDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
     private val internalDbStore = InternalDbStoreFactory.get()
 
@@ -75,7 +75,7 @@ object CachedGithubHtmlClient {
             data.handle { result, error ->
                 when {
                     error != null -> {
-                        LOGGER.error("Failed to read data")
+                        LOGGER.error("Failed to read data ${error.message}")
                         continuation.resumeWith(Result.failure(error))
                     }
                     result.statusCode() == NOT_FOUND.code() -> {
@@ -152,7 +152,7 @@ object CachedGithubHtmlClient {
                 internalDbStore.putCachedWebpage(url, null)
                 return null
             } catch (e: Exception) {
-                LOGGER.error("Failed to read data retrying $retryCount $url")
+                LOGGER.error("Failed to read data retrying $retryCount $url", e)
                 delay(1000)
             }
         }
