@@ -45,6 +45,7 @@ object CachedGithubHtmlClient {
             while (true) {
                 val url = workList.take()
                 async {
+                    delay(2000)
                     LOGGER.info("Enqueuing $url")
                     return@async getData(url)
                 }.await()
