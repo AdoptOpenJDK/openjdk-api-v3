@@ -7,6 +7,7 @@ import io.netty.handler.codec.http.HttpResponseStatus.TEMPORARY_REDIRECT
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.adoptopenjdk.api.v3.HttpClientFactory
@@ -43,7 +44,10 @@ object CachedGithubHtmlClient {
         return {
             while (true) {
                 val url = workList.take()
-                getData(url)
+                async {
+                    LOGGER.info("Enqueuing $url")
+                    return@async getData(url)
+                }.await()
             }
         }
     }
@@ -147,6 +151,7 @@ object CachedGithubHtmlClient {
                 LOGGER.info("Getting $url")
                 val body = get(request)
                 internalDbStore.putCachedWebpage(url, body)
+                LOGGER.info("Got $url")
                 return body
             } catch (e: NotFoundException) {
                 internalDbStore.putCachedWebpage(url, null)
