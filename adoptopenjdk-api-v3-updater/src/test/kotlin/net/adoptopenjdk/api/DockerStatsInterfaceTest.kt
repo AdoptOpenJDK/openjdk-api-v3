@@ -1,15 +1,13 @@
 package net.adoptopenjdk.api
 
 import kotlinx.coroutines.runBlocking
-import net.adoptopenjdk.api.v3.HttpClientFactory
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+import net.adoptopenjdk.api.v3.dataSources.DefaultUpdaterHtmlClient
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.stats.DockerStatsInterface
 import org.junit.Assert
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import java.net.http.HttpClient
-import java.time.Duration
-import java.util.concurrent.Executors
 
 
 class DockerStatsInterfaceTest {
@@ -18,14 +16,7 @@ class DockerStatsInterfaceTest {
         @BeforeAll
         @Override
         fun startDb() {
-
-            HttpClientFactory.setClient(HttpClient
-                    .newBuilder()
-                    .followRedirects(HttpClient.Redirect.ALWAYS)
-                    .connectTimeout(Duration.ofSeconds(10))
-                    .executor(Executors.newFixedThreadPool(6))
-                    .build())
-
+            UpdaterHtmlClientFactory.client = DefaultUpdaterHtmlClient()
             BaseTest.startFongo()
         }
     }

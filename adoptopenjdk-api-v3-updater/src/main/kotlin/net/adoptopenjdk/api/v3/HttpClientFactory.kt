@@ -1,35 +1,48 @@
 package net.adoptopenjdk.api.v3
 
-import java.net.http.HttpClient
-import java.time.Duration
-import java.util.concurrent.Executors
+import org.apache.http.HttpRequest
+import org.apache.http.HttpResponse
+import org.apache.http.client.RedirectStrategy
+import org.apache.http.client.methods.HttpUriRequest
+import org.apache.http.impl.NoConnectionReuseStrategy
+import org.apache.http.impl.nio.client.HttpAsyncClients
+import org.apache.http.nio.client.HttpAsyncClient
+import org.apache.http.protocol.HttpContext
 
 object HttpClientFactory {
-    private var client: HttpClient = HttpClient
-            .newBuilder()
-            .executor(Executors.newFixedThreadPool(2))
-            .followRedirects(HttpClient.Redirect.NORMAL)
-            .connectTimeout(Duration.ofSeconds(30))
-            .build()
+    private val client: HttpAsyncClient
+    private val noRedirect: HttpAsyncClient
 
+    init {
+        val client = HttpAsyncClients.custom()
+                .setConnectionReuseStrategy(NoConnectionReuseStrategy())
+                .disableCookieManagement()
+                .build()
+        client.start()
+        this.client = client
 
-    private var nonRedirect: HttpClient = HttpClient
-            .newBuilder()
-            .executor(Executors.newFixedThreadPool(2))
-            .followRedirects(HttpClient.Redirect.NEVER)
-            .connectTimeout(Duration.ofSeconds(30))
-            .build()
+        val noRedirect = HttpAsyncClients.custom()
+                .setRedirectStrategy(object : RedirectStrategy {
+                    override fun getRedirect(p0: HttpRequest?, p1: HttpResponse?, p2: HttpContext?): HttpUriRequest? {
+                        return null
+                    }
 
-    fun getHttpClient(): HttpClient {
+                    override fun isRedirected(p0: HttpRequest?, p1: HttpResponse?, p2: HttpContext?): Boolean {
+                        return false
+                    }
+
+                })
+                .setConnectionReuseStrategy(NoConnectionReuseStrategy())
+                .build()
+        noRedirect.start()
+        this.noRedirect = noRedirect
+    }
+
+    fun getHttpClient(): HttpAsyncClient {
         return client
     }
 
-    fun getNonRedirectHttpClient(): HttpClient {
-        return nonRedirect
-    }
-
-    fun setClient(client: HttpClient) {
-        this.client = client
-        this.nonRedirect = client
+    fun getNonRedirectHttpClient(): HttpAsyncClient {
+        return noRedirect
     }
 }
