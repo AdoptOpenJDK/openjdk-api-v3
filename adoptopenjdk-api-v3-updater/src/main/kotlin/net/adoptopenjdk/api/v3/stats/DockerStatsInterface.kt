@@ -1,14 +1,12 @@
 package net.adoptopenjdk.api.v3.stats
 
 import io.vertx.core.json.JsonObject
-import net.adoptopenjdk.api.v3.HttpClientFactory
+import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
 import org.slf4j.LoggerFactory
-import java.net.URI
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.time.LocalDateTime
 
 class DockerStatsInterface {
@@ -65,21 +63,13 @@ class DockerStatsInterface {
     }
 
     private fun getStatsForUrl(url: String): JsonObject {
-        val request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .build()
-
-        val response = HttpClientFactory
-                .getHttpClient()
-                .send(request, HttpResponse.BodyHandlers.ofString())
-
-        if (response.statusCode() == 200 && response.body() != null) {
-            return JsonObject(response.body())
-        } else {
-            throw Exception("Failed to read data for $url")
+        return runBlocking {
+            val stats = UpdaterHtmlClientFactory.client.get(url);
+            if (stats == null) {
+                throw Exception("Stats not returned")
+            }
+            return@runBlocking JsonObject(stats)
         }
-
-
     }
 
 }

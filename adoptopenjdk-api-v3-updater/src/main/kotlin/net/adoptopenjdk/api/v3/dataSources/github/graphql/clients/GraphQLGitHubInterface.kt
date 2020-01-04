@@ -9,20 +9,15 @@ import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import net.adoptopenjdk.api.v3.HttpClientFactory
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.github.GithubAuth
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.HasRateLimit
 import org.slf4j.LoggerFactory
-import java.net.URI
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 import kotlin.math.max
 
 
@@ -120,43 +115,18 @@ open class GraphQLGitHubInterface {
 
     private suspend fun getRemainingQuota(): Pair<Int, Long> {
         try {
-            return suspendCoroutine { continuation ->
-                try {
-                    val request = HttpRequest.newBuilder()
-                            .uri(URI.create("https://api.github.com/rate_limit"))
-                            .setHeader("Authorization", "token $TOKEN")
-                            .build()
-
-                    HttpClientFactory
-                            .getHttpClient()
-                            .sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                            .orTimeout(10, TimeUnit.SECONDS)
-                            .handle { result, error ->
-
-                                if (error != null) {
-                                    continuation.resumeWithException(error)
-                                } else if (result?.body() == null) {
-                                    continuation.resumeWithException(Exception("Failed to read remaining quota"))
-                                } else {
-                                    try {
-                                        continuation.resume(processResponse(result))
-                                    } catch (e: Exception) {
-                                        continuation.resumeWithException(e)
-                                    }
-                                }
-                            }
-                } catch (e: Exception) {
-                    continuation.resumeWithException(e)
-                }
+            val response = UpdaterHtmlClientFactory.client.get("https://api.github.com/rate_limit")
+            if (response != null) {
+                return processResponse(response)
             }
         } catch (e: Exception) {
             LOGGER.error("Failed to read remaining quota", e)
-            return Pair(0, 100)
         }
+        return Pair(0, 100)
     }
 
-    private fun processResponse(result: HttpResponse<String>): Pair<Int, Long> {
-        val json = JsonObject(result.body())
+    private fun processResponse(result: String): Pair<Int, Long> {
+        val json = JsonObject(result)
         val remainingQuota = json.getJsonObject("resources")
                 ?.getJsonObject("graphql")
                 ?.getInteger("remaining")
