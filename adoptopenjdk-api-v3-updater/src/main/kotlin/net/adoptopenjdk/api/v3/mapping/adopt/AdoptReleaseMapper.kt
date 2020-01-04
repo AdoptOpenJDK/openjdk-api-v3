@@ -2,7 +2,7 @@ package net.adoptopenjdk.api.v3.mapping.adopt
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.adoptopenjdk.api.v3.JsonMapper
+import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAssets
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
@@ -118,7 +118,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
         if (binaryAsset != null && metadataString != null) {
             try {
                 withContext(Dispatchers.IO) {
-                    val metadata = JsonMapper.mapper.readValue(metadataString, GHMetaData::class.java)
+                    val metadata = UpdaterJsonMapper.mapper.readValue(metadataString, GHMetaData::class.java)
                     return@withContext Pair(binaryAsset, metadata)
                 }
             } catch (e: Exception) {
