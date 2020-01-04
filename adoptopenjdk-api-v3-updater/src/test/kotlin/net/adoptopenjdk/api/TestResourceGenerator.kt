@@ -2,7 +2,7 @@ package net.adoptopenjdk.api
 
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
-import net.adoptopenjdk.api.v3.JsonMapper
+import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.models.Variants
 import java.io.File
 import java.util.zip.GZIPOutputStream
@@ -18,14 +18,14 @@ class TestResourceGenerator {
 
 
                 val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
-                val variants = JsonMapper.mapper.readValue(variantData, Variants::class.java)
+                val variants = UpdaterJsonMapper.mapper.readValue(variantData, Variants::class.java)
 
                 val repo = AdoptReposBuilder.build(variants.versions)
 
                 File("adoptopenjdk-api-v3-updater/src/test/resources/example-data.json.gz").delete()
 
                 GZIPOutputStream(File("adoptopenjdk-api-v3-updater/src/test/resources/example-data.json.gz").outputStream()).use { out ->
-                    JsonMapper.mapper.writerWithDefaultPrettyPrinter().writeValues(out).write(repo)
+                    UpdaterJsonMapper.mapper.writerWithDefaultPrettyPrinter().writeValues(out).write(repo)
                 }
             }
         }

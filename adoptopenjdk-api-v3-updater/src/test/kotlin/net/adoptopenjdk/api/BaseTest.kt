@@ -11,11 +11,11 @@ import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.AdoptRepository
 import net.adoptopenjdk.api.v3.AdoptRepositoryFactory
-import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
+import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleasesSummary
@@ -69,7 +69,7 @@ abstract class BaseTest {
 
         @JvmStatic
         fun mockRepo() {
-            val adoptRepos = JsonMapper.mapper.readValue(GZIPInputStream(javaClass.classLoader.getResourceAsStream("example-data.json.gz")), AdoptRepos::class.java)
+            val adoptRepos = UpdaterJsonMapper.mapper.readValue(GZIPInputStream(javaClass.classLoader.getResourceAsStream("example-data.json.gz")), AdoptRepos::class.java)
 
             AdoptRepositoryFactory.adoptRepository = MockRepository(adoptRepos!!)
         }

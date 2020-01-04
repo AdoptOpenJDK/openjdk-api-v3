@@ -1,10 +1,5 @@
 package net.adoptopenjdk.api.v3.dataSources
 
-import io.netty.handler.codec.http.HttpResponseStatus.FOUND
-import io.netty.handler.codec.http.HttpResponseStatus.OK
-import io.netty.handler.codec.http.HttpResponseStatus.PERMANENT_REDIRECT
-import io.netty.handler.codec.http.HttpResponseStatus.SEE_OTHER
-import io.netty.handler.codec.http.HttpResponseStatus.TEMPORARY_REDIRECT
 import kotlinx.coroutines.delay
 import net.adoptopenjdk.api.v3.HttpClientFactory
 import net.adoptopenjdk.api.v3.dataSources.github.GithubAuth
@@ -52,7 +47,10 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
                     isARedirect(response) -> {
                         client.getData(URL(response.getFirstHeader("location").value), continuation)
                     }
-                    response.statusLine.statusCode == OK.code() -> {
+                    response.statusLine.statusCode == 404 -> {
+                        continuation.resumeWithException(NotFoundException())
+                    }
+                    response.statusLine.statusCode == 200 -> {
                         continuation.resume(extractBody(response))
                     }
                     else -> {
@@ -71,10 +69,10 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
         }
 
         private fun isARedirect(response: HttpResponse): Boolean {
-            return response.statusLine.statusCode == TEMPORARY_REDIRECT.code() ||
-                    response.statusLine.statusCode == PERMANENT_REDIRECT.code() ||
-                    response.statusLine.statusCode == FOUND.code() ||
-                    response.statusLine.statusCode == SEE_OTHER.code()
+            return response.statusLine.statusCode == 307 ||
+                    response.statusLine.statusCode == 301 ||
+                    response.statusLine.statusCode == 302 ||
+                    response.statusLine.statusCode == 303
         }
 
         override fun failed(e: java.lang.Exception?) {

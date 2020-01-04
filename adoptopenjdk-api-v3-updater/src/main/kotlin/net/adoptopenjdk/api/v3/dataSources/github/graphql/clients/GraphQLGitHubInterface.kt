@@ -5,12 +5,11 @@ import io.aexp.nodes.graphql.GraphQLResponseEntity
 import io.aexp.nodes.graphql.GraphQLTemplate
 import io.aexp.nodes.graphql.Variable
 import io.aexp.nodes.graphql.exceptions.GraphQLException
-import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
+import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.github.GithubAuth
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.HasRateLimit
 import org.slf4j.LoggerFactory
@@ -18,6 +17,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
+import javax.json.JsonObject
 import kotlin.math.max
 
 
@@ -126,13 +126,13 @@ open class GraphQLGitHubInterface {
     }
 
     private fun processResponse(result: String): Pair<Int, Long> {
-        val json = JsonObject(result)
+        val json = UpdaterJsonMapper.mapper.readValue(result, JsonObject::class.java)
         val remainingQuota = json.getJsonObject("resources")
                 ?.getJsonObject("graphql")
-                ?.getInteger("remaining")
+                ?.getInt("remaining")
         val resetTime = json.getJsonObject("resources")
                 ?.getJsonObject("graphql")
-                ?.getLong("reset")
+                ?.getJsonNumber("reset")?.longValue()
 
         if (resetTime != null && remainingQuota != null) {
             val delayTime = if (remainingQuota > THRESHOLD_HARD_FLOOR) {
