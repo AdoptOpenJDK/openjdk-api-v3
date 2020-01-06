@@ -64,6 +64,7 @@ object AdoptBinaryMapper : BinaryMapper() {
                     return@async binaryFromName(asset, pack, downloadCount, updatedAt, installer, heapSize)
                 }
             } catch (e: Exception) {
+                LOGGER.error("Failed to fetch binary ${asset.name}", e)
                 return@async null
             }
         }

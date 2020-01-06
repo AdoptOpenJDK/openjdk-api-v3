@@ -12,16 +12,12 @@ open class GraphQLGitHubReleaseClient : GraphQLGitHubReleaseRequest() {
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
     }
 
-    suspend fun getReleaseById(id: String): GHRelease? {
+    suspend fun getReleaseById(id: String): GHRelease {
         val requestEntityBuilder = getReleaseByIdQuery(id)
 
         LOGGER.info("Getting id $id")
 
         val result = queryApi(requestEntityBuilder, null, GHReleaseResult::class.java)
-        if (result == null) {
-            LOGGER.error("Failed to fetch $id")
-            return null
-        }
 
         val release: GHRelease
         if (result.response.release.releaseAssets.pageInfo.hasNextPage) {

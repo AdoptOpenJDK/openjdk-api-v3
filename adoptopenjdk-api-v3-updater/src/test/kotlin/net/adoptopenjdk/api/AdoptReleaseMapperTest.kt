@@ -9,7 +9,7 @@ import net.adoptopenjdk.api.v3.mapping.adopt.AdoptReleaseMapper
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
+import kotlin.test.fail
 
 
 class AdoptReleaseMapperTest {
@@ -29,9 +29,13 @@ class AdoptReleaseMapperTest {
 
             val ghRelease = GHRelease("1", "OpenJDK 123244354325", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "a-url");
 
-            val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
+            try {
+                val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
+                fail("Did not throw exception")
+            } catch (e: Exception) {
+                return@runBlocking
+            }
 
-            assertNull(release)
         }
     }
 

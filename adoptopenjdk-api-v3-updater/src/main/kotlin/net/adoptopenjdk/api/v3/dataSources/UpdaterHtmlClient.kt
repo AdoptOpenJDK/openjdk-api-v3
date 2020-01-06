@@ -57,7 +57,7 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
                         continuation.resumeWithException(Exception("Unexpected response ${response.statusLine.statusCode}"))
                     }
                 }
-            } catch (e: java.lang.Exception) {
+            } catch (e: Exception) {
                 continuation.resumeWithException(e)
             }
         }

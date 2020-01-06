@@ -32,6 +32,7 @@ class DockerStatsInterface {
             database.addDockerDownloadStatsEntries(stats)
         } catch (e: Exception) {
             LOGGER.error("Failed to fetch docker download stats", e)
+            throw e
         }
     }
 

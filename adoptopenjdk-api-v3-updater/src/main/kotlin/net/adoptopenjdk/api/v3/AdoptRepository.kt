@@ -41,10 +41,6 @@ object AdoptRepositoryImpl : AdoptRepository {
 
     override suspend fun getReleaseById(id: String): Release? {
         val release = client.getReleaseById(id)
-        if (release == null) {
-            return null
-        }
-
         return getMapperForRepo(release.url).toAdoptRelease(release)
     }
 
@@ -70,7 +66,13 @@ object AdoptRepositoryImpl : AdoptRepository {
         return client
                 .getRepository(repoName)
                 .getReleases()
-                .map { getMapperForRepo(it.url).toAdoptRelease(it) }
+                .map {
+                    try {
+                        getMapperForRepo(it.url).toAdoptRelease(it)
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
                 .filterNotNull()
     }
 
@@ -90,14 +92,9 @@ object AdoptRepositoryImpl : AdoptRepository {
     private fun <E> getRepoDataAsync(repoName: String, getFun: suspend (String) -> E): Deferred<E?> {
         return GlobalScope.async {
             LOGGER.info("getting $repoName")
-            try {
-                val releases = getFun(repoName)
-                LOGGER.info("Done getting $repoName")
-                return@async releases
-            } catch (e: Exception) {
-                LOGGER.error("Failed when fetching $repoName", e)
-                return@async null
-            }
+            val releases = getFun(repoName)
+            LOGGER.info("Done getting $repoName")
+            return@async releases
         }
     }
 }
