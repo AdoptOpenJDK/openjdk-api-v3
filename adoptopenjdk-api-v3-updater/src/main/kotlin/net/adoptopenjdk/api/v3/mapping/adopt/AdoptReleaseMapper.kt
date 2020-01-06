@@ -22,7 +22,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-    override suspend fun toAdoptRelease(release: GHRelease): Release? {
+    override suspend fun toAdoptRelease(release: GHRelease): Release {
         val release_type: ReleaseType = formReleaseType(release)
 
         val releaseLink = release.url
@@ -37,7 +37,6 @@ object AdoptReleaseMapper : ReleaseMapper() {
 
         try {
             val versionData = getVersionData(release, metadata, releaseName)
-            if (versionData == null) return null
 
             LOGGER.info("Getting binaries $releaseName")
             val binaries = AdoptBinaryMapper.toBinaryList(release.releaseAssets.assets, metadata)
@@ -46,7 +45,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
             return Release(release.id, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, versionData)
         } catch (e: FailedToParse) {
             LOGGER.error("Failed to parse $releaseName")
-            return null
+            throw e
         }
     }
 
@@ -72,7 +71,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
         return release_type
     }
 
-    private fun getVersionData(release: GHRelease, metadata: Map<GHAsset, GHMetaData>, release_name: String): VersionData? {
+    private fun getVersionData(release: GHRelease, metadata: Map<GHAsset, GHMetaData>, release_name: String): VersionData {
         return metadata
                 .values
                 .map { it.version.toApiVersion() }
@@ -80,7 +79,8 @@ object AdoptReleaseMapper : ReleaseMapper() {
                     //if we have no metadata resort to parsing release names
                     parseVersionInfo(release, release_name)
                 }
-                .firstOrNull()
+                .ifEmpty { throw Exception("Failed to parse version $release_name") }
+                .first()
 
     }
 

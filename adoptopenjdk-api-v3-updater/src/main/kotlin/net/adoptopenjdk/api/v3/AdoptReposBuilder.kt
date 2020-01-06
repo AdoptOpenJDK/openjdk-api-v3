@@ -66,12 +66,13 @@ object AdoptReposBuilder {
     }
 
     private suspend fun getReleaseById(it: GHReleaseSummary): Release? {
-        val release = AdoptRepositoryFactory.adoptRepository.getReleaseById(it.id)
-        if (release == null) {
+        return try {
+            return AdoptRepositoryFactory.adoptRepository.getReleaseById(it.id)
+        } catch (e: Exception) {
             LOGGER.info("Excluding ${it.id} from update")
             excluded.add(it.id)
+            null
         }
-        return release
     }
 
 

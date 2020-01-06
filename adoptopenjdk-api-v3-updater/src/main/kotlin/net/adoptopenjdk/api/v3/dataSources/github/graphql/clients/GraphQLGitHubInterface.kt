@@ -72,9 +72,9 @@ open class GraphQLGitHubInterface {
             }
         }
 
-        val result: GraphQLResponseEntity<F>? = queryApi(requestEntityBuilder, cursor, clazz)
+        val result: GraphQLResponseEntity<F> = queryApi(requestEntityBuilder, cursor, clazz)
 
-        if (result == null || repoDoesNotExist(result)) return listOf()
+        if (repoDoesNotExist(result)) return listOf()
 
         selfRateLimit(result)
 
@@ -151,37 +151,35 @@ open class GraphQLGitHubInterface {
         }
     }
 
-    protected suspend fun <F : HasRateLimit> queryApi(requestEntityBuilder: GraphQLRequestEntity.RequestBuilder, cursor: String?, clazz: Class<F>): GraphQLResponseEntity<F>? {
+    protected suspend fun <F : HasRateLimit> queryApi(requestEntityBuilder: GraphQLRequestEntity.RequestBuilder, cursor: String?, clazz: Class<F>): GraphQLResponseEntity<F> {
 
         requestEntityBuilder.variables(Variable("cursorPointer", cursor))
         val query = requestEntityBuilder.build()
 
-        var result: GraphQLResponseEntity<F>? = null
         var retryCount = 0
-        while (result == null) {
+        while (retryCount <= 20) {
             try {
-                withContext(Dispatchers.Default) {
-                    result = GraphQLTemplate(Int.MAX_VALUE, Int.MAX_VALUE).query(query, clazz)
+                return withContext(Dispatchers.Default) {
+                    return@withContext GraphQLTemplate(Int.MAX_VALUE, Int.MAX_VALUE).query(query, clazz)
                 }
             } catch (e: GraphQLException) {
                 if (e.status == "403" || e.status == "502") {
                     // Normally get these due to tmp ban due to rate limiting
                     LOGGER.info("Retrying ${e.status} ${retryCount++}")
-                    if (retryCount == 20) {
-                        printError(query, cursor)
-                        return null
-                    }
-                    delay((TimeUnit.SECONDS.toMillis(2) * retryCount))
+                    delay((TimeUnit.SECONDS.toMillis(5) * retryCount))
                 } else {
                     printError(query, cursor)
-                    return null
+                    throw Exception("Unexpected return type ${e.status}")
                 }
             } catch (e: Exception) {
                 LOGGER.error("Query failed", e)
-                return null
+                throw e
             }
         }
-        return result
+
+
+        printError(query, cursor)
+        throw Exception("Update hit retry limit")
     }
 
 
