@@ -4,7 +4,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
-import net.adoptopenjdk.api.v3.models.DownloadDiff
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.StatsSource
@@ -34,7 +33,7 @@ class DownloadStatsResource {
     @Path("/total")
     @Operation(summary = "Get download stats", description = "stats", hidden = true)
     @Schema(hidden = true)
-    fun getTotalDownloadStats(): CompletionStage<net.adoptopenjdk.api.v3.models.DownloadStats> {
+    fun getTotalDownloadStats(): CompletionStage<Response> {
         return runAsync {
             return@runAsync statsInterface.getTotalDownloadStats()
         }
@@ -117,31 +116,34 @@ class DownloadStatsResource {
             @Parameter(name = "docker_repo", description = "Docker repo to filter stats by", required = false)
             @QueryParam("docker_repo")
             dockerRepo: String?
-    ): CompletionStage<List<DownloadDiff>> {
+    ): CompletionStage<Response> {
         return runAsync {
             if (featureVersion != null && source != StatsSource.github) {
-                throw BadRequestException(Response.status(400, "feature_version can only be used with source=github").build())
+                throw BadRequestException("feature_version can only be used with source=github")
             }
 
             if (dockerRepo != null && source != StatsSource.dockerhub) {
-                throw BadRequestException(Response.status(400, "docker_repo can only be used with source=dockerhub").build())
+                throw BadRequestException("docker_repo can only be used with source=dockerhub")
             }
 
             return@runAsync statsInterface.getTrackingStats(days, source, featureVersion, dockerRepo)
         }
     }
 
-    private inline fun <reified T> runAsync(crossinline doIt: suspend () -> T): CompletionStage<T> {
-        val future = CompletableFuture<T>()
+    private inline fun <reified T> runAsync(crossinline doIt: suspend () -> T): CompletionStage<Response> {
+        val future = CompletableFuture<Response>()
         GlobalScope.launch {
             try {
-
-                future.complete(doIt())
+                future.complete(Response.ok(doIt()).build())
+            } catch (e: BadRequestException) {
+                future.complete(Response.status(400).entity(e.message).build())
             } catch (e: Exception) {
-                future.completeExceptionally(e)
+                future.complete(Response.status(500).entity("Internal error").build())
             }
         }
+
         return future
+
     }
 
 }
