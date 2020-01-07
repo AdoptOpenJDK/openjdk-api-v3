@@ -17,7 +17,6 @@ import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.jboss.resteasy.annotations.jaxrs.PathParam
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.CompletableFuture
@@ -163,35 +162,51 @@ class DownloadStatsResource {
         return future
     }
 
-    private fun calculateDailyDiff(githubGrouped: List<Pair<LocalDate, Long>>, dockerGrouped: List<Pair<LocalDate, Long>>): List<DownloadDiff> {
+    class StatEntry(
+            val dateTime: LocalDateTime,
+            val count: Long
+    )
+
+    private fun calculateDailyDiff(githubGrouped: List<StatEntry>, dockerGrouped: List<StatEntry>): List<DownloadDiff> {
         return githubGrouped
                 .union(dockerGrouped)
-                .groupBy { it.first }
-                .map { grouped -> Pair(grouped.key, grouped.value.map { it.second }.sum()) }
-                .sortedBy { it.first }
+                .groupBy { it.dateTime.toLocalDate() }
+                .map { grouped ->
+                    StatEntry(
+                            grouped.value.map { it.dateTime }.max()!!,
+                            grouped.value.map { it.count }.sum()
+                    )
+                }
+                .sortedBy { it.dateTime }
                 .windowed(2, 1, false) {
-                    val dayDiff = max(1, ChronoUnit.DAYS.between(it[0].first, it[1].first))
-                    val downloadDiff = (it[1].second - it[0].second) / dayDiff
-                    DownloadDiff(it[1].first, it[1].second, downloadDiff)
+                    val minDiff = max(1, ChronoUnit.MINUTES.between(it[0].dateTime, it[1].dateTime))
+                    val downloadDiff = ((it[1].count - it[0].count) * 60L * 24L) / minDiff
+                    DownloadDiff(it[1].dateTime, it[1].count, downloadDiff)
                 }
     }
 
-    private suspend fun getGithubDownloadStatsByDate(since: LocalDateTime): List<Pair<LocalDate, Long>> {
+    private suspend fun getGithubDownloadStatsByDate(since: LocalDateTime): List<StatEntry> {
         return sumDailyStats(dataStore.getGithubStatsSince(since))
     }
 
-    private suspend fun getDockerDownloadStatsByDate(since: LocalDateTime): List<Pair<LocalDate, Long>> {
+    private suspend fun getDockerDownloadStatsByDate(since: LocalDateTime): List<StatEntry> {
         return sumDailyStats(dataStore.getDockerStatsSince(since))
     }
 
-    private fun <T> sumDailyStats(dockerStats: List<DbStatsEntry<T>>): List<Pair<LocalDate, Long>> {
+    private fun <T> sumDailyStats(dockerStats: List<DbStatsEntry<T>>): List<StatEntry> {
         return dockerStats
                 .groupBy { it.date.toLocalDate() }
-                .map { grouped -> Pair(grouped.key, formTotalDownloads(grouped.value)) }
+                .map { grouped -> StatEntry(getLastDate(grouped.value), formTotalDownloads(grouped.value)) }
     }
 
-    private fun <T> formTotalDownloads(grouped: List<DbStatsEntry<T>>): Long {
+    private fun <T> getLastDate(grouped: List<DbStatsEntry<T>>): LocalDateTime {
         return grouped
+                .maxBy { it.date }!!
+                .date
+    }
+
+    private fun <T> formTotalDownloads(stats: List<DbStatsEntry<T>>): Long {
+        return stats
                 .groupBy { it.getId() }
                 .map { grouped -> grouped.value.maxBy { it.date } }
                 .map { it!!.getMetric() }

@@ -68,6 +68,7 @@ class V3Updater {
                 repo = AdoptReposBuilder.build(variants.versions)
                 database.updateAllRepos(repo)
                 statsInterface.update(repo)
+                LOGGER.info("Full update done")
             }
         } catch (e: Exception) {
             LOGGER.error("Failed to perform full update", e)
@@ -83,6 +84,7 @@ class V3Updater {
                 if (updatedRepo != repo) {
                     repo = updatedRepo
                     database.updateAllRepos(repo)
+                    LOGGER.info("Incremental update done")
                 }
 
             }
