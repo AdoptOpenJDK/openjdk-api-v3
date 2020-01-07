@@ -117,15 +117,16 @@ class DownloadStatsResource {
             @QueryParam("docker_repo")
             dockerRepo: String?
     ): CompletionStage<List<DownloadDiff>> {
+        if (featureVersion != null && source != StatsSource.github) {
+            throw BadRequestException("feature_version can only be used with source=github")
+        }
+
+        if (dockerRepo != null && source != StatsSource.dockerhub) {
+            throw BadRequestException("docker_repo can only be used with source=dockerhub")
+        }
+
+
         return runAsync {
-            if (featureVersion != null && source != StatsSource.github) {
-                throw BadRequestException("feature_version can only be used with source=github")
-            }
-
-            if (dockerRepo != null && source != StatsSource.dockerhub) {
-                throw BadRequestException("docker_repo can only be used with source=dockerhub")
-            }
-
             return@runAsync statsInterface.getTrackingStats(days, source, featureVersion, dockerRepo)
         }
     }
