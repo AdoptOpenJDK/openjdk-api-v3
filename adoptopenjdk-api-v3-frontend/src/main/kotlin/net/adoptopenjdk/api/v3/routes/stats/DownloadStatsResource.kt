@@ -21,6 +21,7 @@ import javax.ws.rs.Path
 import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
 import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response
 
 
 @Path("/stats/downloads")
@@ -117,16 +118,15 @@ class DownloadStatsResource {
             @QueryParam("docker_repo")
             dockerRepo: String?
     ): CompletionStage<List<DownloadDiff>> {
-        if (featureVersion != null && source != StatsSource.github) {
-            throw BadRequestException("feature_version can only be used with source=github")
-        }
-
-        if (dockerRepo != null && source != StatsSource.dockerhub) {
-            throw BadRequestException("docker_repo can only be used with source=dockerhub")
-        }
-
-
         return runAsync {
+            if (featureVersion != null && source != StatsSource.github) {
+                throw BadRequestException(Response.status(400, "feature_version can only be used with source=github").build())
+            }
+
+            if (dockerRepo != null && source != StatsSource.dockerhub) {
+                throw BadRequestException(Response.status(400, "docker_repo can only be used with source=dockerhub").build())
+            }
+
             return@runAsync statsInterface.getTrackingStats(days, source, featureVersion, dockerRepo)
         }
     }
@@ -134,7 +134,12 @@ class DownloadStatsResource {
     private inline fun <reified T> runAsync(crossinline doIt: suspend () -> T): CompletionStage<T> {
         val future = CompletableFuture<T>()
         GlobalScope.launch {
-            future.complete(doIt())
+            try {
+
+                future.complete(doIt())
+            } catch (e: Exception) {
+                future.completeExceptionally(e)
+            }
         }
         return future
     }
