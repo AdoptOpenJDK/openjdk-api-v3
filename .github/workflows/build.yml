@@ -15,7 +15,7 @@ jobs:
         architecture: x64
     - uses: actions/checkout@v1
     - name: Build app
-      run: ./mvnw clean install jacoco:report
+      run: ./mvnw clean install jacoco:report jacoco:report-aggregate
     - uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
