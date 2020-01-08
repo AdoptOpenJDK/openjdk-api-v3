@@ -1,6 +1,10 @@
 package net.adoptopenjdk.api.v3.dataSources.mongo
 
+import com.mongodb.client.model.IndexOptions
 import com.mongodb.client.model.UpdateOptions
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoClientFactory
 import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoInterface
 import org.bson.Document
@@ -25,12 +29,21 @@ object InternalDbStoreFactory {
 class InternalDbStore : MongoInterface(MongoClientFactory.get()) {
     private val webCache: CoroutineCollection<CacheDbEntry> = createCollection(database, "web-cache")
 
+    init {
+        runBlocking {
+            webCache.createIndex("""{"url":1}""", IndexOptions().background(true))
+        }
+    }
+
+
     suspend fun putCachedWebpage(url: String, data: String?) {
-        webCache.updateOne(
-                Document("url", url),
-                CacheDbEntry(url, data),
-                UpdateOptions().upsert(true),
-                false)
+        GlobalScope.launch {
+            webCache.updateOne(
+                    Document("url", url),
+                    CacheDbEntry(url, data),
+                    UpdateOptions().upsert(true),
+                    false)
+        }
     }
 
     suspend fun getCachedWebpage(url: String): CacheDbEntry? {

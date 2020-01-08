@@ -18,7 +18,7 @@ class GraphQLGitHubClient : GitHubApi {
         return summaryClient.getRepositorySummary(repoName)
     }
 
-    override suspend fun getReleaseById(id: String): GHRelease? {
+    override suspend fun getReleaseById(id: String): GHRelease {
         return releaseClient.getReleaseById(id)
     }
 

@@ -6,17 +6,16 @@ import de.flapdoodle.embed.mongo.config.MongodConfigBuilder
 import de.flapdoodle.embed.mongo.config.Net
 import de.flapdoodle.embed.mongo.distribution.Version
 import de.flapdoodle.embed.process.runtime.Network
-import io.mockk.every
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.AdoptRepository
 import net.adoptopenjdk.api.v3.AdoptRepositoryFactory
-import net.adoptopenjdk.api.v3.HttpClientFactory
-import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
+import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleasesSummary
@@ -29,11 +28,8 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.LoggerFactory
-import java.net.http.HttpClient
-import java.net.http.HttpResponse
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.concurrent.CompletableFuture
 import java.util.zip.GZIPInputStream
 import kotlin.random.Random
 
@@ -44,28 +40,17 @@ abstract class BaseTest {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
+        fun mockkHttpClient(): UpdaterHtmlClient {
+            return object : UpdaterHtmlClient {
+                override suspend fun get(url: String): String? {
+                    if (url.endsWith("sha256.txt")) {
+                        return "CAFE123 IAmAChecksum"
+                    }
 
-        fun mockkHttpClient(): HttpClient {
+                    return null
+                }
 
-            val client = mockk<HttpClient>()
-            val checksumResponse = mockk<HttpResponse<String>>()
-
-
-            every { client.sendAsync(match({ it.uri().toString().endsWith("sha256.txt") }), any<HttpResponse.BodyHandler<String>>()) } returns CompletableFuture.completedFuture(checksumResponse)
-            every { checksumResponse.statusCode() } returns 200
-            every { checksumResponse.body() } returns "CAFE123 IAmAChecksum"
-
-            every { client.sendAsync(match({ it.uri().toString().endsWith("json") }), any<HttpResponse.BodyHandler<String>>()) } answers { arg ->
-
-                val regex = """.*openjdk([0-9]+).*""".toRegex()
-                val majorVersion = regex.find(arg.invocation.args.get(0).toString())!!.destructured.component1().toInt()
-
-                val metadataResponse = mockk<HttpResponse<String>>()
-                every { metadataResponse.statusCode() } returns 404
-                CompletableFuture.completedFuture(metadataResponse)
             }
-
-            return client
         }
 
 
@@ -75,7 +60,7 @@ abstract class BaseTest {
         @BeforeAll
         fun startDb() {
             System.setProperty("GITHUB_TOKEN", "stub-token")
-            HttpClientFactory.client = mockkHttpClient()
+            UpdaterHtmlClientFactory.client = mockkHttpClient()
             startFongo()
             mockRepo()
             LOGGER.info("Done startup")
@@ -84,7 +69,7 @@ abstract class BaseTest {
 
         @JvmStatic
         fun mockRepo() {
-            val adoptRepos = JsonMapper.mapper.readValue(GZIPInputStream(javaClass.classLoader.getResourceAsStream("example-data.json.gz")), AdoptRepos::class.java)
+            val adoptRepos = UpdaterJsonMapper.mapper.readValue(GZIPInputStream(javaClass.classLoader.getResourceAsStream("example-data.json.gz")), AdoptRepos::class.java)
 
             AdoptRepositoryFactory.adoptRepository = MockRepository(adoptRepos!!)
         }
@@ -159,7 +144,6 @@ abstract class BaseTest {
             mongodExecutable!!.stop()
         }
     }
-
 
     protected suspend fun getInitialRepo(): AdoptRepos {
         return AdoptReposBuilder.incrementalUpdate(AdoptReposBuilder.build(APIDataStore.variants.versions))

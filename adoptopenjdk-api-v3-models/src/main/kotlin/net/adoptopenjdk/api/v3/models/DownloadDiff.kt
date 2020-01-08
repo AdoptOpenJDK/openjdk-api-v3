@@ -1,9 +1,9 @@
 package net.adoptopenjdk.api.v3.models
 
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 class DownloadDiff(
-        val date: LocalDate,
+        val date: LocalDateTime,
         val total: Long,
         val daily: Long
 )

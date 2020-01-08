@@ -5,7 +5,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
-import net.adoptopenjdk.api.v3.dataSources.mongo.CachedHtmlClient
+import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGithubHtmlClient
 import net.adoptopenjdk.api.v3.mapping.BinaryMapper
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Binary
@@ -24,8 +24,6 @@ object AdoptBinaryMapper : BinaryMapper() {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
     private const val HOTSPOT_JFR = "hotspot-jfr"
-    private val githubHtmlDataPuller = CachedHtmlClient()
-
 
     suspend fun toBinaryList(assets: List<GHAsset>, metadata: Map<GHAsset, GHMetaData>): List<Binary> {
         // probably whitelist rather than black list
@@ -66,6 +64,7 @@ object AdoptBinaryMapper : BinaryMapper() {
                     return@async binaryFromName(asset, pack, downloadCount, updatedAt, installer, heapSize)
                 }
             } catch (e: Exception) {
+                LOGGER.error("Failed to fetch binary ${asset.name}", e)
                 return@async null
             }
         }
@@ -203,7 +202,7 @@ object AdoptBinaryMapper : BinaryMapper() {
             if (!(binary_checksum_link == null || binary_checksum_link.isEmpty())) {
                 LOGGER.debug("Pulling checksum for $binary_checksum_link")
 
-                val checksum = githubHtmlDataPuller.getUrl(binary_checksum_link);
+                val checksum = CachedGithubHtmlClient.getUrl(binary_checksum_link);
                 if (checksum != null) {
                     val tokens = checksum.split(" ")
                     if (tokens.size > 1) {

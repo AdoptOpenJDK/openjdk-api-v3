@@ -18,11 +18,10 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-junit5</artifactId>
-            <scope>test</scope>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpasyncclient</artifactId>
+            <version>4.1.4</version>
         </dependency>
-
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-xml</artifactId>
@@ -37,22 +36,6 @@
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-coroutines-core</artifactId>
-            <version>1.2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-kotlin</artifactId>
-            <version>2.9.9</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>2.9.9</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-artifact</artifactId>
-            <version>3.6.1</version>
         </dependency>
         <dependency>
             <groupId>org.jooq</groupId>
@@ -60,25 +43,33 @@
             <version>3.11.11</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-enforcer-plugin</artifactId>
-            <version>3.0.0-M2</version>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr353</artifactId>
+        </dependency>
+
+
         <dependency>
             <groupId>org.litote.kmongo</groupId>
             <artifactId>kmongo-flapdoodle</artifactId>
-            <version>3.10.2</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.litote.kmongo</groupId>
-            <artifactId>kmongo-coroutine</artifactId>
-            <version>3.10.2</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-simple</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-legacy</artifactId>
-            <version>3.10.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -120,12 +111,10 @@
         <dependency>
             <groupId>net.adoptopenjdk.api</groupId>
             <artifactId>adoptopenjdk-api-v3-models</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>net.adoptopenjdk.api</groupId>
             <artifactId>adoptopenjdk-api-v3-persistance</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.awaitility</groupId>
@@ -139,7 +128,6 @@
             <version>1.5.0</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>

@@ -22,10 +22,10 @@ object ServerConfig {
     const val SERVER = "https://api.adoptopenjdk.net"
 }
 
-
 @OpenAPIDefinition(
         servers = [
-            Server(url = ServerConfig.SERVER)
+            Server(url = ServerConfig.SERVER),
+            Server(url = "https://staging-api.adoptopenjdk.net")
         ],
         info = Info(title = "v3", version = "3.0.0-beta"))
 @ApplicationPath("/v3")
@@ -35,7 +35,6 @@ class V3 : Application() {
     private val cors: Set<Any>
 
     init {
-
         cors = setOf(object : ContainerResponseFilter {
             override fun filter(requestContext: ContainerRequestContext?, responseContext: ContainerResponseContext) {
                 responseContext.getHeaders().add("Access-Control-Allow-Origin", "*")

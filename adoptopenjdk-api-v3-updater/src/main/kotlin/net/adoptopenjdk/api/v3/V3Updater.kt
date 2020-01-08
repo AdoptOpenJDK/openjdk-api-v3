@@ -3,6 +3,7 @@ package net.adoptopenjdk.api.v3
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.Variants
@@ -30,7 +31,7 @@ class V3Updater {
 
     init {
         val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
-        variants = JsonMapper.mapper.readValue(variantData, Variants::class.java)
+        variants = UpdaterJsonMapper.mapper.readValue(variantData, Variants::class.java)
         database = ApiPersistenceFactory.get()
         repo = try {
             APIDataStore.loadDataFromDb()
@@ -41,8 +42,6 @@ class V3Updater {
     }
 
     fun run(instantFullUpdate: Boolean) {
-
-
         val executor = Executors.newSingleThreadScheduledExecutor()
 
         executor.scheduleWithFixedDelay(timerTask {
@@ -69,6 +68,7 @@ class V3Updater {
                 repo = AdoptReposBuilder.build(variants.versions)
                 database.updateAllRepos(repo)
                 statsInterface.update(repo)
+                LOGGER.info("Full update done")
             }
         } catch (e: Exception) {
             LOGGER.error("Failed to perform full update", e)
@@ -84,6 +84,7 @@ class V3Updater {
                 if (updatedRepo != repo) {
                     repo = updatedRepo
                     database.updateAllRepos(repo)
+                    LOGGER.info("Incremental update done")
                 }
 
             }

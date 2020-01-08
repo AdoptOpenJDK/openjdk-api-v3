@@ -122,5 +122,17 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
                 .toList()
     }
 
+    override suspend fun removeStatsBetween(start: LocalDateTime, end: LocalDateTime) {
+        val deleteQuery = Document("\$and",
+                arrayOf(
+                        Document("date", Document("\$gt", start)),
+                        Document("date", Document("\$lt", end))
+                )
+        )
+        dockerStatsCollection.deleteMany(deleteQuery)
+        githubStatsCollection.deleteMany(deleteQuery)
+
+    }
+
     private fun majorVersionMatcher(featureVersion: Int) = Document("version_data.major", featureVersion)
 }

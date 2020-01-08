@@ -3,23 +3,15 @@ package net.adoptopenjdk.api.v3.routes.stats
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
-import net.adoptopenjdk.api.v3.models.DbStatsEntry
-import net.adoptopenjdk.api.v3.models.DownloadDiff
-import net.adoptopenjdk.api.v3.models.DownloadStats
-import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
-import net.adoptopenjdk.api.v3.models.TotalStats
+import net.adoptopenjdk.api.v3.models.StatsSource
 import net.adoptopenjdk.api.v3.models.Vendor
 import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.jboss.resteasy.annotations.jaxrs.PathParam
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
 import javax.ws.rs.BadRequestException
@@ -28,52 +20,23 @@ import javax.ws.rs.Path
 import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
 import javax.ws.rs.core.MediaType
-import kotlin.math.max
-import kotlin.math.min
+import javax.ws.rs.core.Response
 
 
 @Path("/stats/downloads")
 @Produces(MediaType.APPLICATION_JSON)
 @Schema(hidden = true)
 class DownloadStatsResource {
-    private val dataStore = ApiPersistenceFactory.get()
+    private val statsInterface = net.adoptopenjdk.api.v3.DownloadStatsInterface()
 
     @GET
     @Path("/total")
     @Operation(summary = "Get download stats", description = "stats", hidden = true)
     @Schema(hidden = true)
-    fun getTotalDownloadStats(): CompletionStage<DownloadStats> {
+    fun getTotalDownloadStats(): CompletionStage<Response> {
         return runAsync {
-            val dockerStats = dataStore.getLatestAllDockerStats()
-
-            val githubStats = getGithubStats()
-
-            val dockerPulls = dockerStats
-                    .map { it.pulls }
-                    .sum()
-
-            val githubDownloads = githubStats
-                    .map { it.downloads }
-                    .sum()
-
-            val dockerBreakdown = dockerStats
-                    .map { Pair(it.repo, it.pulls) }
-                    .toMap()
-
-            val githubBreakdown = githubStats
-                    .map { Pair(it.feature_version, it.downloads) }
-                    .toMap()
-
-            val totalStats = TotalStats(dockerPulls, githubDownloads, dockerPulls + githubDownloads)
-            return@runAsync DownloadStats(LocalDateTime.now(), totalStats, githubBreakdown, dockerBreakdown)
+            return@runAsync statsInterface.getTotalDownloadStats()
         }
-    }
-
-    private suspend fun getGithubStats(): List<GithubDownloadStatsDbEntry> {
-        return APIDataStore.variants.versions
-                .mapNotNull { featureVersion ->
-                    dataStore.getLatestGithubStatsForFeatureVersion(featureVersion)
-                }
     }
 
     @GET
@@ -143,58 +106,44 @@ class DownloadStatsResource {
     fun tracking(
             @Parameter(name = "days", description = "Number of days to display", schema = Schema(defaultValue = "30"), required = false)
             @QueryParam("days")
-            days: Int?
-    ): CompletionStage<List<DownloadDiff>> {
+            days: Int?,
+            @Parameter(name = "source", description = "Stats data source", schema = Schema(defaultValue = "all"), required = false)
+            @QueryParam("source")
+            source: StatsSource?,
+            @Parameter(name = "feature_version", description = "Feature version (i.e 8, 9, 10...), only valid on github source requests", required = false)
+            @QueryParam("feature_version")
+            featureVersion: Int?,
+            @Parameter(name = "docker_repo", description = "Docker repo to filter stats by", required = false)
+            @QueryParam("docker_repo")
+            dockerRepo: String?
+    ): CompletionStage<Response> {
         return runAsync {
-            //need +1 as for a diff you need num days +1 from db
-            val daysSince = (days ?: 30) + 1
-            val since = LocalDateTime.now().minusDays(min(180, daysSince).toLong())
-            val githubGrouped = getGithubDownloadStatsByDate(since)
-            val dockerGrouped = getDockerDownloadStatsByDate(since)
-            return@runAsync calculateDailyDiff(githubGrouped, dockerGrouped)
+            if (featureVersion != null && source != StatsSource.github) {
+                throw BadRequestException("feature_version can only be used with source=github")
+            }
+
+            if (dockerRepo != null && source != StatsSource.dockerhub) {
+                throw BadRequestException("docker_repo can only be used with source=dockerhub")
+            }
+
+            return@runAsync statsInterface.getTrackingStats(days, source, featureVersion, dockerRepo)
         }
     }
 
-    private inline fun <reified T> runAsync(crossinline doIt: suspend () -> T): CompletionStage<T> {
-        val future = CompletableFuture<T>()
+    private inline fun <reified T> runAsync(crossinline doIt: suspend () -> T): CompletionStage<Response> {
+        val future = CompletableFuture<Response>()
         GlobalScope.launch {
-            future.complete(doIt())
+            try {
+                future.complete(Response.ok(doIt()).build())
+            } catch (e: BadRequestException) {
+                future.complete(Response.status(400).entity(e.message).build())
+            } catch (e: Exception) {
+                future.complete(Response.status(500).entity("Internal error").build())
+            }
         }
+
         return future
+
     }
 
-    private fun calculateDailyDiff(githubGrouped: List<Pair<LocalDate, Long>>, dockerGrouped: List<Pair<LocalDate, Long>>): List<DownloadDiff> {
-        return githubGrouped
-                .union(dockerGrouped)
-                .groupBy { it.first }
-                .map { grouped -> Pair(grouped.key, grouped.value.map { it.second }.sum()) }
-                .sortedBy { it.first }
-                .windowed(2, 1, false) {
-                    val dayDiff = max(1, ChronoUnit.DAYS.between(it[0].first, it[1].first))
-                    val downloadDiff = (it[1].second - it[0].second) / dayDiff
-                    DownloadDiff(it[1].first, it[1].second, downloadDiff)
-                }
-    }
-
-    private suspend fun getGithubDownloadStatsByDate(since: LocalDateTime): List<Pair<LocalDate, Long>> {
-        return sumDailyStats(dataStore.getGithubStatsSince(since))
-    }
-
-    private suspend fun getDockerDownloadStatsByDate(since: LocalDateTime): List<Pair<LocalDate, Long>> {
-        return sumDailyStats(dataStore.getDockerStatsSince(since))
-    }
-
-    private fun <T> sumDailyStats(dockerStats: List<DbStatsEntry<T>>): List<Pair<LocalDate, Long>> {
-        return dockerStats
-                .groupBy { it.date.toLocalDate() }
-                .map { grouped -> Pair(grouped.key, formTotalDownloads(grouped.value)) }
-    }
-
-    private fun <T> formTotalDownloads(grouped: List<DbStatsEntry<T>>): Long {
-        return grouped
-                .groupBy { it.getId() }
-                .map { grouped -> grouped.value.maxBy { it.date } }
-                .map { it!!.getMetric() }
-                .sum()
-    }
 }

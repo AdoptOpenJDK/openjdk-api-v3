@@ -17,4 +17,5 @@ interface ApiPersistence {
     suspend fun getDockerStatsSince(since: LocalDateTime): List<DockerDownloadStatsDbEntry>
     suspend fun addDockerDownloadStatsEntries(stats: List<DockerDownloadStatsDbEntry>)
     suspend fun getLatestAllDockerStats(): List<DockerDownloadStatsDbEntry>
+    suspend fun removeStatsBetween(start: LocalDateTime, end: LocalDateTime)
 }

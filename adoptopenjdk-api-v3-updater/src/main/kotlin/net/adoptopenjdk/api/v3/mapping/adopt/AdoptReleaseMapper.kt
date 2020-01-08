@@ -2,12 +2,12 @@ package net.adoptopenjdk.api.v3.mapping.adopt
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.adoptopenjdk.api.v3.JsonMapper
+import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAssets
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
-import net.adoptopenjdk.api.v3.dataSources.mongo.CachedHtmlClient
+import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGithubHtmlClient
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
@@ -22,9 +22,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-    private val githubHtmlDataPuller = CachedHtmlClient()
-
-    override suspend fun toAdoptRelease(release: GHRelease): Release? {
+    override suspend fun toAdoptRelease(release: GHRelease): Release {
         val release_type: ReleaseType = formReleaseType(release)
 
         val releaseLink = release.url
@@ -39,7 +37,6 @@ object AdoptReleaseMapper : ReleaseMapper() {
 
         try {
             val versionData = getVersionData(release, metadata, releaseName)
-            if (versionData == null) return null
 
             LOGGER.info("Getting binaries $releaseName")
             val binaries = AdoptBinaryMapper.toBinaryList(release.releaseAssets.assets, metadata)
@@ -48,7 +45,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
             return Release(release.id, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, versionData)
         } catch (e: FailedToParse) {
             LOGGER.error("Failed to parse $releaseName")
-            return null
+            throw e
         }
     }
 
@@ -74,7 +71,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
         return release_type
     }
 
-    private fun getVersionData(release: GHRelease, metadata: Map<GHAsset, GHMetaData>, release_name: String): VersionData? {
+    private fun getVersionData(release: GHRelease, metadata: Map<GHAsset, GHMetaData>, release_name: String): VersionData {
         return metadata
                 .values
                 .map { it.version.toApiVersion() }
@@ -82,7 +79,8 @@ object AdoptReleaseMapper : ReleaseMapper() {
                     //if we have no metadata resort to parsing release names
                     parseVersionInfo(release, release_name)
                 }
-                .firstOrNull()
+                .ifEmpty { throw Exception("Failed to parse version $release_name") }
+                .first()
 
     }
 
@@ -116,11 +114,11 @@ object AdoptReleaseMapper : ReleaseMapper() {
                     metadataAsset.name.startsWith(it.name)
                 }
 
-        val metadataString = githubHtmlDataPuller.getUrl(metadataAsset.downloadUrl)
+        val metadataString = CachedGithubHtmlClient.getUrl(metadataAsset.downloadUrl)
         if (binaryAsset != null && metadataString != null) {
             try {
                 withContext(Dispatchers.IO) {
-                    val metadata = JsonMapper.mapper.readValue(metadataString, GHMetaData::class.java)
+                    val metadata = UpdaterJsonMapper.mapper.readValue(metadataString, GHMetaData::class.java)
                     return@withContext Pair(binaryAsset, metadata)
                 }
             } catch (e: Exception) {

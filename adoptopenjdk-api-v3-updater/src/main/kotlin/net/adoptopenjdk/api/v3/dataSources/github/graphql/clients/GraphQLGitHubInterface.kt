@@ -5,16 +5,20 @@ import io.aexp.nodes.graphql.GraphQLResponseEntity
 import io.aexp.nodes.graphql.GraphQLTemplate
 import io.aexp.nodes.graphql.Variable
 import io.aexp.nodes.graphql.exceptions.GraphQLException
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
+import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
+import net.adoptopenjdk.api.v3.dataSources.github.GithubAuth
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.HasRateLimit
 import org.slf4j.LoggerFactory
-import java.io.File
-import java.nio.file.Files
-import java.util.*
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
-import kotlin.system.exitProcess
+import javax.json.JsonObject
+import kotlin.math.max
 
 
 open class GraphQLGitHubInterface {
@@ -33,7 +37,9 @@ open class GraphQLGitHubInterface {
     protected val OWNER = "AdoptOpenJDK"
 
     private val BASE_URL = "https://api.github.com/graphql"
-    private val TOKEN: String = readToken()
+    private val TOKEN: String = GithubAuth.readToken()
+    private val THRESHOLD_START = System.getenv("GITHUB_THRESHOLD")?.toFloatOrNull() ?: 1000f
+    private val THRESHOLD_HARD_FLOOR = System.getenv("GITHUB_THRESHOLD_HARD_FLOOR")?.toFloatOrNull() ?: 200f
 
     fun request(query: String): GraphQLRequestEntity.RequestBuilder {
         return GraphQLRequestEntity.Builder()
@@ -66,9 +72,9 @@ open class GraphQLGitHubInterface {
             }
         }
 
-        val result: GraphQLResponseEntity<F>? = queryApi(requestEntityBuilder, cursor, clazz)
+        val result: GraphQLResponseEntity<F> = queryApi(requestEntityBuilder, cursor, clazz)
 
-        if (result == null || repoDoesNotExist(result)) return listOf()
+        if (repoDoesNotExist(result)) return listOf()
 
         selfRateLimit(result)
 
@@ -94,49 +100,86 @@ open class GraphQLGitHubInterface {
 
     private suspend fun <F : HasRateLimit> selfRateLimit(result: GraphQLResponseEntity<F>) {
         val rateLimitData = result.response.rateLimit
+        if (rateLimitData.remaining < THRESHOLD_START) {
+            var quota = getRemainingQuota()
+            do {
+                val delayTime = max(10, quota.second)
+                LOGGER.info("Remaining data getting low $quota ${rateLimitData.cost} $delayTime")
+                delay(1000 * delayTime)
 
-        if (rateLimitData.remaining < 1000) {
-
-            // scale delay, sleep for 1 second at rate limit == 1000
-            // then scale up to 100 seconds at rate limit == 1
-            val delayTime = 100000 - 100 * Integer.max(1, rateLimitData.remaining)
-            LOGGER.info("Remaining data getting low ${rateLimitData.remaining} ${rateLimitData.cost} ${delayTime}")
-            delay(delayTime.toLong())
+                quota = getRemainingQuota()
+            } while (quota.first < THRESHOLD_START)
         }
         LOGGER.info("RateLimit ${rateLimitData.remaining} ${rateLimitData.cost}")
     }
 
-    protected suspend fun <F : HasRateLimit> queryApi(requestEntityBuilder: GraphQLRequestEntity.RequestBuilder, cursor: String?, clazz: Class<F>): GraphQLResponseEntity<F>? {
+    private suspend fun getRemainingQuota(): Pair<Int, Long> {
+        try {
+            val response = UpdaterHtmlClientFactory.client.get("https://api.github.com/rate_limit")
+            if (response != null) {
+                return processResponse(response)
+            }
+        } catch (e: Exception) {
+            LOGGER.error("Failed to read remaining quota", e)
+        }
+        return Pair(0, 100)
+    }
+
+    private fun processResponse(result: String): Pair<Int, Long> {
+        val json = UpdaterJsonMapper.mapper.readValue(result, JsonObject::class.java)
+        val remainingQuota = json.getJsonObject("resources")
+                ?.getJsonObject("graphql")
+                ?.getInt("remaining")
+        val resetTime = json.getJsonObject("resources")
+                ?.getJsonObject("graphql")
+                ?.getJsonNumber("reset")?.longValue()
+
+        if (resetTime != null && remainingQuota != null) {
+            val delayTime = if (remainingQuota > THRESHOLD_HARD_FLOOR) {
+                // scale delay, sleep for 1 second at rate limit == 1000
+                // then scale up to 400 seconds at rate limit == 1
+                (400f * (THRESHOLD_START - remainingQuota) / THRESHOLD_START).toLong()
+            } else {
+                val reset = LocalDateTime.ofEpochSecond(resetTime, 0, ZoneOffset.UTC)
+                LOGGER.info("Remaining quota VERY LOW $remainingQuota delaying til $reset")
+                ChronoUnit.SECONDS.between(LocalDateTime.now(ZoneOffset.UTC), reset)
+            }
+
+            return Pair(remainingQuota, delayTime)
+        } else {
+            throw Exception("Unable to parse graphql data")
+        }
+    }
+
+    protected suspend fun <F : HasRateLimit> queryApi(requestEntityBuilder: GraphQLRequestEntity.RequestBuilder, cursor: String?, clazz: Class<F>): GraphQLResponseEntity<F> {
 
         requestEntityBuilder.variables(Variable("cursorPointer", cursor))
         val query = requestEntityBuilder.build()
 
-        var result: GraphQLResponseEntity<F>? = null
         var retryCount = 0
-        while (result == null) {
+        while (retryCount <= 20) {
             try {
-                GlobalScope.async {
-                    result = GraphQLTemplate(Int.MAX_VALUE, Int.MAX_VALUE).query(query, clazz)
-                }.await()
+                return withContext(Dispatchers.Default) {
+                    return@withContext GraphQLTemplate(Int.MAX_VALUE, Int.MAX_VALUE).query(query, clazz)
+                }
             } catch (e: GraphQLException) {
                 if (e.status == "403" || e.status == "502") {
                     // Normally get these due to tmp ban due to rate limiting
                     LOGGER.info("Retrying ${e.status} ${retryCount++}")
-                    if (retryCount == 20) {
-                        printError(query, cursor)
-                        return null
-                    }
-                    delay((TimeUnit.SECONDS.toMillis(2) * retryCount))
+                    delay((TimeUnit.SECONDS.toMillis(5) * retryCount))
                 } else {
                     printError(query, cursor)
-                    return null
+                    throw Exception("Unexpected return type ${e.status}")
                 }
             } catch (e: Exception) {
                 LOGGER.error("Query failed", e)
-                return null
+                throw e
             }
         }
-        return result
+
+
+        printError(query, cursor)
+        throw Exception("Update hit retry limit")
     }
 
 
@@ -145,32 +188,4 @@ open class GraphQLGitHubInterface {
         LOGGER.warn("Cursor $cursor")
     }
 
-
-    private fun readToken(): String {
-        var token = System.getenv("GITHUB_TOKEN")
-        if (token == null) {
-            token = System.getProperty("GITHUB_TOKEN")
-        }
-
-        if (token == null) {
-
-            val userHome = System.getProperty("user.home")
-
-            // e.g /home/foo/.adopt_api/token.properties
-            val propertiesFile = File(userHome + File.separator + ".adopt_api" + File.separator + "token.properties")
-
-            if (propertiesFile.exists()) {
-
-                val properties = Properties()
-                properties.load(Files.newInputStream(propertiesFile.toPath()))
-                token = properties.getProperty("token")
-            }
-
-        }
-        if (token == null) {
-            LOGGER.error("Could not find GITHUB_TOKEN")
-            exitProcess(1)
-        }
-        return token
-    }
 }

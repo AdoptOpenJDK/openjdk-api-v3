@@ -1,9 +1,9 @@
 package net.adoptopenjdk.api
 
 import kotlinx.coroutines.runBlocking
-import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
 import org.slf4j.LoggerFactory
@@ -32,8 +32,8 @@ class APIDataStoreTest : BaseTest() {
             ApiPersistenceFactory.get().updateAllRepos(repo)
             val dbData = APIDataStore.loadDataFromDb()
 
-            JSONAssert.assertEquals(JsonMapper.mapper.writeValueAsString(dbData),
-                    JsonMapper.mapper.writeValueAsString(repo),
+            JSONAssert.assertEquals(UpdaterJsonMapper.mapper.writeValueAsString(dbData),
+                    UpdaterJsonMapper.mapper.writeValueAsString(repo),
                     true)
         }
     }
