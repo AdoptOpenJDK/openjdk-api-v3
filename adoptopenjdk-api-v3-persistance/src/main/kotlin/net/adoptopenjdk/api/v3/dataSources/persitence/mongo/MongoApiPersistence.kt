@@ -9,10 +9,14 @@ import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.Release
+import org.bson.BsonArray
+import org.bson.BsonDateTime
+import org.bson.BsonDocument
 import org.bson.Document
 import org.litote.kmongo.coroutine.CoroutineCollection
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 
 class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient), ApiPersistence {
@@ -124,10 +128,10 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
 
     override suspend fun removeStatsBetween(start: LocalDateTime, end: LocalDateTime) {
         val deleteQuery = Document("\$and",
-                arrayOf(
-                        Document("date", Document("\$gt", start)),
-                        Document("date", Document("\$lt", end))
-                )
+                BsonArray(listOf(
+                        BsonDocument("date", BsonDocument("\$gt", BsonDateTime(start.toInstant(ZoneOffset.UTC).toEpochMilli()))),
+                        BsonDocument("date", BsonDocument("\$lt", BsonDateTime(end.toInstant(ZoneOffset.UTC).toEpochMilli())))
+                ))
         )
         dockerStatsCollection.deleteMany(deleteQuery)
         githubStatsCollection.deleteMany(deleteQuery)
