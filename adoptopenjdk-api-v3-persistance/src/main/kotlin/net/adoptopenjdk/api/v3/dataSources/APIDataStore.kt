@@ -62,6 +62,10 @@ object APIDataStore {
         return binaryRepos
     }
 
+    fun setAdoptRepos(binaryRepos: AdoptRepos) {
+        this.binaryRepos = binaryRepos
+    }
+
     private fun periodicUpdate() {
         //Must catch errors or may kill the scheduler
         try {
