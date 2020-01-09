@@ -117,7 +117,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
         val metadataString = CachedGithubHtmlClient.getUrl(metadataAsset.downloadUrl)
         if (binaryAsset != null && metadataString != null) {
             try {
-                withContext(Dispatchers.IO) {
+                return withContext(Dispatchers.IO) {
                     val metadata = UpdaterJsonMapper.mapper.readValue(metadataString, GHMetaData::class.java)
                     return@withContext Pair(binaryAsset, metadata)
                 }

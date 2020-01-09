@@ -6,7 +6,16 @@ import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.filters.BinaryFilter
 import net.adoptopenjdk.api.v3.dataSources.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.dataSources.filters.VersionRangeFilter
-import net.adoptopenjdk.api.v3.models.*
+import net.adoptopenjdk.api.v3.models.Architecture
+import net.adoptopenjdk.api.v3.models.BinaryAssetView
+import net.adoptopenjdk.api.v3.models.HeapSize
+import net.adoptopenjdk.api.v3.models.ImageType
+import net.adoptopenjdk.api.v3.models.JvmImpl
+import net.adoptopenjdk.api.v3.models.OperatingSystem
+import net.adoptopenjdk.api.v3.models.Project
+import net.adoptopenjdk.api.v3.models.Release
+import net.adoptopenjdk.api.v3.models.ReleaseType
+import net.adoptopenjdk.api.v3.models.Vendor
 import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Content
@@ -17,7 +26,11 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
-import javax.ws.rs.*
+import javax.ws.rs.BadRequestException
+import javax.ws.rs.GET
+import javax.ws.rs.NotFoundException
+import javax.ws.rs.Path
+import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
 import kotlin.math.min
 
@@ -177,6 +190,7 @@ class AssetsResource {
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
 
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, order)
+
         return getPage(pageSize, page, releases)
     }
 
