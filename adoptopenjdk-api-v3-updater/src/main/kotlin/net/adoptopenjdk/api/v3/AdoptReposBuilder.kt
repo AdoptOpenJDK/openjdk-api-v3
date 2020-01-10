@@ -7,6 +7,10 @@ import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.models.Release
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
+import kotlin.math.absoluteValue
 
 object AdoptReposBuilder {
 
@@ -56,6 +60,7 @@ object AdoptReposBuilder {
                 .filter { !excluded.contains(it.id) }
                 .filter { !pruned.releases.hasReleaseBeenUpdated(it.id, it.getUpdatedTime()) }
                 .mapNotNull { getReleaseById(it) }
+                .filter { isReleaseOldEnough(it.updated_at) } // Ignore artifacts for the first 10 min while they are still uploading
     }
 
     private suspend fun getNewReleases(summary: GHRepositorySummary, currentRelease: FeatureRelease): List<Release> {
@@ -63,6 +68,11 @@ object AdoptReposBuilder {
                 .filter { !excluded.contains(it.id) }
                 .filter { !currentRelease.releases.hasReleaseId(it.id) }
                 .mapNotNull { getReleaseById(it) }
+                .filter { isReleaseOldEnough(it.timestamp) } // Ignore artifacts for the first 10 min while they are still uploading
+    }
+
+    private fun isReleaseOldEnough(timestamp: LocalDateTime): Boolean {
+        return ChronoUnit.MINUTES.between(timestamp, LocalDateTime.now(ZoneId.of("Z"))).absoluteValue > 10
     }
 
     private suspend fun getReleaseById(it: GHReleaseSummary): Release? {
