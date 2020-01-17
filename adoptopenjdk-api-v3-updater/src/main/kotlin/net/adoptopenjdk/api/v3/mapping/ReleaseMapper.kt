@@ -11,7 +11,9 @@ abstract class ReleaseMapper {
     abstract suspend fun toAdoptRelease(release: GHRelease): Release?
 
 
-    fun parseDate(date: String): LocalDateTime =
-            Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(date)).atZone(ZoneId.of("UTC")).toLocalDateTime()
+    companion object {
+        fun parseDate(date: String): LocalDateTime =
+                Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(date)).atZone(ZoneId.of("UTC")).toLocalDateTime()
+    }
 
 }

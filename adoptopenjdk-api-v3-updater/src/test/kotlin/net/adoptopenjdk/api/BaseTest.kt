@@ -17,6 +17,8 @@ import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
+import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHAssetDateSummaries
+import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHAssetDateSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleasesSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
@@ -128,7 +130,8 @@ abstract class BaseTest {
                             .map {
                                 GHReleaseSummary(it.id,
                                         DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.of("UTC")).format(it.timestamp),
-                                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.of("UTC")).format(it.updated_at))
+                                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.of("UTC")).format(it.updated_at),
+                                        GHAssetDateSummaries(listOf(GHAssetDateSummary(DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.of("UTC")).format(it.updated_at)))))
                             }
                             .toList()
 
