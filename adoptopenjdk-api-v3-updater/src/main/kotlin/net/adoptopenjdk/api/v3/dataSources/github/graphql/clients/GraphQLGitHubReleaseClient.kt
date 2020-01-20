@@ -26,7 +26,7 @@ open class GraphQLGitHubReleaseClient : GraphQLGitHubReleaseRequest() {
             release = result.response.release
         }
 
-        return release
+        return GraphQLGitHubRepositoryClient.fixReleaseUpdateTime(release)
     }
 
     private fun getReleaseByIdQuery(releaseId: String): GraphQLRequestEntity.RequestBuilder {

@@ -2,6 +2,8 @@ package net.adoptopenjdk.api
 
 import net.adoptopenjdk.api.v3.models.VersionData
 import net.adoptopenjdk.api.v3.parser.VersionParser
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
@@ -9,8 +11,6 @@ import java.net.URLDecoder
 import java.nio.charset.Charset
 import java.util.*
 import java.util.stream.Stream
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 
 class VersionParserTest {

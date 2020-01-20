@@ -17,11 +17,18 @@ data class GHReleasesSummary @JsonCreator constructor(@JsonProperty("nodes") val
 data class GHReleaseSummary @JsonCreator constructor(
         @JsonProperty("id") val id: String,
         @JsonProperty("publishedAt") val publishedAt: String,
-        @JsonProperty("updatedAt") val updatedAt: String) {
-
+        @JsonProperty("updatedAt") val updatedAt: String,
+        @JsonProperty("releaseAssets") val releaseAssets: GHAssetDateSummaries
+) {
     fun getUpdatedTime(): LocalDateTime {
         return LocalDateTime.from(DateTimeFormatter.ISO_DATE_TIME.parse(updatedAt))
     }
-
-
 }
+
+data class GHAssetDateSummaries @JsonCreator constructor(
+        @JsonProperty("nodes") val assets: List<GHAssetDateSummary>
+)
+
+data class GHAssetDateSummary @JsonCreator constructor(
+        @JsonProperty("updatedAt") val updatedAt: String
+)
