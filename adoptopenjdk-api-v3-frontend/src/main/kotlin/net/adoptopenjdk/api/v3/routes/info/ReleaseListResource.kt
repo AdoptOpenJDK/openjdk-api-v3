@@ -5,8 +5,13 @@ import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.dataSources.filters.VersionRangeFilter
-import net.adoptopenjdk.api.v3.models.*
+import net.adoptopenjdk.api.v3.models.Release
+import net.adoptopenjdk.api.v3.models.ReleaseList
+import net.adoptopenjdk.api.v3.models.ReleaseType
+import net.adoptopenjdk.api.v3.models.ReleaseVersionList
+import net.adoptopenjdk.api.v3.models.Vendor
 import org.eclipse.microprofile.openapi.annotations.Operation
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
@@ -37,11 +42,11 @@ class ReleaseListResource {
             @QueryParam("vendor")
             vendor: Vendor?,
 
-            @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "10"), required = false)
+            @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "10", type = SchemaType.INTEGER), required = false)
             @QueryParam("page_size")
             pageSize: Int?,
 
-            @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0"), required = false)
+            @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false)
             @QueryParam("page")
             page: Int?,
 
@@ -77,11 +82,11 @@ class ReleaseListResource {
             @QueryParam("vendor")
             vendor: Vendor?,
 
-            @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "10"), required = false)
+            @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "10", type = SchemaType.INTEGER), required = false)
             @QueryParam("page_size")
             pageSize: Int?,
 
-            @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0"), required = false)
+            @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false)
             @QueryParam("page")
             page: Int?,
 
