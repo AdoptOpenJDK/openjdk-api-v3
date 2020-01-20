@@ -6,7 +6,6 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.QuerySummaryDat
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleasesSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
-import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import org.slf4j.LoggerFactory
 
 
@@ -28,31 +27,9 @@ class GraphQLGitHubSummaryClient : GraphQLGitHubInterface() {
                 { it.repository!!.releases.pageInfo.endCursor },
                 clazz = QuerySummaryData::class.java)
 
-        val fixedUpdateTimeReleases = fixUpdateTimes(releases)
-
         LOGGER.info("Done getting summary $repoName")
 
-        return GHRepositorySummary(GHReleasesSummary(fixedUpdateTimeReleases, PageInfo(false, null)))
-    }
-
-    private fun fixUpdateTimes(releases: List<GHReleaseSummary>): List<GHReleaseSummary> {
-        //Fix broken github updatedAt times
-        return releases
-                .map {
-                    val assetUpdatedAt = ReleaseMapper.parseDate(it.releaseAssets.assets.last().updatedAt)
-                    val releaseUpdatedAt = ReleaseMapper.parseDate(it.updatedAt)
-
-                    if (assetUpdatedAt.isAfter(releaseUpdatedAt)) {
-                        GHReleaseSummary(
-                                it.id,
-                                it.publishedAt,
-                                it.releaseAssets.assets.last().updatedAt,
-                                it.releaseAssets
-                        )
-                    } else {
-                        it
-                    }
-                }
+        return GHRepositorySummary(GHReleasesSummary(releases, PageInfo(false, null)))
     }
 
     private fun getSummary(request: QuerySummaryData): List<GHReleaseSummary> {
@@ -63,7 +40,6 @@ class GraphQLGitHubSummaryClient : GraphQLGitHubInterface() {
     }
 
     private fun getReleaseSummary(repoName: String): GraphQLRequestEntity.RequestBuilder {
-        //This assumes the last node is the most recently updated, this seems to be the case, but cant be sure on that
         return request("""
                         query(${'$'}cursorPointer:String) { 
                             repository(owner:"$OWNER", name:"$repoName") { 
@@ -71,12 +47,7 @@ class GraphQLGitHubSummaryClient : GraphQLGitHubInterface() {
                                     nodes {
                                         id,
                                         publishedAt,
-                                        updatedAt,
-                                        releaseAssets(last:1) {
-                                            nodes {
-                                                updatedAt
-                                            }
-                                        }
+                                        updatedAt
                                     },
                                     pageInfo {
                                         hasNextPage,

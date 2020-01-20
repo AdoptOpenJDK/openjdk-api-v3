@@ -1,9 +1,9 @@
 package net.adoptopenjdk.api.v3.models
 
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 abstract class DbStatsEntry<T>(
-        val date: LocalDateTime
+        val date: ZonedDateTime
 ) {
     abstract fun getMetric(): Long
     abstract fun getId(): T

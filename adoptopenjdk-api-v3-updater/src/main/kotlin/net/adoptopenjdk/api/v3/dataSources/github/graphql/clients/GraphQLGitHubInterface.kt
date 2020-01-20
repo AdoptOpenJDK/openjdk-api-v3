@@ -8,6 +8,7 @@ import io.aexp.nodes.graphql.exceptions.GraphQLException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.github.GithubAuth
@@ -142,7 +143,7 @@ open class GraphQLGitHubInterface {
             } else {
                 val reset = LocalDateTime.ofEpochSecond(resetTime, 0, ZoneOffset.UTC)
                 LOGGER.info("Remaining quota VERY LOW $remainingQuota delaying til $reset")
-                ChronoUnit.SECONDS.between(LocalDateTime.now(ZoneOffset.UTC), reset)
+                ChronoUnit.SECONDS.between(TimeSource.now(), reset)
             }
 
             return Pair(remainingQuota, delayTime)

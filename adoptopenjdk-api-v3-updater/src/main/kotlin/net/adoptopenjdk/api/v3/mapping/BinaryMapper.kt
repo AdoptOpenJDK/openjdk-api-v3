@@ -2,10 +2,7 @@ package net.adoptopenjdk.api.v3.mapping
 
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.models.FileNameMatcher
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import java.time.ZonedDateTime
 
 abstract class BinaryMapper {
 
@@ -32,6 +29,5 @@ abstract class BinaryMapper {
     }
 
 
-    fun getUpdatedTime(asset: GHAsset): LocalDateTime =
-            Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(asset.updatedAt)).atZone(ZoneId.of("UTC")).toLocalDateTime()
+    fun getUpdatedTime(asset: GHAsset): ZonedDateTime = ReleaseMapper.parseDate(asset.updatedAt)
 }

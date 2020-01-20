@@ -12,6 +12,8 @@ import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.jboss.resteasy.annotations.jaxrs.PathParam
+import java.time.LocalDate
+import java.time.ZoneOffset
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
 import javax.ws.rs.BadRequestException
@@ -104,7 +106,7 @@ class DownloadStatsResource {
     @Operation(summary = "Get download stats for feature verson", description = "stats", hidden = true)
     @Schema(hidden = true)
     fun tracking(
-            @Parameter(name = "days", description = "Number of days to display", schema = Schema(defaultValue = "30"), required = false)
+            @Parameter(name = "days", description = "Number of days to display, if used in conjunction with from/to then this will limit the request to x days before the end of the given period", schema = Schema(defaultValue = "30"), required = false)
             @QueryParam("days")
             days: Int?,
             @Parameter(name = "source", description = "Stats data source", schema = Schema(defaultValue = "all"), required = false)
@@ -115,7 +117,13 @@ class DownloadStatsResource {
             featureVersion: Int?,
             @Parameter(name = "docker_repo", description = "Docker repo to filter stats by", required = false)
             @QueryParam("docker_repo")
-            dockerRepo: String?
+            dockerRepo: String?,
+            @Parameter(name = "from", description = "Date from which to calculate stats (inclusive)", schema = Schema(example = "YYYY-MM-dd"), required = false)
+            @QueryParam("from")
+            from: String?,
+            @Parameter(name = "to", description = "Date upto which to calculate stats (inclusive)", schema = Schema(example = "YYYY-MM-dd"), required = false)
+            @QueryParam("to")
+            to: String?
     ): CompletionStage<Response> {
         return runAsync {
             if (featureVersion != null && source != StatsSource.github) {
@@ -126,7 +134,22 @@ class DownloadStatsResource {
                 throw BadRequestException("docker_repo can only be used with source=dockerhub")
             }
 
-            return@runAsync statsInterface.getTrackingStats(days, source, featureVersion, dockerRepo)
+            val fromDate = parseDate(from)?.atStartOfDay()?.atZone(ZoneOffset.UTC)
+            val toDate = parseDate(to)?.plusDays(1)?.atStartOfDay()?.atZone(ZoneOffset.UTC)
+
+            return@runAsync statsInterface.getTrackingStats(days, fromDate, toDate, source, featureVersion, dockerRepo)
+        }
+    }
+
+    private fun parseDate(date: String?): LocalDate? {
+        return if (date == null) {
+            null
+        } else {
+            try {
+                LocalDate.parse(date)
+            } catch (e: Exception) {
+                throw BadRequestException("Cannot parse date $date")
+            }
         }
     }
 

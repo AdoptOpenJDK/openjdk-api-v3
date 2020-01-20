@@ -1,7 +1,7 @@
 package net.adoptopenjdk.api.v3.models
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 @Schema
 class Binary {
@@ -29,8 +29,8 @@ class Binary {
     @Schema(example = "3899")
     val download_count: Long
 
-    @Schema(example = "2018-03-15T12:13:07.000Z")
-    val updated_at: LocalDateTime
+    @Schema(example = "2018-03-15T12:13:07Z")
+    val updated_at: ZonedDateTime
 
     @Schema(example = "dd28d6d2cde2b931caf94ac2422a2ad082ea62f0beee3bf7057317c53093de93")
     val scm_ref: String?
@@ -41,7 +41,7 @@ class Binary {
     constructor(
             `package`: Package,
             download_count: Long,
-            updated_at: LocalDateTime,
+            updated_at: ZonedDateTime,
             scm_ref: String?,
             installer: Installer?,
             heap_size: HeapSize,

@@ -1,6 +1,7 @@
 package net.adoptopenjdk.api
 
 import kotlinx.coroutines.runBlocking
+import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.models.Architecture
@@ -17,7 +18,7 @@ import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.models.VersionData
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import kotlin.test.assertTrue
 
 
@@ -26,7 +27,7 @@ class AdoptReposTest : BaseTest() {
     @Test
     fun repoEqualityCheckIsCorrect() {
         runBlocking {
-            val time = LocalDateTime.now()
+            val time = TimeSource.now()
             val a = formFeatureRelease(time)
             val b = formFeatureRelease(time)
 
@@ -34,13 +35,13 @@ class AdoptReposTest : BaseTest() {
         }
     }
 
-    private fun formFeatureRelease(time: LocalDateTime): FeatureRelease {
+    private fun formFeatureRelease(time: ZonedDateTime): FeatureRelease {
         return FeatureRelease(8, Releases(listOf(Release(
                 "a",
                 ReleaseType.ga,
                 "b",
                 "c",
-                time,
+                TimeSource.now(),
                 time,
                 arrayOf(Binary(
                         Package("a",

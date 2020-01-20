@@ -5,10 +5,11 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepos
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
+import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import net.adoptopenjdk.api.v3.models.Release
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.time.ZoneId
+
+import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.math.absoluteValue
 
@@ -59,20 +60,21 @@ object AdoptReposBuilder {
         return summary.releases.releases
                 .filter { !excluded.contains(it.id) }
                 .filter { !pruned.releases.hasReleaseBeenUpdated(it.id, it.getUpdatedTime()) }
+                .filter { isReleaseOldEnough(it.publishedAt) } // Ignore artifacts for the first 10 min while they are still uploading
                 .mapNotNull { getReleaseById(it) }
-                .filter { isReleaseOldEnough(it.updated_at) } // Ignore artifacts for the first 10 min while they are still uploading
     }
 
     private suspend fun getNewReleases(summary: GHRepositorySummary, currentRelease: FeatureRelease): List<Release> {
         return summary.releases.releases
                 .filter { !excluded.contains(it.id) }
                 .filter { !currentRelease.releases.hasReleaseId(it.id) }
+                .filter { isReleaseOldEnough(it.publishedAt) } // Ignore artifacts for the first 10 min while they are still uploading
                 .mapNotNull { getReleaseById(it) }
-                .filter { isReleaseOldEnough(it.timestamp) } // Ignore artifacts for the first 10 min while they are still uploading
     }
 
-    private fun isReleaseOldEnough(timestamp: LocalDateTime): Boolean {
-        return ChronoUnit.MINUTES.between(timestamp, LocalDateTime.now(ZoneId.of("Z"))).absoluteValue > 10
+    private fun isReleaseOldEnough(timestamp: String): Boolean {
+        val created = ReleaseMapper.parseDate(timestamp)
+        return ChronoUnit.MINUTES.between(created, TimeSource.now()).absoluteValue > 10
     }
 
     private suspend fun getReleaseById(it: GHReleaseSummary): Release? {

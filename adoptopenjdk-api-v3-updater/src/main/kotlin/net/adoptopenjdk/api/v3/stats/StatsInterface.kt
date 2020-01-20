@@ -7,6 +7,7 @@ import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.StatsSource
 import org.slf4j.LoggerFactory
+import java.time.ZoneOffset
 
 class StatsInterface {
 
@@ -29,7 +30,7 @@ class StatsInterface {
     }
 
     private suspend fun removeBadDownloadStats() {
-        val tracking = downloadStatsInterface.getTrackingStats(10, StatsSource.all, null, null)
+        val tracking = downloadStatsInterface.getTrackingStats(10, null, null, StatsSource.all, null, null)
         tracking
                 .filter { it.daily <= 0 }
                 .forEach { entry ->
@@ -37,7 +38,7 @@ class StatsInterface {
                     val end = entry.date.toLocalDate().plusDays(1).atStartOfDay()
                     LOGGER.info("Removing bad stats between $start $end")
                     runBlocking {
-                        database.removeStatsBetween(start, end)
+                        database.removeStatsBetween(start.atZone(ZoneOffset.UTC), end.atZone(ZoneOffset.UTC))
                     }
                 }
     }
