@@ -30,7 +30,7 @@ class AdoptReleaseMapperTest {
             val ghRelease = GHRelease("1", "OpenJDK 123244354325", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "a-url");
 
             try {
-                val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
+                AdoptReleaseMapper.toAdoptRelease(ghRelease)
                 fail("Did not throw exception")
             } catch (e: Exception) {
                 return@runBlocking
@@ -50,7 +50,7 @@ class AdoptReleaseMapperTest {
 
             val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
 
-            assertEquals(ReleaseType.ea, release!!.release_type)
+            assertEquals(ReleaseType.ea, release.release_type)
         }
     }
 }

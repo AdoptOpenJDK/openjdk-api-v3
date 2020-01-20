@@ -21,25 +21,27 @@ import javax.json.JsonObject
 import kotlin.math.max
 
 
-open class GraphQLGitHubInterface {
+open class GraphQLGitHubInterface() {
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
     }
 
-    // GH limit 500,000 nodes per request
-    // total nodes:
-    //  50 releases
-    //  50 releases * 100 assets
-    // = 50 + 50 * 100
-    // = 5050
-
     protected val OWNER = "AdoptOpenJDK"
 
     private val BASE_URL = "https://api.github.com/graphql"
-    private val TOKEN: String = GithubAuth.readToken()
+    private val TOKEN: String
     private val THRESHOLD_START = System.getenv("GITHUB_THRESHOLD")?.toFloatOrNull() ?: 1000f
     private val THRESHOLD_HARD_FLOOR = System.getenv("GITHUB_THRESHOLD_HARD_FLOOR")?.toFloatOrNull() ?: 200f
+
+    init {
+        val token = GithubAuth.readToken()
+        if (token == null) {
+            throw IllegalStateException("No token provided")
+        } else {
+            TOKEN = token
+        }
+    }
 
     fun request(query: String): GraphQLRequestEntity.RequestBuilder {
         return GraphQLRequestEntity.Builder()
