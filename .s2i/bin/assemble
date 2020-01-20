@@ -7,7 +7,7 @@ fi
 cd /tmp/src
 ./mvnw clean package
 
-if [ -z "$SWAGGERHUB_APIKEY" ]; then
+if [ -v SWAGGERHUB_APIKEY ]; then
   cd adoptopenjdk-api-v3-frontend
   unzip target/adoptopenjdk-api-v3-frontend-*-runner.jar META-INF/quarkus-generated-openapi-doc.JSON || true
   ../mvnw io.swagger:swaggerhub-maven-plugin:upload || true
