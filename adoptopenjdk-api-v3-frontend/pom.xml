@@ -226,7 +226,16 @@
                     </inputFile>
                     <token>${SWAGGERHUB_APIKEY}</token>
                     <uploadType>inputFile</uploadType>
+                    <skipFailures>true</skipFailures>
                 </configuration>
+                <executions>
+                    <execution>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>upload</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
