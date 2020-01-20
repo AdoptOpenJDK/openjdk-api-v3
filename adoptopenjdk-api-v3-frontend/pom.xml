@@ -230,7 +230,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>deploy</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>upload</goal>
                         </goals>
