@@ -9,6 +9,7 @@ import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.StatsSource
 import net.adoptopenjdk.api.v3.models.Vendor
 import org.eclipse.microprofile.openapi.annotations.Operation
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.jboss.resteasy.annotations.jaxrs.PathParam
@@ -104,7 +105,7 @@ class DownloadStatsResource {
     @Operation(summary = "Get download stats for feature verson", description = "stats", hidden = true)
     @Schema(hidden = true)
     fun tracking(
-            @Parameter(name = "days", description = "Number of days to display", schema = Schema(defaultValue = "30"), required = false)
+            @Parameter(name = "days", description = "Number of days to display", schema = Schema(defaultValue = "30", type = SchemaType.INTEGER), required = false)
             @QueryParam("days")
             days: Int?,
             @Parameter(name = "source", description = "Stats data source", schema = Schema(defaultValue = "all"), required = false)
