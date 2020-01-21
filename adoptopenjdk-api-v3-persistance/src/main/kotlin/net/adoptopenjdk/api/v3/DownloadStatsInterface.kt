@@ -45,7 +45,8 @@ class DownloadStatsInterface {
         // previous entry before the period started
         val stats = getStats(periodStart.minusDays(10), periodEnd, featureVersion, dockerRepo, statsSource)
 
-        return calculateDailyDiff(stats, periodStart, periodEnd)
+        return calculateDailyDiff(stats, periodStart, periodEnd, days)
+
     }
 
     private suspend fun getStats(start: ZonedDateTime, end: ZonedDateTime, featureVersion: Int?, dockerRepo: String?, statsSource: StatsSource): Collection<StatEntry> {
@@ -60,7 +61,7 @@ class DownloadStatsInterface {
         return stats
     }
 
-    private fun calculateDailyDiff(stats: Collection<StatEntry>, periodStart: ZonedDateTime, periodEnd: ZonedDateTime): List<DownloadDiff> {
+    private fun calculateDailyDiff(stats: Collection<StatEntry>, periodStart: ZonedDateTime, periodEnd: ZonedDateTime, days: Int?): List<DownloadDiff> {
         return stats
                 .groupBy { it.dateTime.toLocalDate() }
                 .map { grouped ->
@@ -76,6 +77,7 @@ class DownloadStatsInterface {
                     DownloadDiff(it[1].dateTime, it[1].count, downloadDiff)
                 }
                 .filter { it.date.isAfter(periodStart) && it.date.isBefore(periodEnd) }
+                .takeLast(days ?: Int.MAX_VALUE)
     }
 
     private suspend fun getGithubDownloadStatsByDate(start: ZonedDateTime, end: ZonedDateTime, featureVersion: Int?): List<StatEntry> {
