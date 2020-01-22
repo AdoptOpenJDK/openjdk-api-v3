@@ -71,9 +71,9 @@ abstract class BaseTest {
 
         @JvmStatic
         fun mockRepo() {
-            val adoptRepos = UpdaterJsonMapper.mapper.readValue(GZIPInputStream(javaClass.classLoader.getResourceAsStream("example-data.json.gz")), AdoptRepos::class.java)
+            val adoptRepos = UpdaterJsonMapper.mapper.readValue(GZIPInputStream(BaseTest::class.java.classLoader.getResourceAsStream("example-data.json.gz")), AdoptRepos::class.java)
 
-            AdoptRepositoryFactory.adoptRepository = MockRepository(adoptRepos!!)
+            AdoptRepositoryFactory.setAdoptRepository(MockRepository(adoptRepos!!))
         }
 
         @JvmStatic

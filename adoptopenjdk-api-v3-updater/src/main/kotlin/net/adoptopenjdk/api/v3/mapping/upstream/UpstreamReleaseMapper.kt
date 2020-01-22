@@ -37,12 +37,7 @@ object UpstreamReleaseMapper : ReleaseMapper() {
             if (release_type == ReleaseType.ga && binaries.size > 0) {
                 //Release names for ga do not have a full version name, so take it from the package
                 val pack = binaries.get(0).`package`
-                if (pack != null) {
-                    versionData = getVersionData(URLDecoder.decode(pack.link, Charset.defaultCharset()))
-                } else {
-                    LOGGER.error("Failed to parse version for $releaseName")
-                    return null
-                }
+                versionData = getVersionData(URLDecoder.decode(pack.link, Charset.defaultCharset()))
             } else {
                 versionData = getVersionData(releaseName)
             }
