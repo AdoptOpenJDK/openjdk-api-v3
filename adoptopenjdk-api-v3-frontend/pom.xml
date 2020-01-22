@@ -221,11 +221,18 @@
                     <api>API</api>
                     <owner>AdoptOpenJDK</owner>
                     <version>${project.version}</version>
-                    <inputFile>
-                        target/wiring-classes/META-INF/resources/quarkus-generated-openapi-doc.JSON
-                    </inputFile>
+                    <inputFile>META-INF/quarkus-generated-openapi-doc.JSON</inputFile>
                     <token>${SWAGGERHUB_APIKEY}</token>
                     <uploadType>inputFile</uploadType>
+                    <skipFailures>true</skipFailures>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>4.2.2</version>
+                <configuration>
+                    <generatorName>javascript</generatorName>
                 </configuration>
             </plugin>
         </plugins>

@@ -30,7 +30,7 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
-        private val TOKEN: String = GithubAuth.readToken()
+        private val TOKEN: String? = GithubAuth.readToken()
     }
 
     class ResponseHandler(val client: DefaultUpdaterHtmlClient, val continuation: Continuation<String>) : FutureCallback<HttpResponse> {
@@ -88,7 +88,7 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
         try {
             val request = HttpGet(url.toURI())
 
-            if (url.host.endsWith("github.com")) {
+            if (url.host.endsWith("github.com") && TOKEN != null) {
                 request.setHeader("Authorization", "token $TOKEN")
             }
 

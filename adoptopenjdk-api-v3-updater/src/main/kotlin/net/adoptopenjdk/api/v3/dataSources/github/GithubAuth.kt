@@ -4,7 +4,6 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Files
 import java.util.*
-import kotlin.system.exitProcess
 
 class GithubAuth {
 
@@ -12,7 +11,7 @@ class GithubAuth {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-        fun readToken(): String {
+        fun readToken(): String? {
             var token = System.getenv("GITHUB_TOKEN")
             if (token == null) {
                 token = System.getProperty("GITHUB_TOKEN")
@@ -35,7 +34,6 @@ class GithubAuth {
             }
             if (token == null) {
                 LOGGER.error("Could not find GITHUB_TOKEN")
-                exitProcess(1)
             }
             return token
         }

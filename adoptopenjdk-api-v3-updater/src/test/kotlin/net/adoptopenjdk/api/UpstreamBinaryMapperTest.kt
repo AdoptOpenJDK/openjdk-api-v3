@@ -14,7 +14,7 @@ class UpstreamBinaryMapperTest {
     companion object {
         @JvmStatic
         @BeforeAll
-        public fun setup() {
+        fun setup() {
             BaseTest.startFongo()
             BaseTest.mockRepo()
         }
@@ -30,9 +30,9 @@ class UpstreamBinaryMapperTest {
                             1L,
                             "2013-02-27T19:35:32Z"),
                     GHAsset(
-                            name + ".sign",
+                            "$name.sign",
                             1L,
-                            "a-signature-link to ${name}",
+                            "a-signature-link to $name",
                             1L,
                             "2013-02-27T19:35:32Z")
             )
@@ -50,7 +50,7 @@ class UpstreamBinaryMapperTest {
             val binaryList = UpstreamBinaryMapper.toBinaryList(assets)
 
             assert(binaryList.size == 1)
-            assertEquals(assets.get(0).name, binaryList.get(0).`package`!!.name)
+            assertEquals(assets[0].name, binaryList[0].`package`.name)
         }
     }
 
@@ -70,10 +70,10 @@ class UpstreamBinaryMapperTest {
             val binaryList = UpstreamBinaryMapper.toBinaryList(assets)
 
             assertEquals(4, binaryList.size)
-            assertEquals(ImageType.jdk, binaryList.get(0).image_type)
-            assertEquals(ImageType.jdk, binaryList.get(1).image_type)
-            assertEquals(ImageType.testimage, binaryList.get(2).image_type)
-            assertEquals(ImageType.jre, binaryList.get(3).image_type)
+            assertEquals(ImageType.jdk, binaryList[0].image_type)
+            assertEquals(ImageType.jdk, binaryList[1].image_type)
+            assertEquals(ImageType.testimage, binaryList[2].image_type)
+            assertEquals(ImageType.jre, binaryList[3].image_type)
         }
 
     }
@@ -88,7 +88,7 @@ class UpstreamBinaryMapperTest {
 
         runBlocking {
             val binaryList = UpstreamBinaryMapper.toBinaryList(assets)
-            assertEquals("a-signature-link to OpenJDK11U-x64_linux_11.0.3_7.tar.gz", binaryList.get(0).`package`?.signature_link)
+            assertEquals("a-signature-link to OpenJDK11U-x64_linux_11.0.3_7.tar.gz", binaryList[0].`package`.signature_link)
         }
 
     }

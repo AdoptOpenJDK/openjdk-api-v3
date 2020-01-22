@@ -11,7 +11,6 @@ import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.AdoptRepository
 import net.adoptopenjdk.api.v3.AdoptRepositoryFactory
-import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
@@ -29,7 +28,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.LoggerFactory
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.zip.GZIPInputStream
 import kotlin.random.Random
@@ -70,18 +68,9 @@ abstract class BaseTest {
 
         @JvmStatic
         fun mockRepo() {
+            val adoptRepos = UpdaterJsonMapper.mapper.readValue(GZIPInputStream(BaseTest::class.java.classLoader.getResourceAsStream("example-data.json.gz")), AdoptRepos::class.java)
 
-            // LD to Z
-            val l = UpdaterJsonMapper.mapper.writeValueAsString(TimeSource.now());
-            val z = UpdaterJsonMapper.mapper.readValue(l, ZonedDateTime::class.java)
-
-            // Z to Z
-            val l2 = UpdaterJsonMapper.mapper.writeValueAsString(TimeSource.now());
-            val z2 = UpdaterJsonMapper.mapper.readValue(l2, ZonedDateTime::class.java)
-
-            val adoptRepos = UpdaterJsonMapper.mapper.readValue(GZIPInputStream(javaClass.classLoader.getResourceAsStream("example-data.json.gz")), AdoptRepos::class.java)
-
-            AdoptRepositoryFactory.adoptRepository = MockRepository(adoptRepos!!)
+            AdoptRepositoryFactory.setAdoptRepository(MockRepository(adoptRepos!!))
         }
 
         @JvmStatic

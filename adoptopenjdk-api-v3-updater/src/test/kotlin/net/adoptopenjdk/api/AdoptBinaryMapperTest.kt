@@ -57,7 +57,7 @@ class AdoptBinaryMapperTest {
                             1L,
                             "2013-02-27T19:35:32Z")), emptyMap())
 
-            assertEquals("a-download-link", binaryList.get(0).`package`!!.checksum_link)
+            assertEquals("a-download-link", binaryList.get(0).`package`.checksum_link)
         }
     }
 
