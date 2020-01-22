@@ -30,7 +30,7 @@ object AdoptReposBuilder {
     }
 
     private suspend fun getUpdatedFeatureRelease(entry: Map.Entry<Int, FeatureRelease>, repo: AdoptRepos): FeatureRelease? {
-        val summary = AdoptRepositoryFactory.adoptRepository.getSummary(entry.key)
+        val summary = AdoptRepositoryFactory.getAdoptRepository().getSummary(entry.key)
 
         // Update cycle
         // 1) remove missing ones
@@ -79,7 +79,7 @@ object AdoptReposBuilder {
 
     private suspend fun getReleaseById(it: GHReleaseSummary): Release? {
         return try {
-            return AdoptRepositoryFactory.adoptRepository.getReleaseById(it.id)
+            return AdoptRepositoryFactory.getAdoptRepository().getReleaseById(it.id)
         } catch (e: Exception) {
             LOGGER.info("Excluding ${it.id} from update")
             excluded.add(it.id)
@@ -94,7 +94,7 @@ object AdoptReposBuilder {
         val reposMap = versions
                 .reversed()
                 .map { version ->
-                    AdoptRepositoryFactory.adoptRepository.getRelease(version)
+                    AdoptRepositoryFactory.getAdoptRepository().getRelease(version)
                 }
                 .map { Pair(it.featureVersion, it) }
                 .toMap()

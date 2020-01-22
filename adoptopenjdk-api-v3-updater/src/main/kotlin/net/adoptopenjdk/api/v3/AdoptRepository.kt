@@ -16,7 +16,18 @@ import net.adoptopenjdk.api.v3.models.Release
 import org.slf4j.LoggerFactory
 
 object AdoptRepositoryFactory {
-    var adoptRepository: AdoptRepository = AdoptRepositoryImpl
+    private var adoptRepository: AdoptRepository? = null;
+
+    fun getAdoptRepository(): AdoptRepository {
+        if (adoptRepository == null) {
+            adoptRepository = AdoptRepositoryImpl
+        }
+        return adoptRepository!!;
+    }
+
+    fun setAdoptRepository(repo: AdoptRepository) {
+        this.adoptRepository = repo
+    }
 }
 
 interface AdoptRepository {

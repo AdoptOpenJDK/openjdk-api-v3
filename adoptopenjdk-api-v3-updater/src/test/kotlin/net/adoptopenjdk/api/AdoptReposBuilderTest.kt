@@ -21,7 +21,7 @@ class AdoptReposBuilderTest : BaseTest() {
             val toRemove = repo.getFeatureRelease(8)!!.releases.nodes.values.first()
             val removedRepo = repo.removeRelease(8, toRemove)
 
-            AdoptRepositoryFactory.adoptRepository = MockRepository(removedRepo)
+            AdoptRepositoryFactory.setAdoptRepository(MockRepository(removedRepo))
 
             val updated = AdoptReposBuilder.incrementalUpdate(repo)
 
@@ -44,7 +44,7 @@ class AdoptReposBuilderTest : BaseTest() {
 
             val removedRepo = repo.addRelease(8, toAdd)
 
-            AdoptRepositoryFactory.adoptRepository = MockRepository(removedRepo)
+            AdoptRepositoryFactory.setAdoptRepository(MockRepository(removedRepo))
 
             val updated = AdoptReposBuilder.incrementalUpdate(repo)
 
@@ -67,7 +67,7 @@ class AdoptReposBuilderTest : BaseTest() {
 
             val removedRepo = repo.addRelease(8, toAdd)
 
-            AdoptRepositoryFactory.adoptRepository = MockRepository(removedRepo)
+            AdoptRepositoryFactory.setAdoptRepository(MockRepository(removedRepo))
 
             val updated = AdoptReposBuilder.incrementalUpdate(repo)
 
@@ -90,7 +90,7 @@ class AdoptReposBuilderTest : BaseTest() {
 
             val updatedRepo = repo.removeRelease(8, original)//.addRelease(8, toUpdate)
 
-            AdoptRepositoryFactory.adoptRepository = MockRepository(updatedRepo)
+            AdoptRepositoryFactory.setAdoptRepository(MockRepository(updatedRepo))
 
             val updated = AdoptReposBuilder.incrementalUpdate(repo)
 
@@ -107,7 +107,7 @@ class AdoptReposBuilderTest : BaseTest() {
         runBlocking {
             val repo = getInitialRepo()
 
-            AdoptRepositoryFactory.adoptRepository = MockRepository(repo)
+            AdoptRepositoryFactory.setAdoptRepository(MockRepository(repo))
             val updated = AdoptReposBuilder.incrementalUpdate(repo)
 
             assertTrue { updated == repo }

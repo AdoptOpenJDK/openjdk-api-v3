@@ -55,7 +55,7 @@ class AssetsResource {
             release_type: ReleaseType?,
 
             @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
-                    schema = Schema(defaultValue = "8"))
+                    schema = Schema(defaultValue = "8", type = SchemaType.INTEGER))
             @PathParam("feature_version")
             version: Int?,
 
@@ -87,11 +87,11 @@ class AssetsResource {
             @QueryParam("project")
             project: Project?,
 
-            @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "10"), required = false)
+            @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "10", type = SchemaType.INTEGER), required = false)
             @QueryParam("page_size")
             pageSize: Int?,
 
-            @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0"), required = false)
+            @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false)
             @QueryParam("page")
             page: Int?,
 
@@ -167,11 +167,11 @@ class AssetsResource {
             @QueryParam("release_type")
             release_type: ReleaseType?,
 
-            @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "20"), required = false)
+            @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "20", type = SchemaType.INTEGER), required = false)
             @QueryParam("page_size")
             pageSize: Int?,
 
-            @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0"), required = false)
+            @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false)
             @QueryParam("page")
             page: Int?,
 
@@ -217,7 +217,7 @@ class AssetsResource {
     fun getLatestAssets(
 
             @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
-                    schema = Schema(defaultValue = "8"))
+                    schema = Schema(defaultValue = "8", type = SchemaType.INTEGER))
             @PathParam("feature_version")
             version: Int,
 

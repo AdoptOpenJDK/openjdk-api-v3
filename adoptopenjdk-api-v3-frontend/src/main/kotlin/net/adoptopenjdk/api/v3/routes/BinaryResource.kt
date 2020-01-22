@@ -6,8 +6,18 @@ import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.filters.BinaryFilter
 import net.adoptopenjdk.api.v3.dataSources.filters.ReleaseFilter
-import net.adoptopenjdk.api.v3.models.*
+import net.adoptopenjdk.api.v3.models.APIError
+import net.adoptopenjdk.api.v3.models.Architecture
+import net.adoptopenjdk.api.v3.models.HeapSize
+import net.adoptopenjdk.api.v3.models.ImageType
+import net.adoptopenjdk.api.v3.models.JvmImpl
+import net.adoptopenjdk.api.v3.models.OperatingSystem
+import net.adoptopenjdk.api.v3.models.Project
+import net.adoptopenjdk.api.v3.models.Release
+import net.adoptopenjdk.api.v3.models.ReleaseType
+import net.adoptopenjdk.api.v3.models.Vendor
 import org.eclipse.microprofile.openapi.annotations.Operation
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse
@@ -48,7 +58,7 @@ class BinaryResource {
             arch: Architecture?,
 
             @Parameter(name = "release_name", description = OpenApiDocs.RELASE_NAME, required = true,
-                    schema = Schema(defaultValue = "jdk-11.0.4+11"))
+                    schema = Schema(defaultValue = "jdk-11.0.6+10", type = SchemaType.STRING))
             @PathParam("release_name")
             release_name: String?,
 
@@ -93,7 +103,7 @@ class BinaryResource {
     ])
     fun returnBinary(
             @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
-                    schema = Schema(defaultValue = "8"))
+                    schema = Schema(defaultValue = "8", type = SchemaType.INTEGER))
             @PathParam("feature_version")
             version: Int?,
 
