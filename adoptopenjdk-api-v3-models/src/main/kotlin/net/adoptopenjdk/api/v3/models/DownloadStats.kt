@@ -2,10 +2,10 @@ package net.adoptopenjdk.api.v3.models
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 class DownloadStats {
-    val date: LocalDateTime
+    val date: ZonedDateTime
     val total_downloads: TotalStats
     val github_downloads: Map<Int, Long>
     val docker_pulls: Map<String, Long>
@@ -13,7 +13,7 @@ class DownloadStats {
     @JsonCreator
     constructor(
             @JsonProperty("date")
-            date: LocalDateTime,
+            date: ZonedDateTime,
             @JsonProperty("total_downloads")
             total_downloads: TotalStats,
             @JsonProperty("github_downloads")

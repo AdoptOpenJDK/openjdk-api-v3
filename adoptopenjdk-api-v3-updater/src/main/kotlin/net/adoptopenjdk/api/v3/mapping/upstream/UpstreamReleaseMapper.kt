@@ -12,6 +12,7 @@ import net.adoptopenjdk.api.v3.parser.VersionParser
 import org.slf4j.LoggerFactory
 import java.net.URLDecoder
 import java.nio.charset.Charset
+import java.time.ZoneId
 
 object UpstreamReleaseMapper : ReleaseMapper() {
     @JvmStatic

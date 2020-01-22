@@ -1,9 +1,9 @@
 package net.adoptopenjdk.api.v3.models
 
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 class GithubDownloadStatsDbEntry(
-        date: LocalDateTime,
+        date: ZonedDateTime,
         val downloads: Long,
         val feature_version: Int
 ) : DbStatsEntry<Int>(date) {

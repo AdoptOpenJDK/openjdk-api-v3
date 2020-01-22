@@ -1,14 +1,11 @@
 package net.adoptopenjdk.api.v3.dataSources.github.graphql.clients
 
 import io.aexp.nodes.graphql.GraphQLRequestEntity
-import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAssets
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.ReleaseQueryData
-import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import org.slf4j.LoggerFactory
-import java.time.format.DateTimeFormatter
 
 
 open class GraphQLGitHubReleaseRequest : GraphQLGitHubInterface() {
@@ -34,21 +31,6 @@ open class GraphQLGitHubReleaseRequest : GraphQLGitHubInterface() {
         val assets = release.releaseAssets.assets.union(moreAssets)
 
         return GHRelease(release.id, release.name, release.isPrerelease, release.prerelease, release.publishedAt, release.updatedAt, GHAssets(assets.toList(), PageInfo(false, null)), release.resourcePath, release.url)
-    }
-
-    private fun getUpdatedAtTime(assets: Set<GHAsset>, release: GHRelease): String {
-        //fix broken github updatedAt times
-        val updatedAt = assets
-                .map { ReleaseMapper.parseDate(it.updatedAt) }
-                .union(
-                        listOf(
-                                ReleaseMapper.parseDate(release.publishedAt),
-                                ReleaseMapper.parseDate(release.updatedAt)
-                        )
-                )
-                .max()!!
-
-        return DateTimeFormatter.ISO_DATE_TIME.format(updatedAt)
     }
 
     private fun getMoreReleasesQuery(releaseId: String): GraphQLRequestEntity.RequestBuilder {
