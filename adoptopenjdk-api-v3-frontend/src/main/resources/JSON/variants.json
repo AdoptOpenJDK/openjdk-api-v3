@@ -88,6 +88,20 @@
       "version": 13,
       "websiteDescription": "Eclipse OpenJ9",
       "websiteDescriptionLink": "https://www.eclipse.org/openj9"
+    },
+    {
+      "searchableName": "openjdk14-hotspot",
+      "jvm": "hotspot",
+      "vendor": "adoptopenjdk",
+      "version": 14
+    },
+    {
+      "searchableName": "openjdk14-openj9",
+      "jvm": "openj9",
+      "vendor": "adoptopenjdk",
+      "version": 14,
+      "websiteDescription": "Eclipse OpenJ9",
+      "websiteDescriptionLink": "https://www.eclipse.org/openj9"
     }
   ]
 }
