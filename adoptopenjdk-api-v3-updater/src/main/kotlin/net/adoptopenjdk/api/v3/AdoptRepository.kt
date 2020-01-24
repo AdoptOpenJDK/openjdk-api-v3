@@ -31,7 +31,7 @@ object AdoptRepositoryFactory {
 }
 
 interface AdoptRepository {
-    suspend fun getRelease(version: Int): FeatureRelease
+    suspend fun getRelease(version: Int): FeatureRelease?
     suspend fun getSummary(version: Int): GHRepositorySummary
     suspend fun getReleaseById(id: String): Release?
 }

@@ -94,6 +94,7 @@ object AdoptReposBuilder {
                 .map { version ->
                     AdoptRepositoryFactory.getAdoptRepository().getRelease(version)
                 }
+                .filterNotNull()
                 .map { Pair(it.featureVersion, it) }
                 .toMap()
         LOGGER.info("DONE")
