@@ -50,6 +50,7 @@ object APIDataStore {
                     .map { version ->
                         ApiPersistenceFactory.get().readReleaseData(version)
                     }
+                    .filter { it.releases.nodes.isNotEmpty() }
                     .toList()
 
             AdoptRepos(data)
