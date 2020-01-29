@@ -2,6 +2,8 @@ package net.adoptopenjdk.api
 
 import io.quarkus.test.junit.QuarkusTest
 import kotlinx.coroutines.runBlocking
+
+import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
@@ -21,7 +23,8 @@ import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.models.VersionData
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import kotlin.test.assertEquals
 
 
@@ -41,7 +44,7 @@ class AssetsResourceFeatureReleasePathSortOrderTest : BaseTest() {
                             "d"
                     ),
                     2L,
-                    LocalDateTime.now(),
+                    TimeSource.now(),
                     "d",
                     Installer("a",
                             "b",
@@ -60,14 +63,14 @@ class AssetsResourceFeatureReleasePathSortOrderTest : BaseTest() {
             val repo = AdoptRepos(listOf(
                     FeatureRelease(8, Releases(listOf(
                             Release("foo", ReleaseType.ga, "a", "foo",
-                                    LocalDateTime.of(2010, 1, 1, 1, 1),
-                                    LocalDateTime.of(2010, 1, 1, 1, 1),
+                                    ZonedDateTime.of(2010, 1, 1, 1, 1, 0, 0, ZoneId.of("Z")),
+                                    ZonedDateTime.of(2010, 1, 1, 1, 1, 0, 0, ZoneId.of("Z")),
                                     arrayOf(binary), 2, Vendor.adoptopenjdk,
                                     VersionData(8, 0, 242, "b", null, 4, "b", "8u242-b04_openj9-0.18.0-m1")),
 
                             Release("bar", ReleaseType.ga, "a", "bar",
-                                    LocalDateTime.of(2010, 1, 2, 1, 1),
-                                    LocalDateTime.of(2010, 1, 2, 1, 1),
+                                    ZonedDateTime.of(2010, 1, 2, 1, 1, 0, 0, ZoneId.of("Z")),
+                                    ZonedDateTime.of(2010, 1, 2, 1, 1, 0, 0, ZoneId.of("Z")),
                                     arrayOf(binary), 2, Vendor.adoptopenjdk,
                                     VersionData(8, 0, 242, "a", null, 4, "a", "8u242-b04_openj9-0.18.0-m1"))
                     )))

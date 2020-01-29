@@ -17,7 +17,7 @@ import net.adoptopenjdk.api.v3.models.OperatingSystem
 import net.adoptopenjdk.api.v3.models.Package
 import net.adoptopenjdk.api.v3.models.Project
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 object AdoptBinaryMapper : BinaryMapper() {
 
@@ -131,7 +131,7 @@ object AdoptBinaryMapper : BinaryMapper() {
             asset: GHAsset,
             pack: Package,
             download_count: Long,
-            updated_at: LocalDateTime,
+            updated_at: ZonedDateTime,
             installer: Installer?,
             heap_size: HeapSize
     ): Binary {
@@ -158,7 +158,7 @@ object AdoptBinaryMapper : BinaryMapper() {
     }
 
     private fun binaryFromMetadata(
-            binaryMetadata: GHMetaData, pack: Package, download_count: Long, updated_at: LocalDateTime,
+            binaryMetadata: GHMetaData, pack: Package, download_count: Long, updated_at: ZonedDateTime,
             installer: Installer?, heap_size: HeapSize
     ): Binary {
 

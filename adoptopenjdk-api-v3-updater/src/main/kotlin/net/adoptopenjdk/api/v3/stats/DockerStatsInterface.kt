@@ -1,13 +1,13 @@
 package net.adoptopenjdk.api.v3.stats
 
 import kotlinx.coroutines.runBlocking
+import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import javax.json.JsonObject
 
 
@@ -38,7 +38,7 @@ class DockerStatsInterface {
 
 
     private fun getDownloadStats(): List<DockerDownloadStatsDbEntry> {
-        val now = LocalDateTime.now()
+        val now = TimeSource.now()
 
         return pullAllStats()
                 .map {
@@ -48,7 +48,7 @@ class DockerStatsInterface {
 
     private fun pullOfficalStats(): DockerDownloadStatsDbEntry {
         val result = getStatsForUrl(officialStatsUrl)
-        val now = LocalDateTime.now()
+        val now = TimeSource.now()
 
         return DockerDownloadStatsDbEntry(now, result.getJsonNumber("pull_count").longValue(), "official")
     }

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.models.Release
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.*
 
 class Releases {
@@ -58,7 +58,7 @@ class Releases {
         return nodes.containsKey(id)
     }
 
-    fun hasReleaseBeenUpdated(id: String, updatedAt: LocalDateTime): Boolean {
+    fun hasReleaseBeenUpdated(id: String, updatedAt: ZonedDateTime): Boolean {
         return nodes[id]?.updated_at?.equals(updatedAt) ?: true
     }
 

@@ -17,8 +17,6 @@ import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
-import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHAssetDateSummaries
-import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHAssetDateSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleasesSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
@@ -30,7 +28,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.LoggerFactory
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.zip.GZIPInputStream
 import kotlin.random.Random
@@ -129,9 +126,8 @@ abstract class BaseTest {
                     val gHReleaseSummarys = featureRelease.releases.getReleases()
                             .map {
                                 GHReleaseSummary(it.id,
-                                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.of("UTC")).format(it.timestamp),
-                                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.of("UTC")).format(it.updated_at),
-                                        GHAssetDateSummaries(listOf(GHAssetDateSummary(DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.of("UTC")).format(it.updated_at)))))
+                                        DateTimeFormatter.ISO_INSTANT.format(it.timestamp),
+                                        DateTimeFormatter.ISO_INSTANT.format(it.updated_at))
                             }
                             .toList()
 

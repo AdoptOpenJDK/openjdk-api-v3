@@ -15,8 +15,7 @@ import org.bson.BsonDocument
 import org.bson.Document
 import org.litote.kmongo.coroutine.CoroutineCollection
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.ZonedDateTime
 
 
 class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient), ApiPersistence {
@@ -93,16 +92,16 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
                 .first()
     }
 
-    override suspend fun getGithubStatsSince(since: LocalDateTime): List<GithubDownloadStatsDbEntry> {
+    override suspend fun getGithubStats(start: ZonedDateTime, end: ZonedDateTime): List<GithubDownloadStatsDbEntry> {
         return githubStatsCollection
-                .find(Document("date", Document("\$gt", since)))
+                .find(betweenDates(start, end))
                 .sort(Document("date", 1))
                 .toList()
     }
 
-    override suspend fun getDockerStatsSince(since: LocalDateTime): List<DockerDownloadStatsDbEntry> {
+    override suspend fun getDockerStats(start: ZonedDateTime, end: ZonedDateTime): List<DockerDownloadStatsDbEntry> {
         return dockerStatsCollection
-                .find(Document("date", Document("\$gt", since)))
+                .find(betweenDates(start, end))
                 .sort(Document("date", 1))
                 .toList()
     }
@@ -126,16 +125,19 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
                 .toList()
     }
 
-    override suspend fun removeStatsBetween(start: LocalDateTime, end: LocalDateTime) {
-        val deleteQuery = Document("\$and",
-                BsonArray(listOf(
-                        BsonDocument("date", BsonDocument("\$gt", BsonDateTime(start.toInstant(ZoneOffset.UTC).toEpochMilli()))),
-                        BsonDocument("date", BsonDocument("\$lt", BsonDateTime(end.toInstant(ZoneOffset.UTC).toEpochMilli())))
-                ))
-        )
+    override suspend fun removeStatsBetween(start: ZonedDateTime, end: ZonedDateTime) {
+        val deleteQuery = betweenDates(start, end)
         dockerStatsCollection.deleteMany(deleteQuery)
         githubStatsCollection.deleteMany(deleteQuery)
+    }
 
+    private fun betweenDates(start: ZonedDateTime, end: ZonedDateTime): Document {
+        return Document("\$and",
+                BsonArray(listOf(
+                        BsonDocument("date", BsonDocument("\$gt", BsonDateTime(start.toInstant().toEpochMilli()))),
+                        BsonDocument("date", BsonDocument("\$lt", BsonDateTime(end.toInstant().toEpochMilli())))
+                ))
+        )
     }
 
     private fun majorVersionMatcher(featureVersion: Int) = Document("version_data.major", featureVersion)
