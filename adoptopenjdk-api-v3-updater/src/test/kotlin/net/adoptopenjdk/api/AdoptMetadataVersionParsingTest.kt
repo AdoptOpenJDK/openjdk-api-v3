@@ -1,11 +1,19 @@
 package net.adoptopenjdk.api
 
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
+import net.adoptopenjdk.api.v3.dataSources.UrlRequest
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.mapping.adopt.AdoptReleaseMapper
+import org.apache.http.HttpEntity
+import org.apache.http.HttpResponse
+import org.apache.http.ProtocolVersion
+import org.apache.http.message.BasicHeader
+import org.apache.http.message.BasicStatusLine
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -42,6 +50,16 @@ class AdoptMetadataVersionParsingTest {
                             "sha256": "dc755cf762c867d4c71b782b338d2dc1500b468ab01adbf88620b5ae55eef42a"
                         }
                     """.trimIndent()
+                }
+
+                override suspend fun getFullResponse(request: UrlRequest): HttpResponse? {
+                    val metadataResponse = mockk<HttpResponse>()
+                    val entity = mockk<HttpEntity>()
+                    every { entity.content } returns get(request.url)?.byteInputStream()
+                    every { metadataResponse.statusLine } returns BasicStatusLine(ProtocolVersion("", 1, 1), 200, "")
+                    every { metadataResponse.entity } returns entity
+                    every { metadataResponse.getFirstHeader("Last-Modified") } returns BasicHeader("Last-Modified", "")
+                    return metadataResponse
                 }
             }
 
