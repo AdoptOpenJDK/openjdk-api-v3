@@ -113,8 +113,8 @@ abstract class BaseTest {
                     return adoptRepos.allReleases.getReleases().filter { it.id == id }.first()
                 }
 
-                override suspend fun getRelease(version: Int): FeatureRelease {
-                    return adoptRepos.repos.get(version)!!
+                override suspend fun getRelease(version: Int): FeatureRelease? {
+                    return adoptRepos.repos.get(version)
                 }
 
                 override suspend fun getSummary(version: Int): GHRepositorySummary {

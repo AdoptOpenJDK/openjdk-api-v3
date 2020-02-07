@@ -4,7 +4,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema
 
 class ReleaseInfo {
 
-    @Schema(example = "[8,9,10,11,12,13]")
+    @Schema(example = "[8,9,10,11,12,13,14]")
     val available_releases: Array<Int>
 
     @Schema(example = "[8,11]")
