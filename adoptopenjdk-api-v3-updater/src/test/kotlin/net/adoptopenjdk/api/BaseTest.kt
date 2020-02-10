@@ -6,7 +6,9 @@ import de.flapdoodle.embed.mongo.config.MongodConfigBuilder
 import de.flapdoodle.embed.mongo.config.Net
 import de.flapdoodle.embed.mongo.distribution.Version
 import de.flapdoodle.embed.process.runtime.Network
+import io.mockk.every
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.AdoptRepository
@@ -16,6 +18,7 @@ import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
+import net.adoptopenjdk.api.v3.dataSources.UrlRequest
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleasesSummary
@@ -24,6 +27,11 @@ import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoClientFactory
 import net.adoptopenjdk.api.v3.models.Release
+import org.apache.http.HttpEntity
+import org.apache.http.HttpResponse
+import org.apache.http.ProtocolVersion
+import org.apache.http.message.BasicHeader
+import org.apache.http.message.BasicStatusLine
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.extension.ExtendWith
@@ -47,6 +55,17 @@ abstract class BaseTest {
                     }
 
                     return null
+                }
+
+                override suspend fun getFullResponse(request: UrlRequest): HttpResponse? {
+                    val metadataResponse = mockk<HttpResponse>()
+
+                    val entity = mockk<HttpEntity>()
+                    every { entity.content } returns get(request.url)?.byteInputStream()
+                    every { metadataResponse.statusLine } returns BasicStatusLine(ProtocolVersion("", 1, 1), 200, "")
+                    every { metadataResponse.entity } returns entity
+                    every { metadataResponse.getFirstHeader("Last-Modified") } returns BasicHeader("Last-Modified", "")
+                    return metadataResponse
                 }
 
             }
