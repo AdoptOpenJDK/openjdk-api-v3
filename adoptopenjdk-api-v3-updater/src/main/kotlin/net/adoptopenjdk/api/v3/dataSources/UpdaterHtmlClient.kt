@@ -50,7 +50,7 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
 
     }
 
-    class ResponseHandler(val client: DefaultUpdaterHtmlClient, private val continuation: Continuation<HttpResponse>) : FutureCallback<HttpResponse> {
+    class ResponseHandler(val client: DefaultUpdaterHtmlClient, private val continuation: Continuation<HttpResponse>, val request: UrlRequest?) : FutureCallback<HttpResponse> {
         override fun cancelled() {
             continuation.resumeWithException(Exception("cancelled"))
         }
@@ -62,7 +62,7 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
                         continuation.resumeWithException(Exception("No response body"))
                     }
                     isARedirect(response) -> {
-                        client.getData(UrlRequest(response.getFirstHeader("location").value), continuation)
+                        client.getData(UrlRequest(response.getFirstHeader("location").value, request?.lastModified), continuation)
                     }
                     response.statusLine.statusCode == 404 -> {
                         continuation.resumeWithException(NotFoundException())
@@ -115,7 +115,7 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
                         HttpClientFactory.getHttpClient()
                     }
 
-            client.execute(request, ResponseHandler(this, continuation))
+            client.execute(request, ResponseHandler(this, continuation, urlRequest))
         } catch (e: Exception) {
             continuation.resumeWith(Result.failure(e))
         }
