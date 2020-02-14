@@ -35,7 +35,7 @@ class Binary {
     @Schema(example = "dd28d6d2cde2b931caf94ac2422a2ad082ea62f0beee3bf7057317c53093de93")
     val scm_ref: String?
 
-    @Schema(example = "jdk")
+    @Schema(example = "jdk", defaultValue = "jdk")
     val project: Project
 
     constructor(
