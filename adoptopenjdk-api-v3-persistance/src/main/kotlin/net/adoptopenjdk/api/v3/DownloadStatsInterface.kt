@@ -1,4 +1,4 @@
-package net.adoptopenjdk.api.v3;
+package net.adoptopenjdk.api.v3
 
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
@@ -21,7 +21,13 @@ class StatEntry(
 class DownloadStatsInterface {
     private val dataStore = ApiPersistenceFactory.get()
 
-    suspend fun getTrackingStats(days: Int?, from: ZonedDateTime?, to: ZonedDateTime?, source: StatsSource?, featureVersion: Int?, dockerRepo: String?): List<DownloadDiff> {
+    suspend fun getTrackingStats(
+            days: Int? = null,
+            from: ZonedDateTime? = null,
+            to: ZonedDateTime? = null,
+            source: StatsSource? = null,
+            featureVersion: Int? = null,
+            dockerRepo: String? = null): List<DownloadDiff> {
 
         //need +1 as for a diff you need num days +1 from db
         val daysSince = (days ?: 30) + 1
