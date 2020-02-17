@@ -78,11 +78,10 @@ class BinaryResource {
             @PathParam("vendor")
             vendor: Vendor?,
 
-            @Parameter(name = "project", description = "Project", required = false)
+            @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
             @QueryParam("project")
             project: Project?
     ): Response {
-
         val releaseFilter = ReleaseFilter(null, null, release_name, vendor, null)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
@@ -135,7 +134,7 @@ class BinaryResource {
             @PathParam("vendor")
             vendor: Vendor?,
 
-            @Parameter(name = "project", description = "Project", required = false)
+            @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
             @QueryParam("project")
             project: Project?
     ): Response {
