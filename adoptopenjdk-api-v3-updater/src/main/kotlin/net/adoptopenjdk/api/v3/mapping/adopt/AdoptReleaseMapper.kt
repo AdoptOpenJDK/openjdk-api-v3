@@ -80,8 +80,8 @@ object AdoptReleaseMapper : ReleaseMapper() {
                     parseVersionInfo(release, release_name)
                 }
                 .ifEmpty { throw Exception("Failed to parse version $release_name") }
-                .first()
-
+                .sorted()
+                .last()
     }
 
     private fun parseVersionInfo(release: GHRelease, release_name: String): List<VersionData> {
