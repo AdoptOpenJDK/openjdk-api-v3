@@ -2,6 +2,7 @@ package net.adoptopenjdk.api.v3
 
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DbStatsEntry
 import net.adoptopenjdk.api.v3.models.DownloadDiff
 import net.adoptopenjdk.api.v3.models.DownloadStats
@@ -18,8 +19,9 @@ class StatEntry(
         val count: Long
 )
 
-class DownloadStatsInterface {
-    private val dataStore = ApiPersistenceFactory.get()
+class DownloadStatsInterface(
+        private val dataStore: ApiPersistence = ApiPersistenceFactory.get()
+) {
 
     suspend fun getTrackingStats(
             days: Int? = null,
@@ -90,7 +92,16 @@ class DownloadStatsInterface {
         return sumDailyStats(
                 dataStore
                         .getGithubStats(start, end)
+                        .groupBy { it.date.toLocalDate() }
+                        .flatMap { grouped ->
+                            grouped.value
+                                    .groupBy { it.feature_version }
+                                    .map { featureVersionsForDay ->
+                                        featureVersionsForDay.value.maxBy { it.date }!!
+                                    }
+                        }
                         .filter { featureVersion == null || it.feature_version == featureVersion }
+                        .sortedBy { it.date }
         )
     }
 
@@ -98,7 +109,16 @@ class DownloadStatsInterface {
         return sumDailyStats(
                 dataStore
                         .getDockerStats(start, end)
+                        .groupBy { it.date.toLocalDate() }
+                        .flatMap { grouped ->
+                            grouped.value
+                                    .groupBy { it.repo }
+                                    .map { repoForDay ->
+                                        repoForDay.value.maxBy { it.date }!!
+                                    }
+                        }
                         .filter { dockerRepo == null || it.repo == dockerRepo }
+                        .sortedBy { it.date }
         )
     }
 
