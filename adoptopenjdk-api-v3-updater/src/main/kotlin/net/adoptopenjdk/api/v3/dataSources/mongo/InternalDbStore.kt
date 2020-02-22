@@ -36,11 +36,11 @@ class InternalDbStore : MongoInterface(MongoClientFactory.get()) {
     }
 
 
-    suspend fun putCachedWebpage(url: String, data: String?) {
+    suspend fun putCachedWebpage(url: String, lastModified: String?, data: String?) {
         GlobalScope.launch {
             webCache.updateOne(
                     Document("url", url),
-                    CacheDbEntry(url, data),
+                    CacheDbEntry(url, lastModified, data),
                     UpdateOptions().upsert(true),
                     false)
         }

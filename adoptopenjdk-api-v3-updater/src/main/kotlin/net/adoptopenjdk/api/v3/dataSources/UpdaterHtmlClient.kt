@@ -17,8 +17,14 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 
+data class UrlRequest(
+        val url: String,
+        val lastModified: String? = null
+)
+
 interface UpdaterHtmlClient {
     suspend fun get(url: String): String?
+    suspend fun getFullResponse(request: UrlRequest): HttpResponse?
 }
 
 object UpdaterHtmlClientFactory {
@@ -31,9 +37,20 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
         private val TOKEN: String? = GithubAuth.readToken()
+
+
+        fun extractBody(response: HttpResponse?): String? {
+            if (response == null) {
+                return null
+            }
+            val writer = StringWriter()
+            IOUtils.copy(response.entity.content, writer, Charset.defaultCharset())
+            return writer.toString()
+        }
+
     }
 
-    class ResponseHandler(val client: DefaultUpdaterHtmlClient, val continuation: Continuation<String>) : FutureCallback<HttpResponse> {
+    class ResponseHandler(val client: DefaultUpdaterHtmlClient, private val continuation: Continuation<HttpResponse>, val request: UrlRequest?) : FutureCallback<HttpResponse> {
         override fun cancelled() {
             continuation.resumeWithException(Exception("cancelled"))
         }
@@ -45,13 +62,13 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
                         continuation.resumeWithException(Exception("No response body"))
                     }
                     isARedirect(response) -> {
-                        client.getData(URL(response.getFirstHeader("location").value), continuation)
+                        client.getData(UrlRequest(response.getFirstHeader("location").value, request?.lastModified), continuation)
                     }
                     response.statusLine.statusCode == 404 -> {
                         continuation.resumeWithException(NotFoundException())
                     }
-                    response.statusLine.statusCode == 200 -> {
-                        continuation.resume(extractBody(response))
+                    response.statusLine.statusCode == 200 || response.statusLine.statusCode == 304 -> {
+                        continuation.resume(response)
                     }
                     else -> {
                         continuation.resumeWithException(Exception("Unexpected response ${response.statusLine.statusCode}"))
@@ -60,12 +77,6 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
             } catch (e: Exception) {
                 continuation.resumeWithException(e)
             }
-        }
-
-        private fun extractBody(response: HttpResponse): String {
-            val writer = StringWriter()
-            IOUtils.copy(response.entity.content, writer, Charset.defaultCharset())
-            return writer.toString()
         }
 
         private fun isARedirect(response: HttpResponse): Boolean {
@@ -84,9 +95,14 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
         }
     }
 
-    private fun getData(url: URL, continuation: Continuation<String>) {
+    private fun getData(urlRequest: UrlRequest, continuation: Continuation<HttpResponse>) {
         try {
+            val url = URL(urlRequest.url)
             val request = HttpGet(url.toURI())
+
+            if (urlRequest.lastModified != null) {
+                request.addHeader("If-Modified-Since", urlRequest.lastModified)
+            }
 
             if (url.host.endsWith("github.com") && TOKEN != null) {
                 request.setHeader("Authorization", "token $TOKEN")
@@ -99,32 +115,36 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
                         HttpClientFactory.getHttpClient()
                     }
 
-            client.execute(request, ResponseHandler(this, continuation))
+            client.execute(request, ResponseHandler(this, continuation, urlRequest))
         } catch (e: Exception) {
             continuation.resumeWith(Result.failure(e))
         }
     }
 
 
-    override suspend fun get(url: String): String? {
+    override suspend fun getFullResponse(request: UrlRequest): HttpResponse? {
         //Retry up to 10 times
         for (retryCount in 1..10) {
             try {
-                LOGGER.info("Getting $url")
-                val body: String = suspendCoroutine { continuation ->
-                    getData(URL(url), continuation)
+                LOGGER.info("Getting ${request.url} ${request.lastModified}")
+                val response: HttpResponse = suspendCoroutine { continuation ->
+                    getData(request, continuation)
                 }
-                LOGGER.info("Got $url")
-                return body
+                LOGGER.info("Got  ${request.url}")
+                return response
             } catch (e: NotFoundException) {
                 return null
             } catch (e: Exception) {
-                LOGGER.error("Failed to read data retrying $retryCount $url", e)
+                LOGGER.error("Failed to read data retrying $retryCount ${request.url}", e)
                 delay(1000)
             }
         }
 
         return null
+    }
+
+    override suspend fun get(url: String): String? {
+        return extractBody(getFullResponse(UrlRequest(url)))
     }
 
     class NotFoundException : Throwable()

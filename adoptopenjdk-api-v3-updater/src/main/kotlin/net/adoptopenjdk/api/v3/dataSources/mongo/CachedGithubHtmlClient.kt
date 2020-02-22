@@ -6,7 +6,9 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.adoptopenjdk.api.v3.dataSources.DefaultUpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
+import net.adoptopenjdk.api.v3.dataSources.UrlRequest
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
@@ -21,7 +23,8 @@ object CachedGithubHtmlClient {
     private val internalDbStore = InternalDbStoreFactory.get()
 
     //List of urls to be refreshed in the background
-    private val workList = LinkedBlockingQueue<String>()
+    private val workList = LinkedBlockingQueue<UrlRequest>()
+
 
     init {
         //Do refresh in the background
@@ -31,9 +34,9 @@ object CachedGithubHtmlClient {
     suspend fun getUrl(url: String): String? {
         val cachedEntry = internalDbStore.getCachedWebpage(url)
         return if (cachedEntry == null) {
-            get(url)
+            get(UrlRequest(url))
         } else {
-            workList.offer(url)
+            workList.offer(UrlRequest(url, cachedEntry.lastModified))
             cachedEntry.data
         }
     }
@@ -41,26 +44,37 @@ object CachedGithubHtmlClient {
     private fun cacheRefreshDaemonThread(): suspend CoroutineScope.() -> Unit {
         return {
             while (true) {
-                val url = workList.take()
+                val request = workList.take()
                 async {
-                    LOGGER.info("Enqueuing $url")
-                    return@async get(url)
+                    LOGGER.info("Enqueuing ${request.url} ${request.lastModified}")
+                    return@async get(request)
                 }.await()
             }
         }
     }
 
-    private suspend fun get(url: String): String? {
+    private suspend fun get(request: UrlRequest): String? {
         //Retry up to 10 times
         for (retryCount in 1..10) {
             try {
-                LOGGER.info("Getting $url")
-                val body = UpdaterHtmlClientFactory.client.get(url)
-                internalDbStore.putCachedWebpage(url, body)
-                LOGGER.info("Got $url")
+                LOGGER.info("Getting  ${request.url} ${request.lastModified}")
+                val response = UpdaterHtmlClientFactory.client.getFullResponse(request)
+
+
+                if (response?.statusLine?.statusCode == 304) {
+                    //asset has not updated
+                    return null
+                }
+
+                val body = DefaultUpdaterHtmlClient.extractBody(response)
+
+                val lastModified = response?.getFirstHeader("Last-Modified")?.value
+
+                internalDbStore.putCachedWebpage(request.url, lastModified, body)
+                LOGGER.info("Got ${request.url}")
                 return body
             } catch (e: Exception) {
-                LOGGER.error("Failed to read data retrying $retryCount $url", e)
+                LOGGER.error("Failed to read data retrying $retryCount ${request.url}", e)
                 delay(1000)
             }
         }
