@@ -7,14 +7,19 @@ import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.Vendor
 import java.time.ZonedDateTime
-import java.time.temporal.ChronoUnit
 
 class GithubDownloadStatsCalculator {
     private val database: ApiPersistence = ApiPersistenceFactory.get()
 
     suspend fun saveStats(repos: AdoptRepos) {
-        val date: ZonedDateTime = TimeSource.now()
 
+        val stats = getStats(repos)
+
+        database.addGithubDownloadStatsEntries(stats)
+    }
+
+    public fun getStats(repos: AdoptRepos): List<GithubDownloadStatsDbEntry> {
+        val date: ZonedDateTime = TimeSource.now()
         val stats = repos
                 .repos
                 .values
@@ -23,14 +28,15 @@ class GithubDownloadStatsCalculator {
                             .releases
                             .getReleases()
                             .filter { it.vendor == Vendor.adoptopenjdk }
-                            .sumBy { it.download_count.toInt() }
+                            .sumBy {
+                                it.download_count.toInt()
+                            }
 
                     GithubDownloadStatsDbEntry(date,
                             total.toLong(),
                             featureRelease.featureVersion)
                 }
                 .toList()
-
-        database.addGithubDownloadStatsEntries(stats)
+        return stats
     }
 }

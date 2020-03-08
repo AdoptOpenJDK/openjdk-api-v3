@@ -1,6 +1,7 @@
 package net.adoptopenjdk.api.v3.mapping.upstream
 
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
+import net.adoptopenjdk.api.v3.mapping.BinaryMapper
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
@@ -12,7 +13,6 @@ import net.adoptopenjdk.api.v3.parser.VersionParser
 import org.slf4j.LoggerFactory
 import java.net.URLDecoder
 import java.nio.charset.Charset
-import java.time.ZoneId
 
 object UpstreamReleaseMapper : ReleaseMapper() {
     @JvmStatic
@@ -25,7 +25,12 @@ object UpstreamReleaseMapper : ReleaseMapper() {
         val releaseName = release.name
         val timestamp = parseDate(release.publishedAt)
         val updatedAt = parseDate(release.updatedAt)
-        val downloadCount = release.releaseAssets.assets.map { it.downloadCount }.sum()
+        val downloadCount = release.releaseAssets.assets
+                .filter { asset ->
+                    BinaryMapper.BINARY_EXTENSIONS.any { asset.name.endsWith(it) }
+                }
+                .map { it.downloadCount }.sum()
+
         val vendor = Vendor.openjdk
 
         LOGGER.info("Getting binaries $releaseName")
