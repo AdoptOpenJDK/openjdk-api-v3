@@ -1,11 +1,12 @@
 package net.adoptopenjdk.api.v3.dataSources
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeout
 import net.adoptopenjdk.api.v3.HttpClientFactory
 import net.adoptopenjdk.api.v3.dataSources.github.GithubAuth
 import org.apache.commons.io.IOUtils
 import org.apache.http.HttpResponse
-import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.concurrent.FutureCallback
 import org.slf4j.LoggerFactory
 import java.io.StringWriter
@@ -37,7 +38,7 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
         private val TOKEN: String? = GithubAuth.readToken()
-
+        private const val REQUEST_TIMEOUT = 12000L
 
         fun extractBody(response: HttpResponse?): String? {
             if (response == null) {
@@ -98,7 +99,10 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
     private fun getData(urlRequest: UrlRequest, continuation: Continuation<HttpResponse>) {
         try {
             val url = URL(urlRequest.url)
-            val request = HttpGet(url.toURI())
+            val request = RequestBuilder
+                    .get(url.toURI())
+                    .setConfig(HttpClientFactory.REQUEST_CONFIG)
+                    .build()
 
             if (urlRequest.lastModified != null) {
                 request.addHeader("If-Modified-Since", urlRequest.lastModified)
@@ -116,6 +120,7 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
                     }
 
             client.execute(request, ResponseHandler(this, continuation, urlRequest))
+
         } catch (e: Exception) {
             continuation.resumeWith(Result.failure(e))
         }
@@ -127,8 +132,10 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
         for (retryCount in 1..10) {
             try {
                 LOGGER.info("Getting ${request.url} ${request.lastModified}")
-                val response: HttpResponse = suspendCoroutine { continuation ->
-                    getData(request, continuation)
+                val response: HttpResponse = withTimeout(REQUEST_TIMEOUT) {
+                    suspendCoroutine<HttpResponse> { continuation ->
+                        getData(request, continuation)
+                    }
                 }
                 LOGGER.info("Got  ${request.url}")
                 return response
