@@ -83,7 +83,7 @@ class AssetsResource {
             @QueryParam("vendor")
             vendor: Vendor?,
 
-            @Parameter(name = "project", description = "Project", required = false)
+            @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
             @QueryParam("project")
             project: Project?,
 
@@ -155,7 +155,7 @@ class AssetsResource {
             @QueryParam("vendor")
             vendor: Vendor?,
 
-            @Parameter(name = "project", description = "Project", required = false)
+            @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
             @QueryParam("project")
             project: Project?,
 
