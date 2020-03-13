@@ -1,4 +1,5 @@
 <configuration>
+    <logger name="org.apache.http.client.protocol.ResponseProcessCookies" level="ERROR"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -6,15 +7,12 @@
         </encoder>
     </appender>
 
-
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>/tmp/updater.log</file>
-
         <encoder>
             <pattern>%date %level [%thread] %logger{10} [%file:%line]%n%msg%n</pattern>
         </encoder>
     </appender>
-
 
     <root level="info">
         <appender-ref ref="STDOUT"/>

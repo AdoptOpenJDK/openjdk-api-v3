@@ -67,7 +67,7 @@ class DockerStatsInterface {
 
     private fun getStatsForUrl(url: String): JsonObject {
         return runBlocking {
-            val stats = UpdaterHtmlClientFactory.client.get(url);
+            val stats = UpdaterHtmlClientFactory.client.get(url)
             if (stats == null) {
                 throw Exception("Stats not returned")
             }
