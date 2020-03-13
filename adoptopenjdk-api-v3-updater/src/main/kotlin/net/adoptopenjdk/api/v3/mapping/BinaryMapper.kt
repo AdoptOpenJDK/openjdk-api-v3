@@ -6,10 +6,14 @@ import java.time.ZonedDateTime
 
 abstract class BinaryMapper {
 
-    val INSTALLER_EXTENSIONS = listOf("msi", "pkg")
+    companion object {
+        val INSTALLER_EXTENSIONS = listOf("msi", "pkg")
 
-    val BINARY_ASSET_WHITELIST: List<String> = listOf(".tar.gz", ".msi", ".pkg", ".zip", ".deb", ".rpm")
-    val ARCHIVE_WHITELIST: List<String> = listOf(".tar.gz", ".zip")
+        val BINARY_ASSET_WHITELIST: List<String> = listOf(".tar.gz", ".msi", ".pkg", ".zip", ".deb", ".rpm")
+        val ARCHIVE_WHITELIST: List<String> = listOf(".tar.gz", ".zip")
+
+        val BINARY_EXTENSIONS = ARCHIVE_WHITELIST.union(BINARY_ASSET_WHITELIST).union(INSTALLER_EXTENSIONS)
+    }
 
     fun <T : FileNameMatcher> getEnumFromFileName(fileName: String, values: Array<T>, default: T? = null): T {
 

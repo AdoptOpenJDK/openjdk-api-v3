@@ -8,6 +8,7 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAssets
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGithubHtmlClient
+import net.adoptopenjdk.api.v3.mapping.BinaryMapper
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
@@ -29,7 +30,11 @@ object AdoptReleaseMapper : ReleaseMapper() {
         val releaseName = release.name
         val timestamp = parseDate(release.publishedAt)
         val updatedAt = parseDate(release.updatedAt)
-        val downloadCount = release.releaseAssets.assets.map { it.downloadCount }.sum()
+        val downloadCount = release.releaseAssets.assets
+                .filter { asset ->
+                    BinaryMapper.BINARY_EXTENSIONS.any { asset.name.endsWith(it) }
+                }
+                .map { it.downloadCount }.sum()
         val vendor = Vendor.adoptopenjdk
 
 

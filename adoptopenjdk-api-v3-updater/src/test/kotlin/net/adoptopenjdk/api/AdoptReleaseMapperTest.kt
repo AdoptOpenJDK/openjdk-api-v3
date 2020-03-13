@@ -21,10 +21,16 @@ class AdoptReleaseMapperTest {
             1L,
             "2013-02-27T19:35:32Z")
 
+    val checksum = GHAsset(
+            "OpenJDK8U-jre_x64_linux_hotspot-123244354325.tar.gz.sha256.txt",
+            1L,
+            "",
+            1L,
+            "2013-02-27T19:35:32Z")
+
     @Test
     fun ignoresUnparsableVersion() {
         runBlocking {
-
             val source = GHAssets(listOf(jdk), PageInfo(false, ""))
 
             val ghRelease = GHRelease("1", "OpenJDK 123244354325", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "a-url");
@@ -35,10 +41,23 @@ class AdoptReleaseMapperTest {
             } catch (e: Exception) {
                 return@runBlocking
             }
-
         }
     }
 
+    @Test
+    fun statsIgnoresNonBinaryAssets() {
+        runBlocking {
+
+
+            val source = GHAssets(listOf(jdk, checksum), PageInfo(false, ""))
+
+            val ghRelease = GHRelease("1", "jdk9u-2018-09-27-08-50", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz");
+
+            val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
+
+            assertEquals(1, release.download_count)
+        }
+    }
 
     @Test
     fun obaysReleaseTypeforBinaryRepos() {

@@ -5,7 +5,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.mapping.BinaryMapper
-import net.adoptopenjdk.api.v3.mapping.adopt.AdoptBinaryMapper
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Binary
 import net.adoptopenjdk.api.v3.models.HeapSize
@@ -65,7 +64,7 @@ object UpstreamBinaryMapper : BinaryMapper() {
     }
 
     private fun isArchive(asset: GHAsset) =
-            AdoptBinaryMapper.ARCHIVE_WHITELIST.any { asset.name.endsWith(it) }
+            BinaryMapper.ARCHIVE_WHITELIST.any { asset.name.endsWith(it) }
 
 
     private fun getSignatureLink(assets: List<GHAsset>, binary_name: String): String? {

@@ -12,10 +12,7 @@ class TestResourceGenerator {
         @JvmStatic
         fun main(args: Array<String>) {
             runBlocking {
-                //val mock = BaseTest.mockkHttpClient()
-                //HttpClientFactory.client = mock
                 BaseTest.startFongo()
-
 
                 val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
                 val variants = UpdaterJsonMapper.mapper.readValue(variantData, Variants::class.java)
