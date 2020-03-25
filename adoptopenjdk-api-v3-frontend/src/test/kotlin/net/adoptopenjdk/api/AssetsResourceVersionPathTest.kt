@@ -1,7 +1,11 @@
 package net.adoptopenjdk.api
 
 import io.quarkus.test.junit.QuarkusTest
-import net.adoptopenjdk.api.v3.models.*
+import net.adoptopenjdk.api.v3.models.Architecture
+import net.adoptopenjdk.api.v3.models.HeapSize
+import net.adoptopenjdk.api.v3.models.ImageType
+import net.adoptopenjdk.api.v3.models.JvmImpl
+import net.adoptopenjdk.api.v3.models.OperatingSystem
 import org.junit.jupiter.api.DynamicTest
 import java.util.stream.Stream
 
@@ -48,7 +52,8 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
                 versionRange.equals(JAVA11) && element == Architecture.x32 ||
                 versionRange.equals(JAVA11) && element == OperatingSystem.solaris ||
                 versionRange.equals(JAVA11) && element == Architecture.sparcv9 ||
-                versionRange.equals(JAVA11) && element == ImageType.testimage
+                versionRange.equals(JAVA11) && element == ImageType.testimage ||
+                element == ImageType.debugimage
     }
 }
 
