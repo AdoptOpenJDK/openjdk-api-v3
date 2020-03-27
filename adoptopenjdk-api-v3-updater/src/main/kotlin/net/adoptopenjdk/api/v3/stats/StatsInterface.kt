@@ -26,7 +26,8 @@ class StatsInterface {
         githubDownloadStatsCalculator.saveStats(repos)
         dockerStatsInterface.updateDb()
 
-        removeBadDownloadStats()
+        //TODO bring back if we need it and once we understand stats trajectory
+        //removeBadDownloadStats()
     }
 
     private suspend fun removeBadDownloadStats() {
