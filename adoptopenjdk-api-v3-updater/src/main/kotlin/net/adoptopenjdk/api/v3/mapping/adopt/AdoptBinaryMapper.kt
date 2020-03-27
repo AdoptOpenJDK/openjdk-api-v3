@@ -25,10 +25,14 @@ object AdoptBinaryMapper : BinaryMapper() {
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
     private const val HOTSPOT_JFR = "hotspot-jfr"
 
+    //TODO urgent remove me when we are ready to go live on debug images
+    private val EXCLUDED = listOf("debugimage")
+
     suspend fun toBinaryList(assets: List<GHAsset>, metadata: Map<GHAsset, GHMetaData>): List<Binary> {
         // probably whitelist rather than black list
         return assets
                 .filter(this::isArchive)
+                .filter { asset -> EXCLUDED.all { excluded -> !asset.name.contains(excluded) } }
                 .map { asset -> assetToBinaryAsync(asset, metadata, assets) }
                 .mapNotNull { it.await() }
     }
