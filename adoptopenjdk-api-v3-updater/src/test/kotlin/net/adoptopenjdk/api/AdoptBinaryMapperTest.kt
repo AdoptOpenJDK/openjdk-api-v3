@@ -110,6 +110,27 @@ class AdoptBinaryMapperTest {
         }
     }
 
+
+    @Test
+    fun ignoresDebugimage() {
+        runBlocking {
+            val binaryList = AdoptBinaryMapper.toBinaryList(listOf(GHAsset(
+                    "OpenJDK11U-debugimage_ppc64_aix_openj9_2020-03-26-23-31.tar.gz",
+                    1L,
+                    "",
+                    1L,
+                    "2013-02-27T19:35:32Z"),
+                    GHAsset(
+                            "OpenJDK11U-debugimage_ppc64_aix_openj9_2020-03-26-23-31.tar.gz.sha256.txt",
+                            1L,
+                            "a-download-link",
+                            1L,
+                            "2013-02-27T19:35:32Z")), emptyMap())
+
+            assertEquals(0, binaryList.size)
+        }
+    }
+
     private fun assertParsedHotspotJfr(binaryList: List<Binary>) {
         assertEquals(JvmImpl.hotspot, binaryList.get(0).jvm_impl)
         assertEquals(Project.jfr, binaryList.get(0).project)
