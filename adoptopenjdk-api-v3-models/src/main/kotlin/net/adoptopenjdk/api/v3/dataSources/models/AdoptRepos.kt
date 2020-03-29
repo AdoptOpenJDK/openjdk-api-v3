@@ -65,11 +65,11 @@ class AdoptRepos {
     }
 
     fun addRelease(i: Int, r: Release): AdoptRepos {
-        return AdoptRepos(repos.plus(Pair(i, repos.get(i)!!.add(listOf(r)))))
+        return AdoptRepos(repos.plus(Pair(i, repos.getValue(i).add(listOf(r)))))
     }
 
     fun removeRelease(i: Int, r: Release): AdoptRepos {
-        return AdoptRepos(repos.plus(Pair(i, repos.get(i)!!.remove(r.id))))
+        return AdoptRepos(repos.plus(Pair(i, repos.getValue(i).remove(r.id))))
     }
 
     override fun equals(other: Any?): Boolean {
