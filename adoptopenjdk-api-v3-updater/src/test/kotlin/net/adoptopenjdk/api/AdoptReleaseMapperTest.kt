@@ -118,7 +118,7 @@ class AdoptReleaseMapperTest : BaseTest() {
                             "OpenJDK8U-jre_x64_linux_hotspot-3.tar.gz",
                             1L,
                             "",
-                            1L,
+                            2L,
                             "2013-02-27T19:35:32Z"),
                     GHAsset(
                             "OpenJDK8U-jre_x64_linux_hotspot-3.tar.gz.json",
@@ -183,6 +183,9 @@ class AdoptReleaseMapperTest : BaseTest() {
             assertEquals(2, release.size)
             assertEquals(1, release[0].binaries.size)
             assertEquals(2, release[1].binaries.size)
+
+            assertEquals(1, release[0].download_count)
+            assertEquals(3, release[1].download_count)
         }
     }
 }
