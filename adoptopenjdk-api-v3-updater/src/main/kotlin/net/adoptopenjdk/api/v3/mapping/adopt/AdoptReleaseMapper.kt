@@ -27,17 +27,12 @@ object AdoptReleaseMapper : ReleaseMapper() {
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
     override suspend fun toAdoptRelease(release: GHRelease): List<Release> {
-        val release_type: ReleaseType = formReleaseType(release)
+        val releaseType: ReleaseType = formReleaseType(release)
 
         val releaseLink = release.url
         val releaseName = release.name
         val timestamp = parseDate(release.publishedAt)
         val updatedAt = parseDate(release.updatedAt)
-        val downloadCount = release.releaseAssets.assets
-                .filter { asset ->
-                    BinaryMapper.BINARY_EXTENSIONS.any { asset.name.endsWith(it) }
-                }
-                .map { it.downloadCount }.sum()
         val vendor = Vendor.adoptopenjdk
 
         val metadata = getMetadata(release.releaseAssets)
@@ -45,16 +40,16 @@ object AdoptReleaseMapper : ReleaseMapper() {
         try {
             val groupedByVersion = metadata
                     .entries
-                    .groupBy { it.value.version };
+                    .groupBy { it.value.version }
 
             return groupedByVersion
                     .entries
-                    .mapIndexed { index, grouped ->
+                    .map { grouped ->
                         val version = grouped.key.toApiVersion()
                         val assets = grouped.value.map { it.key }
                         val id = generateIdForSplitRelease(version, release)
 
-                        toRelease(releaseName, assets, metadata, id, release_type, releaseLink, timestamp, updatedAt, downloadCount, vendor, version)
+                        toRelease(releaseName, assets, metadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version)
                     }
                     .ifEmpty {
                         try {
@@ -63,9 +58,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
                             val assets = release.releaseAssets.assets
                             val id = release.id.githubId
 
-                            val release = toRelease(releaseName, assets, metadata, id, release_type, releaseLink, timestamp, updatedAt, downloadCount, vendor, version)
-
-                            return@ifEmpty listOf(release)
+                            return@ifEmpty listOf(toRelease(releaseName, assets, metadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version))
                         } catch (e: Exception) {
                             throw Exception("Failed to parse version $releaseName")
                         }
@@ -85,38 +78,43 @@ object AdoptReleaseMapper : ReleaseMapper() {
                         .digest(version.semver.toByteArray())
                         .copyOfRange(0, 10))
 
-        val id = release.id.githubId + "." + suffix
-        return id
+        return release.id.githubId + "." + suffix
     }
 
-    private suspend fun toRelease(releaseName: String, assets: List<GHAsset>, metadata: Map<GHAsset, GHMetaData>, id: String, release_type: ReleaseType, releaseLink: String, timestamp: ZonedDateTime, updatedAt: ZonedDateTime, downloadCount: Long, vendor: Vendor, version: VersionData): Release {
+    private suspend fun toRelease(releaseName: String, assets: List<GHAsset>, metadata: Map<GHAsset, GHMetaData>, id: String, release_type: ReleaseType, releaseLink: String, timestamp: ZonedDateTime, updatedAt: ZonedDateTime, vendor: Vendor, version: VersionData): Release {
         LOGGER.info("Getting binaries $releaseName")
         val binaries = AdoptBinaryMapper.toBinaryList(assets, metadata)
         LOGGER.info("Done Getting binaries $releaseName")
-        val release = Release(id, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, version)
-        return release
+
+
+        val downloadCount = assets
+                .filter { asset ->
+                    BinaryMapper.BINARY_EXTENSIONS.any { asset.name.endsWith(it) }
+                }
+                .map { it.downloadCount }.sum()
+
+        return Release(id, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, version)
     }
 
     private fun formReleaseType(release: GHRelease): ReleaseType {
         //TODO fix me before the year 2100
         val dateMatcher = """.*(20[0-9]{2}-[0-9]{2}-[0-9]{2}|20[0-9]{6}).*"""
         val hasDate = Pattern.compile(dateMatcher).matcher(release.name)
-        val release_type: ReleaseType =
-                if (release.url.matches(Regex(".*/openjdk[0-9]+-binaries/.*"))) {
-                    //Can trust isPrerelease from -binaries repos
-                    if (release.isPrerelease) {
-                        ReleaseType.ea
-                    } else {
-                        ReleaseType.ga
-                    }
-                } else {
-                    if (hasDate.matches()) {
-                        ReleaseType.ea
-                    } else {
-                        ReleaseType.ga
-                    }
-                }
-        return release_type
+
+        return if (release.url.matches(Regex(".*/openjdk[0-9]+-binaries/.*"))) {
+            //Can trust isPrerelease from -binaries repos
+            if (release.isPrerelease) {
+                ReleaseType.ea
+            } else {
+                ReleaseType.ga
+            }
+        } else {
+            if (hasDate.matches()) {
+                ReleaseType.ea
+            } else {
+                ReleaseType.ga
+            }
+        }
     }
 
     private fun parseVersionInfo(release: GHRelease, release_name: String): VersionData {
