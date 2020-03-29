@@ -4,8 +4,8 @@ import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.OpenApiDocs
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
-import net.adoptopenjdk.api.v3.dataSources.filters.BinaryFilter
-import net.adoptopenjdk.api.v3.dataSources.filters.ReleaseFilter
+import net.adoptopenjdk.api.v3.filters.BinaryFilter
+import net.adoptopenjdk.api.v3.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.models.APIError
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.HeapSize
@@ -82,7 +82,7 @@ class BinaryResource {
             @QueryParam("project")
             project: Project?
     ): Response {
-        val releaseFilter = ReleaseFilter(null, null, release_name, vendor, null)
+        val releaseFilter = ReleaseFilter(releaseName = release_name, vendor = vendor)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
 
@@ -138,7 +138,7 @@ class BinaryResource {
             @QueryParam("project")
             project: Project?
     ): Response {
-        val releaseFilter = ReleaseFilter(release_type, version, null, vendor, null)
+        val releaseFilter = ReleaseFilter(releaseType = release_type, featureVersion = version, vendor = vendor)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
 
