@@ -4,11 +4,13 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.GraphQLGitHubClient
+import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleasesSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepo
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
+import net.adoptopenjdk.api.v3.dataSources.models.GithubId
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import net.adoptopenjdk.api.v3.mapping.adopt.AdoptReleaseMapper
 import net.adoptopenjdk.api.v3.mapping.upstream.UpstreamReleaseMapper
@@ -33,7 +35,7 @@ object AdoptRepositoryFactory {
 interface AdoptRepository {
     suspend fun getRelease(version: Int): FeatureRelease?
     suspend fun getSummary(version: Int): GHRepositorySummary
-    suspend fun getReleaseById(id: String): Release?
+    suspend fun getReleaseById(id: GithubId): List<Release>?
 }
 
 object AdoptRepositoryImpl : AdoptRepository {
@@ -50,9 +52,10 @@ object AdoptRepositoryImpl : AdoptRepository {
         }
     }
 
-    override suspend fun getReleaseById(id: String): Release? {
-        val release = client.getReleaseById(id)
-        return getMapperForRepo(release.url).toAdoptRelease(release)
+    override suspend fun getReleaseById(githubId: GithubId): List<Release>? {
+        val release = client.getReleaseById(githubId)
+        return getMapperForRepo(release.url)
+                .toAdoptRelease(release)
     }
 
     override suspend fun getRelease(version: Int): FeatureRelease {
@@ -77,14 +80,16 @@ object AdoptRepositoryImpl : AdoptRepository {
         return client
                 .getRepository(repoName)
                 .getReleases()
-                .map {
+                .flatMap<GHRelease, Release> {
                     try {
-                        getMapperForRepo(it.url).toAdoptRelease(it)
+                        val releases = getMapperForRepo(it.url).toAdoptRelease(it)
+                        if (releases != null) {
+                            return@flatMap releases
+                        }
                     } catch (e: Exception) {
-                        null
                     }
+                    return@flatMap emptyList<Release>()
                 }
-                .filterNotNull()
     }
 
     private suspend fun <E> getDataForEachRepo(version: Int, getFun: suspend (String) -> E): Deferred<List<E?>> {

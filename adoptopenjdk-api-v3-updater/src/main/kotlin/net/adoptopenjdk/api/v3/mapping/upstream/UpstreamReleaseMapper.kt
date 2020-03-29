@@ -18,7 +18,7 @@ object UpstreamReleaseMapper : ReleaseMapper() {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-    override suspend fun toAdoptRelease(release: GHRelease): Release? {
+    override suspend fun toAdoptRelease(release: GHRelease): List<Release>? {
         val release_type: ReleaseType = if (release.name.contains(" GA ")) ReleaseType.ga else ReleaseType.ea
 
         val releaseLink = release.url
@@ -50,7 +50,7 @@ object UpstreamReleaseMapper : ReleaseMapper() {
 
             val sourcePackage = getSourcePackage(release)
 
-            return Release(release.id, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, versionData, sourcePackage)
+            return listOf(Release(release.id.githubId, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, versionData, sourcePackage))
         } catch (e: FailedToParse) {
             LOGGER.error("Failed to parse $releaseName")
             return null

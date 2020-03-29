@@ -50,16 +50,19 @@ class Releases {
         return getReleases(SortOrder.ASC)
     }
 
-    fun retain(ids: List<String>): Releases {
-        return Releases(nodes.filterKeys { ids.contains(it) })
+    fun retain(githubId: List<GithubId>): Releases {
+        return Releases(nodes.filterKeys { adoptId -> githubId.any { adoptId.startsWith(it.githubId) } })
     }
 
-    fun hasReleaseId(id: String): Boolean {
-        return nodes.containsKey(id)
+    fun hasReleaseId(githubId: GithubId): Boolean {
+        return nodes
+                .any { it.key.startsWith(githubId.githubId) }
     }
 
-    fun hasReleaseBeenUpdated(id: String, updatedAt: ZonedDateTime): Boolean {
-        return nodes[id]?.updated_at?.equals(updatedAt) ?: true
+    fun hasReleaseBeenUpdated(githubId: GithubId, updatedAt: ZonedDateTime): Boolean {
+        return nodes
+                .filter { it.key.startsWith(githubId.githubId) }
+                .any { it.value.updated_at != updatedAt }
     }
 
     fun add(newReleases: List<Release>): Releases {

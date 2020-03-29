@@ -17,13 +17,16 @@ import net.adoptopenjdk.api.v3.models.VersionData
 import net.adoptopenjdk.api.v3.parser.FailedToParse
 import net.adoptopenjdk.api.v3.parser.VersionParser
 import org.slf4j.LoggerFactory
+import java.security.MessageDigest
+import java.time.ZonedDateTime
+import java.util.*
 import java.util.regex.Pattern
 
 object AdoptReleaseMapper : ReleaseMapper() {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-    override suspend fun toAdoptRelease(release: GHRelease): Release {
+    override suspend fun toAdoptRelease(release: GHRelease): List<Release> {
         val release_type: ReleaseType = formReleaseType(release)
 
         val releaseLink = release.url
@@ -37,21 +40,61 @@ object AdoptReleaseMapper : ReleaseMapper() {
                 .map { it.downloadCount }.sum()
         val vendor = Vendor.adoptopenjdk
 
-
         val metadata = getMetadata(release.releaseAssets)
 
         try {
-            val versionData = getVersionData(release, metadata, releaseName)
+            val groupedByVersion = metadata
+                    .entries
+                    .groupBy { it.value.version };
 
-            LOGGER.info("Getting binaries $releaseName")
-            val binaries = AdoptBinaryMapper.toBinaryList(release.releaseAssets.assets, metadata)
-            LOGGER.info("Done Getting binaries $releaseName")
+            return groupedByVersion
+                    .entries
+                    .mapIndexed { index, grouped ->
+                        val version = grouped.key.toApiVersion()
+                        val assets = grouped.value.map { it.key }
+                        val id = generateIdForSplitRelease(version, release)
 
-            return Release(release.id, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, versionData)
+                        toRelease(releaseName, assets, metadata, id, release_type, releaseLink, timestamp, updatedAt, downloadCount, vendor, version)
+                    }
+                    .ifEmpty {
+                        try {
+                            //if we have no metadata resort to parsing release names
+                            val version = parseVersionInfo(release, releaseName)
+                            val assets = release.releaseAssets.assets
+                            val id = release.id.githubId
+
+                            val release = toRelease(releaseName, assets, metadata, id, release_type, releaseLink, timestamp, updatedAt, downloadCount, vendor, version)
+
+                            return@ifEmpty listOf(release)
+                        } catch (e: Exception) {
+                            throw Exception("Failed to parse version $releaseName")
+                        }
+                    }
         } catch (e: FailedToParse) {
             LOGGER.error("Failed to parse $releaseName")
             throw e
         }
+    }
+
+    private fun generateIdForSplitRelease(version: VersionData, release: GHRelease): String {
+        //using a shortend hash as a suffix to keep id short, probability of clash still very low
+        val suffix = Base64
+                .getEncoder()
+                .encodeToString(MessageDigest
+                        .getInstance("SHA-1")
+                        .digest(version.semver.toByteArray())
+                        .copyOfRange(0, 10))
+
+        val id = release.id.githubId + "." + suffix
+        return id
+    }
+
+    private suspend fun toRelease(releaseName: String, assets: List<GHAsset>, metadata: Map<GHAsset, GHMetaData>, id: String, release_type: ReleaseType, releaseLink: String, timestamp: ZonedDateTime, updatedAt: ZonedDateTime, downloadCount: Long, vendor: Vendor, version: VersionData): Release {
+        LOGGER.info("Getting binaries $releaseName")
+        val binaries = AdoptBinaryMapper.toBinaryList(assets, metadata)
+        LOGGER.info("Done Getting binaries $releaseName")
+        val release = Release(id, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, version)
+        return release
     }
 
     private fun formReleaseType(release: GHRelease): ReleaseType {
@@ -76,28 +119,15 @@ object AdoptReleaseMapper : ReleaseMapper() {
         return release_type
     }
 
-    private fun getVersionData(release: GHRelease, metadata: Map<GHAsset, GHMetaData>, release_name: String): VersionData {
-        return metadata
-                .values
-                .map { it.version.toApiVersion() }
-                .ifEmpty {
-                    //if we have no metadata resort to parsing release names
-                    parseVersionInfo(release, release_name)
-                }
-                .ifEmpty { throw Exception("Failed to parse version $release_name") }
-                .sorted()
-                .last()
-    }
-
-    private fun parseVersionInfo(release: GHRelease, release_name: String): List<VersionData> {
+    private fun parseVersionInfo(release: GHRelease, release_name: String): VersionData {
         return try {
-            listOf(VersionParser.parse(release_name))
+            VersionParser.parse(release_name)
         } catch (e: FailedToParse) {
             try {
-                listOf(getFeatureVersion(release))
+                getFeatureVersion(release)
             } catch (e: Exception) {
                 LOGGER.warn("Failed to parse ${release.name}")
-                emptyList()
+                throw e
             }
         }
     }

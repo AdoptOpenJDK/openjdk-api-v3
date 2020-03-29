@@ -68,7 +68,7 @@ class AdoptMetadataVersionParsingTest {
             val release = JsonMapper.mapper.readValue(json, GHRelease::class.java)
             val adoptRelease = AdoptReleaseMapper.toAdoptRelease(release)
 
-            assertEquals(242, adoptRelease.version_data.security)
+            assertEquals(242, adoptRelease.first().version_data.security)
         }
     }
 }
