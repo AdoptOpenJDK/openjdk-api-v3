@@ -1,4 +1,4 @@
-[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FAdoptOpenJDK%2Fopenjdk-api-v3%2Fbadge%3Fref%3Dmaster&style=flat)](https://actions-badge.atrox.dev/AdoptOpenJDK/openjdk-api-v3/goto?ref=master) [![codecov](https://codecov.io/gh/AdoptOpenJDK/openjdk-api-v3/branch/master/graph/badge.svg)](https://codecov.io/gh/AdoptOpenJDK/openjdk-api-v3)
+![Build](https://github.com/AdoptOpenJDK/openjdk-api-v3/workflows/Build/badge.svg?branch=master) [![codecov](https://codecov.io/gh/AdoptOpenJDK/openjdk-api-v3/branch/master/graph/badge.svg)](https://codecov.io/gh/AdoptOpenJDK/openjdk-api-v3)
 
 # AdoptOpenJDK API
 
