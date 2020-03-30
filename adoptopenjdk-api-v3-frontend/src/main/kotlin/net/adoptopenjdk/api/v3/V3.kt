@@ -29,7 +29,7 @@ const val DESCRIPTION = "<li><strong>NOTICE:</strong> AdoptOpenJDK API v1 Has no
             Server(url = ServerConfig.SERVER),
             Server(url = "https://staging-api.adoptopenjdk.net")
         ],
-        info = Info(title = "v3", version = "3.0.0-beta", description = DESCRIPTION))
+        info = Info(title = "v3", version = "3.0.0", description = DESCRIPTION))
 @ApplicationPath("/v3")
 class V3 : Application() {
 
