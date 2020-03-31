@@ -7,6 +7,7 @@ import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.models.Release
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 class Releases {
@@ -62,7 +63,9 @@ class Releases {
     fun hasReleaseBeenUpdated(githubId: GithubId, updatedAt: ZonedDateTime): Boolean {
         return nodes
                 .filter { it.key.startsWith(githubId.githubId) }
-                .any { it.value.updated_at != updatedAt }
+                .any {
+                    ChronoUnit.SECONDS.between(it.value.updated_at, updatedAt) != 0L
+                }
     }
 
     fun add(newReleases: List<Release>): Releases {

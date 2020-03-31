@@ -58,7 +58,7 @@ object AdoptReposBuilder {
     private suspend fun getUpdatedReleases(summary: GHRepositorySummary, pruned: FeatureRelease): List<Release> {
         return summary.releases.releases
                 .filter { !excluded.contains(it.id) }
-                .filter { !pruned.releases.hasReleaseBeenUpdated(it.id, it.getUpdatedTime()) }
+                .filter { pruned.releases.hasReleaseBeenUpdated(it.id, it.getUpdatedTime()) }
                 .filter { isReleaseOldEnough(it.publishedAt) } // Ignore artifacts for the first 10 min while they are still uploading
                 .flatMap { getReleaseById(it) }
     }
