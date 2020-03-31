@@ -1,6 +1,7 @@
 package net.adoptopenjdk.api.v3.stats
 
 import net.adoptopenjdk.api.v3.DownloadStatsInterface
+import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
@@ -35,8 +36,8 @@ class StatsInterface {
         tracking
                 .filter { it.daily <= 0 }
                 .forEach { entry ->
-                    val start = entry.date.toLocalDate().atStartOfDay().atZone(ZoneOffset.UTC)
-                    val end = entry.date.toLocalDate().plusDays(1).atStartOfDay().atZone(ZoneOffset.UTC)
+                    val start = entry.date.toLocalDate().atStartOfDay().atZone(TimeSource.ZONE)
+                    val end = entry.date.toLocalDate().plusDays(1).atStartOfDay().atZone(TimeSource.ZONE)
 
                     printStatDebugInfo(start, end)
                     database.removeStatsBetween(start, end)

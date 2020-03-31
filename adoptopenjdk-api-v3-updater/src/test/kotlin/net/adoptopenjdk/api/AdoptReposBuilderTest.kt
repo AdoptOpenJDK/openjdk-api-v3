@@ -104,11 +104,8 @@ class AdoptReposBuilderTest : BaseTest() {
 
     @Test
     fun updatedReleaseIsNotUpdatedWhenThingsDontChange() {
-
         runBlocking {
             val repo = getInitialRepo()
-
-            AdoptRepositoryFactory.setAdoptRepository(MockRepository(repo))
             val updated = AdoptReposBuilder.incrementalUpdate(repo)
 
             assertTrue { updated == repo }
