@@ -36,7 +36,7 @@ import kotlin.math.min
 
 
 @Tag(name = "Assets")
-@Path("/assets/")
+@Path("/v3/assets/")
 @Produces(MediaType.APPLICATION_JSON)
 class AssetsResource {
 

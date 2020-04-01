@@ -26,7 +26,7 @@ import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
 
 
-@Path("/stats/downloads")
+@Path("/v3/stats/downloads")
 @Produces(MediaType.APPLICATION_JSON)
 @Schema(hidden = true)
 class DownloadStatsResource {
