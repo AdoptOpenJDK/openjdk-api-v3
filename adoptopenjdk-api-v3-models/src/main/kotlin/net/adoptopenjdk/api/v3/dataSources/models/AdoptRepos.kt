@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
-import net.adoptopenjdk.api.v3.dataSources.filters.BinaryFilter
-import net.adoptopenjdk.api.v3.dataSources.filters.ReleaseFilter
+import net.adoptopenjdk.api.v3.models.Binary
 import net.adoptopenjdk.api.v3.models.Release
+import java.util.function.Predicate
 
 class AdoptRepos {
 
@@ -42,21 +42,21 @@ class AdoptRepos {
             .toMap())
 
 
-    fun getReleases(releaseFilter: ReleaseFilter, sortOrder: SortOrder): Sequence<Release> {
+    fun getReleases(releaseFilter: Predicate<Release>, sortOrder: SortOrder): Sequence<Release> {
         return allReleases.getReleases(releaseFilter, sortOrder)
     }
 
-    fun getFilteredReleases(version: Int, releaseFilter: ReleaseFilter, binaryFilter: BinaryFilter, sortOrder: SortOrder): Sequence<Release> {
+    fun getFilteredReleases(version: Int, releaseFilter: Predicate<Release>, binaryFilter: Predicate<Binary>, sortOrder: SortOrder): Sequence<Release> {
         val featureRelease = getFeatureRelease(version) ?: return emptySequence()
 
         return getFilteredReleases(featureRelease.releases.getReleases(releaseFilter, sortOrder), binaryFilter)
     }
 
-    fun getFilteredReleases(releaseFilter: ReleaseFilter, binaryFilter: BinaryFilter, sortOrder: SortOrder): Sequence<Release> {
+    fun getFilteredReleases(releaseFilter: Predicate<Release>, binaryFilter: Predicate<Binary>, sortOrder: SortOrder): Sequence<Release> {
         return getFilteredReleases(allReleases.getReleases(releaseFilter, sortOrder), binaryFilter)
     }
 
-    private fun getFilteredReleases(releases: Sequence<Release>, binaryFilter: BinaryFilter): Sequence<Release> {
+    private fun getFilteredReleases(releases: Sequence<Release>, binaryFilter: Predicate<Binary>): Sequence<Release> {
         return releases
                 .map { release ->
                     release.filterBinaries(binaryFilter)

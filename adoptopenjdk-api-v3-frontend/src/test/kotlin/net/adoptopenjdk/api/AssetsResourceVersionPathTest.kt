@@ -1,8 +1,15 @@
 package net.adoptopenjdk.api
 
 import io.quarkus.test.junit.QuarkusTest
-import net.adoptopenjdk.api.v3.models.*
+import io.restassured.RestAssured
+import net.adoptopenjdk.api.v3.models.Architecture
+import net.adoptopenjdk.api.v3.models.HeapSize
+import net.adoptopenjdk.api.v3.models.ImageType
+import net.adoptopenjdk.api.v3.models.JvmImpl
+import net.adoptopenjdk.api.v3.models.OperatingSystem
+import org.hamcrest.Matchers
 import org.junit.jupiter.api.DynamicTest
+import org.junit.jupiter.api.TestFactory
 import java.util.stream.Stream
 
 
@@ -15,11 +22,37 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
     val RANGE_11_12 = "[11.0.0,12.0.0]"
     val RANGE_8_METADATA = "[8.0.212+3,8.0.212+5]"
     val JAVA11 = "11.0.0+28"
+    val ABOVE_8 = "[8.0.0,)"
+
+
+    @TestFactory
+    fun filtersLts(): Stream<DynamicTest> {
+        return listOf(
+                Pair("${getPath()}/${JAVA8_212}?lts=true", 200),
+                Pair("${getPath()}/${JAVA8_212}?lts=false", 404),
+                Pair("${getPath()}/${ABOVE_8}?lts=false", 200),
+                Pair("${getPath()}/${ABOVE_8}?lts=false", 200)
+        ).map { request ->
+            DynamicTest.dynamicTest(request.first) {
+                val response = RestAssured.given()
+                        .`when`()
+                        .get(request.first)
+                        .then()
+                        .statusCode(request.second)
+                if (request.second == 200) {
+                    response.body("binaries.lts.flatten().size()", Matchers.greaterThan(0))
+                } else {
+                    response
+                }
+            }
+        }.stream()
+    }
+
 
     override fun <T> runFilterTest(filterParamName: String, values: Array<T>): Stream<DynamicTest> {
 
         return listOf(
-                "[8.0.0,)",
+                ABOVE_8,
                 JAVA8_212,
                 RANGE_11_12,
                 RANGE_8_METADATA,
