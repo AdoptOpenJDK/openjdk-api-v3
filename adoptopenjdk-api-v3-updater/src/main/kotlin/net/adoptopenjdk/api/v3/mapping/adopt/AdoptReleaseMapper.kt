@@ -40,12 +40,17 @@ object AdoptReleaseMapper : ReleaseMapper() {
         try {
             val groupedByVersion = metadata
                     .entries
-                    .groupBy { it.value.version }
+                    .groupBy {
+                        val version = it.value.version
+                        "${version.major}.${version.minor}.${version.security}.${version.build}.${version.adopt_build_number}"
+                    }
 
             return groupedByVersion
                     .entries
                     .map { grouped ->
-                        val version = grouped.key.toApiVersion()
+                        val version = grouped.value.sortedBy { it.value.version.toApiVersion() }
+                                .last().value.version.toApiVersion()
+
                         val assets = grouped.value.map { it.key }
                         val id = generateIdForSplitRelease(version, release)
 
