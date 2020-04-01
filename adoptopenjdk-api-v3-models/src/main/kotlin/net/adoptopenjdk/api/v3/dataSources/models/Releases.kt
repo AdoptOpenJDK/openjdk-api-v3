@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
-import net.adoptopenjdk.api.v3.dataSources.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.models.Release
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
+import java.util.function.Predicate
 
 class Releases {
 
@@ -32,7 +32,7 @@ class Releases {
     }
 
     @JsonIgnore
-    fun getReleases(filter: ReleaseFilter, sortOrder: SortOrder): Sequence<Release> {
+    fun getReleases(filter: Predicate<Release>, sortOrder: SortOrder): Sequence<Release> {
         return getReleases(sortOrder)
                 .filter {
                     return@filter filter.test(it)

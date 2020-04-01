@@ -2,10 +2,10 @@ package net.adoptopenjdk.api.v3.models
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
-import net.adoptopenjdk.api.v3.dataSources.filters.BinaryFilter
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import java.time.ZonedDateTime
+import java.util.function.Predicate
 
 
 class Release {
@@ -81,7 +81,7 @@ class Release {
         this.source = release.source;
     }
 
-    fun filterBinaries(binaryFilter: BinaryFilter): Release {
+    fun filterBinaries(binaryFilter: Predicate<Binary>): Release {
         return Release(this, binaries.filter { binaryFilter.test(it) }.toTypedArray())
     }
 

@@ -1,4 +1,4 @@
-package net.adoptopenjdk.api.v3.dataSources.filters
+package net.adoptopenjdk.api.v3.filters
 
 import net.adoptopenjdk.api.v3.models.VersionData
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion
