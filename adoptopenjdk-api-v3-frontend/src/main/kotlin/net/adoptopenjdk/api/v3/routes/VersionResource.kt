@@ -16,7 +16,7 @@ import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
 
 @Tag(name = "Version")
-@Path("/version/")
+@Path("/v3/version/")
 @Produces(MediaType.APPLICATION_JSON)
 class VersionResource {
 
