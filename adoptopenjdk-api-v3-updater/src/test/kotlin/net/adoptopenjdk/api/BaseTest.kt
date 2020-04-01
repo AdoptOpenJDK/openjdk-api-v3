@@ -72,7 +72,6 @@ abstract class BaseTest {
             }
         }
 
-
         private var mongodExecutable: MongodExecutable? = null
 
         @JvmStatic

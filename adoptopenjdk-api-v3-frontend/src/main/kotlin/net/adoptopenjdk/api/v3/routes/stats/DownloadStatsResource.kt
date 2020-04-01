@@ -2,6 +2,7 @@ package net.adoptopenjdk.api.v3.routes.stats
 
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.models.Release
@@ -135,8 +136,8 @@ class DownloadStatsResource {
                 throw BadRequestException("docker_repo can only be used with source=dockerhub")
             }
 
-            val fromDate = parseDate(from)?.atStartOfDay()?.atZone(ZoneOffset.UTC)
-            val toDate = parseDate(to)?.plusDays(1)?.atStartOfDay()?.atZone(ZoneOffset.UTC)
+            val fromDate = parseDate(from)?.atStartOfDay()?.atZone(TimeSource.ZONE)
+            val toDate = parseDate(to)?.plusDays(1)?.atStartOfDay()?.atZone(TimeSource.ZONE)
 
             return@runAsync statsInterface.getTrackingStats(days, fromDate, toDate, source, featureVersion, dockerRepo)
         }
