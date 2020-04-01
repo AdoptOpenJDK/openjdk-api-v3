@@ -19,6 +19,7 @@ import org.apache.http.ProtocolVersion
 import org.apache.http.message.BasicHeader
 import org.apache.http.message.BasicStatusLine
 import org.junit.jupiter.api.Test
+import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.fail
 
@@ -136,6 +137,7 @@ class AdoptReleaseMapperTest : BaseTest() {
                 }
 
                 fun getMetadata(url: String): String {
+                    val opt = UUID.randomUUID()
                     return """
                         {
                             "WARNING": "THIS METADATA FILE IS STILL IN ALPHA DO NOT USE ME",
@@ -148,10 +150,10 @@ class AdoptReleaseMapperTest : BaseTest() {
                                 "pre": null,
                                 "adopt_build_number": 1,
                                 "major": 8,
-                                "version": "1.8.0_242-202001081700-b0${url}",
-                                "semver": "8.0.242+${url}.1.202001081700",
+                                "version": "1.8.0_242-${opt}-b0${url}",
+                                "semver": "8.0.242+${url}.1.${opt}",
                                 "build": ${url},
-                                "opt": "202001081700"
+                                "opt": "${opt}"
                             },
                             "scmRef": "",
                             "version_data": "jdk8u",
