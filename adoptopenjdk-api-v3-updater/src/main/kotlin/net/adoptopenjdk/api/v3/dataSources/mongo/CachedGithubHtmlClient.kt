@@ -48,9 +48,7 @@ object CachedGithubHtmlClient {
                 val request = workList.take()
                 async {
                     LOGGER.info("Enqueuing ${request.url} ${request.lastModified} ${workList.size}")
-                    // Dont actually do refresh while we are debugging, just delay to simulate it
-                    delay(150)
-                    //return@async get(request)
+                    return@async get(request)
                 }.await()
             }
         }
