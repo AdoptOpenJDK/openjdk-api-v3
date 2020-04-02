@@ -3,6 +3,7 @@ package net.adoptopenjdk.api.v3
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.routes.AssetsResource
 import net.adoptopenjdk.api.v3.routes.BinaryResource
+import net.adoptopenjdk.api.v3.routes.V1Route
 import net.adoptopenjdk.api.v3.routes.VersionResource
 import net.adoptopenjdk.api.v3.routes.info.AvailableReleasesResource
 import net.adoptopenjdk.api.v3.routes.info.PlatformsResource
@@ -22,13 +23,15 @@ object ServerConfig {
     const val SERVER = "https://api.adoptopenjdk.net"
 }
 
+const val DESCRIPTION = "<li><strong>NOTICE:</strong> AdoptOpenJDK API v1 Has now been removed.</li><li><strong>NOTICE:</strong> AdoptOpenJDK API v2 Has now been deprecated.</li><li><strong>NOTICE:</strong> If you are using v2 please move to the v3 as soon as possible. Please raise any migration problems as an issue in the <a href=\"https://github.com/AdoptOpenJDK/openjdk-api-v3/issues/new\">v3 issue tracker</a>.</li><li><strong>NOTICE:</strong> For v2 docs please refer to <a href=\"https://api.adoptopenjdk.net/README\">https://api.adoptopenjdk.net/README</a>.</li>"
+
 @OpenAPIDefinition(
         servers = [
             Server(url = ServerConfig.SERVER),
             Server(url = "https://staging-api.adoptopenjdk.net")
         ],
-        info = Info(title = "v3", version = "3.0.0-beta"))
-@ApplicationPath("/v3")
+        info = Info(title = "v3", version = "3.0.0", description = DESCRIPTION))
+@ApplicationPath("/")
 class V3 : Application() {
 
     private val resourceClasses: Set<Class<out Any>>
@@ -45,6 +48,7 @@ class V3 : Application() {
         APIDataStore.getAdoptRepos()
 
         resourceClasses = setOf(
+                V1Route::class.java,
                 AssetsResource::class.java,
                 BinaryResource::class.java,
                 AvailableReleasesResource::class.java,
@@ -63,3 +67,4 @@ class V3 : Application() {
         return resourceClasses
     }
 }
+

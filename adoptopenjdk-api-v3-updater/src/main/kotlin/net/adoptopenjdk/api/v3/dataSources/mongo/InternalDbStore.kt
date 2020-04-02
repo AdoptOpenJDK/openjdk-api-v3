@@ -40,7 +40,6 @@ class InternalDbStoreImpl : MongoInterface(MongoClientFactory.get()), InternalDb
         }
     }
 
-
     override suspend fun putCachedWebpage(url: String, lastModified: String?, data: String?) {
         GlobalScope.launch {
             webCache.updateOne(

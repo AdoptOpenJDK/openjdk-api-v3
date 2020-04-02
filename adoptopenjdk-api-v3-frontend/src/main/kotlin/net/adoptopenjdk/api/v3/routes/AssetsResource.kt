@@ -3,9 +3,9 @@ package net.adoptopenjdk.api.v3.routes
 import net.adoptopenjdk.api.v3.OpenApiDocs
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
-import net.adoptopenjdk.api.v3.dataSources.filters.BinaryFilter
-import net.adoptopenjdk.api.v3.dataSources.filters.ReleaseFilter
-import net.adoptopenjdk.api.v3.dataSources.filters.VersionRangeFilter
+import net.adoptopenjdk.api.v3.filters.BinaryFilter
+import net.adoptopenjdk.api.v3.filters.ReleaseFilter
+import net.adoptopenjdk.api.v3.filters.VersionRangeFilter
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.BinaryAssetView
 import net.adoptopenjdk.api.v3.models.HeapSize
@@ -36,7 +36,7 @@ import kotlin.math.min
 
 
 @Tag(name = "Assets")
-@Path("/assets/")
+@Path("/v3/assets/")
 @Produces(MediaType.APPLICATION_JSON)
 class AssetsResource {
 
@@ -105,7 +105,7 @@ class AssetsResource {
         }
         val order = sortOrder ?: SortOrder.DESC
 
-        val releaseFilter = ReleaseFilter(release_type, version, null, vendor, null)
+        val releaseFilter = ReleaseFilter(releaseType = release_type, featureVersion = version, vendor = vendor)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
         val repos = APIDataStore.getAdoptRepos().getFeatureRelease(version)
 
@@ -186,7 +186,7 @@ class AssetsResource {
 
         val range = VersionRangeFilter(version)
 
-        val releaseFilter = ReleaseFilter(release_type, null, null, vendor, range)
+        val releaseFilter = ReleaseFilter(releaseType = release_type, vendor = vendor, versionRange = range, lts = lts)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
 
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, order)
@@ -202,7 +202,8 @@ class AssetsResource {
         val chunked = releases.chunked(pageSizeNum)
 
         try {
-            return chunked.elementAt(pageNum)
+            val res = chunked.elementAt(pageNum)
+            return res
         } catch (e: IndexOutOfBoundsException) {
             throw NotFoundException("Page not available")
         }
@@ -226,7 +227,7 @@ class AssetsResource {
             jvm_impl: JvmImpl
 
     ): List<BinaryAssetView> {
-        val releaseFilter = ReleaseFilter(ReleaseType.ga, version, null, Vendor.adoptopenjdk, null)
+        val releaseFilter = ReleaseFilter(ReleaseType.ga, featureVersion = version, releaseName = null, vendor = Vendor.adoptopenjdk)
         val binaryFilter = BinaryFilter(null, null, null, jvm_impl, null, null)
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(version, releaseFilter, binaryFilter, SortOrder.ASC)
 
