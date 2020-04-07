@@ -98,7 +98,12 @@ class VersionParserTest {
                             VersionData(13, 0, 0, "", null, 0, "2019-10-30-23-10", "13u-2019-10-30-23-10"),
                             "13.0.0+2019-10-30-23-10"
                     )
-            )
+            ),
+            Pair("jdk-11.0.7-ea+9_openj9-0.20.0",
+                    VersionTestData(
+                            VersionData(11, 0, 7, "ea", null, 9, null, "11.0.7-ea+9"),
+                            "11.0.7-ea+9"
+                    ))
     )
 
     @TestFactory
