@@ -19,12 +19,12 @@ class BinaryFilter : Predicate<Binary> {
     private val project: Project
 
     constructor(
-        os: OperatingSystem?,
-        arch: Architecture?,
-        imageType: ImageType?,
-        jvmImpl: JvmImpl?,
-        heapSize: HeapSize?,
-        project: Project?
+            os: OperatingSystem?,
+            arch: Architecture?,
+            imageType: ImageType?,
+            jvmImpl: JvmImpl?,
+            heapSize: HeapSize?,
+            project: Project?
     ) {
         this.os = os
         this.arch = arch

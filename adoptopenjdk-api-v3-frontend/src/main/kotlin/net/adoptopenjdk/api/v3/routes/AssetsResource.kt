@@ -1,12 +1,5 @@
 package net.adoptopenjdk.api.v3.routes
 
-import javax.ws.rs.BadRequestException
-import javax.ws.rs.GET
-import javax.ws.rs.NotFoundException
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
-import javax.ws.rs.core.MediaType
-import kotlin.math.min
 import net.adoptopenjdk.api.v3.OpenApiDocs
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
@@ -33,6 +26,13 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
+import javax.ws.rs.BadRequestException
+import javax.ws.rs.GET
+import javax.ws.rs.NotFoundException
+import javax.ws.rs.Path
+import javax.ws.rs.Produces
+import javax.ws.rs.core.MediaType
+import kotlin.math.min
 
 @Tag(name = "Assets")
 @Path("/v3/assets/")
@@ -49,54 +49,54 @@ class AssetsResource {
         APIResponse(responseCode = "400", description = "bad input parameter")
     ])
     fun get(
-        @Parameter(name = "release_type", description = OpenApiDocs.RELEASE_TYPE, required = true)
-        @PathParam("release_type")
-        release_type: ReleaseType?,
+            @Parameter(name = "release_type", description = OpenApiDocs.RELEASE_TYPE, required = true)
+            @PathParam("release_type")
+            release_type: ReleaseType?,
 
-        @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
-                schema = Schema(defaultValue = "8", type = SchemaType.INTEGER))
-        @PathParam("feature_version")
-        version: Int?,
+            @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
+                    schema = Schema(defaultValue = "8", type = SchemaType.INTEGER))
+            @PathParam("feature_version")
+            version: Int?,
 
-        @Parameter(name = "os", description = "Operating System", required = false)
-        @QueryParam("os")
-        os: OperatingSystem?,
+            @Parameter(name = "os", description = "Operating System", required = false)
+            @QueryParam("os")
+            os: OperatingSystem?,
 
-        @Parameter(name = "architecture", description = "Architecture", required = false)
-        @QueryParam("architecture")
-        arch: Architecture?,
+            @Parameter(name = "architecture", description = "Architecture", required = false)
+            @QueryParam("architecture")
+            arch: Architecture?,
 
-        @Parameter(name = "image_type", description = "Image Type", required = false)
-        @QueryParam("image_type")
-        image_type: ImageType?,
+            @Parameter(name = "image_type", description = "Image Type", required = false)
+            @QueryParam("image_type")
+            image_type: ImageType?,
 
-        @Parameter(name = "jvm_impl", description = "JVM Implementation", required = false)
-        @QueryParam("jvm_impl")
-        jvm_impl: JvmImpl?,
+            @Parameter(name = "jvm_impl", description = "JVM Implementation", required = false)
+            @QueryParam("jvm_impl")
+            jvm_impl: JvmImpl?,
 
-        @Parameter(name = "heap_size", description = "Heap Size", required = false)
-        @QueryParam("heap_size")
-        heap_size: HeapSize?,
+            @Parameter(name = "heap_size", description = "Heap Size", required = false)
+            @QueryParam("heap_size")
+            heap_size: HeapSize?,
 
-        @Parameter(name = "vendor", description = OpenApiDocs.VENDOR, required = false)
-        @QueryParam("vendor")
-        vendor: Vendor?,
+            @Parameter(name = "vendor", description = OpenApiDocs.VENDOR, required = false)
+            @QueryParam("vendor")
+            vendor: Vendor?,
 
-        @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
-        @QueryParam("project")
-        project: Project?,
+            @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
+            @QueryParam("project")
+            project: Project?,
 
-        @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "10", type = SchemaType.INTEGER), required = false)
-        @QueryParam("page_size")
-        pageSize: Int?,
+            @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "10", type = SchemaType.INTEGER), required = false)
+            @QueryParam("page_size")
+            pageSize: Int?,
 
-        @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false)
-        @QueryParam("page")
-        page: Int?,
+            @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false)
+            @QueryParam("page")
+            page: Int?,
 
-        @Parameter(name = "sort_order", description = "Result sort order", required = false)
-        @QueryParam("sort_order")
-        sortOrder: SortOrder?
+            @Parameter(name = "sort_order", description = "Result sort order", required = false)
+            @QueryParam("sort_order")
+            sortOrder: SortOrder?
 
     ): List<Release> {
         if (release_type == null || version == null) {
@@ -126,57 +126,57 @@ class AssetsResource {
         APIResponse(responseCode = "400", description = "bad input parameter")
     ])
     fun getReleaseVersion(
-        @Parameter(name = "version", description = OpenApiDocs.VERSION_RANGE, required = true)
-        @PathParam("version")
-        version: String,
+            @Parameter(name = "version", description = OpenApiDocs.VERSION_RANGE, required = true)
+            @PathParam("version")
+            version: String,
 
-        @Parameter(name = "os", description = "Operating System", required = false)
-        @QueryParam("os")
-        os: OperatingSystem?,
+            @Parameter(name = "os", description = "Operating System", required = false)
+            @QueryParam("os")
+            os: OperatingSystem?,
 
-        @Parameter(name = "architecture", description = "Architecture", required = false)
-        @QueryParam("architecture")
-        arch: Architecture?,
+            @Parameter(name = "architecture", description = "Architecture", required = false)
+            @QueryParam("architecture")
+            arch: Architecture?,
 
-        @Parameter(name = "image_type", description = "Image Type", required = false)
-        @QueryParam("image_type")
-        image_type: ImageType?,
+            @Parameter(name = "image_type", description = "Image Type", required = false)
+            @QueryParam("image_type")
+            image_type: ImageType?,
 
-        @Parameter(name = "jvm_impl", description = "JVM Implementation", required = false)
-        @QueryParam("jvm_impl")
-        jvm_impl: JvmImpl?,
+            @Parameter(name = "jvm_impl", description = "JVM Implementation", required = false)
+            @QueryParam("jvm_impl")
+            jvm_impl: JvmImpl?,
 
-        @Parameter(name = "heap_size", description = "Heap Size", required = false)
-        @QueryParam("heap_size")
-        heap_size: HeapSize?,
+            @Parameter(name = "heap_size", description = "Heap Size", required = false)
+            @QueryParam("heap_size")
+            heap_size: HeapSize?,
 
-        @Parameter(name = "vendor", description = OpenApiDocs.VENDOR, required = false)
-        @QueryParam("vendor")
-        vendor: Vendor?,
+            @Parameter(name = "vendor", description = OpenApiDocs.VENDOR, required = false)
+            @QueryParam("vendor")
+            vendor: Vendor?,
 
-        @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
-        @QueryParam("project")
-        project: Project?,
+            @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
+            @QueryParam("project")
+            project: Project?,
 
-        @Parameter(name = "lts", description = "Include only LTS releases", required = false)
-        @QueryParam("lts")
-        lts: Boolean?,
+            @Parameter(name = "lts", description = "Include only LTS releases", required = false)
+            @QueryParam("lts")
+            lts: Boolean?,
 
-        @Parameter(name = "release_type", description = OpenApiDocs.RELEASE_TYPE, required = false)
-        @QueryParam("release_type")
-        release_type: ReleaseType?,
+            @Parameter(name = "release_type", description = OpenApiDocs.RELEASE_TYPE, required = false)
+            @QueryParam("release_type")
+            release_type: ReleaseType?,
 
-        @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "20", type = SchemaType.INTEGER), required = false)
-        @QueryParam("page_size")
-        pageSize: Int?,
+            @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "20", type = SchemaType.INTEGER), required = false)
+            @QueryParam("page_size")
+            pageSize: Int?,
 
-        @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false)
-        @QueryParam("page")
-        page: Int?,
+            @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false)
+            @QueryParam("page")
+            page: Int?,
 
-        @Parameter(name = "sort_order", description = "Result sort order", required = false)
-        @QueryParam("sort_order")
-        sortOrder: SortOrder?
+            @Parameter(name = "sort_order", description = "Result sort order", required = false)
+            @QueryParam("sort_order")
+            sortOrder: SortOrder?
 
     ): List<Release> {
         val order = sortOrder ?: SortOrder.DESC
@@ -214,14 +214,14 @@ class AssetsResource {
     @Operation(summary = "Returns list of latest assets for the given feature version and jvm impl")
     fun getLatestAssets(
 
-        @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
-                schema = Schema(defaultValue = "8", type = SchemaType.INTEGER))
-        @PathParam("feature_version")
-        version: Int,
+            @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
+                    schema = Schema(defaultValue = "8", type = SchemaType.INTEGER))
+            @PathParam("feature_version")
+            version: Int,
 
-        @Parameter(name = "jvm_impl", description = "JVM Implementation", required = true)
-        @PathParam("jvm_impl")
-        jvm_impl: JvmImpl
+            @Parameter(name = "jvm_impl", description = "JVM Implementation", required = true)
+            @PathParam("jvm_impl")
+            jvm_impl: JvmImpl
 
     ): List<BinaryAssetView> {
         val releaseFilter = ReleaseFilter(ReleaseType.ga, featureVersion = version, releaseName = null, vendor = Vendor.adoptopenjdk)

@@ -1,9 +1,6 @@
 package net.adoptopenjdk.api
 
 import io.quarkus.test.junit.QuarkusTest
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
@@ -25,6 +22,8 @@ import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.models.VersionData
 import org.junit.jupiter.api.Test
+import java.time.ZonedDateTime
+import kotlin.test.assertEquals
 
 @QuarkusTest
 class AssetsResourceFeatureReleasePathSortOrderTest : BaseTest() {

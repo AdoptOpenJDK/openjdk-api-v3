@@ -2,7 +2,6 @@ package net.adoptopenjdk.api
 
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
-import java.util.stream.Stream
 import junit.framework.Assert.fail
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
@@ -15,6 +14,7 @@ import net.adoptopenjdk.api.v3.models.ReleaseType
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import java.util.stream.Stream
 
 @QuarkusTest
 class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {

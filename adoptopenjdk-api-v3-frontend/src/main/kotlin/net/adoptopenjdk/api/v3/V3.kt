@@ -1,10 +1,5 @@
 package net.adoptopenjdk.api.v3
 
-import javax.ws.rs.ApplicationPath
-import javax.ws.rs.container.ContainerRequestContext
-import javax.ws.rs.container.ContainerResponseContext
-import javax.ws.rs.container.ContainerResponseFilter
-import javax.ws.rs.core.Application
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.routes.AssetsResource
 import net.adoptopenjdk.api.v3.routes.BinaryResource
@@ -18,6 +13,11 @@ import net.adoptopenjdk.api.v3.routes.stats.DownloadStatsResource
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition
 import org.eclipse.microprofile.openapi.annotations.info.Info
 import org.eclipse.microprofile.openapi.annotations.servers.Server
+import javax.ws.rs.ApplicationPath
+import javax.ws.rs.container.ContainerRequestContext
+import javax.ws.rs.container.ContainerResponseContext
+import javax.ws.rs.container.ContainerResponseFilter
+import javax.ws.rs.core.Application
 
 object ServerConfig {
     const val SERVER = "https://api.adoptopenjdk.net"

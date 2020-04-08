@@ -3,8 +3,6 @@ package net.adoptopenjdk.api
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
 import io.restassured.response.ValidatableResponse
-import java.time.format.DateTimeFormatter
-import kotlin.test.assertFails
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.TimeSource
@@ -16,6 +14,8 @@ import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import java.time.format.DateTimeFormatter
+import kotlin.test.assertFails
 
 @QuarkusTest
 class DownloadStatsPathTest : BaseTest() {
