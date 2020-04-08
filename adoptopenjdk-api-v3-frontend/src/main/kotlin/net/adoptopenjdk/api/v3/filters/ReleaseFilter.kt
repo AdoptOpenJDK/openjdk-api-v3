@@ -7,14 +7,13 @@ import net.adoptopenjdk.api.v3.models.Vendor
 import java.util.function.Predicate
 
 class ReleaseFilter(
-        private val releaseType: ReleaseType? = null,
-        private val featureVersion: Int? = null,
-        private val releaseName: String? = null,
-        private val vendor: Vendor? = null,
-        private val versionRange: VersionRangeFilter? = null,
-        private val lts: Boolean? = null
+    private val releaseType: ReleaseType? = null,
+    private val featureVersion: Int? = null,
+    private val releaseName: String? = null,
+    private val vendor: Vendor? = null,
+    private val versionRange: VersionRangeFilter? = null,
+    private val lts: Boolean? = null
 ) : Predicate<Release> {
-
     override fun test(release: Release): Boolean {
 
         val ltsFilter = if (lts != null) {
@@ -31,5 +30,4 @@ class ReleaseFilter(
                 (versionRange == null || versionRange.test(release.version_data)) &&
                 ltsFilter
     }
-
 }

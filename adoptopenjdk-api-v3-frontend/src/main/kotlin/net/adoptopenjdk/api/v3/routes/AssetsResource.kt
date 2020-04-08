@@ -41,7 +41,8 @@ class AssetsResource {
 
     @GET
     @Path("/feature_releases/{feature_version}/{release_type}")
-    @Operation(summary = "Returns release information", description = "List of information about builds that match the current query")
+    @Operation(summary = "Returns release information",
+            description = "List of information about builds that match the current query")
     @APIResponses(value = [
         APIResponse(responseCode = "200", description = "search results matching criteria",
                 content = [Content(schema = Schema(type = SchemaType.ARRAY, implementation = Release::class))]
@@ -82,15 +83,18 @@ class AssetsResource {
             @QueryParam("vendor")
             vendor: Vendor?,
 
-            @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
+            @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk",
+                    enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
             @QueryParam("project")
             project: Project?,
 
-            @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "10", type = SchemaType.INTEGER), required = false)
+            @Parameter(name = "page_size", description = "Pagination page size",
+                    schema = Schema(defaultValue = "10", type = SchemaType.INTEGER), required = false)
             @QueryParam("page_size")
             pageSize: Int?,
 
-            @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false)
+            @Parameter(name = "page", description = "Pagination page number",
+                    schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false)
             @QueryParam("page")
             page: Int?,
 
@@ -112,13 +116,17 @@ class AssetsResource {
             throw NotFoundException()
         }
 
-        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(version, releaseFilter, binaryFilter, order)
+        val releases = APIDataStore
+                .getAdoptRepos()
+                .getFilteredReleases(version, releaseFilter, binaryFilter, order)
+
         return getPage(pageSize, page, releases)
     }
 
     @GET
     @Path("/version/{version}")
-    @Operation(summary = "Returns release information about the specified version.", description = "List of information about builds that match the current query ")
+    @Operation(summary = "Returns release information about the specified version.",
+            description = "List of information about builds that match the current query ")
     @APIResponses(value = [
         APIResponse(responseCode = "200", description = "search results matching criteria",
                 content = [Content(schema = Schema(type = SchemaType.ARRAY, implementation = Release::class))]
@@ -154,7 +162,8 @@ class AssetsResource {
             @QueryParam("vendor")
             vendor: Vendor?,
 
-            @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
+            @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk",
+                    enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
             @QueryParam("project")
             project: Project?,
 
@@ -166,11 +175,13 @@ class AssetsResource {
             @QueryParam("release_type")
             release_type: ReleaseType?,
 
-            @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "20", type = SchemaType.INTEGER), required = false)
+            @Parameter(name = "page_size", description = "Pagination page size",
+                    schema = Schema(defaultValue = "20", type = SchemaType.INTEGER), required = false)
             @QueryParam("page_size")
             pageSize: Int?,
 
-            @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false)
+            @Parameter(name = "page", description = "Pagination page number",
+                    schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false)
             @QueryParam("page")
             page: Int?,
 
@@ -188,7 +199,9 @@ class AssetsResource {
         val releaseFilter = ReleaseFilter(releaseType = release_type, vendor = vendor, versionRange = range, lts = lts)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
 
-        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, order)
+        val releases = APIDataStore
+                .getAdoptRepos()
+                .getFilteredReleases(releaseFilter, binaryFilter, order)
 
         return getPage(pageSize, page, releases)
     }
@@ -207,7 +220,12 @@ class AssetsResource {
         }
     }
 
-    data class binaryPermutation(val arch: Architecture, val heapSize: HeapSize, val imageType: ImageType, val os: OperatingSystem)
+    data class binaryPermutation(
+        val arch: Architecture,
+        val heapSize: HeapSize,
+        val imageType: ImageType,
+        val os: OperatingSystem
+    )
 
     @GET
     @Path("/latest/{feature_version}/{jvm_impl}")
@@ -224,9 +242,11 @@ class AssetsResource {
             jvm_impl: JvmImpl
 
     ): List<BinaryAssetView> {
-        val releaseFilter = ReleaseFilter(ReleaseType.ga, featureVersion = version, releaseName = null, vendor = Vendor.adoptopenjdk)
+        val releaseFilter = ReleaseFilter(ReleaseType.ga, featureVersion = version, vendor = Vendor.adoptopenjdk)
         val binaryFilter = BinaryFilter(null, null, null, jvm_impl, null, null)
-        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(version, releaseFilter, binaryFilter, SortOrder.ASC)
+        val releases = APIDataStore
+                .getAdoptRepos()
+                .getFilteredReleases(version, releaseFilter, binaryFilter, SortOrder.ASC)
 
         return releases
                 .flatMap { release ->
@@ -234,7 +254,9 @@ class AssetsResource {
                             .asSequence()
                             .map { Pair(release, it) }
                 }
-                .associateBy { binaryPermutation(it.second.architecture, it.second.heap_size, it.second.image_type, it.second.os) }
+                .associateBy {
+                    binaryPermutation(it.second.architecture, it.second.heap_size, it.second.image_type, it.second.os)
+                }
                 .values
                 .map { BinaryAssetView(it.first.release_name, it.second, it.first.version_data) }
                 .toList()
