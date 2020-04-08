@@ -2,6 +2,7 @@ package net.adoptopenjdk.api
 
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
+import java.util.stream.Stream
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.HeapSize
 import net.adoptopenjdk.api.v3.models.ImageType
@@ -11,8 +12,6 @@ import org.hamcrest.Matchers
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
-import java.util.stream.Stream
-
 
 @QuarkusTest
 abstract class AssetsPathTest : BaseTest() {
@@ -26,7 +25,6 @@ abstract class AssetsPathTest : BaseTest() {
     }
 
     abstract fun <T> runFilterTest(filterParamName: String, values: Array<T>): Stream<DynamicTest>
-
 
     @TestFactory
     fun filtersOs(): Stream<DynamicTest> {
@@ -57,18 +55,16 @@ abstract class AssetsPathTest : BaseTest() {
         return values
                 .filter { !exclude(it) }
                 .map { value ->
-                    val path2 = "${path}?${filterParamName}=${value.toString().toLowerCase()}"
+                    val path2 = "$path?$filterParamName=${value.toString().toLowerCase()}"
                     DynamicTest.dynamicTest(path2) {
                         RestAssured.given()
                                 .`when`()
                                 .get(path2)
                                 .then()
                                 .statusCode(200)
-                                .body("binaries.${filterParamName}.flatten()", Matchers.everyItem(Matchers.`is`(value.toString())))
-                                .body("binaries.${filterParamName}.flatten().size()", Matchers.greaterThan(0))
+                                .body("binaries.$filterParamName.flatten()", Matchers.everyItem(Matchers.`is`(value.toString())))
+                                .body("binaries.$filterParamName.flatten().size()", Matchers.greaterThan(0))
                     }
                 }
     }
-
 }
-

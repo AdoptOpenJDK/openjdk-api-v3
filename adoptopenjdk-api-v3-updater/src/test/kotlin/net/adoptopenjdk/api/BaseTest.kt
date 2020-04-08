@@ -9,6 +9,9 @@ import de.flapdoodle.embed.process.runtime.Network
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import java.time.format.DateTimeFormatter
+import java.util.zip.GZIPInputStream
+import kotlin.random.Random
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.AdoptRepository
@@ -36,9 +39,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.LoggerFactory
-import java.time.format.DateTimeFormatter
-import java.util.zip.GZIPInputStream
-import kotlin.random.Random
 
 @ExtendWith(MockKExtension::class)
 abstract class BaseTest {
@@ -67,10 +67,8 @@ abstract class BaseTest {
                     every { metadataResponse.getFirstHeader("Last-Modified") } returns BasicHeader("Last-Modified", "")
                     return metadataResponse
                 }
-
             }
         }
-
 
         private var mongodExecutable: MongodExecutable? = null
 
@@ -82,7 +80,6 @@ abstract class BaseTest {
             startFongo()
             mockRepo()
             LOGGER.info("Done startup")
-
         }
 
         @JvmStatic
@@ -104,7 +101,7 @@ abstract class BaseTest {
                     .build()
 
             LOGGER.info("Mongo \"mongodb://localhost:${port}\"")
-            System.setProperty("MONGO_DB", "mongodb://localhost:${port}")
+            System.setProperty("MONGO_DB", "mongodb://localhost:$port")
 
             mongodExecutable = starter.prepare(mongodConfig)
             mongodExecutable!!.start()
@@ -112,14 +109,13 @@ abstract class BaseTest {
             ApiPersistenceFactory.set(null)
             MongoClientFactory.set(null)
             LOGGER.info("FMongo started")
-
         }
 
         @JvmStatic
         fun populateDb() {
             runBlocking {
                 val repo = AdoptReposBuilder.build(APIDataStore.variants.versions)
-                //Reset connection
+                // Reset connection
                 ApiPersistenceFactory.set(null)
                 ApiPersistenceFactory.get().updateAllRepos(repo)
                 APIDataStore.loadDataFromDb()
@@ -149,7 +145,6 @@ abstract class BaseTest {
                                         DateTimeFormatter.ISO_INSTANT.format(it.updated_at))
                             }
                             .toList()
-
 
                     return GHRepositorySummary(GHReleasesSummary(gHReleaseSummarys, PageInfo(false, "")))
                 }

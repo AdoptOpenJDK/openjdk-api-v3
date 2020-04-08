@@ -1,13 +1,12 @@
 package net.adoptopenjdk.api.v3.stats
 
+import java.time.ZonedDateTime
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.Vendor
-import java.time.ZonedDateTime
-import java.time.temporal.ChronoUnit
 
 class GithubDownloadStatsCalculator {
     private val database: ApiPersistence = ApiPersistenceFactory.get()

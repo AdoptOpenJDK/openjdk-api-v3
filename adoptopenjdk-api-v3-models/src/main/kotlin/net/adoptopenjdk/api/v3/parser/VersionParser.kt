@@ -1,13 +1,15 @@
 package net.adoptopenjdk.api.v3.parser
 
-import net.adoptopenjdk.api.v3.models.VersionData
-import org.slf4j.LoggerFactory
+/* ktlint-disable no-wildcard-imports */
 import java.util.*
+/* ktlint-enable no-wildcard-imports */
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import net.adoptopenjdk.api.v3.models.VersionData
+import org.slf4j.LoggerFactory
 
-//This is a port of the Groovy VersionParser in the openjdk-build project
-//Should probably look at exporting it as a common lib rather than having 2 implementations
+// This is a port of the Groovy VersionParser in the openjdk-build project
+// Should probably look at exporting it as a common lib rather than having 2 implementations
 object VersionParser {
 
     @JvmStatic
@@ -15,7 +17,6 @@ object VersionParser {
     private val REGEXES: List<Pattern> = getRegexes()
     private val DATE_TIME_MATCHER: Regex = Regex("^[0-9]{4}(-[0-9]{1,2}){4}$")
     private val PRE_223_REGEX: Pattern = Pattern.compile(""".*?(?<version>1\.(?<major>[0-8])\.0(_(?<update>[0-9]+))?(-?(?<additional>.*))?).*?""")
-
 
     private fun pre223(): String {
         val majorMatcher = "(?<major>[0-8]+)"
@@ -37,10 +38,10 @@ object VersionParser {
         return "(?:jdk\\-)?(?<version>$vnumRegex(\\-$preRegex)?\\+$buildRegex(\\-$optRegex)?)"
     }
 
-    //Identical to java version but with adoptbuild number
+    // Identical to java version but with adoptbuild number
     // i.e allow . in the build number
     private fun jep223WithAdoptBuildNum(): List<String> {
-        //Regexes based on those in http://openjdk.java.net/jeps/223
+        // Regexes based on those in http://openjdk.java.net/jeps/223
         // Technically the standard supports an arbitrary number of numbers, we will support 3 for now
         val vnumRegex = """(?<major>[0-9]+)(\.(?<minor>[0-9]+))?(\.(?<security>[0-9]+))?"""
         val preRegex = "(?<pre>[a-zA-Z0-9]+)"
@@ -54,7 +55,7 @@ object VersionParser {
     }
 
     private fun jep223(): List<String> {
-        //Regexes based on those in http://openjdk.java.net/jeps/223
+        // Regexes based on those in http://openjdk.java.net/jeps/223
         // Technically the standard supports an arbitrary number of numbers, we will support 3 for now
         val vnumRegex = """(?<major>[0-9]+)(\.(?<minor>[0-9]+))?(\.(?<security>[0-9]+))?"""
         val preRegex = "(?<pre>[a-zA-Z0-9]+)"
@@ -66,7 +67,6 @@ object VersionParser {
                 "(?:jdk\\-)?(?<version>$vnumRegex\\-$preRegex(\\-$optRegex)?)",
                 "(?:jdk\\-)?(?<version>$vnumRegex(\\+\\-$optRegex)?)")
     }
-
 
     private fun adoptNightly(): String {
         return """jdk(?<version>(?<major>[0-9]+)[-u]+(?<opt>[-0-9]+))"""
@@ -103,7 +103,7 @@ object VersionParser {
             }
         } catch (e: Exception) {
         }
-        throw FailedToParse("Failed to parse ${publishName}")
+        throw FailedToParse("Failed to parse $publishName")
     }
 
     private fun parseWithJavaClass(publishName: String): VersionData? {
@@ -142,11 +142,10 @@ object VersionParser {
         } else {
             defautNum
         }
-
     }
 
     private fun matchAltPre223(versionString: String): VersionData? {
-        //1.8.0_202-internal-201903130451-b08
+        // 1.8.0_202-internal-201903130451-b08
         val matched = PRE_223_REGEX.matcher(versionString)
 
         if (matched.matches()) {
@@ -183,7 +182,7 @@ object VersionParser {
     private fun sanityCheck(parsed: VersionData): Boolean {
 
         if (!(parsed.major in 101 downTo 7)) {
-            //Sanity check as javas parser can match a single number
+            // Sanity check as javas parser can match a single number
             // sane range is 8 to 100
             // TODO update me before 2062 and java 100 is released
             return false

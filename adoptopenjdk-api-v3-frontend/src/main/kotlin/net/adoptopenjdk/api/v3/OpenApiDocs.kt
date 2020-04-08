@@ -15,5 +15,4 @@ object OpenApiDocs {
             """<p>Details of maven version ranges can be found at <a href="https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html">https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html<a>.</p>"""
 
     const val RELEASE_TYPE = """<p>Type of release. Either a release version, known as General Availability(ga) or an Early Access(ea) </p>"""
-
 }

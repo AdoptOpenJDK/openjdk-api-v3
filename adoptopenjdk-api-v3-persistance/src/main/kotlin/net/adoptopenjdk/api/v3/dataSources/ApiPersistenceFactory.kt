@@ -4,7 +4,6 @@ import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoApiPersistence
 import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoClientFactory
 
-
 object ApiPersistenceFactory {
     // Current default impl is mongo impl
     private var impl: ApiPersistence? = null

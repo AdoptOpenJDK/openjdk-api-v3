@@ -8,9 +8,7 @@ import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
 import org.slf4j.LoggerFactory
 
-
 class APIDataStoreTest : BaseTest() {
-
 
     companion object {
         @JvmStatic
@@ -37,6 +35,4 @@ class APIDataStoreTest : BaseTest() {
                     true)
         }
     }
-
 }
-

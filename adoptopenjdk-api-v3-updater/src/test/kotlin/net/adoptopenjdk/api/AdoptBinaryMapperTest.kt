@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api
 
+import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
@@ -13,8 +14,6 @@ import net.adoptopenjdk.api.v3.models.OperatingSystem
 import net.adoptopenjdk.api.v3.models.Project
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-
 
 class AdoptBinaryMapperTest {
 
@@ -25,7 +24,6 @@ class AdoptBinaryMapperTest {
             BaseTest.startFongo()
         }
     }
-
 
     val jdk = GHAsset(
             "OpenJDK8U-jre_x64_linux_hotspot-jfr_2019-11-21-10-26.tar.gz",
@@ -109,7 +107,6 @@ class AdoptBinaryMapperTest {
             assertParsedHotspotJfr(binaryList)
         }
     }
-
 
     @Test
     fun ignoresDebugimage() {

@@ -15,13 +15,12 @@ class BinaryAssetView {
     val version: VersionData
 
     constructor(
-            release_name: String,
-            binary: Binary,
-            version: VersionData) {
+        release_name: String,
+        binary: Binary,
+        version: VersionData
+    ) {
         this.release_name = release_name
         this.binary = binary
         this.version = version
     }
-
-
 }

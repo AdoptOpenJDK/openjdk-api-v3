@@ -14,9 +14,10 @@ class SourcePackage {
     val size: Long
 
     constructor(
-            name: String,
-            link: String,
-            size: Long) {
+        name: String,
+        link: String,
+        size: Long
+    ) {
         this.name = name
         this.link = link
         this.size = size

@@ -40,7 +40,6 @@ object HttpClientFactory {
                     override fun isRedirected(p0: HttpRequest?, p1: HttpResponse?, p2: HttpContext?): Boolean {
                         return false
                     }
-
                 })
                 .setConnectionReuseStrategy(NoConnectionReuseStrategy())
                 .setDefaultRequestConfig(REQUEST_CONFIG)

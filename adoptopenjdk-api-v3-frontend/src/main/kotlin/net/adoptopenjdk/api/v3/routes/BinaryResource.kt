@@ -1,5 +1,11 @@
 package net.adoptopenjdk.api.v3.routes
 
+import java.net.URI
+import javax.ws.rs.GET
+import javax.ws.rs.Path
+import javax.ws.rs.Produces
+import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.OpenApiDocs
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
@@ -25,19 +31,11 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
-import java.net.URI
-import javax.ws.rs.GET
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
-import javax.ws.rs.core.MediaType
-import javax.ws.rs.core.Response
-
 
 @Tag(name = "Binary")
 @Path("/v3/binary/")
 @Produces(MediaType.APPLICATION_JSON)
 class BinaryResource {
-
 
     @GET
     @Path("/version/{release_name}/{os}/{arch}/{image_type}/{jvm_impl}/{heap_size}/{vendor}")
@@ -49,47 +47,45 @@ class BinaryResource {
         APIResponse(responseCode = "404", description = "No matching binary found")
     ])
     fun returnBinaryByVersion(
-            @Parameter(name = "os", description = "Operating System", required = true)
-            @PathParam("os")
-            os: OperatingSystem?,
+        @Parameter(name = "os", description = "Operating System", required = true)
+        @PathParam("os")
+        os: OperatingSystem?,
 
-            @Parameter(name = "arch", description = "Architecture", required = true)
-            @PathParam("arch")
-            arch: Architecture?,
+        @Parameter(name = "arch", description = "Architecture", required = true)
+        @PathParam("arch")
+        arch: Architecture?,
 
-            @Parameter(name = "release_name", description = OpenApiDocs.RELASE_NAME, required = true,
-                    schema = Schema(defaultValue = "jdk-11.0.6+10", type = SchemaType.STRING))
-            @PathParam("release_name")
-            release_name: String?,
+        @Parameter(name = "release_name", description = OpenApiDocs.RELASE_NAME, required = true,
+                schema = Schema(defaultValue = "jdk-11.0.6+10", type = SchemaType.STRING))
+        @PathParam("release_name")
+        release_name: String?,
 
-            @Parameter(name = "image_type", description = "Image Type", required = true)
-            @PathParam("image_type")
-            image_type: ImageType?,
+        @Parameter(name = "image_type", description = "Image Type", required = true)
+        @PathParam("image_type")
+        image_type: ImageType?,
 
-            @Parameter(name = "jvm_impl", description = "JVM Implementation", required = true)
-            @PathParam("jvm_impl")
-            jvm_impl: JvmImpl?,
+        @Parameter(name = "jvm_impl", description = "JVM Implementation", required = true)
+        @PathParam("jvm_impl")
+        jvm_impl: JvmImpl?,
 
-            @Parameter(name = "heap_size", description = "Heap Size", required = true)
-            @PathParam("heap_size")
-            heap_size: HeapSize?,
+        @Parameter(name = "heap_size", description = "Heap Size", required = true)
+        @PathParam("heap_size")
+        heap_size: HeapSize?,
 
-            @Parameter(name = "vendor", description = OpenApiDocs.VENDOR, required = true)
-            @PathParam("vendor")
-            vendor: Vendor?,
+        @Parameter(name = "vendor", description = OpenApiDocs.VENDOR, required = true)
+        @PathParam("vendor")
+        vendor: Vendor?,
 
-            @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
-            @QueryParam("project")
-            project: Project?
+        @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
+        @QueryParam("project")
+        project: Project?
     ): Response {
         val releaseFilter = ReleaseFilter(releaseName = release_name, vendor = vendor)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
 
         return formResponse(releases)
-
     }
-
 
     @GET
     @Path("/latest/{feature_version}/{release_type}/{os}/{arch}/{image_type}/{jvm_impl}/{heap_size}/{vendor}")
@@ -101,42 +97,42 @@ class BinaryResource {
         APIResponse(responseCode = "404", description = "No matching binary found")
     ])
     fun returnBinary(
-            @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
-                    schema = Schema(defaultValue = "8", type = SchemaType.INTEGER))
-            @PathParam("feature_version")
-            version: Int?,
+        @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
+                schema = Schema(defaultValue = "8", type = SchemaType.INTEGER))
+        @PathParam("feature_version")
+        version: Int?,
 
-            @Parameter(name = "release_type", description = OpenApiDocs.RELEASE_TYPE, required = true)
-            @PathParam("release_type")
-            release_type: ReleaseType?,
+        @Parameter(name = "release_type", description = OpenApiDocs.RELEASE_TYPE, required = true)
+        @PathParam("release_type")
+        release_type: ReleaseType?,
 
-            @Parameter(name = "os", description = "Operating System", required = true)
-            @PathParam("os")
-            os: OperatingSystem?,
+        @Parameter(name = "os", description = "Operating System", required = true)
+        @PathParam("os")
+        os: OperatingSystem?,
 
-            @Parameter(name = "arch", description = "Architecture", required = true)
-            @PathParam("arch")
-            arch: Architecture?,
+        @Parameter(name = "arch", description = "Architecture", required = true)
+        @PathParam("arch")
+        arch: Architecture?,
 
-            @Parameter(name = "image_type", description = "Image Type", required = true)
-            @PathParam("image_type")
-            image_type: ImageType?,
+        @Parameter(name = "image_type", description = "Image Type", required = true)
+        @PathParam("image_type")
+        image_type: ImageType?,
 
-            @Parameter(name = "jvm_impl", description = "JVM Implementation", required = true)
-            @PathParam("jvm_impl")
-            jvm_impl: JvmImpl?,
+        @Parameter(name = "jvm_impl", description = "JVM Implementation", required = true)
+        @PathParam("jvm_impl")
+        jvm_impl: JvmImpl?,
 
-            @Parameter(name = "heap_size", description = "Heap Size", required = true)
-            @PathParam("heap_size")
-            heap_size: HeapSize?,
+        @Parameter(name = "heap_size", description = "Heap Size", required = true)
+        @PathParam("heap_size")
+        heap_size: HeapSize?,
 
-            @Parameter(name = "vendor", description = OpenApiDocs.VENDOR, required = true)
-            @PathParam("vendor")
-            vendor: Vendor?,
+        @Parameter(name = "vendor", description = OpenApiDocs.VENDOR, required = true)
+        @PathParam("vendor")
+        vendor: Vendor?,
 
-            @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
-            @QueryParam("project")
-            project: Project?
+        @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
+        @QueryParam("project")
+        project: Project?
     ): Response {
         val releaseFilter = ReleaseFilter(releaseType = release_type, featureVersion = version, vendor = vendor)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
@@ -149,7 +145,6 @@ class BinaryResource {
                 .thenBy { it.version_data.build }
                 .thenBy { it.version_data.adopt_build_number }
                 .thenBy { it.version_data.optional }
-
 
         val release = releases.sortedWith(comparator).lastOrNull()
 
@@ -186,5 +181,4 @@ class BinaryResource {
                 .entity(JsonMapper.mapper.writeValueAsString(APIError(message)))
                 .build()
     }
-
 }

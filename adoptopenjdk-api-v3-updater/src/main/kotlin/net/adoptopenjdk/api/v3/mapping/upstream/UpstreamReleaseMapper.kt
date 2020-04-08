@@ -1,5 +1,7 @@
 package net.adoptopenjdk.api.v3.mapping.upstream
 
+import java.net.URLDecoder
+import java.nio.charset.Charset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import net.adoptopenjdk.api.v3.models.Release
@@ -10,9 +12,6 @@ import net.adoptopenjdk.api.v3.models.VersionData
 import net.adoptopenjdk.api.v3.parser.FailedToParse
 import net.adoptopenjdk.api.v3.parser.VersionParser
 import org.slf4j.LoggerFactory
-import java.net.URLDecoder
-import java.nio.charset.Charset
-import java.time.ZoneId
 
 object UpstreamReleaseMapper : ReleaseMapper() {
     @JvmStatic
@@ -36,7 +35,7 @@ object UpstreamReleaseMapper : ReleaseMapper() {
             val versionData: VersionData
 
             if (release_type == ReleaseType.ga && binaries.size > 0) {
-                //Release names for ga do not have a full version name, so take it from the package
+                // Release names for ga do not have a full version name, so take it from the package
                 val pack = binaries.get(0).`package`
                 versionData = getVersionData(URLDecoder.decode(pack.link, Charset.defaultCharset()))
             } else {
@@ -63,7 +62,5 @@ object UpstreamReleaseMapper : ReleaseMapper() {
 
     private fun getVersionData(release_name: String): VersionData {
         return VersionParser.parse(release_name)
-
     }
-
 }

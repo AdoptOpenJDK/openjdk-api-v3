@@ -3,6 +3,8 @@ package net.adoptopenjdk.api
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
 import io.restassured.response.ValidatableResponse
+import java.time.format.DateTimeFormatter
+import kotlin.test.assertFails
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.TimeSource
@@ -14,8 +16,6 @@ import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import java.time.format.DateTimeFormatter
-import kotlin.test.assertFails
 
 @QuarkusTest
 class DownloadStatsPathTest : BaseTest() {
@@ -40,7 +40,6 @@ class DownloadStatsPathTest : BaseTest() {
                 )
             }
         }
-
 
         private fun createGithubData(): List<GithubDownloadStatsDbEntry> {
             return listOf(
@@ -130,7 +129,6 @@ class DownloadStatsPathTest : BaseTest() {
         }
     }
 
-
     @Test
     fun totalVersionReturnsSaneData() {
         runBlocking {
@@ -196,7 +194,6 @@ class DownloadStatsPathTest : BaseTest() {
         }
     }
 
-
     @Test
     fun dateRangeFilterWithStartAndEndIsCorrect() {
         requestStats(
@@ -250,7 +247,6 @@ class DownloadStatsPathTest : BaseTest() {
                     })
         })
     }
-
 
     private fun requestStats(from: String?, to: String?, days: Int?, check: (List<*>) -> Boolean): ValidatableResponse? {
         return runBlocking {

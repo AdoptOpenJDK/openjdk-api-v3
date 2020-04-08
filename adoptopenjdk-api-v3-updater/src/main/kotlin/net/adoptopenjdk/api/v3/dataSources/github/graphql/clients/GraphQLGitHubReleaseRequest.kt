@@ -7,7 +7,6 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.ReleaseQueryData
 import org.slf4j.LoggerFactory
 
-
 open class GraphQLGitHubReleaseRequest : GraphQLGitHubInterface() {
     companion object {
         @JvmStatic
@@ -59,6 +58,4 @@ open class GraphQLGitHubReleaseRequest : GraphQLGitHubInterface() {
                             }
                     """)
     }
-
-
 }

@@ -10,7 +10,6 @@ import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoInterface
 import org.bson.Document
 import org.litote.kmongo.coroutine.CoroutineCollection
 
-
 object InternalDbStoreFactory {
     private var impl: InternalDbStore? = null
 
@@ -34,7 +33,6 @@ class InternalDbStore : MongoInterface(MongoClientFactory.get()) {
             webCache.createIndex("""{"url":1}""", IndexOptions().background(true))
         }
     }
-
 
     suspend fun putCachedWebpage(url: String, lastModified: String?, data: String?) {
         GlobalScope.launch {
