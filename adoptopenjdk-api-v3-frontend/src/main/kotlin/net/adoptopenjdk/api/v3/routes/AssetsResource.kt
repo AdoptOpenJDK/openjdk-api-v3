@@ -239,7 +239,7 @@ class AssetsResource {
                 }
                 .associateBy { binaryPermutation(it.second.architecture, it.second.heap_size, it.second.image_type, it.second.os) }
                 .values
-                .map { BinaryAssetView(it.first.release_name, it.second) }
+                .map { BinaryAssetView(it.first.release_name, it.second, it.first.version_data) }
                 .toList()
     }
 
