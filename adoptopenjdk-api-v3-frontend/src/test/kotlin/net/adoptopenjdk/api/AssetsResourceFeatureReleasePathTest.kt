@@ -103,7 +103,8 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                 version != 8 && element == Architecture.sparcv9 ||
                 version == 8 && element == ImageType.testimage ||
                 version == 11 && element == ImageType.testimage ||
-                version == 12 && element == ImageType.testimage
+                version == 12 && element == ImageType.testimage ||
+                element == ImageType.debugimage
     }
 
     companion object {

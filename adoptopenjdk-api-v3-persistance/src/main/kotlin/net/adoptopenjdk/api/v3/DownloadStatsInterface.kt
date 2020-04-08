@@ -1,9 +1,5 @@
 package net.adoptopenjdk.api.v3
 
-import java.time.ZonedDateTime
-import java.time.temporal.ChronoUnit
-import kotlin.math.max
-import kotlin.math.min
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
@@ -13,6 +9,10 @@ import net.adoptopenjdk.api.v3.models.DownloadStats
 import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.StatsSource
 import net.adoptopenjdk.api.v3.models.TotalStats
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
+import kotlin.math.max
+import kotlin.math.min
 
 class StatEntry(
     val dateTime: ZonedDateTime,

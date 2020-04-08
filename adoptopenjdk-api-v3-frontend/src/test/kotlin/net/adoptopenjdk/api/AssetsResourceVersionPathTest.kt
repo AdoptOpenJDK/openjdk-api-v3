@@ -2,7 +2,6 @@ package net.adoptopenjdk.api
 
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
-import java.util.stream.Stream
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.HeapSize
 import net.adoptopenjdk.api.v3.models.ImageType
@@ -11,6 +10,7 @@ import net.adoptopenjdk.api.v3.models.OperatingSystem
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
+import java.util.stream.Stream
 
 @QuarkusTest
 class AssetsResourceVersionPathTest : AssetsPathTest() {
@@ -25,10 +25,10 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
     @TestFactory
     fun filtersLts(): Stream<DynamicTest> {
         return listOf(
-                Pair("${getPath()}/$JAVA8_212?lts=true", 200),
-                Pair("${getPath()}/$JAVA8_212?lts=false", 404),
-                Pair("${getPath()}/$ABOVE_8?lts=false", 200),
-                Pair("${getPath()}/$ABOVE_8?lts=false", 200)
+                Pair("${getPath()}/${JAVA8_212}?lts=true", 200),
+                Pair("${getPath()}/${JAVA8_212}?lts=false", 404),
+                Pair("${getPath()}/${ABOVE_8}?lts=false", 200),
+                Pair("${getPath()}/${ABOVE_8}?lts=false", 200)
         ).map { request ->
             DynamicTest.dynamicTest(request.first) {
                 val response = RestAssured.given()
@@ -77,6 +77,7 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
                 versionRange.equals(JAVA11) && element == Architecture.x32 ||
                 versionRange.equals(JAVA11) && element == OperatingSystem.solaris ||
                 versionRange.equals(JAVA11) && element == Architecture.sparcv9 ||
-                versionRange.equals(JAVA11) && element == ImageType.testimage
+                versionRange.equals(JAVA11) && element == ImageType.testimage ||
+                element == ImageType.debugimage
     }
 }

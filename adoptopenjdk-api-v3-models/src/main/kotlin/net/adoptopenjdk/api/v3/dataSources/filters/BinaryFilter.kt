@@ -1,4 +1,4 @@
-package net.adoptopenjdk.api.v3.filters
+package net.adoptopenjdk.api.v3.dataSources.filters
 
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Binary
@@ -19,12 +19,12 @@ class BinaryFilter : Predicate<Binary> {
     private val project: Project
 
     constructor(
-        os: OperatingSystem?,
-        arch: Architecture?,
-        imageType: ImageType?,
-        jvmImpl: JvmImpl?,
-        heapSize: HeapSize?,
-        project: Project?
+            os: OperatingSystem?,
+            arch: Architecture?,
+            imageType: ImageType?,
+            jvmImpl: JvmImpl?,
+            heapSize: HeapSize?,
+            project: Project?
     ) {
         this.os = os
         this.arch = arch
@@ -42,4 +42,5 @@ class BinaryFilter : Predicate<Binary> {
                 (heapSize == null || binary.heap_size == heapSize) &&
                 (binary.project == project)
     }
+
 }

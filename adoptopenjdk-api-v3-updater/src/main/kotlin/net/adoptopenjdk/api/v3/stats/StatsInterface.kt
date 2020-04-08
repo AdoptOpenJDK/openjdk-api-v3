@@ -1,13 +1,13 @@
 package net.adoptopenjdk.api.v3.stats
 
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
 import net.adoptopenjdk.api.v3.DownloadStatsInterface
+import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.StatsSource
 import org.slf4j.LoggerFactory
+import java.time.ZonedDateTime
 
 class StatsInterface {
 
@@ -26,7 +26,8 @@ class StatsInterface {
         githubDownloadStatsCalculator.saveStats(repos)
         dockerStatsInterface.updateDb()
 
-        removeBadDownloadStats()
+        //TODO bring back if we need it and once we understand stats trajectory
+        //removeBadDownloadStats()
     }
 
     private suspend fun removeBadDownloadStats() {
@@ -34,8 +35,8 @@ class StatsInterface {
         tracking
                 .filter { it.daily <= 0 }
                 .forEach { entry ->
-                    val start = entry.date.toLocalDate().atStartOfDay().atZone(ZoneOffset.UTC)
-                    val end = entry.date.toLocalDate().plusDays(1).atStartOfDay().atZone(ZoneOffset.UTC)
+                    val start = entry.date.toLocalDate().atStartOfDay().atZone(TimeSource.ZONE)
+                    val end = entry.date.toLocalDate().plusDays(1).atStartOfDay().atZone(TimeSource.ZONE)
 
                     printStatDebugInfo(start, end)
                     database.removeStatsBetween(start, end)

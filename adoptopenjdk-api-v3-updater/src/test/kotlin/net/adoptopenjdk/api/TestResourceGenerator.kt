@@ -1,11 +1,11 @@
 package net.adoptopenjdk.api
 
-import java.io.File
-import java.util.zip.GZIPOutputStream
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.models.Variants
+import java.io.File
+import java.util.zip.GZIPOutputStream
 
 class TestResourceGenerator {
     companion object {

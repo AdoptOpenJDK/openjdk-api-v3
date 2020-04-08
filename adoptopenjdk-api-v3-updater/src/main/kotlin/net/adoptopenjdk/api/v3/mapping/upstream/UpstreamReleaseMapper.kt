@@ -1,8 +1,7 @@
 package net.adoptopenjdk.api.v3.mapping.upstream
 
-import java.net.URLDecoder
-import java.nio.charset.Charset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
+import net.adoptopenjdk.api.v3.mapping.BinaryMapper
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
@@ -12,19 +11,26 @@ import net.adoptopenjdk.api.v3.models.VersionData
 import net.adoptopenjdk.api.v3.parser.FailedToParse
 import net.adoptopenjdk.api.v3.parser.VersionParser
 import org.slf4j.LoggerFactory
+import java.net.URLDecoder
+import java.nio.charset.Charset
 
 object UpstreamReleaseMapper : ReleaseMapper() {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-    override suspend fun toAdoptRelease(release: GHRelease): Release? {
+    override suspend fun toAdoptRelease(release: GHRelease): List<Release>? {
         val release_type: ReleaseType = if (release.name.contains(" GA ")) ReleaseType.ga else ReleaseType.ea
 
         val releaseLink = release.url
         val releaseName = release.name
         val timestamp = parseDate(release.publishedAt)
         val updatedAt = parseDate(release.updatedAt)
-        val downloadCount = release.releaseAssets.assets.map { it.downloadCount }.sum()
+        val downloadCount = release.releaseAssets.assets
+                .filter { asset ->
+                    BinaryMapper.BINARY_EXTENSIONS.any { asset.name.endsWith(it) }
+                }
+                .map { it.downloadCount }.sum()
+
         val vendor = Vendor.openjdk
 
         LOGGER.info("Getting binaries $releaseName")
@@ -44,7 +50,7 @@ object UpstreamReleaseMapper : ReleaseMapper() {
 
             val sourcePackage = getSourcePackage(release)
 
-            return Release(release.id, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, versionData, sourcePackage)
+            return listOf(Release(release.id.githubId, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, versionData, sourcePackage))
         } catch (e: FailedToParse) {
             LOGGER.error("Failed to parse $releaseName")
             return null

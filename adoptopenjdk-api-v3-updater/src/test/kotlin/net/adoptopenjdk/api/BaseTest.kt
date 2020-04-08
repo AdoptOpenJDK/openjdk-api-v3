@@ -9,9 +9,6 @@ import de.flapdoodle.embed.process.runtime.Network
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import java.time.format.DateTimeFormatter
-import java.util.zip.GZIPInputStream
-import kotlin.random.Random
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.AdoptRepository
@@ -28,6 +25,7 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRelea
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
+import net.adoptopenjdk.api.v3.dataSources.models.GithubId
 import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoClientFactory
 import net.adoptopenjdk.api.v3.models.Release
 import org.apache.http.HttpEntity
@@ -39,6 +37,9 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.LoggerFactory
+import java.time.format.DateTimeFormatter
+import java.util.zip.GZIPInputStream
+import kotlin.random.Random
 
 @ExtendWith(MockKExtension::class)
 abstract class BaseTest {
@@ -124,8 +125,10 @@ abstract class BaseTest {
 
         fun MockRepository(adoptRepos: AdoptRepos): AdoptRepository {
             return object : AdoptRepository {
-                override suspend fun getReleaseById(id: String): Release? {
-                    return adoptRepos.allReleases.getReleases().filter { it.id == id }.first()
+                override suspend fun getReleaseById(id: GithubId): List<Release>? {
+                    return adoptRepos.allReleases.getReleases().filter {
+                        it.id.startsWith(id.githubId)
+                    }.toList()
                 }
 
                 override suspend fun getRelease(version: Int): FeatureRelease? {
@@ -140,7 +143,8 @@ abstract class BaseTest {
 
                     val gHReleaseSummarys = featureRelease.releases.getReleases()
                             .map {
-                                GHReleaseSummary(it.id,
+                                GHReleaseSummary(
+                                        GithubId(it.id),
                                         DateTimeFormatter.ISO_INSTANT.format(it.timestamp),
                                         DateTimeFormatter.ISO_INSTANT.format(it.updated_at))
                             }

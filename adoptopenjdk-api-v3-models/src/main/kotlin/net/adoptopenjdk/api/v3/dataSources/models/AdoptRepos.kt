@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import java.util.function.Predicate
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.models.Binary
 import net.adoptopenjdk.api.v3.models.Release
+import java.util.function.Predicate
 
 class AdoptRepos {
 
@@ -65,11 +65,11 @@ class AdoptRepos {
     }
 
     fun addRelease(i: Int, r: Release): AdoptRepos {
-        return AdoptRepos(repos.plus(Pair(i, repos.get(i)!!.add(listOf(r)))))
+        return AdoptRepos(repos.plus(Pair(i, repos.getValue(i).add(listOf(r)))))
     }
 
     fun removeRelease(i: Int, r: Release): AdoptRepos {
-        return AdoptRepos(repos.plus(Pair(i, repos.get(i)!!.remove(r.id))))
+        return AdoptRepos(repos.plus(Pair(i, repos.getValue(i).remove(r.id))))
     }
 
     override fun equals(other: Any?): Boolean {

@@ -12,6 +12,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
 import com.fasterxml.jackson.datatype.jsr353.JSR353Module
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import net.adoptopenjdk.api.v3.TimeSource
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
@@ -23,7 +24,7 @@ class ZonedTimeUpgrader : SimpleModule() {
                     return InstantDeserializer.ZONED_DATE_TIME.deserialize(parser, context)
                 } else {
                     return LocalDateTimeDeserializer.INSTANCE.deserialize(parser, context)
-                            .atZone(ZoneId.of("UTC"))
+                            .atZone(TimeSource.ZONE)
                 }
             }
         })

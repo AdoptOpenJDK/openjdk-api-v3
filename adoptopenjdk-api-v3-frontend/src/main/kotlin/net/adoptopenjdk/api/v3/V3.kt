@@ -40,7 +40,7 @@ class V3 : Application() {
     init {
         cors = setOf(object : ContainerResponseFilter {
             override fun filter(requestContext: ContainerRequestContext?, responseContext: ContainerResponseContext) {
-                responseContext.getHeaders().add("Access-Control-Allow-Origin", "*")
+                responseContext.headers.add("Access-Control-Allow-Origin", "*")
             }
         })
 
@@ -67,3 +67,4 @@ class V3 : Application() {
         return resourceClasses
     }
 }
+

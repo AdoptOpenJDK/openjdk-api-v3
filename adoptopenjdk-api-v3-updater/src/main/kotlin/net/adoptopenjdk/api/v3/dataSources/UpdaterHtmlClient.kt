@@ -1,12 +1,5 @@
 package net.adoptopenjdk.api.v3.dataSources
 
-import java.io.StringWriter
-import java.net.URL
-import java.nio.charset.Charset
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import net.adoptopenjdk.api.v3.HttpClientFactory
@@ -16,6 +9,13 @@ import org.apache.http.HttpResponse
 import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.concurrent.FutureCallback
 import org.slf4j.LoggerFactory
+import java.io.StringWriter
+import java.net.URL
+import java.nio.charset.Charset
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 data class UrlRequest(
     val url: String,
