@@ -20,10 +20,7 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
     - name: ktlint
-      uses: ScaCap/action-ktlint@master
-      with:
-        github_token: ${{ secrets.github_token }}
-        reporter: github-pr-review # Change reporter
+      run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.35.0/ktlint && chmod a+x ktlint && ./ktlint
     - name: Extract openapi doc
       run: cd adoptopenjdk-api-v3-frontend && unzip target/adoptopenjdk-api-v3-frontend-*-runner.jar META-INF/quarkus-generated-openapi-doc.YAML
     - name:
