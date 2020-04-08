@@ -19,6 +19,11 @@ jobs:
     - uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+    - name: ktlint
+      uses: ScaCap/action-ktlint@master
+      with:
+        github_token: ${{ secrets.github_token }}
+        reporter: github-pr-review # Change reporter
     - name: Extract openapi doc
       run: cd adoptopenjdk-api-v3-frontend && unzip target/adoptopenjdk-api-v3-frontend-*-runner.jar META-INF/quarkus-generated-openapi-doc.YAML
     - name:

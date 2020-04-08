@@ -44,7 +44,7 @@ class V3 : Application() {
             }
         })
 
-        // Eagerly fetch repo from db on app startup
+        //Eagerly fetch repo from db on app startup
         APIDataStore.getAdoptRepos()
 
         resourceClasses = setOf(
