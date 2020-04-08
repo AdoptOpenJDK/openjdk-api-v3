@@ -1,15 +1,14 @@
 package net.adoptopenjdk.api.v3.filters
 
+import java.util.function.Predicate
 import net.adoptopenjdk.api.v3.models.VersionData
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion
 import org.apache.maven.artifact.versioning.VersionRange
-import java.util.function.Predicate
 
 class VersionRangeFilter(range: String?) : Predicate<VersionData> {
 
     val rangeMatcher: VersionRange?
     val exactMatcher: DefaultArtifactVersion?
-
 
     init {
         // default range behaviour of a solid version is stupid:

@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api
 
+import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAssets
@@ -7,7 +8,6 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.mapping.upstream.UpstreamReleaseMapper
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 
 class UpstreamReleaseMapperTest {
 
@@ -20,7 +20,7 @@ class UpstreamReleaseMapperTest {
                     PageInfo(false, "")
             )
 
-            val ghRelease = GHRelease("1", "OpenJDK 8u232 GA Release", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "a-url");
+            val ghRelease = GHRelease("1", "OpenJDK 8u232 GA Release", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "a-url")
 
             val release = UpstreamReleaseMapper.toAdoptRelease(ghRelease)
 

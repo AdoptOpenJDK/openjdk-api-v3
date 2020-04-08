@@ -1,5 +1,10 @@
 package net.adoptopenjdk.api.v3.routes
 
+import javax.ws.rs.BadRequestException
+import javax.ws.rs.GET
+import javax.ws.rs.Path
+import javax.ws.rs.Produces
+import javax.ws.rs.core.MediaType
 import net.adoptopenjdk.api.v3.models.VersionData
 import net.adoptopenjdk.api.v3.parser.FailedToParse
 import net.adoptopenjdk.api.v3.parser.VersionParser
@@ -9,11 +14,6 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
-import javax.ws.rs.BadRequestException
-import javax.ws.rs.GET
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
-import javax.ws.rs.core.MediaType
 
 @Tag(name = "Version")
 @Path("/v3/version/")
@@ -28,9 +28,9 @@ class VersionResource {
         APIResponse(responseCode = "400", description = "bad input parameter")
     ])
     fun parseVersion(
-            @Parameter(name = "version", description = "Version", required = true)
-            @PathParam("version")
-            version: String?
+        @Parameter(name = "version", description = "Version", required = true)
+        @PathParam("version")
+        version: String?
     ): VersionData {
         if (version == null) {
             throw BadRequestException("Must provide a version parameter")

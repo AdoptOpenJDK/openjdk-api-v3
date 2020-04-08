@@ -12,11 +12,10 @@ class BinaryAssetView {
     val release_name: String
 
     constructor(
-            release_name: String,
-            binary: Binary) {
+        release_name: String,
+        binary: Binary
+    ) {
         this.release_name = release_name
         this.binary = binary
     }
-
-
 }

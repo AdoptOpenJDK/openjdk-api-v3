@@ -16,13 +16,13 @@ import net.adoptopenjdk.api.v3.models.Release
 import org.slf4j.LoggerFactory
 
 object AdoptRepositoryFactory {
-    private var adoptRepository: AdoptRepository? = null;
+    private var adoptRepository: AdoptRepository? = null
 
     fun getAdoptRepository(): AdoptRepository {
         if (adoptRepository == null) {
             adoptRepository = AdoptRepositoryImpl
         }
-        return adoptRepository!!;
+        return adoptRepository!!
     }
 
     fun setAdoptRepository(repo: AdoptRepository) {
@@ -70,7 +70,6 @@ object AdoptRepositoryImpl : AdoptRepository {
                 .flatMap { it.releases.releases }
                 .toList()
         return GHRepositorySummary(GHReleasesSummary(releaseSummaries, PageInfo(false, "")))
-
     }
 
     private suspend fun getRepository(repoName: String): List<Release> {

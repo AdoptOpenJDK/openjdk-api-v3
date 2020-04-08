@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api
 
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.AdoptRepositoryFactory
@@ -9,8 +10,6 @@ import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.models.VersionData
 import org.junit.jupiter.api.Test
-import kotlin.test.assertTrue
-
 
 class AdoptReposBuilderTest : BaseTest() {
 
@@ -41,7 +40,6 @@ class AdoptReposBuilderTest : BaseTest() {
                     arrayOf(), 2, Vendor.adoptopenjdk,
                     VersionData(1, 2, 3, "", 1, 4, "", ""))
 
-
             val removedRepo = repo.addRelease(8, toAdd)
 
             AdoptRepositoryFactory.setAdoptRepository(MockRepository(removedRepo))
@@ -63,7 +61,6 @@ class AdoptReposBuilderTest : BaseTest() {
                     TimeSource.now(),
                     TimeSource.now(), arrayOf(), 2, Vendor.adoptopenjdk,
                     VersionData(1, 2, 3, "", 1, 4, "", ""))
-
 
             val removedRepo = repo.addRelease(8, toAdd)
 
@@ -88,7 +85,7 @@ class AdoptReposBuilderTest : BaseTest() {
                     arrayOf(), 2, Vendor.adoptopenjdk,
                     VersionData(1, 2, 3, "", 1, 4, "", ""))
 
-            val updatedRepo = repo.removeRelease(8, original)//.addRelease(8, toUpdate)
+            val updatedRepo = repo.removeRelease(8, original) // .addRelease(8, toUpdate)
 
             AdoptRepositoryFactory.setAdoptRepository(MockRepository(updatedRepo))
 
@@ -113,6 +110,4 @@ class AdoptReposBuilderTest : BaseTest() {
             assertTrue { updated == repo }
         }
     }
-
 }
-

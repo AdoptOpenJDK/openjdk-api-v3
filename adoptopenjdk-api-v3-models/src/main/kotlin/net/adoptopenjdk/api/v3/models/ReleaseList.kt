@@ -7,5 +7,4 @@ class ReleaseList {
     constructor(releases: Array<String>) {
         this.releases = releases
     }
-
 }

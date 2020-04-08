@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api.v3.mapping.adopt
 
+import java.util.regex.Pattern
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
@@ -16,7 +17,6 @@ import net.adoptopenjdk.api.v3.models.VersionData
 import net.adoptopenjdk.api.v3.parser.FailedToParse
 import net.adoptopenjdk.api.v3.parser.VersionParser
 import org.slf4j.LoggerFactory
-import java.util.regex.Pattern
 
 object AdoptReleaseMapper : ReleaseMapper() {
     @JvmStatic
@@ -31,7 +31,6 @@ object AdoptReleaseMapper : ReleaseMapper() {
         val updatedAt = parseDate(release.updatedAt)
         val downloadCount = release.releaseAssets.assets.map { it.downloadCount }.sum()
         val vendor = Vendor.adoptopenjdk
-
 
         val metadata = getMetadata(release.releaseAssets)
 
@@ -50,12 +49,12 @@ object AdoptReleaseMapper : ReleaseMapper() {
     }
 
     private fun formReleaseType(release: GHRelease): ReleaseType {
-        //TODO fix me before the year 2100
+        // TODO fix me before the year 2100
         val dateMatcher = """.*(20[0-9]{2}-[0-9]{2}-[0-9]{2}|20[0-9]{6}).*"""
         val hasDate = Pattern.compile(dateMatcher).matcher(release.name)
         val release_type: ReleaseType =
                 if (release.url.matches(Regex(".*/openjdk[0-9]+-binaries/.*"))) {
-                    //Can trust isPrerelease from -binaries repos
+                    // Can trust isPrerelease from -binaries repos
                     if (release.isPrerelease) {
                         ReleaseType.ea
                     } else {
@@ -76,7 +75,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
                 .values
                 .map { it.version.toApiVersion() }
                 .ifEmpty {
-                    //if we have no metadata resort to parsing release names
+                    // if we have no metadata resort to parsing release names
                     parseVersionInfo(release, release_name)
                 }
                 .ifEmpty { throw Exception("Failed to parse version $release_name") }

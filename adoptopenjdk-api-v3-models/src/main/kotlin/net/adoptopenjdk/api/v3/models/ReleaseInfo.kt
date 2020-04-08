@@ -22,5 +22,4 @@ class ReleaseInfo {
         this.most_recent_lts = most_recent_lts
         this.most_recent_feature_release = most_recent_feature_release
     }
-
 }

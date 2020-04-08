@@ -1,5 +1,9 @@
 package net.adoptopenjdk.api.v3
 
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
+import kotlin.math.max
+import kotlin.math.min
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
@@ -9,34 +13,31 @@ import net.adoptopenjdk.api.v3.models.DownloadStats
 import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.StatsSource
 import net.adoptopenjdk.api.v3.models.TotalStats
-import java.time.ZonedDateTime
-import java.time.temporal.ChronoUnit
-import kotlin.math.max
-import kotlin.math.min
 
 class StatEntry(
-        val dateTime: ZonedDateTime,
-        val count: Long
+    val dateTime: ZonedDateTime,
+    val count: Long
 )
 
 class DownloadStatsInterface(
-        private val dataStore: ApiPersistence = ApiPersistenceFactory.get()
+    private val dataStore: ApiPersistence = ApiPersistenceFactory.get()
 ) {
 
     suspend fun getTrackingStats(
-            days: Int? = null,
-            from: ZonedDateTime? = null,
-            to: ZonedDateTime? = null,
-            source: StatsSource? = null,
-            featureVersion: Int? = null,
-            dockerRepo: String? = null): List<DownloadDiff> {
+        days: Int? = null,
+        from: ZonedDateTime? = null,
+        to: ZonedDateTime? = null,
+        source: StatsSource? = null,
+        featureVersion: Int? = null,
+        dockerRepo: String? = null
+    ): List<DownloadDiff> {
 
-        //need +1 as for a diff you need num days +1 from db
+        // need +1 as for a diff you need num days +1 from db
         val daysSince = (days ?: 30) + 1
         val statsSource = source ?: StatsSource.all
         val periodEnd = to ?: TimeSource.now()
 
-        //Cap maximum period to 180 days
+        // Cap maximum period to 180 days
         val periodMinusDays = periodEnd.minusDays(min(180, daysSince).toLong())
 
         val periodStart = if (from != null) {
@@ -54,7 +55,6 @@ class DownloadStatsInterface(
         val stats = getStats(periodStart.minusDays(10), periodEnd, featureVersion, dockerRepo, statsSource)
 
         return calculateDailyDiff(stats, periodStart, periodEnd, days)
-
     }
 
     private suspend fun getStats(start: ZonedDateTime, end: ZonedDateTime, featureVersion: Int?, dockerRepo: String?, statsSource: StatsSource): Collection<StatEntry> {
@@ -141,7 +141,6 @@ class DownloadStatsInterface(
                 .map { it!!.getMetric() }
                 .sum()
     }
-
 
     suspend fun getTotalDownloadStats(): DownloadStats {
         val dockerStats = dataStore.getLatestAllDockerStats()

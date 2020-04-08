@@ -1,5 +1,7 @@
 package net.adoptopenjdk.api.v3.dataSources.mongo
 
+import java.util.concurrent.Executors
+import java.util.concurrent.LinkedBlockingQueue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -10,8 +12,6 @@ import net.adoptopenjdk.api.v3.dataSources.DefaultUpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UrlRequest
 import org.slf4j.LoggerFactory
-import java.util.concurrent.Executors
-import java.util.concurrent.LinkedBlockingQueue
 
 object CachedGithubHtmlClient {
     @JvmStatic
@@ -22,12 +22,11 @@ object CachedGithubHtmlClient {
 
     private val internalDbStore = InternalDbStoreFactory.get()
 
-    //List of urls to be refreshed in the background
+    // List of urls to be refreshed in the background
     private val workList = LinkedBlockingQueue<UrlRequest>()
 
-
     init {
-        //Do refresh in the background
+        // Do refresh in the background
         GlobalScope.launch(backgroundHtmlDispatcher, block = cacheRefreshDaemonThread())
     }
 
@@ -54,15 +53,14 @@ object CachedGithubHtmlClient {
     }
 
     private suspend fun get(request: UrlRequest): String? {
-        //Retry up to 10 times
+        // Retry up to 10 times
         for (retryCount in 1..10) {
             try {
                 LOGGER.info("Getting  ${request.url} ${request.lastModified}")
                 val response = UpdaterHtmlClientFactory.client.getFullResponse(request)
 
-
                 if (response?.statusLine?.statusCode == 304) {
-                    //asset has not updated
+                    // asset has not updated
                     return null
                 }
 
@@ -81,6 +79,4 @@ object CachedGithubHtmlClient {
 
         return null
     }
-
 }
-

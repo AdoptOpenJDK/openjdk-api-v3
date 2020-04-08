@@ -30,7 +30,6 @@ class VersionData : Comparable<VersionData> {
         this.semver = semver ?: formSemver()
     }
 
-
     // i.e 11.0.1+11.1
     fun formSemver(): String {
         var semver = major.toString() + "." + minor + "." + security
@@ -57,7 +56,6 @@ class VersionData : Comparable<VersionData> {
         }
 
         return semver
-
     }
 
     override fun hashCode(): Int {

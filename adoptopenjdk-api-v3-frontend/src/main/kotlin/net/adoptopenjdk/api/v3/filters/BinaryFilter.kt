@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api.v3.filters
 
+import java.util.function.Predicate
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Binary
 import net.adoptopenjdk.api.v3.models.HeapSize
@@ -7,7 +8,6 @@ import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.OperatingSystem
 import net.adoptopenjdk.api.v3.models.Project
-import java.util.function.Predicate
 
 class BinaryFilter : Predicate<Binary> {
 
@@ -19,12 +19,12 @@ class BinaryFilter : Predicate<Binary> {
     private val project: Project
 
     constructor(
-            os: OperatingSystem?,
-            arch: Architecture?,
-            imageType: ImageType?,
-            jvmImpl: JvmImpl?,
-            heapSize: HeapSize?,
-            project: Project?
+        os: OperatingSystem?,
+        arch: Architecture?,
+        imageType: ImageType?,
+        jvmImpl: JvmImpl?,
+        heapSize: HeapSize?,
+        project: Project?
     ) {
         this.os = os
         this.arch = arch
@@ -42,5 +42,4 @@ class BinaryFilter : Predicate<Binary> {
                 (heapSize == null || binary.heap_size == heapSize) &&
                 (binary.project == project)
     }
-
 }

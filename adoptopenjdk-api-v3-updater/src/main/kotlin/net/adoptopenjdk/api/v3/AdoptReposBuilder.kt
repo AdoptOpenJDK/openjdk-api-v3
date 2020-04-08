@@ -1,5 +1,7 @@
 package net.adoptopenjdk.api.v3
 
+import java.time.temporal.ChronoUnit
+import kotlin.math.absoluteValue
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
@@ -8,10 +10,6 @@ import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import net.adoptopenjdk.api.v3.models.Release
 import org.slf4j.LoggerFactory
-
-import java.time.ZonedDateTime
-import java.time.temporal.ChronoUnit
-import kotlin.math.absoluteValue
 
 object AdoptReposBuilder {
 
@@ -87,10 +85,9 @@ object AdoptReposBuilder {
         }
     }
 
-
     suspend fun build(versions: Array<Int>): AdoptRepos {
         excluded.clear()
-        //Fetch repos in parallel
+        // Fetch repos in parallel
         val reposMap = versions
                 .reversed()
                 .map { version ->

@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import java.util.function.Predicate
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.models.Binary
 import net.adoptopenjdk.api.v3.models.Release
-import java.util.function.Predicate
 
 class AdoptRepos {
 
@@ -18,9 +18,10 @@ class AdoptRepos {
 
     @JsonCreator
     constructor(
-            @JsonProperty("repos")
-            @JsonDeserialize(keyAs = Int::class)
-            repos: Map<Int, FeatureRelease>) {
+        @JsonProperty("repos")
+        @JsonDeserialize(keyAs = Int::class)
+        repos: Map<Int, FeatureRelease>
+    ) {
         this.repos = repos
 
         val releases = repos
@@ -40,7 +41,6 @@ class AdoptRepos {
     constructor(list: List<FeatureRelease>) : this(list
             .map { Pair(it.featureVersion, it) }
             .toMap())
-
 
     fun getReleases(releaseFilter: Predicate<Release>, sortOrder: SortOrder): Sequence<Release> {
         return allReleases.getReleases(releaseFilter, sortOrder)
@@ -89,6 +89,4 @@ class AdoptRepos {
         result = 31 * result + allReleases.hashCode()
         return result
     }
-
-
 }

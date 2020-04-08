@@ -8,7 +8,6 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRepository
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 
-
 class GraphQLGitHubClient : GitHubApi {
     private val summaryClient = GraphQLGitHubSummaryClient()
     private val releaseClient = GraphQLGitHubReleaseClient()
@@ -25,6 +24,4 @@ class GraphQLGitHubClient : GitHubApi {
     override suspend fun getRepository(repoName: String): GHRepository {
         return repositoryClientClient.getRepository(repoName)
     }
-
-
 }

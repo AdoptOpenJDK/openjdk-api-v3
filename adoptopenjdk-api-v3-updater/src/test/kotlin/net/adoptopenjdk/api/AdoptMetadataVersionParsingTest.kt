@@ -2,6 +2,7 @@ package net.adoptopenjdk.api
 
 import io.mockk.every
 import io.mockk.mockk
+import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
@@ -15,8 +16,6 @@ import org.apache.http.ProtocolVersion
 import org.apache.http.message.BasicHeader
 import org.apache.http.message.BasicStatusLine
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-
 
 class AdoptMetadataVersionParsingTest {
 
@@ -62,7 +61,6 @@ class AdoptMetadataVersionParsingTest {
                     return metadataResponse
                 }
             }
-
 
             val json = String(this.javaClass.classLoader.getResourceAsStream("example-release.json").readAllBytes())
             val release = JsonMapper.mapper.readValue(json, GHRelease::class.java)

@@ -8,10 +8,11 @@ import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+/* ktlint-disable no-wildcard-imports */
 import net.adoptopenjdk.api.v3.models.*
+/* ktlint-enable no-wildcard-imports */
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-
 
 @QuarkusTest
 class LatestAssetsPathTest : BaseTest() {
@@ -22,7 +23,7 @@ class LatestAssetsPathTest : BaseTest() {
         fun populateDb() {
             runBlocking {
                 val repo = AdoptReposBuilder.build(APIDataStore.variants.versions)
-                //Reset connection
+                // Reset connection
                 ApiPersistenceFactory.set(null)
                 ApiPersistenceFactory.get().updateAllRepos(repo)
                 APIDataStore.loadDataFromDb()
@@ -57,11 +58,8 @@ class LatestAssetsPathTest : BaseTest() {
                     release.binary.os == os &&
                             release.binary.image_type == imageType &&
                             release.binary.architecture == architecture
-
                 })
                 .count() > 0
         return hasEntry
     }
-
 }
-

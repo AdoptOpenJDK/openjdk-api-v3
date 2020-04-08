@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api.v3.stats
 
+import javax.json.JsonObject
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
@@ -8,8 +9,6 @@ import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
 import org.slf4j.LoggerFactory
-import javax.json.JsonObject
-
 
 class DockerStatsInterface {
     companion object {
@@ -35,7 +34,6 @@ class DockerStatsInterface {
             throw e
         }
     }
-
 
     private fun getDownloadStats(): List<DockerDownloadStatsDbEntry> {
         val now = TimeSource.now()
@@ -81,8 +79,6 @@ class DockerStatsInterface {
             } catch (e: Exception) {
                 throw Exception("Failed to parse stats", e)
             }
-
         }
     }
-
 }

@@ -1,13 +1,12 @@
 package net.adoptopenjdk.api
 
+import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.mapping.upstream.UpstreamBinaryMapper
 import net.adoptopenjdk.api.v3.models.ImageType
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-
 
 class UpstreamBinaryMapperTest {
 
@@ -38,7 +37,6 @@ class UpstreamBinaryMapperTest {
             )
         }
     }
-
 
     @Test
     fun filtersOutDebugInfo() {
@@ -75,9 +73,7 @@ class UpstreamBinaryMapperTest {
             assertEquals(ImageType.testimage, binaryList[2].image_type)
             assertEquals(ImageType.jre, binaryList[3].image_type)
         }
-
     }
-
 
     @Test
     fun addsSignatureLink() {
@@ -90,6 +86,5 @@ class UpstreamBinaryMapperTest {
             val binaryList = UpstreamBinaryMapper.toBinaryList(assets)
             assertEquals("a-signature-link to OpenJDK11U-x64_linux_11.0.3_7.tar.gz", binaryList[0].`package`.signature_link)
         }
-
     }
 }

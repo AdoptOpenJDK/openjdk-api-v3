@@ -29,7 +29,6 @@ class ZonedTimeUpgrader : SimpleModule() {
     }
 }
 
-
 object JsonMapper {
     val mapper: ObjectMapper = ObjectMapper()
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)

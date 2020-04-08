@@ -18,22 +18,23 @@ class Variant {
     var latest: Boolean = false
 
     constructor(
-            @JsonProperty("searchableName")
-            searchableName: String,
-            @JsonProperty("jvm")
-            jvm: JvmImpl,
-            @JsonProperty("vendor")
-            vendor: Vendor,
-            @JsonProperty("version")
-            version: Int,
-            @JsonProperty("lts")
-            lts: Boolean?,
-            @JsonProperty("websiteDescription")
-            websiteDescription: String?,
-            @JsonProperty("websiteDescriptionLink")
-            websiteDescriptionLink: String?,
-            @JsonProperty("websiteDefault")
-            websiteDefault: Boolean?) {
+        @JsonProperty("searchableName")
+        searchableName: String,
+        @JsonProperty("jvm")
+        jvm: JvmImpl,
+        @JsonProperty("vendor")
+        vendor: Vendor,
+        @JsonProperty("version")
+        version: Int,
+        @JsonProperty("lts")
+        lts: Boolean?,
+        @JsonProperty("websiteDescription")
+        websiteDescription: String?,
+        @JsonProperty("websiteDescriptionLink")
+        websiteDescriptionLink: String?,
+        @JsonProperty("websiteDefault")
+        websiteDefault: Boolean?
+    ) {
         this.searchableName = searchableName
         this.jvm = jvm
         this.vendor = vendor
@@ -44,7 +45,6 @@ class Variant {
         this.websiteDefault = websiteDefault
         this.label = "$vendor $version"
         this.officialName = "$vendor $version with $jvm"
-
     }
 }
 
@@ -57,8 +57,9 @@ class Variants {
     val latestLtsVersion: Int
 
     constructor(
-            @JsonProperty("variants")
-            variants: Array<Variant>) {
+        @JsonProperty("variants")
+        variants: Array<Variant>
+    ) {
         this.variants = variants
 
         versions = variants.map { it.version }.sorted().distinct().toTypedArray()
