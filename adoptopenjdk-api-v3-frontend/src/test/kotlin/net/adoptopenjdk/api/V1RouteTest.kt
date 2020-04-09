@@ -2,8 +2,8 @@ package net.adoptopenjdk.api
 
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
-import javax.ws.rs.core.Response
 import org.junit.jupiter.api.Test
+import javax.ws.rs.core.Response
 
 @QuarkusTest
 class V1RouteTest : BaseTest() {

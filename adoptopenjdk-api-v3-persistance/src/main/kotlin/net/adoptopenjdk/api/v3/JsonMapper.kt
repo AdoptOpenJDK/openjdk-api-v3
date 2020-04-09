@@ -22,7 +22,7 @@ class ZonedTimeUpgrader : SimpleModule() {
                     return InstantDeserializer.ZONED_DATE_TIME.deserialize(parser, context)
                 } else {
                     return LocalDateTimeDeserializer.INSTANCE.deserialize(parser, context)
-                            .atZone(ZoneId.of("UTC"))
+                            .atZone(TimeSource.ZONE)
                 }
             }
         })

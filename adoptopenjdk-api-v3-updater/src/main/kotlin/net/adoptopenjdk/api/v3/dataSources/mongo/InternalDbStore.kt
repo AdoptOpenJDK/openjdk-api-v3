@@ -15,7 +15,7 @@ object InternalDbStoreFactory {
 
     fun get(): InternalDbStore {
         if (impl == null) {
-            impl = InternalDbStore()
+            impl = InternalDbStoreImpl()
         }
         return impl!!
     }
@@ -25,7 +25,12 @@ object InternalDbStoreFactory {
     }
 }
 
-class InternalDbStore : MongoInterface(MongoClientFactory.get()) {
+interface InternalDbStore {
+    suspend fun putCachedWebpage(url: String, lastModified: String?, data: String?)
+    suspend fun getCachedWebpage(url: String): CacheDbEntry?
+}
+
+class InternalDbStoreImpl : MongoInterface(MongoClientFactory.get()), InternalDbStore {
     private val webCache: CoroutineCollection<CacheDbEntry> = createCollection(database, "web-cache")
 
     init {
@@ -34,7 +39,7 @@ class InternalDbStore : MongoInterface(MongoClientFactory.get()) {
         }
     }
 
-    suspend fun putCachedWebpage(url: String, lastModified: String?, data: String?) {
+    override suspend fun putCachedWebpage(url: String, lastModified: String?, data: String?) {
         GlobalScope.launch {
             webCache.updateOne(
                     Document("url", url),
@@ -44,7 +49,7 @@ class InternalDbStore : MongoInterface(MongoClientFactory.get()) {
         }
     }
 
-    suspend fun getCachedWebpage(url: String): CacheDbEntry? {
+    override suspend fun getCachedWebpage(url: String): CacheDbEntry? {
         return webCache.findOne(Document("url", url))
     }
 }

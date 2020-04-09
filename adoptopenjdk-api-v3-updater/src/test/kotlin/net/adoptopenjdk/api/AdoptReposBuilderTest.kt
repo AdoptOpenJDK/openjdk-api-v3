@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.AdoptRepositoryFactory
 import net.adoptopenjdk.api.v3.TimeSource
+import net.adoptopenjdk.api.v3.dataSources.models.GithubId
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
@@ -24,8 +25,8 @@ class AdoptReposBuilderTest : BaseTest() {
 
             val updated = AdoptReposBuilder.incrementalUpdate(repo)
 
-            assertTrue { repo.getFeatureRelease(8)!!.releases.hasReleaseId(toRemove.id) }
-            assertTrue { !updated.getFeatureRelease(8)!!.releases.hasReleaseId(toRemove.id) }
+            assertTrue { repo.getFeatureRelease(8)!!.releases.hasReleaseId(GithubId(toRemove.id)) }
+            assertTrue { !updated.getFeatureRelease(8)!!.releases.hasReleaseId(GithubId(toRemove.id)) }
             assertTrue { updated != repo }
         }
     }
@@ -46,7 +47,7 @@ class AdoptReposBuilderTest : BaseTest() {
 
             val updated = AdoptReposBuilder.incrementalUpdate(repo)
 
-            assertTrue { !repo.getFeatureRelease(8)!!.releases.hasReleaseId(toAdd.id) }
+            assertTrue { !repo.getFeatureRelease(8)!!.releases.hasReleaseId(GithubId(toAdd.id)) }
             assertTrue { updated.getFeatureRelease(8)!!.releases.getReleases().contains(toAdd) }
             assertTrue { updated != repo }
         }
@@ -100,11 +101,8 @@ class AdoptReposBuilderTest : BaseTest() {
 
     @Test
     fun updatedReleaseIsNotUpdatedWhenThingsDontChange() {
-
         runBlocking {
             val repo = getInitialRepo()
-
-            AdoptRepositoryFactory.setAdoptRepository(MockRepository(repo))
             val updated = AdoptReposBuilder.incrementalUpdate(repo)
 
             assertTrue { updated == repo }

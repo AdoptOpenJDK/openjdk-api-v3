@@ -2,10 +2,11 @@ package net.adoptopenjdk.api.v3.models
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
-import java.time.ZonedDateTime
-import java.util.function.Predicate
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
+import java.time.ZonedDateTime
+import java.util.function.Predicate
+
 
 class Release {
 

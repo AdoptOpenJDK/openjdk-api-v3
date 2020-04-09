@@ -5,6 +5,7 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAssets
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.ReleaseQueryData
+import net.adoptopenjdk.api.v3.dataSources.models.GithubId
 import org.slf4j.LoggerFactory
 
 open class GraphQLGitHubReleaseRequest : GraphQLGitHubInterface() {
@@ -32,9 +33,9 @@ open class GraphQLGitHubReleaseRequest : GraphQLGitHubInterface() {
         return GHRelease(release.id, release.name, release.isPrerelease, release.prerelease, release.publishedAt, release.updatedAt, GHAssets(assets.toList(), PageInfo(false, null)), release.resourcePath, release.url)
     }
 
-    private fun getMoreReleasesQuery(releaseId: String): GraphQLRequestEntity.RequestBuilder {
+    private fun getMoreReleasesQuery(releaseId: GithubId): GraphQLRequestEntity.RequestBuilder {
         return request("""query(${'$'}cursorPointer:String) { 
-                              node(id:"$releaseId") {
+                              node(id:"${releaseId.githubId}") {
                                 ... on Release {
                                     releaseAssets(first:50, after:${'$'}cursorPointer) {
                                         nodes {

@@ -1,11 +1,5 @@
 package net.adoptopenjdk.api.v3.routes
 
-import java.net.URI
-import javax.ws.rs.GET
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
-import javax.ws.rs.core.MediaType
-import javax.ws.rs.core.Response
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.OpenApiDocs
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
@@ -31,6 +25,12 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
+import java.net.URI
+import javax.ws.rs.GET
+import javax.ws.rs.Path
+import javax.ws.rs.Produces
+import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response
 
 @Tag(name = "Binary")
 @Path("/v3/binary/")
@@ -45,7 +45,8 @@ class BinaryResource {
         APIResponse(responseCode = "307", description = "link to binary that matches your current query"),
         APIResponse(responseCode = "400", description = "bad input parameter"),
         APIResponse(responseCode = "404", description = "No matching binary found")
-    ])
+    ]
+    )
     fun returnBinaryByVersion(
         @Parameter(name = "os", description = "Operating System", required = true)
         @PathParam("os")
@@ -56,7 +57,8 @@ class BinaryResource {
         arch: Architecture?,
 
         @Parameter(name = "release_name", description = OpenApiDocs.RELASE_NAME, required = true,
-                schema = Schema(defaultValue = "jdk-11.0.6+10", type = SchemaType.STRING))
+                   schema = Schema(defaultValue = "jdk-11.0.6+10", type = SchemaType.STRING)
+        )
         @PathParam("release_name")
         release_name: String?,
 
@@ -95,10 +97,12 @@ class BinaryResource {
         APIResponse(responseCode = "307", description = "link to binary that matches your current query"),
         APIResponse(responseCode = "400", description = "bad input parameter"),
         APIResponse(responseCode = "404", description = "No matching binary found")
-    ])
+    ]
+    )
     fun returnBinary(
         @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
-                schema = Schema(defaultValue = "8", type = SchemaType.INTEGER))
+                   schema = Schema(defaultValue = "8", type = SchemaType.INTEGER)
+        )
         @PathParam("feature_version")
         version: Int?,
 
@@ -139,12 +143,12 @@ class BinaryResource {
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
 
         val comparator = compareBy<Release> { it.version_data.major }
-                .thenBy { it.version_data.minor }
-                .thenBy { it.version_data.security }
-                .thenBy { it.version_data.pre }
-                .thenBy { it.version_data.build }
-                .thenBy { it.version_data.adopt_build_number }
-                .thenBy { it.version_data.optional }
+            .thenBy { it.version_data.minor }
+            .thenBy { it.version_data.security }
+            .thenBy { it.version_data.pre }
+            .thenBy { it.version_data.build }
+            .thenBy { it.version_data.adopt_build_number }
+            .thenBy { it.version_data.optional }
 
         val release = releases.sortedWith(comparator).lastOrNull()
 
@@ -156,13 +160,13 @@ class BinaryResource {
             return formErrorResponse(Response.Status.NOT_FOUND, "No releases match the request")
         } else if (releases.size > 1) {
             val versions = releases
-                    .map { it.release_name }
+                .map { it.release_name }
             return formErrorResponse(Response.Status.BAD_REQUEST, "Multiple releases match request: $versions")
         } else {
             val binaries = releases.get(0).binaries
             val packages = binaries
-                    .map { it.`package` }
-                    .filterNotNull()
+                .map { it.`package` }
+                .filterNotNull()
 
             if (packages.size == 0) {
                 return formErrorResponse(Response.Status.NOT_FOUND, "No binaries match the request")
@@ -177,8 +181,8 @@ class BinaryResource {
 
     private fun formErrorResponse(status: Response.Status, message: String): Response {
         return Response
-                .status(status)
-                .entity(JsonMapper.mapper.writeValueAsString(APIError(message)))
-                .build()
+            .status(status)
+            .entity(JsonMapper.mapper.writeValueAsString(APIError(message)))
+            .build()
     }
 }

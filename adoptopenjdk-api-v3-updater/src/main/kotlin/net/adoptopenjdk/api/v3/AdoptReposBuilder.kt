@@ -1,22 +1,23 @@
 package net.adoptopenjdk.api.v3
 
-import java.time.temporal.ChronoUnit
-import kotlin.math.absoluteValue
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
+import net.adoptopenjdk.api.v3.dataSources.models.GithubId
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import net.adoptopenjdk.api.v3.models.Release
 import org.slf4j.LoggerFactory
+import java.time.temporal.ChronoUnit
+import kotlin.math.absoluteValue
 
 object AdoptReposBuilder {
 
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-    private val excluded: MutableSet<String> = HashSet()
+    private val excluded: MutableSet<GithubId> = HashSet()
 
     suspend fun incrementalUpdate(repo: AdoptRepos): AdoptRepos {
         val updated = repo
@@ -57,9 +58,9 @@ object AdoptReposBuilder {
     private suspend fun getUpdatedReleases(summary: GHRepositorySummary, pruned: FeatureRelease): List<Release> {
         return summary.releases.releases
                 .filter { !excluded.contains(it.id) }
-                .filter { !pruned.releases.hasReleaseBeenUpdated(it.id, it.getUpdatedTime()) }
+                .filter { pruned.releases.hasReleaseBeenUpdated(it.id, it.getUpdatedTime()) }
                 .filter { isReleaseOldEnough(it.publishedAt) } // Ignore artifacts for the first 10 min while they are still uploading
-                .mapNotNull { getReleaseById(it) }
+                .flatMap { getReleaseById(it) }
     }
 
     private suspend fun getNewReleases(summary: GHRepositorySummary, currentRelease: FeatureRelease): List<Release> {
@@ -67,7 +68,7 @@ object AdoptReposBuilder {
                 .filter { !excluded.contains(it.id) }
                 .filter { !currentRelease.releases.hasReleaseId(it.id) }
                 .filter { isReleaseOldEnough(it.publishedAt) } // Ignore artifacts for the first 10 min while they are still uploading
-                .mapNotNull { getReleaseById(it) }
+                .flatMap { getReleaseById(it) }
     }
 
     private fun isReleaseOldEnough(timestamp: String): Boolean {
@@ -75,13 +76,14 @@ object AdoptReposBuilder {
         return ChronoUnit.MINUTES.between(created, TimeSource.now()).absoluteValue > 10
     }
 
-    private suspend fun getReleaseById(it: GHReleaseSummary): Release? {
+    private suspend fun getReleaseById(it: GHReleaseSummary): List<Release> {
         return try {
-            return AdoptRepositoryFactory.getAdoptRepository().getReleaseById(it.id)
+            val result = AdoptRepositoryFactory.getAdoptRepository().getReleaseById(it.id)
+            return result ?: emptyList()
         } catch (e: Exception) {
             LOGGER.info("Excluding ${it.id} from update")
             excluded.add(it.id)
-            null
+            emptyList()
         }
     }
 

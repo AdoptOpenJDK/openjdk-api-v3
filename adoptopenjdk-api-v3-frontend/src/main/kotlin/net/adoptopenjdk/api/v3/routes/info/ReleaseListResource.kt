@@ -1,9 +1,5 @@
 package net.adoptopenjdk.api.v3.routes.info
 
-import javax.ws.rs.GET
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
-import javax.ws.rs.core.MediaType
 import net.adoptopenjdk.api.v3.OpenApiDocs
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
@@ -20,6 +16,10 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
+import javax.ws.rs.GET
+import javax.ws.rs.Path
+import javax.ws.rs.Produces
+import javax.ws.rs.core.MediaType
 
 @Tag(name = "Release Info")
 @Path("/v3/info")
@@ -60,8 +60,8 @@ class ReleaseListResource {
         val filteredReleases = getReleases(release_type, vendor, version, order)
 
         val releases = filteredReleases
-                .map { it.release_name }
-                .toList()
+            .map { it.release_name }
+            .toList()
 
         return ReleaseList(releases.toTypedArray())
     }
@@ -100,9 +100,9 @@ class ReleaseListResource {
         val filteredReleases = getReleases(release_type, vendor, version, order)
 
         val releases = filteredReleases
-                .map { it.version_data }
-                .distinct()
-                .toList()
+            .map { it.version_data }
+            .distinct()
+            .toList()
 
         return ReleaseVersionList(releases.toTypedArray())
     }
@@ -111,7 +111,7 @@ class ReleaseListResource {
         val range = VersionRangeFilter(version)
         val releaseFilter = ReleaseFilter(releaseType = release_type, vendor = vendor, versionRange = range)
         return APIDataStore
-                .getAdoptRepos()
-                .getReleases(releaseFilter, sortOrder)
+            .getAdoptRepos()
+            .getReleases(releaseFilter, sortOrder)
     }
 }

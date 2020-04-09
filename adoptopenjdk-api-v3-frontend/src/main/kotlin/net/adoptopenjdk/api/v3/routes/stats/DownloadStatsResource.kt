@@ -1,18 +1,8 @@
 package net.adoptopenjdk.api.v3.routes.stats
 
-import java.time.LocalDate
-import java.time.ZoneOffset
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CompletionStage
-import javax.ws.rs.BadRequestException
-import javax.ws.rs.GET
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
-import javax.ws.rs.QueryParam
-import javax.ws.rs.core.MediaType
-import javax.ws.rs.core.Response
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.models.Release
@@ -24,6 +14,16 @@ import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.jboss.resteasy.annotations.jaxrs.PathParam
+import java.time.LocalDate
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionStage
+import javax.ws.rs.BadRequestException
+import javax.ws.rs.GET
+import javax.ws.rs.Path
+import javax.ws.rs.Produces
+import javax.ws.rs.QueryParam
+import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response
 
 @Path("/v3/stats/downloads")
 @Produces(MediaType.APPLICATION_JSON)
@@ -51,16 +51,16 @@ class DownloadStatsResource {
         featureVersion: Int
     ): Map<String, Long> {
         val release = APIDataStore.getAdoptRepos().getFeatureRelease(featureVersion)
-                ?: throw BadRequestException("Unable to find version $featureVersion")
+            ?: throw BadRequestException("Unable to find version $featureVersion")
 
         return getAdoptReleases(release)
-                .filter { it.release_type == ReleaseType.ga }
-                .map { grouped ->
-                    Pair(grouped.release_name, grouped.binaries.map {
-                        it.download_count + ((it.installer?.download_count) ?: 0L)
-                    }.sum())
-                }
-                .toMap()
+            .filter { it.release_type == ReleaseType.ga }
+            .map { grouped ->
+                Pair(grouped.release_name, grouped.binaries.map {
+                    it.download_count + ((it.installer?.download_count) ?: 0L)
+                }.sum())
+            }
+            .toMap()
     }
 
     @Throws(BadRequestException::class)
@@ -77,27 +77,27 @@ class DownloadStatsResource {
         releaseName: String
     ): Map<String, Long> {
         val release = APIDataStore.getAdoptRepos().getFeatureRelease(featureVersion)
-                ?: throw BadRequestException("Unable to find version $featureVersion")
+            ?: throw BadRequestException("Unable to find version $featureVersion")
 
         return getAdoptReleases(release)
-                .filter { it.release_name == releaseName }
-                .flatMap { it.binaries.asSequence() }
-                .flatMap {
-                    val archive = Pair(it.`package`.name, it.download_count)
-                    if (it.installer != null) {
-                        sequenceOf(archive, Pair(it.installer!!.name, it.installer!!.download_count))
-                    } else {
-                        sequenceOf(archive)
-                    }
+            .filter { it.release_name == releaseName }
+            .flatMap { it.binaries.asSequence() }
+            .flatMap {
+                val archive = Pair(it.`package`.name, it.download_count)
+                if (it.installer != null) {
+                    sequenceOf(archive, Pair(it.installer!!.name, it.installer!!.download_count))
+                } else {
+                    sequenceOf(archive)
                 }
-                .toMap()
+            }
+            .toMap()
     }
 
     private fun getAdoptReleases(release: FeatureRelease): Sequence<Release> {
         return release
-                .releases
-                .getReleases()
-                .filter { it.vendor == Vendor.adoptopenjdk }
+            .releases
+            .getReleases()
+            .filter { it.vendor == Vendor.adoptopenjdk }
     }
 
     @GET
@@ -133,8 +133,8 @@ class DownloadStatsResource {
                 throw BadRequestException("docker_repo can only be used with source=dockerhub")
             }
 
-            val fromDate = parseDate(from)?.atStartOfDay()?.atZone(ZoneOffset.UTC)
-            val toDate = parseDate(to)?.plusDays(1)?.atStartOfDay()?.atZone(ZoneOffset.UTC)
+            val fromDate = parseDate(from)?.atStartOfDay()?.atZone(TimeSource.ZONE)
+            val toDate = parseDate(to)?.plusDays(1)?.atStartOfDay()?.atZone(TimeSource.ZONE)
 
             return@runAsync statsInterface.getTrackingStats(days, fromDate, toDate, source, featureVersion, dockerRepo)
         }

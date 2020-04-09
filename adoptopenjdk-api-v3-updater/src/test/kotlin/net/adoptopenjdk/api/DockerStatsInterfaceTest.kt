@@ -2,8 +2,6 @@ package net.adoptopenjdk.api
 
 import io.mockk.coEvery
 import io.mockk.mockk
-import java.time.ZonedDateTime
-import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.DownloadStatsInterface
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
@@ -17,6 +15,8 @@ import net.adoptopenjdk.api.v3.stats.DockerStatsInterface
 import org.junit.Assert
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import java.time.ZonedDateTime
+import kotlin.test.assertEquals
 
 class DockerStatsInterfaceTest {
     companion object {
@@ -71,6 +71,7 @@ class DockerStatsInterfaceTest {
 
             stats = downloadStatsInterface.getTrackingStats(10)
             assertEquals(240, stats[0].total)
+
         }
     }
 }

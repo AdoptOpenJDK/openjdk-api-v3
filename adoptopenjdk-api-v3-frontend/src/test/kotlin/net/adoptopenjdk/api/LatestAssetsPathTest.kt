@@ -1,5 +1,7 @@
 package net.adoptopenjdk.api
 
+/* ktlint-disable no-wildcard-imports */
+/* ktlint-enable no-wildcard-imports */
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
 import io.vertx.core.json.JsonArray
@@ -8,9 +10,11 @@ import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
-/* ktlint-disable no-wildcard-imports */
-import net.adoptopenjdk.api.v3.models.*
-/* ktlint-enable no-wildcard-imports */
+import net.adoptopenjdk.api.v3.models.Architecture
+import net.adoptopenjdk.api.v3.models.BinaryAssetView
+import net.adoptopenjdk.api.v3.models.ImageType
+import net.adoptopenjdk.api.v3.models.JvmImpl
+import net.adoptopenjdk.api.v3.models.OperatingSystem
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 

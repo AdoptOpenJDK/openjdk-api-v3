@@ -1,12 +1,12 @@
 package net.adoptopenjdk.api.v3.routes
 
+import org.eclipse.microprofile.openapi.annotations.Operation
+import org.eclipse.microprofile.openapi.annotations.media.Schema
 import javax.ws.rs.GET
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
-import org.eclipse.microprofile.openapi.annotations.Operation
-import org.eclipse.microprofile.openapi.annotations.media.Schema
 
 @Path("/v1/")
 @Schema(hidden = true)
@@ -28,8 +28,8 @@ class V1Route {
 
     private fun reject(): Response {
         return Response
-                .status(Response.Status.GONE)
-                .entity("REMOVED: V1 has now been removed, please see https://api.adoptopenjdk.net for the latest version")
-                .build()
+            .status(Response.Status.GONE)
+            .entity("REMOVED: V1 has now been removed, please see https://api.adoptopenjdk.net for the latest version")
+            .build()
     }
 }

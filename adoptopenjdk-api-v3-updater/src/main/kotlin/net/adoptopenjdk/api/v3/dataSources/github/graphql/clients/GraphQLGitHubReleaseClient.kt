@@ -3,6 +3,7 @@ package net.adoptopenjdk.api.v3.dataSources.github.graphql.clients
 import io.aexp.nodes.graphql.GraphQLRequestEntity
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHReleaseResult
+import net.adoptopenjdk.api.v3.dataSources.models.GithubId
 import org.slf4j.LoggerFactory
 
 open class GraphQLGitHubReleaseClient : GraphQLGitHubReleaseRequest() {
@@ -11,7 +12,7 @@ open class GraphQLGitHubReleaseClient : GraphQLGitHubReleaseRequest() {
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
     }
 
-    suspend fun getReleaseById(id: String): GHRelease {
+    suspend fun getReleaseById(id: GithubId): GHRelease {
         val requestEntityBuilder = getReleaseByIdQuery(id)
 
         LOGGER.info("Getting id $id")
@@ -28,9 +29,9 @@ open class GraphQLGitHubReleaseClient : GraphQLGitHubReleaseRequest() {
         return release
     }
 
-    private fun getReleaseByIdQuery(releaseId: String): GraphQLRequestEntity.RequestBuilder {
+    private fun getReleaseByIdQuery(releaseId: GithubId): GraphQLRequestEntity.RequestBuilder {
         return request("""query { 
-                              node(id:"$releaseId") {
+                              node(id:"${releaseId.githubId}") {
                                 ... on Release {
                                         id,
                                         url,

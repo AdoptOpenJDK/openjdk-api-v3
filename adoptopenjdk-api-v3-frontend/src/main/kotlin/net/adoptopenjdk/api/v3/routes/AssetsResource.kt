@@ -1,12 +1,5 @@
 package net.adoptopenjdk.api.v3.routes
 
-import javax.ws.rs.BadRequestException
-import javax.ws.rs.GET
-import javax.ws.rs.NotFoundException
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
-import javax.ws.rs.core.MediaType
-import kotlin.math.min
 import net.adoptopenjdk.api.v3.OpenApiDocs
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
@@ -33,6 +26,13 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
+import javax.ws.rs.BadRequestException
+import javax.ws.rs.GET
+import javax.ws.rs.NotFoundException
+import javax.ws.rs.Path
+import javax.ws.rs.Produces
+import javax.ws.rs.core.MediaType
+import kotlin.math.min
 
 @Tag(name = "Assets")
 @Path("/v3/assets/")
@@ -41,20 +41,24 @@ class AssetsResource {
 
     @GET
     @Path("/feature_releases/{feature_version}/{release_type}")
-    @Operation(summary = "Returns release information", description = "List of information about builds that match the current query")
+    @Operation(summary = "Returns release information",
+               description = "List of information about builds that match the current query"
+    )
     @APIResponses(value = [
         APIResponse(responseCode = "200", description = "search results matching criteria",
-                content = [Content(schema = Schema(type = SchemaType.ARRAY, implementation = Release::class))]
+                    content = [Content(schema = Schema(type = SchemaType.ARRAY, implementation = Release::class))]
         ),
         APIResponse(responseCode = "400", description = "bad input parameter")
-    ])
+    ]
+    )
     fun get(
         @Parameter(name = "release_type", description = OpenApiDocs.RELEASE_TYPE, required = true)
         @PathParam("release_type")
         release_type: ReleaseType?,
 
         @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
-                schema = Schema(defaultValue = "8", type = SchemaType.INTEGER))
+                   schema = Schema(defaultValue = "8", type = SchemaType.INTEGER)
+        )
         @PathParam("feature_version")
         version: Int?,
 
@@ -82,15 +86,22 @@ class AssetsResource {
         @QueryParam("vendor")
         vendor: Vendor?,
 
-        @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
+        @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk",
+                                                                              enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false
+        ), required = false
+        )
         @QueryParam("project")
         project: Project?,
 
-        @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "10", type = SchemaType.INTEGER), required = false)
+        @Parameter(name = "page_size", description = "Pagination page size",
+                   schema = Schema(defaultValue = "10", type = SchemaType.INTEGER), required = false
+        )
         @QueryParam("page_size")
         pageSize: Int?,
 
-        @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false)
+        @Parameter(name = "page", description = "Pagination page number",
+                   schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false
+        )
         @QueryParam("page")
         page: Int?,
 
@@ -112,19 +123,25 @@ class AssetsResource {
             throw NotFoundException()
         }
 
-        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(version, releaseFilter, binaryFilter, order)
+        val releases = APIDataStore
+            .getAdoptRepos()
+            .getFilteredReleases(version, releaseFilter, binaryFilter, order)
+
         return getPage(pageSize, page, releases)
     }
 
     @GET
     @Path("/version/{version}")
-    @Operation(summary = "Returns release information about the specified version.", description = "List of information about builds that match the current query ")
+    @Operation(summary = "Returns release information about the specified version.",
+               description = "List of information about builds that match the current query "
+    )
     @APIResponses(value = [
         APIResponse(responseCode = "200", description = "search results matching criteria",
-                content = [Content(schema = Schema(type = SchemaType.ARRAY, implementation = Release::class))]
+                    content = [Content(schema = Schema(type = SchemaType.ARRAY, implementation = Release::class))]
         ),
         APIResponse(responseCode = "400", description = "bad input parameter")
-    ])
+    ]
+    )
     fun getReleaseVersion(
         @Parameter(name = "version", description = OpenApiDocs.VERSION_RANGE, required = true)
         @PathParam("version")
@@ -154,7 +171,10 @@ class AssetsResource {
         @QueryParam("vendor")
         vendor: Vendor?,
 
-        @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
+        @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk",
+                                                                              enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false
+        ), required = false
+        )
         @QueryParam("project")
         project: Project?,
 
@@ -166,11 +186,15 @@ class AssetsResource {
         @QueryParam("release_type")
         release_type: ReleaseType?,
 
-        @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "20", type = SchemaType.INTEGER), required = false)
+        @Parameter(name = "page_size", description = "Pagination page size",
+                   schema = Schema(defaultValue = "20", type = SchemaType.INTEGER), required = false
+        )
         @QueryParam("page_size")
         pageSize: Int?,
 
-        @Parameter(name = "page", description = "Pagination page number", schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false)
+        @Parameter(name = "page", description = "Pagination page number",
+                   schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false
+        )
         @QueryParam("page")
         page: Int?,
 
@@ -188,7 +212,9 @@ class AssetsResource {
         val releaseFilter = ReleaseFilter(releaseType = release_type, vendor = vendor, versionRange = range, lts = lts)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
 
-        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, order)
+        val releases = APIDataStore
+            .getAdoptRepos()
+            .getFilteredReleases(releaseFilter, binaryFilter, order)
 
         return getPage(pageSize, page, releases)
     }
@@ -207,7 +233,12 @@ class AssetsResource {
         }
     }
 
-    data class binaryPermutation(val arch: Architecture, val heapSize: HeapSize, val imageType: ImageType, val os: OperatingSystem)
+    data class binaryPermutation(
+        val arch: Architecture,
+        val heapSize: HeapSize,
+        val imageType: ImageType,
+        val os: OperatingSystem
+    )
 
     @GET
     @Path("/latest/{feature_version}/{jvm_impl}")
@@ -215,7 +246,8 @@ class AssetsResource {
     fun getLatestAssets(
 
         @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
-                schema = Schema(defaultValue = "8", type = SchemaType.INTEGER))
+                   schema = Schema(defaultValue = "8", type = SchemaType.INTEGER)
+        )
         @PathParam("feature_version")
         version: Int,
 
@@ -224,19 +256,23 @@ class AssetsResource {
         jvm_impl: JvmImpl
 
     ): List<BinaryAssetView> {
-        val releaseFilter = ReleaseFilter(ReleaseType.ga, featureVersion = version, releaseName = null, vendor = Vendor.adoptopenjdk)
+        val releaseFilter = ReleaseFilter(ReleaseType.ga, featureVersion = version, vendor = Vendor.adoptopenjdk)
         val binaryFilter = BinaryFilter(null, null, null, jvm_impl, null, null)
-        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(version, releaseFilter, binaryFilter, SortOrder.ASC)
+        val releases = APIDataStore
+            .getAdoptRepos()
+            .getFilteredReleases(version, releaseFilter, binaryFilter, SortOrder.ASC)
 
         return releases
-                .flatMap { release ->
-                    release.binaries
-                            .asSequence()
-                            .map { Pair(release, it) }
-                }
-                .associateBy { binaryPermutation(it.second.architecture, it.second.heap_size, it.second.image_type, it.second.os) }
-                .values
-                .map { BinaryAssetView(it.first.release_name, it.second, it.first.version_data) }
-                .toList()
+            .flatMap { release ->
+                release.binaries
+                    .asSequence()
+                    .map { Pair(release, it) }
+            }
+            .associateBy {
+                binaryPermutation(it.second.architecture, it.second.heap_size, it.second.image_type, it.second.os)
+            }
+            .values
+            .map { BinaryAssetView(it.first.release_name, it.second, it.first.version_data) }
+            .toList()
     }
 }

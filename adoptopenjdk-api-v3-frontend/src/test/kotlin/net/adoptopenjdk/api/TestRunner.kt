@@ -1,7 +1,6 @@
 package net.adoptopenjdk.api
 
 import io.quarkus.test.junit.QuarkusTest
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
@@ -10,6 +9,7 @@ import org.awaitility.Awaitility
 import org.junit.Ignore
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import java.util.concurrent.TimeUnit
 
 @QuarkusTest
 @Ignore("For manual execution")

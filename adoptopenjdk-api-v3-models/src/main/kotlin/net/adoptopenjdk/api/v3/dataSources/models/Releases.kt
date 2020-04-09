@@ -3,13 +3,13 @@ package net.adoptopenjdk.api.v3.dataSources.models
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
-import java.time.ZonedDateTime
-/* ktlint-disable no-wildcard-imports */
-import java.util.*
-/* ktlint-enable no-wildcard-imports */
-import java.util.function.Predicate
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.models.Release
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
+/* ktlint-enable no-wildcard-imports */
+import java.util.*
+import java.util.function.Predicate
 
 class Releases {
 
@@ -52,16 +52,21 @@ class Releases {
         return getReleases(SortOrder.ASC)
     }
 
-    fun retain(ids: List<String>): Releases {
-        return Releases(nodes.filterKeys { ids.contains(it) })
+    fun retain(githubId: List<GithubId>): Releases {
+        return Releases(nodes.filterKeys { adoptId -> githubId.any { adoptId.startsWith(it.githubId) } })
     }
 
-    fun hasReleaseId(id: String): Boolean {
-        return nodes.containsKey(id)
+    fun hasReleaseId(githubId: GithubId): Boolean {
+        return nodes
+                .any { it.key.startsWith(githubId.githubId) }
     }
 
-    fun hasReleaseBeenUpdated(id: String, updatedAt: ZonedDateTime): Boolean {
-        return nodes[id]?.updated_at?.equals(updatedAt) ?: true
+    fun hasReleaseBeenUpdated(githubId: GithubId, updatedAt: ZonedDateTime): Boolean {
+        return nodes
+                .filter { it.key.startsWith(githubId.githubId) }
+                .any {
+                    ChronoUnit.SECONDS.between(it.value.updated_at, updatedAt) != 0L
+                }
     }
 
     fun add(newReleases: List<Release>): Releases {
