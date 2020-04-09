@@ -18,7 +18,17 @@ class VersionData : Comparable<VersionData> {
     val build: Int
     val optional: String?
 
-    constructor(major: Int, minor: Int, security: Int, pre: String?, adopt_build_number: Int?, build: Int, optional: String?, openjdk_version: String, semver: String? = null) {
+    constructor(
+        major: Int,
+        minor: Int,
+        security: Int,
+        pre: String?,
+        adopt_build_number: Int?,
+        build: Int,
+        optional: String?,
+        openjdk_version: String,
+        semver: String? = null
+    ) {
         this.major = major
         this.minor = minor
         this.security = security

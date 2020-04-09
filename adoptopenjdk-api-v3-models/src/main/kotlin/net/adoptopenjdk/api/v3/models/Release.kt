@@ -7,7 +7,6 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema
 import java.time.ZonedDateTime
 import java.util.function.Predicate
 
-
 class Release {
 
     @Schema(example = "VXNlci0xMA==")

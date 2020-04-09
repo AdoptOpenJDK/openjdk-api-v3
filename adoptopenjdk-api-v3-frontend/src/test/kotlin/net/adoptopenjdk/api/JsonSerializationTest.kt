@@ -31,6 +31,4 @@ class JsonSerializationTest : BaseTest() {
                 .statusCode(200)
                 .body(PrettyPrintMatcher())
     }
-
 }
-

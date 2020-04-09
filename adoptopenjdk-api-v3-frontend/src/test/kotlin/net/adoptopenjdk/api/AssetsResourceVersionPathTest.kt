@@ -25,10 +25,10 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
     @TestFactory
     fun filtersLts(): Stream<DynamicTest> {
         return listOf(
-                Pair("${getPath()}/${JAVA8_212}?lts=true", 200),
-                Pair("${getPath()}/${JAVA8_212}?lts=false", 404),
-                Pair("${getPath()}/${ABOVE_8}?lts=false", 200),
-                Pair("${getPath()}/${ABOVE_8}?lts=false", 200)
+                Pair("${getPath()}/$JAVA8_212?lts=true", 200),
+                Pair("${getPath()}/$JAVA8_212?lts=false", 404),
+                Pair("${getPath()}/$ABOVE_8?lts=false", 200),
+                Pair("${getPath()}/$ABOVE_8?lts=false", 200)
         ).map { request ->
             DynamicTest.dynamicTest(request.first) {
                 val response = RestAssured.given()

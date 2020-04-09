@@ -35,7 +35,7 @@ object CachedGithubHtmlClient {
         return if (cachedEntry == null) {
             get(UrlRequest(url))
         } else {
-            LOGGER.info("Scheduling for refresh ${url} ${cachedEntry.lastModified} ${workList.size}")
+            LOGGER.info("Scheduling for refresh $url ${cachedEntry.lastModified} ${workList.size}")
             workList.offer(UrlRequest(url, cachedEntry.lastModified))
             cachedEntry.data
         }

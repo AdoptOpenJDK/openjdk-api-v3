@@ -38,26 +38,26 @@ class BinaryPathTest : BaseTest() {
     val path = "/v3/binary"
 
     fun getLatestPath(
-            featureVersion: Int,
-            releaseType: ReleaseType,
-            os: OperatingSystem,
-            arch: Architecture,
-            imageType: ImageType,
-            jvmImpl: JvmImpl,
-            heapSize: HeapSize,
-            vendor: Vendor
+        featureVersion: Int,
+        releaseType: ReleaseType,
+        os: OperatingSystem,
+        arch: Architecture,
+        imageType: ImageType,
+        jvmImpl: JvmImpl,
+        heapSize: HeapSize,
+        vendor: Vendor
     ): String {
         return "$path/latest/$featureVersion/$releaseType/$os/$arch/$imageType/$jvmImpl/$heapSize/$vendor"
     }
 
     fun getVersionPath(
-            releaseName: String,
-            os: OperatingSystem,
-            arch: Architecture,
-            imageType: ImageType,
-            jvmImpl: JvmImpl,
-            heapSize: HeapSize,
-            vendor: Vendor
+        releaseName: String,
+        os: OperatingSystem,
+        arch: Architecture,
+        imageType: ImageType,
+        jvmImpl: JvmImpl,
+        heapSize: HeapSize,
+        vendor: Vendor
     ): String {
         return "$path/version/$releaseName/$os/$arch/$imageType/$jvmImpl/$heapSize/$vendor"
     }

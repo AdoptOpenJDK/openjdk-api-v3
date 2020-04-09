@@ -152,7 +152,11 @@ open class GraphQLGitHubInterface() {
         }
     }
 
-    protected suspend fun <F : HasRateLimit> queryApi(requestEntityBuilder: GraphQLRequestEntity.RequestBuilder, cursor: String?, clazz: Class<F>): GraphQLResponseEntity<F> {
+    protected suspend fun <F : HasRateLimit> queryApi(
+        requestEntityBuilder: GraphQLRequestEntity.RequestBuilder,
+        cursor: String?,
+        clazz: Class<F>
+    ): GraphQLResponseEntity<F> {
 
         requestEntityBuilder.variables(Variable("cursorPointer", cursor))
         val query = requestEntityBuilder.build()

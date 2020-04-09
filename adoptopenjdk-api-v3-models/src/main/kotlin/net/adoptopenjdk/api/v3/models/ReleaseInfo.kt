@@ -16,7 +16,12 @@ class ReleaseInfo {
     @Schema(example = "13")
     val most_recent_feature_release: Int
 
-    constructor(available_releases: Array<Int>, available_lts_releases: Array<Int>, most_recent_lts: Int, most_recent_feature_release: Int) {
+    constructor(
+        available_releases: Array<Int>,
+        available_lts_releases: Array<Int>,
+        most_recent_lts: Int,
+        most_recent_feature_release: Int
+    ) {
         this.available_releases = available_releases
         this.available_lts_releases = available_lts_releases
         this.most_recent_lts = most_recent_lts

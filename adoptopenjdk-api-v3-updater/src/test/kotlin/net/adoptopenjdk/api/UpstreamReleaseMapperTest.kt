@@ -25,7 +25,6 @@ class UpstreamReleaseMapperTest {
         }
     }
 
-
     @Test
     fun statsOnlyLooksAtBinaryAssets() {
         runBlocking {
@@ -49,7 +48,7 @@ class UpstreamReleaseMapperTest {
                 PageInfo(false, "")
         )
 
-        val ghRelease = GHRelease(GithubId("1"), "OpenJDK 8u232 GA Release", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "a-url");
+        val ghRelease = GHRelease(GithubId("1"), "OpenJDK 8u232 GA Release", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "a-url")
         return ghRelease
     }
 }

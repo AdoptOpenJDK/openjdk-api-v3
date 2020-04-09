@@ -44,7 +44,7 @@ class AdoptReleaseMapperTest : BaseTest() {
         runBlocking {
             val source = GHAssets(listOf(jdk), PageInfo(false, ""))
 
-            val ghRelease = GHRelease(GithubId("1"), "OpenJDK 123244354325", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "a-url");
+            val ghRelease = GHRelease(GithubId("1"), "OpenJDK 123244354325", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "a-url")
 
             try {
                 AdoptReleaseMapper.toAdoptRelease(ghRelease)
@@ -59,10 +59,9 @@ class AdoptReleaseMapperTest : BaseTest() {
     fun statsIgnoresNonBinaryAssets() {
         runBlocking {
 
-
             val source = GHAssets(listOf(jdk, checksum), PageInfo(false, ""))
 
-            val ghRelease = GHRelease(GithubId("1"), "jdk9u-2018-09-27-08-50", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz");
+            val ghRelease = GHRelease(GithubId("1"), "jdk9u-2018-09-27-08-50", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz")
 
             val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
 
@@ -76,14 +75,13 @@ class AdoptReleaseMapperTest : BaseTest() {
 
             val source = GHAssets(listOf(jdk), PageInfo(false, ""))
 
-            val ghRelease = GHRelease(GithubId("1"), "jdk9u-2018-09-27-08-50", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz");
+            val ghRelease = GHRelease(GithubId("1"), "jdk9u-2018-09-27-08-50", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz")
 
             val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
 
             assertEquals(ReleaseType.ea, release.first().release_type)
         }
     }
-
 
     @Test
     fun copesWithMultipleVersionsInSingleRelease() {
@@ -129,7 +127,6 @@ class AdoptReleaseMapperTest : BaseTest() {
 
             ), PageInfo(false, ""))
 
-
             UpdaterHtmlClientFactory.client = object : UpdaterHtmlClient {
                 override suspend fun get(url: String): String? {
                     return getMetadata(url)
@@ -149,10 +146,10 @@ class AdoptReleaseMapperTest : BaseTest() {
                                 "pre": null,
                                 "adopt_build_number": 1,
                                 "major": 8,
-                                "version": "1.8.0_242-${opt}-b0${url}",
-                                "semver": "8.0.242+${url}.1.${opt}",
-                                "build": ${url},
-                                "opt": "${opt}"
+                                "version": "1.8.0_242-$opt-b0$url",
+                                "semver": "8.0.242+$url.1.$opt",
+                                "build": $url,
+                                "opt": "$opt"
                             },
                             "scmRef": "",
                             "version_data": "jdk8u",
@@ -161,7 +158,6 @@ class AdoptReleaseMapperTest : BaseTest() {
                         }
                     """.trimIndent()
                             .replace("\n", "")
-
                 }
 
                 override suspend fun getFullResponse(request: UrlRequest): HttpResponse? {
@@ -177,7 +173,7 @@ class AdoptReleaseMapperTest : BaseTest() {
                 }
             }
 
-            val ghRelease = GHRelease(GithubId("1"), "jdk9u-2018-09-27-08-50", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz");
+            val ghRelease = GHRelease(GithubId("1"), "jdk9u-2018-09-27-08-50", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz")
 
             val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
 

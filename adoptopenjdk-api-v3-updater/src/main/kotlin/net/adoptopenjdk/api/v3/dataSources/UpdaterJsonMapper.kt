@@ -13,7 +13,6 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
 import com.fasterxml.jackson.datatype.jsr353.JSR353Module
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import net.adoptopenjdk.api.v3.TimeSource
-import java.time.ZoneId
 import java.time.ZonedDateTime
 
 class ZonedTimeUpgrader : SimpleModule() {

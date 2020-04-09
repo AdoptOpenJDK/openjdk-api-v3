@@ -71,7 +71,6 @@ class DockerStatsInterfaceTest {
 
             stats = downloadStatsInterface.getTrackingStats(10)
             assertEquals(240, stats[0].total)
-
         }
     }
 }
