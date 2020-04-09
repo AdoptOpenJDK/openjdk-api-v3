@@ -151,6 +151,17 @@ class DownloadStatsPathTest : BaseTest() {
     }
 
     @Test
+    fun badTotalVersionReturnsSaneData() {
+        runBlocking {
+            RestAssured.given()
+                    .`when`()
+                    .get("/v3/stats/downloads/total/101")
+                    .then()
+                    .statusCode(400)
+        }
+    }
+
+    @Test
     fun totalTagReturnsSaneData() {
         runBlocking {
             RestAssured.given()
@@ -168,6 +179,17 @@ class DownloadStatsPathTest : BaseTest() {
                             return stats.isNotEmpty() && !stats.containsValue(0L)
                         }
                     })
+        }
+    }
+
+    @Test
+    fun badTotalTagReturnsSaneData() {
+        runBlocking {
+            RestAssured.given()
+                    .`when`()
+                    .get("/v3/stats/downloads/total/101/fooBar")
+                    .then()
+                    .statusCode(400)
         }
     }
 

@@ -38,4 +38,24 @@ class VersionPathTest {
                 .statusCode(200)
                 .body(VersionDataMatcher(parsed))
     }
+    
+    @Test
+    fun parsesNoVersion() {
+
+        RestAssured.given()
+                .`when`()
+                .get("/v3/version/")
+                .then()
+                .statusCode(404)
+    }
+
+    @Test
+    fun parsesBadVersion() {
+
+        RestAssured.given()
+                .`when`()
+                .get("/v3/version/fooBar")
+                .then()
+                .statusCode(400)
+    }
 }
