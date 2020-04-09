@@ -8,8 +8,9 @@ class GithubId {
 
     @JsonCreator
     constructor(
-            @JsonProperty("githubId")
-            githubId: String) {
+        @JsonProperty("githubId")
+        githubId: String
+    ) {
         this.githubId = githubId.split("\\.")[0]
     }
 
@@ -27,6 +28,4 @@ class GithubId {
     override fun hashCode(): Int {
         return githubId.hashCode()
     }
-
-
 }

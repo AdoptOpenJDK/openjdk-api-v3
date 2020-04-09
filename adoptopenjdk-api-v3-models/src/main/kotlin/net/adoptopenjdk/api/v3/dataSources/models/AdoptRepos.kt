@@ -46,7 +46,12 @@ class AdoptRepos {
         return allReleases.getReleases(releaseFilter, sortOrder)
     }
 
-    fun getFilteredReleases(version: Int, releaseFilter: Predicate<Release>, binaryFilter: Predicate<Binary>, sortOrder: SortOrder): Sequence<Release> {
+    fun getFilteredReleases(
+        version: Int,
+        releaseFilter: Predicate<Release>,
+        binaryFilter: Predicate<Binary>,
+        sortOrder: SortOrder
+    ): Sequence<Release> {
         val featureRelease = getFeatureRelease(version) ?: return emptySequence()
 
         return getFilteredReleases(featureRelease.releases.getReleases(releaseFilter, sortOrder), binaryFilter)

@@ -42,7 +42,7 @@ class AssetsResource {
     @GET
     @Path("/feature_releases/{feature_version}/{release_type}")
     @Operation(summary = "Returns release information",
-               description = "List of information about builds that match the current query"
+            description = "List of information about builds that match the current query"
     )
     @APIResponses(value = [
         APIResponse(responseCode = "200", description = "search results matching criteria",
@@ -133,7 +133,7 @@ class AssetsResource {
     @GET
     @Path("/version/{version}")
     @Operation(summary = "Returns release information about the specified version.",
-               description = "List of information about builds that match the current query "
+            description = "List of information about builds that match the current query "
     )
     @APIResponses(value = [
         APIResponse(responseCode = "200", description = "search results matching criteria",

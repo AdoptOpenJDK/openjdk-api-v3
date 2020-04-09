@@ -57,7 +57,13 @@ class DownloadStatsInterface(
         return calculateDailyDiff(stats, periodStart, periodEnd, days)
     }
 
-    private suspend fun getStats(start: ZonedDateTime, end: ZonedDateTime, featureVersion: Int?, dockerRepo: String?, statsSource: StatsSource): Collection<StatEntry> {
+    private suspend fun getStats(
+        start: ZonedDateTime,
+        end: ZonedDateTime,
+        featureVersion: Int?,
+        dockerRepo: String?,
+        statsSource: StatsSource
+    ): Collection<StatEntry> {
         val githubGrouped = getGithubDownloadStatsByDate(start, end, featureVersion)
         val dockerGrouped = getDockerDownloadStatsByDate(start, end, dockerRepo)
 
@@ -69,7 +75,12 @@ class DownloadStatsInterface(
         return stats
     }
 
-    private fun calculateDailyDiff(stats: Collection<StatEntry>, periodStart: ZonedDateTime, periodEnd: ZonedDateTime, days: Int?): List<DownloadDiff> {
+    private fun calculateDailyDiff(
+        stats: Collection<StatEntry>,
+        periodStart: ZonedDateTime,
+        periodEnd: ZonedDateTime,
+        days: Int?
+    ): List<DownloadDiff> {
         return stats
                 .groupBy { it.dateTime.toLocalDate() }
                 .map { grouped ->

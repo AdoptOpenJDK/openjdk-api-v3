@@ -49,7 +49,11 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
         }
     }
 
-    class ResponseHandler(val client: DefaultUpdaterHtmlClient, private val continuation: Continuation<HttpResponse>, val request: UrlRequest?) : FutureCallback<HttpResponse> {
+    class ResponseHandler(
+        val client: DefaultUpdaterHtmlClient,
+        private val continuation: Continuation<HttpResponse>,
+        val request: UrlRequest?
+    ) : FutureCallback<HttpResponse> {
         override fun cancelled() {
             continuation.resumeWithException(Exception("cancelled"))
         }

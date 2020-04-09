@@ -58,7 +58,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
                     }
                     .ifEmpty {
                         try {
-                            //if we have no metadata resort to parsing release names
+                            // if we have no metadata resort to parsing release names
                             val version = parseVersionInfo(release, releaseName)
                             val assets = release.releaseAssets.assets
                             val id = release.id.githubId
@@ -75,7 +75,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
     }
 
     private fun generateIdForSplitRelease(version: VersionData, release: GHRelease): String {
-        //using a shortend hash as a suffix to keep id short, probability of clash still very low
+        // using a shortend hash as a suffix to keep id short, probability of clash still very low
         val suffix = Base64
                 .getEncoder()
                 .encodeToString(MessageDigest
@@ -86,11 +86,21 @@ object AdoptReleaseMapper : ReleaseMapper() {
         return release.id.githubId + "." + suffix
     }
 
-    private suspend fun toRelease(releaseName: String, assets: List<GHAsset>, metadata: Map<GHAsset, GHMetaData>, id: String, release_type: ReleaseType, releaseLink: String, timestamp: ZonedDateTime, updatedAt: ZonedDateTime, vendor: Vendor, version: VersionData): Release {
+    private suspend fun toRelease(
+        releaseName: String,
+        assets: List<GHAsset>,
+        metadata: Map<GHAsset, GHMetaData>,
+        id: String,
+        release_type: ReleaseType,
+        releaseLink: String,
+        timestamp: ZonedDateTime,
+        updatedAt: ZonedDateTime,
+        vendor: Vendor,
+        version: VersionData
+    ): Release {
         LOGGER.info("Getting binaries $releaseName")
         val binaries = AdoptBinaryMapper.toBinaryList(assets, metadata)
         LOGGER.info("Done Getting binaries $releaseName")
-
 
         val downloadCount = assets
                 .filter { asset ->
@@ -107,7 +117,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
         val hasDate = Pattern.compile(dateMatcher).matcher(release.name)
 
         return if (release.url.matches(Regex(".*/openjdk[0-9]+-binaries/.*"))) {
-            //Can trust isPrerelease from -binaries repos
+            // Can trust isPrerelease from -binaries repos
             if (release.isPrerelease) {
                 ReleaseType.ea
             } else {

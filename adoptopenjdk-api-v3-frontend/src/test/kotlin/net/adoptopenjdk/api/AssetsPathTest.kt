@@ -51,7 +51,12 @@ abstract class AssetsPathTest : BaseTest() {
         return runFilterTest("heap_size", HeapSize.values())
     }
 
-    protected fun <T> createTest(values: Array<T>, path: String, filterParamName: String, exclude: (element: T) -> Boolean = { false }): List<DynamicTest> {
+    protected fun <T> createTest(
+        values: Array<T>,
+        path: String,
+        filterParamName: String,
+        exclude: (element: T) -> Boolean = { false }
+    ): List<DynamicTest> {
         return values
                 .filter { !exclude(it) }
                 .map { value ->
