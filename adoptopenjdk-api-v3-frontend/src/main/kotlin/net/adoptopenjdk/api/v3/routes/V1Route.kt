@@ -28,8 +28,8 @@ class V1Route {
 
     private fun reject(): Response {
         return Response
-                .status(Response.Status.GONE)
-                .entity("REMOVED: V1 has now been removed, please see https://api.adoptopenjdk.net for the latest version")
-                .build()
+            .status(Response.Status.GONE)
+            .entity("REMOVED: V1 has now been removed, please see https://api.adoptopenjdk.net for the latest version")
+            .build()
     }
 }

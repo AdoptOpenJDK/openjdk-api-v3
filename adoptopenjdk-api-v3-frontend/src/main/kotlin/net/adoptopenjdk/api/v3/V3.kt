@@ -34,11 +34,12 @@ problems as an issue in the <a href=\"https://github.com/AdoptOpenJDK/openjdk-ap
 </li>"""
 
 @OpenAPIDefinition(
-        servers = [
-            Server(url = ServerConfig.SERVER),
-            Server(url = "https://staging-api.adoptopenjdk.net")
-        ],
-        info = Info(title = "v3", version = "3.0.0", description = DESCRIPTION))
+    servers = [
+        Server(url = ServerConfig.SERVER),
+        Server(url = "https://staging-api.adoptopenjdk.net")
+    ],
+    info = Info(title = "v3", version = "3.0.0", description = DESCRIPTION)
+)
 @ApplicationPath("/")
 class V3 : Application() {
 
@@ -56,15 +57,16 @@ class V3 : Application() {
         APIDataStore.getAdoptRepos()
 
         resourceClasses = setOf(
-                V1Route::class.java,
-                AssetsResource::class.java,
-                BinaryResource::class.java,
-                AvailableReleasesResource::class.java,
-                PlatformsResource::class.java,
-                ReleaseListResource::class.java,
-                VariantsResource::class.java,
-                VersionResource::class.java,
-                DownloadStatsResource::class.java)
+            V1Route::class.java,
+            AssetsResource::class.java,
+            BinaryResource::class.java,
+            AvailableReleasesResource::class.java,
+            PlatformsResource::class.java,
+            ReleaseListResource::class.java,
+            VariantsResource::class.java,
+            VersionResource::class.java,
+            DownloadStatsResource::class.java
+        )
     }
 
     override fun getSingletons(): Set<Any> {

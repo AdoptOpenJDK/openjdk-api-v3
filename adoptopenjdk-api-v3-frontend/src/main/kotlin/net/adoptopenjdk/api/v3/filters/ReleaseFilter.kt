@@ -24,10 +24,10 @@ class ReleaseFilter(
         }
 
         return (releaseType == null || release.release_type == releaseType) &&
-                (featureVersion == null || release.version_data.major == featureVersion) &&
-                (releaseName == null || release.release_name == releaseName) &&
-                (vendor == null || release.vendor == vendor) &&
-                (versionRange == null || versionRange.test(release.version_data)) &&
-                ltsFilter
+            (featureVersion == null || release.version_data.major == featureVersion) &&
+            (releaseName == null || release.release_name == releaseName) &&
+            (vendor == null || release.vendor == vendor) &&
+            (versionRange == null || versionRange.test(release.version_data)) &&
+            ltsFilter
     }
 }
