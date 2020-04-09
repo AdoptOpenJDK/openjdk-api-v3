@@ -10,6 +10,7 @@ import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.DownloadStats
 import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.JvmImpl
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
 import org.junit.jupiter.api.BeforeAll
@@ -47,26 +48,31 @@ class DownloadStatsPathTest : BaseTest() {
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(10),
                             10,
+                            mapOf(JvmImpl.hotspot to 10),
                             8
                     ),
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(5),
                             20,
+                            mapOf(JvmImpl.hotspot to 16, JvmImpl.openj9 to 4),
                             9
                     ),
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1),
                             40,
+                            mapOf(JvmImpl.hotspot to 30, JvmImpl.openj9 to 10),
                             9
                     ),
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1).minusMinutes(1),
                             25,
+                            mapOf(JvmImpl.hotspot to 20, JvmImpl.openj9 to 5),
                             8
                     ),
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1),
                             30,
+                            mapOf(JvmImpl.hotspot to 20, JvmImpl.openj9 to 10),
                             8
                     )
             )

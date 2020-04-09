@@ -10,6 +10,7 @@ import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.StatsSource
 import net.adoptopenjdk.api.v3.stats.DockerStatsInterface
 import org.junit.Assert
@@ -46,10 +47,10 @@ class DockerStatsInterfaceTest {
         runBlocking {
             val apiPersistanceMock = mockk<ApiPersistence>()
             coEvery { apiPersistanceMock.getGithubStats(any<ZonedDateTime>(), any<ZonedDateTime>()) } returns listOf(
-                    GithubDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(10), 100, 8),
-                    GithubDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(20), 90, 8),
-                    GithubDownloadStatsDbEntry(ZonedDateTime.now().minusDays(1), 80, 8),
-                    GithubDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(15), 20, 9)
+                    GithubDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(10), 100, mapOf(JvmImpl.hotspot to 40, JvmImpl.openj9 to 60), 8),
+                    GithubDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(20), 90, mapOf(JvmImpl.hotspot to 80, JvmImpl.openj9 to 10), 8),
+                    GithubDownloadStatsDbEntry(ZonedDateTime.now().minusDays(1), 80, mapOf(JvmImpl.hotspot to 50, JvmImpl.openj9 to 30), 8),
+                    GithubDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(15), 20, mapOf(JvmImpl.hotspot to 15, JvmImpl.openj9 to 5), 9)
             )
 
             coEvery { apiPersistanceMock.getDockerStats(any<ZonedDateTime>(), any<ZonedDateTime>()) } returns listOf(

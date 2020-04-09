@@ -6,6 +6,7 @@ import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.Vendor
+import net.adoptopenjdk.api.v3.models.JvmImpl
 import java.time.ZonedDateTime
 
 class GithubDownloadStatsCalculator {
@@ -32,8 +33,27 @@ class GithubDownloadStatsCalculator {
                                 it.download_count.toInt()
                             }
 
+                    // Tally up jvmImpl download stats
+                    val jvmImplMap : Map<JvmImpl,Int> = JvmImpl.values().map {
+                        val jvmImpl = it;
+
+                        jvmImpl to
+                            featureRelease
+                            .releases
+                            .getReleases()
+                            .filter { it.vendor == Vendor.adoptopenjdk }
+                            .sumBy {
+                                it.binaries
+                                .filter { it.jvm_impl == jvmImpl }
+                                .sumBy {
+                                    it.download_count.toInt()
+                                }
+                            }
+                    }.toMap()
+
                     GithubDownloadStatsDbEntry(date,
                             total.toLong(),
+                            jvmImplMap,
                             featureRelease.featureVersion)
                 }
                 .toList()
