@@ -19,6 +19,5 @@ enum class HeapSize : FileNameMatcher {
                 .firstOrNull {
                     lowerCaseFileName.contains(Regex("${it}_"))
                 } != null
-
     }
 }

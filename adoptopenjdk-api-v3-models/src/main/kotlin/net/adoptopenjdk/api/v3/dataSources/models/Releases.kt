@@ -7,6 +7,7 @@ import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.models.Release
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
+/* ktlint-enable no-wildcard-imports */
 import java.util.*
 import java.util.function.Predicate
 
@@ -92,14 +93,13 @@ class Releases {
     }
 
     companion object {
-        //Cant use the default sort as we want to ignore optional
+        // Cant use the default sort as we want to ignore optional
         val VERSION_COMPARATOR = compareBy<Release> { it.version_data.major }
                 .thenBy { it.version_data.minor }
                 .thenBy { it.version_data.security }
                 .thenBy { it.version_data.pre }
                 .thenBy { it.version_data.build }
                 .thenBy { it.version_data.adopt_build_number }
-
 
         val VERSION_THEN_TIME_SORTER: Comparator<Release> =
                 VERSION_COMPARATOR

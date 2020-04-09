@@ -16,7 +16,7 @@ class PlatformsResource {
 
     @GET
     @Path("/platforms/")
-    //Hide this path as it is only used internally by the website
+    // Hide this path as it is only used internally by the website
     @Operation(summary = "Returns information about available platforms", hidden = true)
     fun get(): Platforms {
         return APIDataStore.platforms

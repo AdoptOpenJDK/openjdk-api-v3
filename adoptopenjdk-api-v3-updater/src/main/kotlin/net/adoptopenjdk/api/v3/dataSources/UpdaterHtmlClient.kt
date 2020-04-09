@@ -17,10 +17,9 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-
 data class UrlRequest(
-        val url: String,
-        val lastModified: String? = null
+    val url: String,
+    val lastModified: String? = null
 )
 
 interface UpdaterHtmlClient {
@@ -48,10 +47,13 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
             IOUtils.copy(response.entity.content, writer, Charset.defaultCharset())
             return writer.toString()
         }
-
     }
 
-    class ResponseHandler(val client: DefaultUpdaterHtmlClient, private val continuation: Continuation<HttpResponse>, val request: UrlRequest?) : FutureCallback<HttpResponse> {
+    class ResponseHandler(
+        val client: DefaultUpdaterHtmlClient,
+        private val continuation: Continuation<HttpResponse>,
+        val request: UrlRequest?
+    ) : FutureCallback<HttpResponse> {
         override fun cancelled() {
             continuation.resumeWithException(Exception("cancelled"))
         }
@@ -120,15 +122,13 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
                     }
 
             client.execute(request, ResponseHandler(this, continuation, urlRequest))
-
         } catch (e: Exception) {
             continuation.resumeWith(Result.failure(e))
         }
     }
 
-
     override suspend fun getFullResponse(request: UrlRequest): HttpResponse? {
-        //Retry up to 10 times
+        // Retry up to 10 times
         for (retryCount in 1..10) {
             try {
                 LOGGER.info("Getting ${request.url} ${request.lastModified}")
@@ -156,4 +156,3 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
 
     class NotFoundException : Throwable()
 }
-

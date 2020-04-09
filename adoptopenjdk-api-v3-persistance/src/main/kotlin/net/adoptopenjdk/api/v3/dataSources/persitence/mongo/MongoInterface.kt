@@ -5,7 +5,6 @@ import org.litote.kmongo.coroutine.CoroutineClient
 import org.litote.kmongo.coroutine.CoroutineCollection
 import org.litote.kmongo.coroutine.CoroutineDatabase
 
-
 abstract class MongoInterface(mongoClient: MongoClient) {
     protected val database: CoroutineDatabase = mongoClient.database
     protected val client: CoroutineClient = mongoClient.client
@@ -13,7 +12,7 @@ abstract class MongoInterface(mongoClient: MongoClient) {
     inline fun <reified T : Any> createCollection(database: CoroutineDatabase, collectionName: String): CoroutineCollection<T> {
         return runBlocking {
             if (!database.listCollectionNames().contains(collectionName)) {
-                //TODO add indexes
+                // TODO add indexes
                 database.createCollection(collectionName)
             }
             return@runBlocking database.getCollection<T>(collectionName)

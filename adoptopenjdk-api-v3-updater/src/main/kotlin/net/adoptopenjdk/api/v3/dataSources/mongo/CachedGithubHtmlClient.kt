@@ -22,12 +22,11 @@ object CachedGithubHtmlClient {
 
     private val internalDbStore = InternalDbStoreFactory.get()
 
-    //List of urls to be refreshed in the background
+    // List of urls to be refreshed in the background
     private val workList = LinkedBlockingQueue<UrlRequest>()
 
-
     init {
-        //Do refresh in the background
+        // Do refresh in the background
         GlobalScope.launch(backgroundHtmlDispatcher, block = cacheRefreshDaemonThread())
     }
 
@@ -36,7 +35,7 @@ object CachedGithubHtmlClient {
         return if (cachedEntry == null) {
             get(UrlRequest(url))
         } else {
-            LOGGER.info("Scheduling for refresh ${url} ${cachedEntry.lastModified} ${workList.size}")
+            LOGGER.info("Scheduling for refresh $url ${cachedEntry.lastModified} ${workList.size}")
             workList.offer(UrlRequest(url, cachedEntry.lastModified))
             cachedEntry.data
         }
@@ -55,15 +54,14 @@ object CachedGithubHtmlClient {
     }
 
     private suspend fun get(request: UrlRequest): String? {
-        //Retry up to 10 times
+        // Retry up to 10 times
         for (retryCount in 1..10) {
             try {
                 LOGGER.info("Getting  ${request.url} ${request.lastModified}")
                 val response = UpdaterHtmlClientFactory.client.getFullResponse(request)
 
-
                 if (response?.statusLine?.statusCode == 304) {
-                    //asset has not updated
+                    // asset has not updated
                     return null
                 }
 
@@ -82,6 +80,4 @@ object CachedGithubHtmlClient {
 
         return null
     }
-
 }
-

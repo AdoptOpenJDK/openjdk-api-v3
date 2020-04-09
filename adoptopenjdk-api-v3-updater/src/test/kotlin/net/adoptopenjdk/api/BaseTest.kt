@@ -68,7 +68,6 @@ abstract class BaseTest {
                     every { metadataResponse.getFirstHeader("Last-Modified") } returns BasicHeader("Last-Modified", "")
                     return metadataResponse
                 }
-
             }
         }
 
@@ -82,7 +81,6 @@ abstract class BaseTest {
             startFongo()
             mockRepo()
             LOGGER.info("Done startup")
-
         }
 
         @JvmStatic
@@ -104,7 +102,7 @@ abstract class BaseTest {
                     .build()
 
             LOGGER.info("Mongo \"mongodb://localhost:${port}\"")
-            System.setProperty("MONGO_DB", "mongodb://localhost:${port}")
+            System.setProperty("MONGO_DB", "mongodb://localhost:$port")
 
             mongodExecutable = starter.prepare(mongodConfig)
             mongodExecutable!!.start()
@@ -112,14 +110,13 @@ abstract class BaseTest {
             ApiPersistenceFactory.set(null)
             MongoClientFactory.set(null)
             LOGGER.info("FMongo started")
-
         }
 
         @JvmStatic
         fun populateDb() {
             runBlocking {
                 val repo = AdoptReposBuilder.build(APIDataStore.variants.versions)
-                //Reset connection
+                // Reset connection
                 ApiPersistenceFactory.set(null)
                 ApiPersistenceFactory.get().updateAllRepos(repo)
                 APIDataStore.loadDataFromDb()
@@ -152,7 +149,6 @@ abstract class BaseTest {
                                         DateTimeFormatter.ISO_INSTANT.format(it.updated_at))
                             }
                             .toList()
-
 
                     return GHRepositorySummary(GHReleasesSummary(gHReleaseSummarys, PageInfo(false, "")))
                 }

@@ -9,7 +9,6 @@ interface FileNameMatcher {
                 .firstOrNull {
                     lowerCaseFileName.contains(Regex("[\\-_]${it}_"))
                 } != null
-
     }
 
     fun setNames(instanceName: String, alternativeNames: List<String>) {

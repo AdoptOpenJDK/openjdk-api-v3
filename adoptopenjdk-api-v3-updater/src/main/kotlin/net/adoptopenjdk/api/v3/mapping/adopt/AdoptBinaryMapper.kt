@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api.v3.mapping.adopt
 
+import java.time.ZonedDateTime
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -17,7 +18,6 @@ import net.adoptopenjdk.api.v3.models.OperatingSystem
 import net.adoptopenjdk.api.v3.models.Package
 import net.adoptopenjdk.api.v3.models.Project
 import org.slf4j.LoggerFactory
-import java.time.ZonedDateTime
 
 object AdoptBinaryMapper : BinaryMapper() {
 
@@ -25,8 +25,7 @@ object AdoptBinaryMapper : BinaryMapper() {
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
     private const val HOTSPOT_JFR = "hotspot-jfr"
 
-    //TODO urgent remove me when we are ready to go live on debug images
-    private val EXCLUDED = listOf("debugimage")
+    private val EXCLUDED = listOf<String>()
 
     suspend fun toBinaryList(assets: List<GHAsset>, metadata: Map<GHAsset, GHMetaData>): List<Binary> {
         // probably whitelist rather than black list
@@ -38,9 +37,9 @@ object AdoptBinaryMapper : BinaryMapper() {
     }
 
     private fun assetToBinaryAsync(
-            asset: GHAsset,
-            metadata: Map<GHAsset, GHMetaData>,
-            assets: List<GHAsset>
+        asset: GHAsset,
+        metadata: Map<GHAsset, GHMetaData>,
+        assets: List<GHAsset>
     ): Deferred<Binary?> {
         return GlobalScope.async {
             try {
@@ -53,7 +52,6 @@ object AdoptBinaryMapper : BinaryMapper() {
 
                 val installer = getInstaller(asset, assets)
                 val pack = getPackage(assets, asset, binaryMetadata)
-
 
                 if (binaryMetadata != null) {
                     return@async binaryFromMetadata(
@@ -119,9 +117,9 @@ object AdoptBinaryMapper : BinaryMapper() {
 
         return assets
                 .firstOrNull { asset ->
-                    asset.name == "${binary_name}.sha256.txt" ||
+                    asset.name == "$binary_name.sha256.txt" ||
                             binary_name.split(".")[0] + ".sha256.txt" == asset.name ||
-                            "${nameWithoutExtension}.sha256.txt" == asset.name
+                            "$nameWithoutExtension.sha256.txt" == asset.name
                 }?.downloadUrl
     }
 
@@ -132,12 +130,12 @@ object AdoptBinaryMapper : BinaryMapper() {
     private fun isArchive(asset: GHAsset) = ARCHIVE_WHITELIST.any { asset.name.endsWith(it) }
 
     private fun binaryFromName(
-            asset: GHAsset,
-            pack: Package,
-            download_count: Long,
-            updated_at: ZonedDateTime,
-            installer: Installer?,
-            heap_size: HeapSize
+        asset: GHAsset,
+        pack: Package,
+        download_count: Long,
+        updated_at: ZonedDateTime,
+        installer: Installer?,
+        heap_size: HeapSize
     ): Binary {
         val scmRef = null
         val os = getEnumFromFileName(asset.name, OperatingSystem.values())
@@ -162,11 +160,15 @@ object AdoptBinaryMapper : BinaryMapper() {
     }
 
     private fun binaryFromMetadata(
-            binaryMetadata: GHMetaData, pack: Package, download_count: Long, updated_at: ZonedDateTime,
-            installer: Installer?, heap_size: HeapSize
+        binaryMetadata: GHMetaData,
+        pack: Package,
+        download_count: Long,
+        updated_at: ZonedDateTime,
+        installer: Installer?,
+        heap_size: HeapSize
     ): Binary {
 
-        //github metadata has concept of hotspot-jfr split this into
+        // github metadata has concept of hotspot-jfr split this into
         val variant = parseJvmImpl(binaryMetadata)
         val project = parseProject(binaryMetadata)
 
@@ -206,7 +208,7 @@ object AdoptBinaryMapper : BinaryMapper() {
             if (!(binary_checksum_link == null || binary_checksum_link.isEmpty())) {
                 LOGGER.debug("Pulling checksum for $binary_checksum_link")
 
-                val checksum = CachedGithubHtmlClient.getUrl(binary_checksum_link);
+                val checksum = CachedGithubHtmlClient.getUrl(binary_checksum_link)
                 if (checksum != null) {
                     val tokens = checksum.split(" ")
                     if (tokens.size > 1) {
@@ -219,6 +221,4 @@ object AdoptBinaryMapper : BinaryMapper() {
         }
         return null
     }
-
-
 }

@@ -19,12 +19,12 @@ class BinaryFilter : Predicate<Binary> {
     private val project: Project
 
     constructor(
-            os: OperatingSystem?,
-            arch: Architecture?,
-            imageType: ImageType?,
-            jvmImpl: JvmImpl?,
-            heapSize: HeapSize?,
-            project: Project?
+        os: OperatingSystem?,
+        arch: Architecture?,
+        imageType: ImageType?,
+        jvmImpl: JvmImpl?,
+        heapSize: HeapSize?,
+        project: Project?
     ) {
         this.os = os
         this.arch = arch
@@ -36,11 +36,10 @@ class BinaryFilter : Predicate<Binary> {
 
     override fun test(binary: Binary): Boolean {
         return (os == null || binary.os == os) &&
-                (arch == null || binary.architecture == arch) &&
-                (imageType == null || binary.image_type == imageType) &&
-                (jvmImpl == null || binary.jvm_impl == jvmImpl) &&
-                (heapSize == null || binary.heap_size == heapSize) &&
-                (binary.project == project)
+            (arch == null || binary.architecture == arch) &&
+            (imageType == null || binary.image_type == imageType) &&
+            (jvmImpl == null || binary.jvm_impl == jvmImpl) &&
+            (heapSize == null || binary.heap_size == heapSize) &&
+            (binary.project == project)
     }
-
 }

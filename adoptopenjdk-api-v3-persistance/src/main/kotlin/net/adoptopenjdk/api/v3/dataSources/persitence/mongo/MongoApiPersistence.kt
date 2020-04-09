@@ -2,6 +2,7 @@ package net.adoptopenjdk.api.v3.dataSources.persitence.mongo
 
 import com.mongodb.client.model.InsertManyOptions
 import com.mongodb.reactivestreams.client.ClientSession
+import java.time.ZonedDateTime
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
@@ -15,8 +16,6 @@ import org.bson.BsonDocument
 import org.bson.Document
 import org.litote.kmongo.coroutine.CoroutineCollection
 import org.slf4j.LoggerFactory
-import java.time.ZonedDateTime
-
 
 class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient), ApiPersistence {
     private val releasesCollection: CoroutineCollection<Release> = createCollection(database, RELEASE_DB)
@@ -47,7 +46,6 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
                     .forEach { repo ->
                         writeReleases(session, repo.key, repo.value)
                     }
-
         } finally {
             session?.commitTransaction()
             session?.close()

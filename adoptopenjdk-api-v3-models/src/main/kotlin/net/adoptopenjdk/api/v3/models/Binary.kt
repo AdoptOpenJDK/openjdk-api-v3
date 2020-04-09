@@ -1,7 +1,7 @@
 package net.adoptopenjdk.api.v3.models
 
-import org.eclipse.microprofile.openapi.annotations.media.Schema
 import java.time.ZonedDateTime
+import org.eclipse.microprofile.openapi.annotations.media.Schema
 
 @Schema
 class Binary {
@@ -39,17 +39,18 @@ class Binary {
     val project: Project
 
     constructor(
-            `package`: Package,
-            download_count: Long,
-            updated_at: ZonedDateTime,
-            scm_ref: String?,
-            installer: Installer?,
-            heap_size: HeapSize,
-            os: OperatingSystem,
-            architecture: Architecture,
-            image_type: ImageType,
-            jvm_impl: JvmImpl,
-            project: Project = Project.jdk) {
+        `package`: Package,
+        download_count: Long,
+        updated_at: ZonedDateTime,
+        scm_ref: String?,
+        installer: Installer?,
+        heap_size: HeapSize,
+        os: OperatingSystem,
+        architecture: Architecture,
+        image_type: ImageType,
+        jvm_impl: JvmImpl,
+        project: Project = Project.jdk
+    ) {
         this.`package` = `package`
         this.download_count = download_count
         this.updated_at = updated_at
@@ -98,5 +99,4 @@ class Binary {
         result = 31 * result + project.hashCode()
         return result
     }
-
 }

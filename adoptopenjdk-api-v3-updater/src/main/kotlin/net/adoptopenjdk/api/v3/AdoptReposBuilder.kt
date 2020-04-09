@@ -87,10 +87,9 @@ object AdoptReposBuilder {
         }
     }
 
-
     suspend fun build(versions: Array<Int>): AdoptRepos {
         excluded.clear()
-        //Fetch repos in parallel
+        // Fetch repos in parallel
         val reposMap = versions
                 .reversed()
                 .map { version ->

@@ -7,7 +7,6 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema
 import java.time.ZonedDateTime
 import java.util.function.Predicate
 
-
 class Release {
 
     @Schema(example = "VXNlci0xMA==")
@@ -43,17 +42,18 @@ class Release {
 
     @JsonCreator
     constructor(
-            @JsonProperty("id") id: String,
-            @JsonProperty("release_type") release_type: ReleaseType,
-            @JsonProperty("release_link") release_link: String,
-            @JsonProperty("release_name") release_name: String,
-            @JsonProperty("timestamp") timestamp: ZonedDateTime,
-            @JsonProperty("updated_at") updated_at: ZonedDateTime,
-            @JsonProperty("binaries") binaries: Array<Binary>,
-            @JsonProperty("download_count") download_count: Long,
-            @JsonProperty("vendor") vendor: Vendor,
-            @JsonProperty("version_data") version_data: VersionData,
-            @JsonProperty("source") source: SourcePackage? = null) {
+        @JsonProperty("id") id: String,
+        @JsonProperty("release_type") release_type: ReleaseType,
+        @JsonProperty("release_link") release_link: String,
+        @JsonProperty("release_name") release_name: String,
+        @JsonProperty("timestamp") timestamp: ZonedDateTime,
+        @JsonProperty("updated_at") updated_at: ZonedDateTime,
+        @JsonProperty("binaries") binaries: Array<Binary>,
+        @JsonProperty("download_count") download_count: Long,
+        @JsonProperty("vendor") vendor: Vendor,
+        @JsonProperty("version_data") version_data: VersionData,
+        @JsonProperty("source") source: SourcePackage? = null
+    ) {
         this.id = id
         this.release_type = release_type
         this.release_link = release_link
@@ -78,7 +78,7 @@ class Release {
         this.download_count = release.download_count
         this.vendor = release.vendor
         this.version_data = release.version_data
-        this.source = release.source;
+        this.source = release.source
     }
 
     fun filterBinaries(binaryFilter: Predicate<Binary>): Release {

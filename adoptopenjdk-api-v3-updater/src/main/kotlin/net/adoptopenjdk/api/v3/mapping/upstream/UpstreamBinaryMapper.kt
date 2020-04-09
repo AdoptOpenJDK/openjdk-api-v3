@@ -66,12 +66,10 @@ object UpstreamBinaryMapper : BinaryMapper() {
     private fun isArchive(asset: GHAsset) =
             BinaryMapper.ARCHIVE_WHITELIST.any { asset.name.endsWith(it) }
 
-
     private fun getSignatureLink(assets: List<GHAsset>, binary_name: String): String? {
         return assets
                 .firstOrNull { asset ->
-                    asset.name == "${binary_name}.sign"
+                    asset.name == "$binary_name.sign"
                 }?.downloadUrl
     }
-
 }

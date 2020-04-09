@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test
 import java.time.ZonedDateTime
 import kotlin.test.assertEquals
 
-
 class DockerStatsInterfaceTest {
     companion object {
         @JvmStatic
@@ -39,7 +38,6 @@ class DockerStatsInterfaceTest {
             Assert.assertTrue(stats.size > 0)
         }
     }
-
 
     @Test
     fun onlyLastStatEntryPerDayIsRead() {
@@ -73,8 +71,6 @@ class DockerStatsInterfaceTest {
 
             stats = downloadStatsInterface.getTrackingStats(10)
             assertEquals(240, stats[0].total)
-
         }
     }
 }
-

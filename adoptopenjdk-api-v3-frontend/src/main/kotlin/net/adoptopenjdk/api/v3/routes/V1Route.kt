@@ -13,7 +13,7 @@ import javax.ws.rs.core.Response
 @Produces(MediaType.TEXT_PLAIN)
 class V1Route {
 
-    //Cant find a way to match nothing and something in the same request, so need 2
+    // Cant find a way to match nothing and something in the same request, so need 2
     @GET
     @Schema(hidden = true)
     @Path("/{ignore: .*}")
@@ -26,11 +26,10 @@ class V1Route {
     @Operation(hidden = true)
     fun getRoot(): Response = reject()
 
-
     private fun reject(): Response {
         return Response
-                .status(Response.Status.GONE)
-                .entity("REMOVED: V1 has now been removed, please see https://api.adoptopenjdk.net for the latest version")
-                .build()
+            .status(Response.Status.GONE)
+            .entity("REMOVED: V1 has now been removed, please see https://api.adoptopenjdk.net for the latest version")
+            .build()
     }
 }
