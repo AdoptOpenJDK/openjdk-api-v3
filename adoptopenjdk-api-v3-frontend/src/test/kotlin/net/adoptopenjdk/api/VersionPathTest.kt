@@ -38,7 +38,7 @@ class VersionPathTest {
                 .statusCode(200)
                 .body(VersionDataMatcher(parsed))
     }
-    
+
     @Test
     fun parsesNoVersion() {
 
