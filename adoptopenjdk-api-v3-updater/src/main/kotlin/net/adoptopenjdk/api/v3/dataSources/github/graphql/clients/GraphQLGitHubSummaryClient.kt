@@ -8,7 +8,6 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRelea
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 import org.slf4j.LoggerFactory
 
-
 class GraphQLGitHubSummaryClient : GraphQLGitHubInterface() {
 
     companion object {
@@ -35,7 +34,7 @@ class GraphQLGitHubSummaryClient : GraphQLGitHubInterface() {
     private fun getSummary(request: QuerySummaryData): List<GHReleaseSummary> {
         if (request.repository == null) return listOf()
 
-        //nested releases based on how we deserialise githubs data
+        // nested releases based on how we deserialise githubs data
         return request.repository.releases.releases
     }
 
@@ -62,5 +61,4 @@ class GraphQLGitHubSummaryClient : GraphQLGitHubInterface() {
                         }
                     """)
     }
-
 }

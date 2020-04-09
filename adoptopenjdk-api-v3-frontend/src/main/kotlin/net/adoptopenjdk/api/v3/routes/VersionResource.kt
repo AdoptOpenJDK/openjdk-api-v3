@@ -26,11 +26,12 @@ class VersionResource {
     @Operation(summary = "Parses a java version string", description = "Parses a java version string and returns that data in a structured format")
     @APIResponses(value = [
         APIResponse(responseCode = "400", description = "bad input parameter")
-    ])
+    ]
+    )
     fun parseVersion(
-            @Parameter(name = "version", description = "Version", required = true)
-            @PathParam("version")
-            version: String?
+        @Parameter(name = "version", description = "Version", required = true)
+        @PathParam("version")
+        version: String?
     ): VersionData {
         if (version == null) {
             throw BadRequestException("Must provide a version parameter")

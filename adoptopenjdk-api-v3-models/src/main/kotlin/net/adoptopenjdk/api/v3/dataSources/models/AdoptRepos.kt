@@ -18,9 +18,10 @@ class AdoptRepos {
 
     @JsonCreator
     constructor(
-            @JsonProperty("repos")
-            @JsonDeserialize(keyAs = Int::class)
-            repos: Map<Int, FeatureRelease>) {
+        @JsonProperty("repos")
+        @JsonDeserialize(keyAs = Int::class)
+        repos: Map<Int, FeatureRelease>
+    ) {
         this.repos = repos
 
         val releases = repos
@@ -41,12 +42,16 @@ class AdoptRepos {
             .map { Pair(it.featureVersion, it) }
             .toMap())
 
-
     fun getReleases(releaseFilter: Predicate<Release>, sortOrder: SortOrder): Sequence<Release> {
         return allReleases.getReleases(releaseFilter, sortOrder)
     }
 
-    fun getFilteredReleases(version: Int, releaseFilter: Predicate<Release>, binaryFilter: Predicate<Binary>, sortOrder: SortOrder): Sequence<Release> {
+    fun getFilteredReleases(
+        version: Int,
+        releaseFilter: Predicate<Release>,
+        binaryFilter: Predicate<Binary>,
+        sortOrder: SortOrder
+    ): Sequence<Release> {
         val featureRelease = getFeatureRelease(version) ?: return emptySequence()
 
         return getFilteredReleases(featureRelease.releases.getReleases(releaseFilter, sortOrder), binaryFilter)
@@ -89,6 +94,4 @@ class AdoptRepos {
         result = 31 * result + allReleases.hashCode()
         return result
     }
-
-
 }

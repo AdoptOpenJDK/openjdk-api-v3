@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 
-
 @QuarkusTest
 @Ignore("For manual execution")
 class TestRunner : BaseTest() {
@@ -22,7 +21,7 @@ class TestRunner : BaseTest() {
         fun populateDb() {
             runBlocking {
                 val repo = AdoptReposBuilder.build(APIDataStore.variants.versions)
-                //Reset connection
+                // Reset connection
                 ApiPersistenceFactory.set(null)
                 ApiPersistenceFactory.get().updateAllRepos(repo)
                 APIDataStore.loadDataFromDb()

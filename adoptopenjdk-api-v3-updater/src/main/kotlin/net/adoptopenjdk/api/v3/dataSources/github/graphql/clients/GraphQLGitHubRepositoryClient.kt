@@ -1,9 +1,10 @@
 package net.adoptopenjdk.api.v3.dataSources.github.graphql.clients
 
 import io.aexp.nodes.graphql.GraphQLRequestEntity
+/* ktlint-disable no-wildcard-imports */
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.*
+/* ktlint-enable no-wildcard-imports */
 import org.slf4j.LoggerFactory
-
 
 open class GraphQLGitHubRepositoryClient : GraphQLGitHubReleaseRequest() {
     companion object {
@@ -30,7 +31,7 @@ open class GraphQLGitHubRepositoryClient : GraphQLGitHubReleaseRequest() {
     private suspend fun getAllAssets(request: QueryData): List<GHRelease> {
         if (request.repository == null) return listOf()
 
-        //nested releases based on how we deserialise githubs data
+        // nested releases based on how we deserialise githubs data
         return request.repository.releases.releases
                 .map { release ->
                     if (release.releaseAssets.pageInfo.hasNextPage) {
@@ -81,5 +82,4 @@ open class GraphQLGitHubRepositoryClient : GraphQLGitHubReleaseRequest() {
                         }
                     """)
     }
-
 }

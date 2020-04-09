@@ -1,5 +1,11 @@
 package net.adoptopenjdk.api
 
+import java.net.URLDecoder
+import java.nio.charset.Charset
+/* ktlint-disable no-wildcard-imports */
+import java.util.*
+/* ktlint-enable no-wildcard-imports */
+import java.util.stream.Stream
 import net.adoptopenjdk.api.v3.models.VersionData
 import net.adoptopenjdk.api.v3.parser.VersionParser
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -7,11 +13,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
-import java.net.URLDecoder
-import java.nio.charset.Charset
-import java.util.*
-import java.util.stream.Stream
-
 
 class VersionParserTest {
 
@@ -85,7 +86,6 @@ class VersionParserTest {
                     )
             ),
 
-
             Pair("jdk-11.0.4+11.4",
                     VersionTestData(
                             VersionData(11, 0, 4, "", 4, 11, "", "11.0.4+11.4"),
@@ -98,7 +98,12 @@ class VersionParserTest {
                             VersionData(13, 0, 0, "", null, 0, "2019-10-30-23-10", "13u-2019-10-30-23-10"),
                             "13.0.0+2019-10-30-23-10"
                     )
-            )
+            ),
+            Pair("jdk-11.0.7-ea+9_openj9-0.20.0",
+                    VersionTestData(
+                            VersionData(11, 0, 7, "ea", null, 9, null, "11.0.7-ea+9"),
+                            "11.0.7-ea+9"
+                    ))
     )
 
     @TestFactory

@@ -11,5 +11,4 @@ class ReleaseVersionList {
     constructor(versions: Array<VersionData>) {
         this.versions = versions
     }
-
 }

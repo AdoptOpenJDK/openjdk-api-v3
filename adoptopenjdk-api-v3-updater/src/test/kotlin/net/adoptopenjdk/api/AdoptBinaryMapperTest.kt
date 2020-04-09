@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api
 
+import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
@@ -13,8 +14,6 @@ import net.adoptopenjdk.api.v3.models.OperatingSystem
 import net.adoptopenjdk.api.v3.models.Project
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-
 
 class AdoptBinaryMapperTest {
 
@@ -25,7 +24,6 @@ class AdoptBinaryMapperTest {
             BaseTest.startFongo()
         }
     }
-
 
     val jdk = GHAsset(
             "OpenJDK8U-jre_x64_linux_hotspot-jfr_2019-11-21-10-26.tar.gz",
@@ -107,27 +105,6 @@ class AdoptBinaryMapperTest {
             )
             val binaryList = AdoptBinaryMapper.toBinaryList(assets, mapOf(Pair(jdk, metadata)))
             assertParsedHotspotJfr(binaryList)
-        }
-    }
-
-
-    @Test
-    fun ignoresDebugimage() {
-        runBlocking {
-            val binaryList = AdoptBinaryMapper.toBinaryList(listOf(GHAsset(
-                    "OpenJDK11U-debugimage_ppc64_aix_openj9_2020-03-26-23-31.tar.gz",
-                    1L,
-                    "",
-                    1L,
-                    "2013-02-27T19:35:32Z"),
-                    GHAsset(
-                            "OpenJDK11U-debugimage_ppc64_aix_openj9_2020-03-26-23-31.tar.gz.sha256.txt",
-                            1L,
-                            "a-download-link",
-                            1L,
-                            "2013-02-27T19:35:32Z")), emptyMap())
-
-            assertEquals(0, binaryList.size)
         }
     }
 

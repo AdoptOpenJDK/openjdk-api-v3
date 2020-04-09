@@ -10,7 +10,6 @@ class VersionRangeFilter(range: String?) : Predicate<VersionData> {
     val rangeMatcher: VersionRange?
     val exactMatcher: DefaultArtifactVersion?
 
-
     init {
         // default range behaviour of a solid version is stupid:
         // https://cwiki.apache.org/confluence/display/MAVENOLD/Dependency+Mediation+and+Conflict+Resolution#DependencyMediationandConflictResolution-DependencyVersionRanges

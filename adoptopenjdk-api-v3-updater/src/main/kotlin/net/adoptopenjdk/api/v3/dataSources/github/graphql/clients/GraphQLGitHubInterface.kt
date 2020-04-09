@@ -5,6 +5,12 @@ import io.aexp.nodes.graphql.GraphQLResponseEntity
 import io.aexp.nodes.graphql.GraphQLTemplate
 import io.aexp.nodes.graphql.Variable
 import io.aexp.nodes.graphql.exceptions.GraphQLException
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
+import java.util.concurrent.TimeUnit
+import javax.json.JsonObject
+import kotlin.math.max
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -14,13 +20,6 @@ import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.github.GithubAuth
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.HasRateLimit
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.temporal.ChronoUnit
-import java.util.concurrent.TimeUnit
-import javax.json.JsonObject
-import kotlin.math.max
-
 
 open class GraphQLGitHubInterface() {
     companion object {
@@ -51,19 +50,18 @@ open class GraphQLGitHubInterface() {
                         "Authorization" to "Bearer $TOKEN"
                 ))
                 .request(query.trimIndent().replace("\n", ""))
-
     }
 
     protected suspend fun <E, F : HasRateLimit> getAll(
-            requestEntityBuilder: GraphQLRequestEntity.RequestBuilder,
+        requestEntityBuilder: GraphQLRequestEntity.RequestBuilder,
 
-            extract: suspend (F) -> List<E>,
-            hasNext: (F) -> Boolean,
-            getCursor: (F) -> String?,
+        extract: suspend (F) -> List<E>,
+        hasNext: (F) -> Boolean,
+        getCursor: (F) -> String?,
 
-            initialCursor: String? = null,
-            response: F? = null,
-            clazz: Class<F>
+        initialCursor: String? = null,
+        response: F? = null,
+        clazz: Class<F>
     ): List<E> {
         var cursor = initialCursor
 
@@ -154,7 +152,11 @@ open class GraphQLGitHubInterface() {
         }
     }
 
-    protected suspend fun <F : HasRateLimit> queryApi(requestEntityBuilder: GraphQLRequestEntity.RequestBuilder, cursor: String?, clazz: Class<F>): GraphQLResponseEntity<F> {
+    protected suspend fun <F : HasRateLimit> queryApi(
+        requestEntityBuilder: GraphQLRequestEntity.RequestBuilder,
+        cursor: String?,
+        clazz: Class<F>
+    ): GraphQLResponseEntity<F> {
 
         requestEntityBuilder.variables(Variable("cursorPointer", cursor))
         val query = requestEntityBuilder.build()
@@ -180,15 +182,12 @@ open class GraphQLGitHubInterface() {
             }
         }
 
-
         printError(query, cursor)
         throw Exception("Update hit retry limit")
     }
-
 
     private fun printError(query: GraphQLRequestEntity?, cursor: String?) {
         LOGGER.warn("Retry limit hit $query")
         LOGGER.warn("Cursor $cursor")
     }
-
 }

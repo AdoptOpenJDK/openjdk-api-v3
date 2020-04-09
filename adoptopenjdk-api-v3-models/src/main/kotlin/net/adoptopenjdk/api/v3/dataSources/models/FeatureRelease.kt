@@ -16,10 +16,11 @@ class FeatureRelease {
 
     @JsonCreator
     constructor(
-            @JsonProperty("featureVersion")
-            featureVersion: Int,
-            @JsonProperty("releases")
-            releases: Releases) {
+        @JsonProperty("featureVersion")
+        featureVersion: Int,
+        @JsonProperty("releases")
+        releases: Releases
+    ) {
         this.featureVersion = featureVersion
         this.releases = releases
     }
@@ -53,6 +54,4 @@ class FeatureRelease {
         result = 31 * result + releases.hashCode()
         return result
     }
-
-
 }

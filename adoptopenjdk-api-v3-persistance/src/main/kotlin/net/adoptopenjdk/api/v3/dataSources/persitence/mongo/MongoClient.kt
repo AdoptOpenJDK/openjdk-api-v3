@@ -6,7 +6,6 @@ import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
 import org.slf4j.LoggerFactory
 
-
 object MongoClientFactory {
     // Current default impl is mongo impl
     private var impl: MongoClient? = null
@@ -39,11 +38,11 @@ class MongoClient {
         val host = System.getenv("MONGODB_HOST") ?: "localhost"
         val port = System.getenv("MONGODB_PORT") ?: "27017"
 
-        LOGGER.info("Connecting to mongodb://${username}:a-password@${host}:${port}/${dbName}")
+        LOGGER.info("Connecting to mongodb://$username:a-password@$host:$port/$dbName")
         var uri = if (username != null && password != null) {
-            "mongodb://${username}:${password}@${host}:${port}/${dbName}"
+            "mongodb://$username:$password@$host:$port/$dbName"
         } else {
-            "mongodb://${host}:${port}"
+            "mongodb://$host:$port"
         }
 
         if (System.getProperty("MONGO_DB") != null) {
@@ -53,5 +52,4 @@ class MongoClient {
         client = KMongo.createClient(uri).coroutine
         database = client.getDatabase(dbName)
     }
-
 }

@@ -1,5 +1,7 @@
 package net.adoptopenjdk.api
 
+import java.time.ZonedDateTime
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
@@ -18,9 +20,6 @@ import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.models.VersionData
 import org.junit.jupiter.api.Test
-import java.time.ZonedDateTime
-import kotlin.test.assertTrue
-
 
 class AdoptReposTest : BaseTest() {
 
@@ -83,7 +82,4 @@ class AdoptReposTest : BaseTest() {
 
         ))))
     }
-
-
 }
-

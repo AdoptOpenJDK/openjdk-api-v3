@@ -1,5 +1,7 @@
 package net.adoptopenjdk.api
 
+/* ktlint-disable no-wildcard-imports */
+/* ktlint-enable no-wildcard-imports */
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
 import io.vertx.core.json.JsonArray
@@ -8,10 +10,13 @@ import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
-import net.adoptopenjdk.api.v3.models.*
+import net.adoptopenjdk.api.v3.models.Architecture
+import net.adoptopenjdk.api.v3.models.BinaryAssetView
+import net.adoptopenjdk.api.v3.models.ImageType
+import net.adoptopenjdk.api.v3.models.JvmImpl
+import net.adoptopenjdk.api.v3.models.OperatingSystem
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-
 
 @QuarkusTest
 class LatestAssetsPathTest : BaseTest() {
@@ -22,7 +27,7 @@ class LatestAssetsPathTest : BaseTest() {
         fun populateDb() {
             runBlocking {
                 val repo = AdoptReposBuilder.build(APIDataStore.variants.versions)
-                //Reset connection
+                // Reset connection
                 ApiPersistenceFactory.set(null)
                 ApiPersistenceFactory.get().updateAllRepos(repo)
                 APIDataStore.loadDataFromDb()
@@ -57,11 +62,8 @@ class LatestAssetsPathTest : BaseTest() {
                     release.binary.os == os &&
                             release.binary.image_type == imageType &&
                             release.binary.architecture == architecture
-
                 })
                 .count() > 0
         return hasEntry
     }
-
 }
-

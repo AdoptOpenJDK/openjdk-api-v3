@@ -10,7 +10,6 @@ import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoInterface
 import org.bson.Document
 import org.litote.kmongo.coroutine.CoroutineCollection
 
-
 object InternalDbStoreFactory {
     private var impl: InternalDbStore? = null
 

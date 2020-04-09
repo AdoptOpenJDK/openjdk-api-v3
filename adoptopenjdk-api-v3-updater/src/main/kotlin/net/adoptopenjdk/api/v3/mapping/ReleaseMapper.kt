@@ -10,12 +10,10 @@ import java.time.format.DateTimeFormatter
 abstract class ReleaseMapper {
     abstract suspend fun toAdoptRelease(release: GHRelease): List<Release>?
 
-
     companion object {
         fun parseDate(date: String): ZonedDateTime {
             return Instant.from(DateTimeFormatter.ISO_INSTANT.parse(date))
                     .atZone(TimeSource.ZONE)
         }
     }
-
 }

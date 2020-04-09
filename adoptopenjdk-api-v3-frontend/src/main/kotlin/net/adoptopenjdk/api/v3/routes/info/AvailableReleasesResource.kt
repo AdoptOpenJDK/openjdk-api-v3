@@ -19,9 +19,10 @@ class AvailableReleasesResource {
     @Operation(summary = "Returns information about available releases")
     fun get(): ReleaseInfo {
         return ReleaseInfo(
-                APIDataStore.variants.versions,
-                APIDataStore.variants.ltsVersions,
-                APIDataStore.variants.latestLtsVersion,
-                APIDataStore.variants.latestVersion)
+            APIDataStore.variants.versions,
+            APIDataStore.variants.ltsVersions,
+            APIDataStore.variants.latestLtsVersion,
+            APIDataStore.variants.latestVersion
+        )
     }
 }

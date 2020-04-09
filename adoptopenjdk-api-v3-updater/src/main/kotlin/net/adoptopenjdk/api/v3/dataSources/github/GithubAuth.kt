@@ -1,9 +1,11 @@
 package net.adoptopenjdk.api.v3.dataSources.github
 
-import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Files
+/* ktlint-disable no-wildcard-imports */
 import java.util.*
+/* ktlint-enable no-wildcard-imports */
+import org.slf4j.LoggerFactory
 
 class GithubAuth {
 
@@ -30,7 +32,6 @@ class GithubAuth {
                     properties.load(Files.newInputStream(propertiesFile.toPath()))
                     token = properties.getProperty("token")
                 }
-
             }
             if (token == null) {
                 LOGGER.error("Could not find GITHUB_TOKEN")
@@ -38,5 +39,4 @@ class GithubAuth {
             return token
         }
     }
-
 }
