@@ -14,13 +14,13 @@ jobs:
         java-package: jdk
         architecture: x64
     - uses: actions/checkout@v1
+    - name: ktlint
+      run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.35.0/ktlint && chmod a+x ktlint && ./ktlint
     - name: Build app
       run: ./mvnw clean install jacoco:report jacoco:report-aggregate
     - uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-    - name: ktlint
-      run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.35.0/ktlint && chmod a+x ktlint && ./ktlint
     - name: Extract openapi doc
       run: cd adoptopenjdk-api-v3-frontend && unzip target/adoptopenjdk-api-v3-frontend-*-runner.jar META-INF/quarkus-generated-openapi-doc.YAML
     - name:
