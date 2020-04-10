@@ -4,9 +4,9 @@ end_of_line = lf
 indent_size = 4
 indent_style = space
 insert_final_newline = true
-max_line_length = false
+max_line_length = 9999
 tab_width = 4
-ij_continuation_indent_size = 8
+ij_continuation_indent_size = 4
 ij_formatter_off_tag = @formatter:off
 ij_formatter_on_tag = @formatter:on
 ij_formatter_tags_enabled = false
@@ -871,7 +871,7 @@ ij_kotlin_align_multiline_binary_operation = false
 ij_kotlin_align_multiline_extends_list = false
 ij_kotlin_align_multiline_method_parentheses = false
 ij_kotlin_align_multiline_parameters = true
-ij_kotlin_align_multiline_parameters_in_calls = true
+ij_kotlin_align_multiline_parameters_in_calls = false
 ij_kotlin_assignment_wrap = off
 ij_kotlin_blank_lines_after_class_header = 0
 ij_kotlin_blank_lines_around_block_when_branches = 0
@@ -941,7 +941,7 @@ ij_kotlin_wrap_elvis_expressions = 1
 ij_kotlin_wrap_expression_body_functions = 0
 ij_kotlin_wrap_first_method_in_call_chain = false
 
-disabled_rules=no-wildcard-imports,import-ordering
+disabled_rules=no-wildcard-imports,import-ordering,final-newline
 
 [{*.gson,*.gradle,*.groovy,*.gdsl,*.gy,*.gant}]
 ij_groovy_align_group_field_declarations = false

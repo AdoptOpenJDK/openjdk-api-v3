@@ -99,6 +99,44 @@ class BinaryPathTest : BaseTest() {
                 .statusCode(404)
     }
 
+    @Test
+    fun gradleHeadRequestToVersionGives200() {
+        val path = getVersionPath("jdk8u212-b04", OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.jdk)
+
+        RestAssured.given()
+            .`when`()
+            .header("user-agent", "Gradle")
+            .head(path)
+            .then()
+            .statusCode(200)
+            .header("size", Matchers.equalTo("104366847"))
+            .header("content-disposition", Matchers.equalTo("""attachment; filename="OpenJDK8U-jdk_x64_linux_hotspot_8u212b04.tar.gz"; filename*=UTF-8''OpenJDK8U-jdk_x64_linux_hotspot_8u212b04.tar.gz"""))
+    }
+
+    @Test
+    fun nonGradleHeadRequestToVersionGives307() {
+        val path = getVersionPath("jdk8u212-b04", OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.jdk)
+
+        RestAssured.given()
+            .`when`()
+            .redirects().follow(false)
+            .head(path)
+            .then()
+            .statusCode(307)
+    }
+
+    @Test
+    fun nonExistantHeadVersionRequestGives404() {
+        val path = getVersionPath("fooBar", OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.jdk)
+
+        RestAssured.given()
+            .`when`()
+            .header("user-agent", "Gradle")
+            .head(path)
+            .then()
+            .statusCode(404)
+    }
+
     private fun performRequest(path: String): Response {
         return RestAssured.given()
                 .`when`()
