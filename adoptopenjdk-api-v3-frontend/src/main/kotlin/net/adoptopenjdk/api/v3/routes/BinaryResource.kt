@@ -90,6 +90,7 @@ class BinaryResource {
         @Context
         request: Request,
 
+        @Parameter(hidden = true, required = false)
         @HeaderParam("User-Agent")
         userAgent: String
     ): Response {
