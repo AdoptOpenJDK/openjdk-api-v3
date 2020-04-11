@@ -20,7 +20,6 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpasyncclient</artifactId>
-            <version>4.1.4</version>
         </dependency>
         <!--
             Should be set by httpasyncclient however bumping past 4.4.12 due to issues caused by:
@@ -29,18 +28,15 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-            <version>4.4.13</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-xml</artifactId>
-            <version>2.4.15</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>io.aexp.nodes.graphql</groupId>
             <artifactId>nodes</artifactId>
-            <version>0.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
@@ -49,7 +45,6 @@
         <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jooq</artifactId>
-            <version>3.11.11</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -84,13 +79,11 @@
         <dependency>
             <groupId>io.mockk</groupId>
             <artifactId>mockk</artifactId>
-            <version>1.9.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.12.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -124,14 +117,16 @@
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
-            <version>4.0.0-rc1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.skyscreamer</groupId>
             <artifactId>jsonassert</artifactId>
-            <version>1.5.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-core</artifactId>
         </dependency>
     </dependencies>
 
