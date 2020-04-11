@@ -42,11 +42,11 @@ class AssetsResource {
     @GET
     @Path("/feature_releases/{feature_version}/{release_type}")
     @Operation(summary = "Returns release information",
-            description = "List of information about builds that match the current query"
+        description = "List of information about builds that match the current query"
     )
     @APIResponses(value = [
         APIResponse(responseCode = "200", description = "search results matching criteria",
-                    content = [Content(schema = Schema(type = SchemaType.ARRAY, implementation = Release::class))]
+            content = [Content(schema = Schema(type = SchemaType.ARRAY, implementation = Release::class))]
         ),
         APIResponse(responseCode = "400", description = "bad input parameter")
     ]
@@ -57,7 +57,7 @@ class AssetsResource {
         release_type: ReleaseType?,
 
         @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
-                   schema = Schema(defaultValue = "8", type = SchemaType.INTEGER)
+            schema = Schema(defaultValue = "8", type = SchemaType.INTEGER)
         )
         @PathParam("feature_version")
         version: Int?,
@@ -87,20 +87,20 @@ class AssetsResource {
         vendor: Vendor?,
 
         @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk",
-                                                                              enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false
+            enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false
         ), required = false
         )
         @QueryParam("project")
         project: Project?,
 
         @Parameter(name = "page_size", description = "Pagination page size",
-                   schema = Schema(defaultValue = "10", type = SchemaType.INTEGER), required = false
+            schema = Schema(defaultValue = "10", type = SchemaType.INTEGER), required = false
         )
         @QueryParam("page_size")
         pageSize: Int?,
 
         @Parameter(name = "page", description = "Pagination page number",
-                   schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false
+            schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false
         )
         @QueryParam("page")
         page: Int?,
@@ -133,11 +133,11 @@ class AssetsResource {
     @GET
     @Path("/version/{version}")
     @Operation(summary = "Returns release information about the specified version.",
-            description = "List of information about builds that match the current query "
+        description = "List of information about builds that match the current query "
     )
     @APIResponses(value = [
         APIResponse(responseCode = "200", description = "search results matching criteria",
-                    content = [Content(schema = Schema(type = SchemaType.ARRAY, implementation = Release::class))]
+            content = [Content(schema = Schema(type = SchemaType.ARRAY, implementation = Release::class))]
         ),
         APIResponse(responseCode = "400", description = "bad input parameter")
     ]
@@ -172,7 +172,7 @@ class AssetsResource {
         vendor: Vendor?,
 
         @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk",
-                                                                              enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false
+            enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false
         ), required = false
         )
         @QueryParam("project")
@@ -187,13 +187,13 @@ class AssetsResource {
         release_type: ReleaseType?,
 
         @Parameter(name = "page_size", description = "Pagination page size",
-                   schema = Schema(defaultValue = "20", type = SchemaType.INTEGER), required = false
+            schema = Schema(defaultValue = "20", type = SchemaType.INTEGER), required = false
         )
         @QueryParam("page_size")
         pageSize: Int?,
 
         @Parameter(name = "page", description = "Pagination page number",
-                   schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false
+            schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false
         )
         @QueryParam("page")
         page: Int?,
@@ -246,7 +246,7 @@ class AssetsResource {
     fun getLatestAssets(
 
         @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
-                   schema = Schema(defaultValue = "8", type = SchemaType.INTEGER)
+            schema = Schema(defaultValue = "8", type = SchemaType.INTEGER)
         )
         @PathParam("feature_version")
         version: Int,

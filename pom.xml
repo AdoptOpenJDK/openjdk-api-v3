@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <project
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-        xmlns="http://maven.apache.org/POM/4.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.adoptopenjdk.api</groupId>
     <artifactId>adoptopenjdk-api-v3</artifactId>
@@ -10,9 +10,9 @@
     <properties>
         <surefire-plugin.version>2.22.0</surefire-plugin.version>
         <maven.compiler.target>11</maven.compiler.target>
-        <kotlin.version>1.3.31</kotlin.version>
+        <kotlin.version>1.3.71</kotlin.version>
         <maven.compiler.source>11</maven.compiler.source>
-        <quarkus.version>0.27.0</quarkus.version>
+        <quarkus.version>1.3.1.Final</quarkus.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <junit.version>4.12</junit.version>
@@ -61,12 +61,7 @@
             <dependency>
                 <groupId>org.jetbrains.kotlinx</groupId>
                 <artifactId>kotlinx-coroutines-core</artifactId>
-                <version>1.2.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.litote.kmongo</groupId>
-                <artifactId>kmongo-coroutine</artifactId>
-                <version>3.10.2</version>
+                <version>1.3.5</version>
             </dependency>
             <dependency>
                 <groupId>net.adoptopenjdk.api</groupId>
@@ -89,27 +84,31 @@
                 <version>1.1.2</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-artifact</artifactId>
+                <version>3.6.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.25</version>
+            </dependency>
+
+
+            <dependency>
                 <groupId>org.litote.kmongo</groupId>
-                <artifactId>kmongo-flapdoodle</artifactId>
-                <version>3.10.2</version>
-                <scope>test</scope>
+                <artifactId>kmongo-coroutine</artifactId>
+                <version>4.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.mongodb</groupId>
-                <artifactId>mongodb-driver-legacy</artifactId>
-                <version>3.10.2</version>
-                <scope>test</scope>
+                <artifactId>mongodb-driver-reactivestreams</artifactId>
+                <version>4.0.2</version>
             </dependency>
-            <dependency>
-                <groupId>org.apache.maven</groupId>
-                <artifactId>maven-artifact</artifactId>
-                <version>3.6.1</version>
-            </dependency>
-
-
             <dependency>
                 <groupId>org.litote.kmongo</groupId>
                 <artifactId>kmongo-flapdoodle</artifactId>
+                <version>4.0.0</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
@@ -117,6 +116,82 @@
                         <groupId>org.slf4j</groupId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongodb-driver-core</artifactId>
+                <version>4.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-smallrye-metrics</artifactId>
+                <version>${quarkus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-smallrye-openapi</artifactId>
+                <version>${quarkus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.mockk</groupId>
+                <artifactId>mockk</artifactId>
+                <version>1.9.3</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.rest-assured</groupId>
+                <artifactId>rest-assured</artifactId>
+                <version>4.3.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.rest-assured</groupId>
+                <artifactId>json-path</artifactId>
+                <version>4.3.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpasyncclient</artifactId>
+                <version>4.1.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpcore</artifactId>
+                <version>4.4.13</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-xml</artifactId>
+                <version>3.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>io.aexp.nodes.graphql</groupId>
+                <artifactId>nodes</artifactId>
+                <version>0.5.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq</artifactId>
+                <version>3.13.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>3.15.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>4.0.2</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.skyscreamer</groupId>
+                <artifactId>jsonassert</artifactId>
+                <version>1.5.0</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -134,7 +209,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
         </dependency>
     </dependencies>
     <repositories>
