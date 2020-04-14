@@ -34,8 +34,8 @@ class GithubDownloadStatsCalculator {
                             }
 
                     // Tally up jvmImpl download stats
-                    val jvmImplMap : Map<JvmImpl,Long> = JvmImpl.values().map {
-                        val jvmImpl = it;
+                    val jvmImplMap: Map<JvmImpl, Long> = JvmImpl.values().map {
+                        val jvmImpl = it
 
                         jvmImpl to
                             featureRelease
