@@ -15,11 +15,11 @@ class GithubAuth {
 
         fun readToken(): String? {
             var token = System.getenv("GITHUB_TOKEN")
-            if (token == null) {
+            if (token == null || token.isEmpty()) {
                 token = System.getProperty("GITHUB_TOKEN")
             }
 
-            if (token == null) {
+            if (token == null || token.isEmpty()) {
 
                 val userHome = System.getProperty("user.home")
 
@@ -33,7 +33,7 @@ class GithubAuth {
                     token = properties.getProperty("token")
                 }
             }
-            if (token == null) {
+            if (token == null || token.isEmpty()) {
                 LOGGER.error("Could not find GITHUB_TOKEN")
             }
             return token

@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 class GitHubAuthTest {
     @Test
     fun readsTokenFromFile() {
-        System.setProperty("GITHUB_TOKEN", null)
+        System.setProperty("GITHUB_TOKEN", "")
         System.setProperty("user.home", "/tmp")
         Files.createDirectory(Path.of("/tmp/.adopt_api"))
         File("/tmp/.adopt_api/token.properties").printWriter().use { out ->
@@ -26,7 +26,7 @@ class GitHubAuthTest {
 
     @Test
     fun readsTokenNullFromFile() {
-        System.setProperty("GITHUB_TOKEN", null)
+        System.setProperty("GITHUB_TOKEN", "")
         System.setProperty("user.home", "/tmp")
         assertEquals(null, GithubAuth.readToken())
     }
