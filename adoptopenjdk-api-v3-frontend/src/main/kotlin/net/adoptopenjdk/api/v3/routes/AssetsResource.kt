@@ -26,7 +26,6 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
-import javax.ws.rs.BadRequestException
 import javax.ws.rs.GET
 import javax.ws.rs.NotFoundException
 import javax.ws.rs.Path
@@ -110,14 +109,11 @@ class AssetsResource {
         sortOrder: SortOrder?
 
     ): List<Release> {
-        if (release_type == null || version == null) {
-            throw BadRequestException("Unrecognised type")
-        }
         val order = sortOrder ?: SortOrder.DESC
 
         val releaseFilter = ReleaseFilter(releaseType = release_type, featureVersion = version, vendor = vendor)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
-        val repos = APIDataStore.getAdoptRepos().getFeatureRelease(version)
+        val repos = APIDataStore.getAdoptRepos().getFeatureRelease(version!!)
 
         if (repos == null) {
             throw NotFoundException()

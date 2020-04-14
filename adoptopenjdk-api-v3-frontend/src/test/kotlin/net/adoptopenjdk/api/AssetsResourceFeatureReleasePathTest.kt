@@ -119,4 +119,14 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
             return JsonMapper.mapper.readValue(releasesStr, JsonMapper.mapper.getTypeFactory().constructCollectionType(MutableList::class.java, Release::class.java))
         }
     }
+
+    @Test
+    fun pagination() {
+
+        RestAssured.given()
+                .`when`()
+                .get("${getPath()}/8/ga?pageSize=1&page=1")
+                .then()
+                .statusCode(200)
+    }
 }

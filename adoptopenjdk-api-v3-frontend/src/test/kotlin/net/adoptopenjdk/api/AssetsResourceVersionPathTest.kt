@@ -21,6 +21,7 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
     val RANGE_8_METADATA = "[8.0.212+3,8.0.212+5]"
     val JAVA11 = "11.0.0+28"
     val ABOVE_8 = "[8.0.0,)"
+    val BELOW_11 = "(,11.0.0]"
 
     @TestFactory
     fun filtersLts(): Stream<DynamicTest> {
@@ -49,6 +50,7 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
 
         return listOf(
                 ABOVE_8,
+                BELOW_11,
                 JAVA8_212,
                 RANGE_11_12,
                 RANGE_8_METADATA,

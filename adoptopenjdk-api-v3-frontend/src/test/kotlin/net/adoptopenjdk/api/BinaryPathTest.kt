@@ -75,8 +75,25 @@ class BinaryPathTest : BaseTest() {
     }
 
     @Test
+    fun latestDoesRedirectToBinary() {
+        val path = "$path/latest/11/ga/linux/x64/jdk/openj9/normal/adoptopenjdk"
+        performRequest(path)
+                .then()
+                .statusCode(307)
+                .header("Location", Matchers.startsWith("https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/"))
+    }
+
+    @Test
+    fun latestDoesNotRedirectToBinary() {
+        val path = getLatestPath(8, ReleaseType.ga, OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.valhalla)
+        performRequest(path)
+                .then()
+                .statusCode(404)
+    }
+
+    @Test
     fun noExistantLatestRequestGives404() {
-        val path = getLatestPath(4, ReleaseType.ga, OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.jdk)
+        val path = getLatestPath(4, ReleaseType.ga, OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.valhalla)
         performRequest(path)
                 .then()
                 .statusCode(404)
