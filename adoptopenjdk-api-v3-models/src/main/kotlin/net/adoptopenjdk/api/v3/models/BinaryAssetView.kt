@@ -11,12 +11,16 @@ class BinaryAssetView {
     @Schema(example = "jdk8u162-b12_openj9-0.8.0")
     val release_name: String
 
+    @Schema(implementation = VersionData::class)
+    val version: VersionData
+
     constructor(
-            release_name: String,
-            binary: Binary) {
+        release_name: String,
+        binary: Binary,
+        version: VersionData
+    ) {
         this.release_name = release_name
         this.binary = binary
+        this.version = version
     }
-
-
 }

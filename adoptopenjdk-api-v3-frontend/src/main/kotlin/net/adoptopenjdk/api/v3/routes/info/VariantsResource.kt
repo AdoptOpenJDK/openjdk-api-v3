@@ -16,10 +16,9 @@ class VariantsResource {
 
     @GET
     @Path("/variants")
-    //Hide this path as it is only used internally by the website
+    // Hide this path as it is only used internally by the website
     @Operation(summary = "Returns information about available variants", hidden = true)
     fun get(): Variants {
         return APIDataStore.variants
     }
-
 }

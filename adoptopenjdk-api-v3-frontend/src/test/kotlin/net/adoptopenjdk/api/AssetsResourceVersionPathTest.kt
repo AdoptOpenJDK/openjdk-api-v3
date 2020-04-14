@@ -12,10 +12,8 @@ import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 import java.util.stream.Stream
 
-
 @QuarkusTest
 class AssetsResourceVersionPathTest : AssetsPathTest() {
-
 
     fun getPath() = "/v3/assets/version"
     val JAVA8_212 = "8.0.212+4"
@@ -24,14 +22,13 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
     val JAVA11 = "11.0.0+28"
     val ABOVE_8 = "[8.0.0,)"
 
-
     @TestFactory
     fun filtersLts(): Stream<DynamicTest> {
         return listOf(
-                Pair("${getPath()}/${JAVA8_212}?lts=true", 200),
-                Pair("${getPath()}/${JAVA8_212}?lts=false", 404),
-                Pair("${getPath()}/${ABOVE_8}?lts=false", 200),
-                Pair("${getPath()}/${ABOVE_8}?lts=false", 200)
+                Pair("${getPath()}/$JAVA8_212?lts=true", 200),
+                Pair("${getPath()}/$JAVA8_212?lts=false", 404),
+                Pair("${getPath()}/$ABOVE_8?lts=false", 200),
+                Pair("${getPath()}/$ABOVE_8?lts=false", 200)
         ).map { request ->
             DynamicTest.dynamicTest(request.first) {
                 val response = RestAssured.given()
@@ -47,7 +44,6 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
             }
         }.stream()
     }
-
 
     override fun <T> runFilterTest(filterParamName: String, values: Array<T>): Stream<DynamicTest> {
 
@@ -85,4 +81,3 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
                 element == ImageType.debugimage
     }
 }
-

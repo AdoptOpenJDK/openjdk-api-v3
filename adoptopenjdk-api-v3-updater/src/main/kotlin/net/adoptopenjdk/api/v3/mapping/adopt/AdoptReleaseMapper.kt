@@ -39,35 +39,35 @@ object AdoptReleaseMapper : ReleaseMapper() {
 
         try {
             val groupedByVersion = metadata
-                    .entries
-                    .groupBy {
-                        val version = it.value.version
-                        "${version.major}.${version.minor}.${version.security}.${version.build}.${version.adopt_build_number}"
-                    }
+                .entries
+                .groupBy {
+                    val version = it.value.version
+                    "${version.major}.${version.minor}.${version.security}.${version.build}.${version.adopt_build_number}"
+                }
 
             return groupedByVersion
-                    .entries
-                    .map { grouped ->
-                        val version = grouped.value.sortedBy { it.value.version.toApiVersion() }
-                                .last().value.version.toApiVersion()
+                .entries
+                .map { grouped ->
+                    val version = grouped.value.sortedBy { it.value.version.toApiVersion() }
+                        .last().value.version.toApiVersion()
 
-                        val assets = grouped.value.map { it.key }
-                        val id = generateIdForSplitRelease(version, release)
+                    val assets = grouped.value.map { it.key }
+                    val id = generateIdForSplitRelease(version, release)
 
-                        toRelease(releaseName, assets, metadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version)
+                    toRelease(releaseName, assets, metadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version, release.releaseAssets.assets)
+                }
+                .ifEmpty {
+                    try {
+                        // if we have no metadata resort to parsing release names
+                        val version = parseVersionInfo(release, releaseName)
+                        val assets = release.releaseAssets.assets
+                        val id = release.id.githubId
+
+                        return@ifEmpty listOf(toRelease(releaseName, assets, metadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version, assets))
+                    } catch (e: Exception) {
+                        throw Exception("Failed to parse version $releaseName")
                     }
-                    .ifEmpty {
-                        try {
-                            //if we have no metadata resort to parsing release names
-                            val version = parseVersionInfo(release, releaseName)
-                            val assets = release.releaseAssets.assets
-                            val id = release.id.githubId
-
-                            return@ifEmpty listOf(toRelease(releaseName, assets, metadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version))
-                        } catch (e: Exception) {
-                            throw Exception("Failed to parse version $releaseName")
-                        }
-                    }
+                }
         } catch (e: FailedToParse) {
             LOGGER.error("Failed to parse $releaseName")
             throw e
@@ -75,39 +75,51 @@ object AdoptReleaseMapper : ReleaseMapper() {
     }
 
     private fun generateIdForSplitRelease(version: VersionData, release: GHRelease): String {
-        //using a shortend hash as a suffix to keep id short, probability of clash still very low
+        // using a shortend hash as a suffix to keep id short, probability of clash still very low
         val suffix = Base64
-                .getEncoder()
-                .encodeToString(MessageDigest
-                        .getInstance("SHA-1")
-                        .digest(version.semver.toByteArray())
-                        .copyOfRange(0, 10))
+            .getEncoder()
+            .encodeToString(MessageDigest
+                .getInstance("SHA-1")
+                .digest(version.semver.toByteArray())
+                .copyOfRange(0, 10)
+            )
 
         return release.id.githubId + "." + suffix
     }
 
-    private suspend fun toRelease(releaseName: String, assets: List<GHAsset>, metadata: Map<GHAsset, GHMetaData>, id: String, release_type: ReleaseType, releaseLink: String, timestamp: ZonedDateTime, updatedAt: ZonedDateTime, vendor: Vendor, version: VersionData): Release {
+    private suspend fun toRelease(
+        releaseName: String,
+        assets: List<GHAsset>,
+        metadata: Map<GHAsset, GHMetaData>,
+        id: String,
+        release_type: ReleaseType,
+        releaseLink: String,
+        timestamp: ZonedDateTime,
+        updatedAt: ZonedDateTime,
+        vendor: Vendor,
+        version: VersionData,
+        fullAssetList: List<GHAsset>
+    ): Release {
         LOGGER.info("Getting binaries $releaseName")
-        val binaries = AdoptBinaryMapper.toBinaryList(assets, metadata)
+        val binaries = AdoptBinaryMapper.toBinaryList(assets, fullAssetList, metadata)
         LOGGER.info("Done Getting binaries $releaseName")
 
-
         val downloadCount = assets
-                .filter { asset ->
-                    BinaryMapper.BINARY_EXTENSIONS.any { asset.name.endsWith(it) }
-                }
-                .map { it.downloadCount }.sum()
+            .filter { asset ->
+                BinaryMapper.BINARY_EXTENSIONS.any { asset.name.endsWith(it) }
+            }
+            .map { it.downloadCount }.sum()
 
         return Release(id, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, version)
     }
 
     private fun formReleaseType(release: GHRelease): ReleaseType {
-        //TODO fix me before the year 2100
+        // TODO fix me before the year 2100
         val dateMatcher = """.*(20[0-9]{2}-[0-9]{2}-[0-9]{2}|20[0-9]{6}).*"""
         val hasDate = Pattern.compile(dateMatcher).matcher(release.name)
 
         return if (release.url.matches(Regex(".*/openjdk[0-9]+-binaries/.*"))) {
-            //Can trust isPrerelease from -binaries repos
+            // Can trust isPrerelease from -binaries repos
             if (release.isPrerelease) {
                 ReleaseType.ea
             } else {
@@ -137,20 +149,20 @@ object AdoptReleaseMapper : ReleaseMapper() {
 
     private suspend fun getMetadata(releaseAssets: GHAssets): Map<GHAsset, GHMetaData> {
         return releaseAssets
-                .assets
-                .filter { it.name.endsWith(".json") }
-                .mapNotNull { metadataAsset ->
-                    pairUpBinaryAndMetadata(releaseAssets, metadataAsset)
-                }
-                .toMap()
+            .assets
+            .filter { it.name.endsWith(".json") }
+            .mapNotNull { metadataAsset ->
+                pairUpBinaryAndMetadata(releaseAssets, metadataAsset)
+            }
+            .toMap()
     }
 
     private suspend fun pairUpBinaryAndMetadata(releaseAssets: GHAssets, metadataAsset: GHAsset): Pair<GHAsset, GHMetaData>? {
         val binaryAsset = releaseAssets
-                .assets
-                .firstOrNull {
-                    metadataAsset.name.startsWith(it.name)
-                }
+            .assets
+            .firstOrNull {
+                metadataAsset.name.startsWith(it.name)
+            }
 
         val metadataString = CachedGithubHtmlClient.getUrl(metadataAsset.downloadUrl)
         if (binaryAsset != null && metadataString != null) {

@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-
 class AdoptBinaryMapperTest {
 
     companion object {
@@ -26,36 +25,42 @@ class AdoptBinaryMapperTest {
         }
     }
 
-
     val jdk = GHAsset(
-            "OpenJDK8U-jre_x64_linux_hotspot-jfr_2019-11-21-10-26.tar.gz",
-            1L,
-            "",
-            1L,
-            "2013-02-27T19:35:32Z")
+        "OpenJDK8U-jre_x64_linux_hotspot-jfr_2019-11-21-10-26.tar.gz",
+        1L,
+        "",
+        1L,
+        "2013-02-27T19:35:32Z"
+    )
 
     val assets = listOf(jdk, GHAsset(
-            "OpenJDK8U-jdk_x64_linux_hotspot_2019-11-22-16-01.tar.gz",
-            1L,
-            "",
-            1L,
-            "2013-02-27T19:35:32Z"))
+        "OpenJDK8U-jdk_x64_linux_hotspot_2019-11-22-16-01.tar.gz",
+        1L,
+        "",
+        1L,
+        "2013-02-27T19:35:32Z"
+    )
+    )
 
     @Test
     fun oldChecksumIsFound() {
         runBlocking {
-            val binaryList = AdoptBinaryMapper.toBinaryList(listOf(GHAsset(
-                    "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.tar.gz",
+            val assets = listOf(GHAsset(
+                "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.tar.gz",
+                1L,
+                "",
+                1L,
+                "2013-02-27T19:35:32Z"
+            ),
+                GHAsset(
+                    "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.sha256.txt",
                     1L,
-                    "",
+                    "a-download-link",
                     1L,
-                    "2013-02-27T19:35:32Z"),
-                    GHAsset(
-                            "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.sha256.txt",
-                            1L,
-                            "a-download-link",
-                            1L,
-                            "2013-02-27T19:35:32Z")), emptyMap())
+                    "2013-02-27T19:35:32Z"
+                )
+            )
+            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
 
             assertEquals("a-download-link", binaryList.get(0).`package`.checksum_link)
         }
@@ -64,12 +69,15 @@ class AdoptBinaryMapperTest {
     @Test
     fun parsesOldOpenj9() {
         runBlocking {
-            val binaryList = AdoptBinaryMapper.toBinaryList(listOf(GHAsset(
-                    "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.tar.gz",
-                    1L,
-                    "",
-                    1L,
-                    "2013-02-27T19:35:32Z")), emptyMap())
+            val assets = listOf(GHAsset(
+                "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.tar.gz",
+                1L,
+                "",
+                1L,
+                "2013-02-27T19:35:32Z"
+            )
+            )
+            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
 
             assertEquals(JvmImpl.openj9, binaryList.get(0).jvm_impl)
             assertEquals(Architecture.ppc64le, binaryList.get(0).architecture)
@@ -81,7 +89,7 @@ class AdoptBinaryMapperTest {
     @Test
     fun parsesJfrFromName() {
         runBlocking {
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, emptyMap())
+            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
             assertParsedHotspotJfr(binaryList)
         }
     }
@@ -89,7 +97,7 @@ class AdoptBinaryMapperTest {
     @Test
     fun projectDefaultsToJdk() {
         runBlocking {
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, emptyMap())
+            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
             assertEquals(Project.jdk, binaryList.get(1).project)
         }
     }
@@ -99,35 +107,39 @@ class AdoptBinaryMapperTest {
 
         runBlocking {
             val metadata = GHMetaData("", OperatingSystem.linux, Architecture.x64, "hotspot-jfr",
-                    GHVersion(0, 1, 2, "", 4, "", 6, "", ""),
-                    "",
-                    "",
-                    ImageType.jdk,
-                    ""
+                GHVersion(0, 1, 2, "", 4, "", 6, "", ""),
+                "",
+                "",
+                ImageType.jdk,
+                ""
             )
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, mapOf(Pair(jdk, metadata)))
+            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, mapOf(Pair(jdk, metadata)))
             assertParsedHotspotJfr(binaryList)
         }
     }
 
-
     @Test
-    fun ignoresDebugimage() {
+    fun checkSumLinkFoundWhenChecksumIsSplitFromReleaseGroup() {
         runBlocking {
-            val binaryList = AdoptBinaryMapper.toBinaryList(listOf(GHAsset(
-                    "OpenJDK11U-debugimage_ppc64_aix_openj9_2020-03-26-23-31.tar.gz",
-                    1L,
-                    "",
-                    1L,
-                    "2013-02-27T19:35:32Z"),
-                    GHAsset(
-                            "OpenJDK11U-debugimage_ppc64_aix_openj9_2020-03-26-23-31.tar.gz.sha256.txt",
-                            1L,
-                            "a-download-link",
-                            1L,
-                            "2013-02-27T19:35:32Z")), emptyMap())
+            val asset = GHAsset(
+                "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.tar.gz",
+                1L,
+                "",
+                1L,
+                "2013-02-27T19:35:32Z"
+            )
 
-            assertEquals(0, binaryList.size)
+            val checksum = GHAsset(
+                "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.sha256.txt",
+                1L,
+                "a-download-link",
+                1L,
+                "2013-02-27T19:35:32Z"
+            )
+
+            val binaryList = AdoptBinaryMapper.toBinaryList(listOf(asset), listOf(asset, checksum), emptyMap())
+
+            assertEquals("a-download-link", binaryList.get(0).`package`.checksum_link)
         }
     }
 

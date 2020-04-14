@@ -42,7 +42,6 @@ class DownloadStatsPathTest : BaseTest() {
             }
         }
 
-
         private fun createGithubData(): List<GithubDownloadStatsDbEntry> {
             return listOf(
                     GithubDownloadStatsDbEntry(
@@ -136,7 +135,6 @@ class DownloadStatsPathTest : BaseTest() {
         }
     }
 
-
     @Test
     fun totalVersionReturnsSaneData() {
         runBlocking {
@@ -155,6 +153,17 @@ class DownloadStatsPathTest : BaseTest() {
                             return stats.isNotEmpty() && !stats.containsValue(0L)
                         }
                     })
+        }
+    }
+
+    @Test
+    fun badTotalVersionReturnsSaneData() {
+        runBlocking {
+            RestAssured.given()
+                    .`when`()
+                    .get("/v3/stats/downloads/total/101")
+                    .then()
+                    .statusCode(400)
         }
     }
 
@@ -180,6 +189,17 @@ class DownloadStatsPathTest : BaseTest() {
     }
 
     @Test
+    fun badTotalTagReturnsSaneData() {
+        runBlocking {
+            RestAssured.given()
+                    .`when`()
+                    .get("/v3/stats/downloads/total/101/fooBar")
+                    .then()
+                    .statusCode(400)
+        }
+    }
+
+    @Test
     fun trackingReturnsSaneData() {
         runBlocking {
             RestAssured.given()
@@ -201,7 +221,6 @@ class DownloadStatsPathTest : BaseTest() {
                     })
         }
     }
-
 
     @Test
     fun dateRangeFilterWithStartAndEndIsCorrect() {
@@ -256,7 +275,6 @@ class DownloadStatsPathTest : BaseTest() {
                     })
         })
     }
-
 
     private fun requestStats(from: String?, to: String?, days: Int?, check: (List<*>) -> Boolean): ValidatableResponse? {
         return runBlocking {

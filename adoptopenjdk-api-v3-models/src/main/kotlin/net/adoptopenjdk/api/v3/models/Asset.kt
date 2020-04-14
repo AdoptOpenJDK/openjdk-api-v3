@@ -26,13 +26,14 @@ open class Asset {
     val download_count: Long
 
     constructor(
-            name: String,
-            link: String,
-            size: Long,
-            checksum: String?,
-            checksum_link: String?,
-            signature_link: String?,
-            download_count: Long) {
+        name: String,
+        link: String,
+        size: Long,
+        checksum: String?,
+        checksum_link: String?,
+        signature_link: String?,
+        download_count: Long
+    ) {
         this.name = name
         this.link = link
         this.size = size

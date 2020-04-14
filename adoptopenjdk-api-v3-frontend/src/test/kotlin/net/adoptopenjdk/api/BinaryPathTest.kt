@@ -12,12 +12,12 @@ import net.adoptopenjdk.api.v3.models.HeapSize
 import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.OperatingSystem
+import net.adoptopenjdk.api.v3.models.Project
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-
 
 @QuarkusTest
 class BinaryPathTest : BaseTest() {
@@ -28,7 +28,7 @@ class BinaryPathTest : BaseTest() {
         fun populateDb() {
             runBlocking {
                 val repo = AdoptReposBuilder.build(APIDataStore.variants.versions)
-                //Reset connection
+                // Reset connection
                 ApiPersistenceFactory.set(null)
                 ApiPersistenceFactory.get().updateAllRepos(repo)
                 APIDataStore.loadDataFromDb()
@@ -39,33 +39,35 @@ class BinaryPathTest : BaseTest() {
     val path = "/v3/binary"
 
     fun getLatestPath(
-            featureVersion: Int,
-            releaseType: ReleaseType,
-            os: OperatingSystem,
-            arch: Architecture,
-            imageType: ImageType,
-            jvmImpl: JvmImpl,
-            heapSize: HeapSize,
-            vendor: Vendor
+        featureVersion: Int,
+        releaseType: ReleaseType,
+        os: OperatingSystem,
+        arch: Architecture,
+        imageType: ImageType,
+        jvmImpl: JvmImpl,
+        heapSize: HeapSize,
+        vendor: Vendor,
+        project: Project
     ): String {
-        return "${path}/latest/${featureVersion}/${releaseType}/${os}/${arch}/${imageType}/${jvmImpl}/${heapSize}/${vendor}"
+        return "$path/latest/$featureVersion/$releaseType/$os/$arch/$imageType/$jvmImpl/$heapSize/$vendor?project=$project"
     }
 
     fun getVersionPath(
-            releaseName: String,
-            os: OperatingSystem,
-            arch: Architecture,
-            imageType: ImageType,
-            jvmImpl: JvmImpl,
-            heapSize: HeapSize,
-            vendor: Vendor
+        releaseName: String,
+        os: OperatingSystem,
+        arch: Architecture,
+        imageType: ImageType,
+        jvmImpl: JvmImpl,
+        heapSize: HeapSize,
+        vendor: Vendor,
+        project: Project
     ): String {
-        return "${path}/version/${releaseName}/${os}/${arch}/${imageType}/${jvmImpl}/${heapSize}/${vendor}"
+        return "$path/version/$releaseName/$os/$arch/$imageType/$jvmImpl/$heapSize/$vendor?project=$project"
     }
 
     @Test
     fun latestDoesRedirectToBinary() {
-        val path = getLatestPath(8, ReleaseType.ga, OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk)
+        val path = getLatestPath(8, ReleaseType.ga, OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.jdk)
         performRequest(path)
                 .then()
                 .statusCode(307)
@@ -74,7 +76,7 @@ class BinaryPathTest : BaseTest() {
 
     @Test
     fun noExistantLatestRequestGives404() {
-        val path = getLatestPath(4, ReleaseType.ga, OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk)
+        val path = getLatestPath(4, ReleaseType.ga, OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.jdk)
         performRequest(path)
                 .then()
                 .statusCode(404)
@@ -82,7 +84,7 @@ class BinaryPathTest : BaseTest() {
 
     @Test
     fun nonExistantVersionRequestRedirects() {
-        val path = getVersionPath("jdk8u212-b04", OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk)
+        val path = getVersionPath("jdk8u212-b04", OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.jdk)
         performRequest(path)
                 .then()
                 .statusCode(307)
@@ -91,10 +93,48 @@ class BinaryPathTest : BaseTest() {
 
     @Test
     fun nonExistantVersionRequestGives404() {
-        val path = getVersionPath("fooBar", OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk)
+        val path = getVersionPath("fooBar", OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.jdk)
         performRequest(path)
                 .then()
                 .statusCode(404)
+    }
+
+    @Test
+    fun gradleHeadRequestToVersionGives200() {
+        val path = getVersionPath("jdk8u212-b04", OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.jdk)
+
+        RestAssured.given()
+            .`when`()
+            .header("user-agent", "Gradle")
+            .head(path)
+            .then()
+            .statusCode(200)
+            .header("size", Matchers.equalTo("104366847"))
+            .header("content-disposition", Matchers.equalTo("""attachment; filename="OpenJDK8U-jdk_x64_linux_hotspot_8u212b04.tar.gz"; filename*=UTF-8''OpenJDK8U-jdk_x64_linux_hotspot_8u212b04.tar.gz"""))
+    }
+
+    @Test
+    fun nonGradleHeadRequestToVersionGives307() {
+        val path = getVersionPath("jdk8u212-b04", OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.jdk)
+
+        RestAssured.given()
+            .`when`()
+            .redirects().follow(false)
+            .head(path)
+            .then()
+            .statusCode(307)
+    }
+
+    @Test
+    fun nonExistantHeadVersionRequestGives404() {
+        val path = getVersionPath("fooBar", OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.jdk)
+
+        RestAssured.given()
+            .`when`()
+            .header("user-agent", "Gradle")
+            .head(path)
+            .then()
+            .statusCode(404)
     }
 
     private fun performRequest(path: String): Response {
@@ -103,6 +143,4 @@ class BinaryPathTest : BaseTest() {
                 .redirects().follow(false)
                 .get(path)
     }
-
 }
-

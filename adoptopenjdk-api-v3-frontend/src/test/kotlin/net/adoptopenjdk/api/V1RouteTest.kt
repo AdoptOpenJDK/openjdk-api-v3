@@ -21,5 +21,4 @@ class V1RouteTest : BaseTest() {
                             .statusCode(Response.Status.GONE.statusCode)
                 })
     }
-
 }

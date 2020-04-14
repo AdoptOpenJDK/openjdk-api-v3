@@ -16,17 +16,15 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import java.util.stream.Stream
 
-
 @QuarkusTest
 class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
-
 
     @TestFactory
     fun noFilter(): Stream<DynamicTest> {
         return (8..12)
                 .flatMap { version ->
                     ReleaseType.values()
-                            .map { "/v3/assets/feature_releases/${version}/${it}" }
+                            .map { "/v3/assets/feature_releases/$version/$it" }
                             .map {
                                 DynamicTest.dynamicTest(it) {
                                     RestAssured.given()
@@ -69,7 +67,6 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                     }
                     next
                 })
-
     }
 
     @Test
@@ -83,17 +80,15 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                     }
                     next
                 })
-
     }
-
 
     override fun <T> runFilterTest(filterParamName: String, values: Array<T>): Stream<DynamicTest> {
         return ReleaseType.values()
                 .flatMap { releaseType ->
-                    //test the ltses and 1 non-lts
+                    // test the ltses and 1 non-lts
                     listOf(8, 11, 12)
                             .flatMap { version ->
-                                createTest(values, "${getPath()}/${version}/${releaseType}", filterParamName, { element ->
+                                createTest(values, "${getPath()}/$version/$releaseType", filterParamName, { element ->
                                     getExclusions(version, element)
                                 })
                             }
@@ -125,4 +120,3 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
         }
     }
 }
-

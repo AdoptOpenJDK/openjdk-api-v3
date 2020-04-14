@@ -7,7 +7,6 @@ import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.StatsSource
 import org.slf4j.LoggerFactory
-import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 class StatsInterface {
@@ -27,8 +26,8 @@ class StatsInterface {
         githubDownloadStatsCalculator.saveStats(repos)
         dockerStatsInterface.updateDb()
 
-        //TODO bring back if we need it and once we understand stats trajectory
-        //removeBadDownloadStats()
+        // TODO bring back if we need it and once we understand stats trajectory
+        // removeBadDownloadStats()
     }
 
     private suspend fun removeBadDownloadStats() {
