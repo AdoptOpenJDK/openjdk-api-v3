@@ -28,6 +28,6 @@ class GitHubAuthTest {
     fun readsTokenNullFromFile() {
         System.setProperty("GITHUB_TOKEN", "")
         System.setProperty("user.home", "/tmp")
-        assertEquals(null, GithubAuth.readToken())
+        assertEquals("", GithubAuth.readToken())
     }
 }
