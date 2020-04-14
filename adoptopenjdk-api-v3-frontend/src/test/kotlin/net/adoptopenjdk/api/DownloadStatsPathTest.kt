@@ -48,31 +48,31 @@ class DownloadStatsPathTest : BaseTest() {
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(10),
                             10,
-                            mapOf(JvmImpl.hotspot to 10),
+                            mapOf(JvmImpl.hotspot to 10L),
                             8
                     ),
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(5),
                             20,
-                            mapOf(JvmImpl.hotspot to 16, JvmImpl.openj9 to 4),
+                            mapOf(JvmImpl.hotspot to 16L, JvmImpl.openj9 to 4L),
                             9
                     ),
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1),
                             40,
-                            mapOf(JvmImpl.hotspot to 30, JvmImpl.openj9 to 10),
+                            mapOf(JvmImpl.hotspot to 30L, JvmImpl.openj9 to 10L),
                             9
                     ),
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1).minusMinutes(1),
                             25,
-                            mapOf(JvmImpl.hotspot to 20, JvmImpl.openj9 to 5),
+                            mapOf(JvmImpl.hotspot to 20L, JvmImpl.openj9 to 5L),
                             8
                     ),
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1),
                             30,
-                            mapOf(JvmImpl.hotspot to 20, JvmImpl.openj9 to 10),
+                            mapOf(JvmImpl.hotspot to 20L, JvmImpl.openj9 to 10L),
                             8
                     )
             )

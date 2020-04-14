@@ -47,10 +47,10 @@ class DockerStatsInterfaceTest {
         runBlocking {
             val apiPersistanceMock = mockk<ApiPersistence>()
             coEvery { apiPersistanceMock.getGithubStats(any<ZonedDateTime>(), any<ZonedDateTime>()) } returns listOf(
-                    GithubDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(10), 100, mapOf(JvmImpl.hotspot to 40, JvmImpl.openj9 to 60), 8),
-                    GithubDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(20), 90, mapOf(JvmImpl.hotspot to 80, JvmImpl.openj9 to 10), 8),
-                    GithubDownloadStatsDbEntry(ZonedDateTime.now().minusDays(1), 80, mapOf(JvmImpl.hotspot to 50, JvmImpl.openj9 to 30), 8),
-                    GithubDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(15), 20, mapOf(JvmImpl.hotspot to 15, JvmImpl.openj9 to 5), 9)
+                    GithubDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(10), 100, mapOf(JvmImpl.hotspot to 40L, JvmImpl.openj9 to 60L), 8),
+                    GithubDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(20), 90, mapOf(JvmImpl.hotspot to 80L, JvmImpl.openj9 to 10L), 8),
+                    GithubDownloadStatsDbEntry(ZonedDateTime.now().minusDays(1), 80, mapOf(JvmImpl.hotspot to 50L, JvmImpl.openj9 to 30L), 8),
+                    GithubDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(15), 20, mapOf(JvmImpl.hotspot to 15L, JvmImpl.openj9 to 5L), 9)
             )
 
             coEvery { apiPersistanceMock.getDockerStats(any<ZonedDateTime>(), any<ZonedDateTime>()) } returns listOf(
