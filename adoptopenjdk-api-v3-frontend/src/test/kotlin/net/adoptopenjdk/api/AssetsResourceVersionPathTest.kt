@@ -80,6 +80,7 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
                 versionRange.equals(JAVA11) && element == OperatingSystem.solaris ||
                 versionRange.equals(JAVA11) && element == Architecture.sparcv9 ||
                 versionRange.equals(JAVA11) && element == ImageType.testimage ||
+                versionRange.equals(BELOW_11) && element == ImageType.testimage ||
                 element == ImageType.debugimage
     }
 }
