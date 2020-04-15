@@ -75,7 +75,7 @@ class BinaryPathTest : BaseTest() {
     }
 
     @Test
-    fun latestDoesRedirectToBinary() {
+    fun latestDoesRedirectToBinaryNoProject() {
         val path = "$path/latest/11/ga/linux/x64/jdk/openj9/normal/adoptopenjdk"
         performRequest(path)
                 .then()
