@@ -19,6 +19,7 @@ import org.apache.http.ProtocolVersion
 import org.apache.http.message.BasicHeader
 import org.apache.http.message.BasicStatusLine
 import org.junit.jupiter.api.Test
+import java.lang.RuntimeException
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.fail
@@ -88,42 +89,42 @@ class AdoptReleaseMapperTest : BaseTest() {
         runBlocking {
 
             val source = GHAssets(listOf(
-                    GHAsset(
-                            "OpenJDK8U-jre_x64_linux_hotspot-1.tar.gz",
-                            1L,
-                            "",
-                            1L,
-                            "2013-02-27T19:35:32Z"),
-                    GHAsset(
-                            "OpenJDK8U-jre_x64_linux_hotspot-1.tar.gz.json",
-                            1L,
-                            "1",
-                            1L,
-                            "2013-02-27T19:35:32Z"),
-                    GHAsset(
-                            "OpenJDK8U-jre_x64_linux_hotspot-2.tar.gz",
-                            1L,
-                            "",
-                            1L,
-                            "2013-02-27T19:35:32Z"),
-                    GHAsset(
-                            "OpenJDK8U-jre_x64_linux_hotspot-2.tar.gz.json",
-                            1L,
-                            "2",
-                            1L,
-                            "2013-02-27T19:35:32Z"),
-                    GHAsset(
-                            "OpenJDK8U-jre_x64_linux_hotspot-3.tar.gz",
-                            1L,
-                            "",
-                            2L,
-                            "2013-02-27T19:35:32Z"),
-                    GHAsset(
-                            "OpenJDK8U-jre_x64_linux_hotspot-3.tar.gz.json",
-                            1L,
-                            "2",
-                            1L,
-                            "2013-02-27T19:35:32Z")
+                GHAsset(
+                    "OpenJDK8U-jre_x64_linux_hotspot-1.tar.gz",
+                    1L,
+                    "",
+                    1L,
+                    "2013-02-27T19:35:32Z"),
+                GHAsset(
+                    "OpenJDK8U-jre_x64_linux_hotspot-1.tar.gz.json",
+                    1L,
+                    "1",
+                    1L,
+                    "2013-02-27T19:35:32Z"),
+                GHAsset(
+                    "OpenJDK8U-jre_x64_linux_hotspot-2.tar.gz",
+                    1L,
+                    "",
+                    1L,
+                    "2013-02-27T19:35:32Z"),
+                GHAsset(
+                    "OpenJDK8U-jre_x64_linux_hotspot-2.tar.gz.json",
+                    1L,
+                    "2",
+                    1L,
+                    "2013-02-27T19:35:32Z"),
+                GHAsset(
+                    "OpenJDK8U-jre_x64_linux_hotspot-3.tar.gz",
+                    1L,
+                    "",
+                    2L,
+                    "2013-02-27T19:35:32Z"),
+                GHAsset(
+                    "OpenJDK8U-jre_x64_linux_hotspot-3.tar.gz.json",
+                    1L,
+                    "2",
+                    1L,
+                    "2013-02-27T19:35:32Z")
 
             ), PageInfo(false, ""))
 
@@ -157,7 +158,7 @@ class AdoptReleaseMapperTest : BaseTest() {
                             "sha256": "dc755cf762c867d4c71b782b338d2dc1500b468ab01adbf88620b5ae55eef42a"
                         }
                     """.trimIndent()
-                            .replace("\n", "")
+                        .replace("\n", "")
                 }
 
                 override suspend fun getFullResponse(request: UrlRequest): HttpResponse? {
@@ -183,6 +184,32 @@ class AdoptReleaseMapperTest : BaseTest() {
 
             assertEquals(1, release[0].download_count)
             assertEquals(3, release[1].download_count)
+        }
+    }
+
+    @Test
+    fun updaterCopesWithExceptionFromGitHub() {
+        runBlocking {
+
+            UpdaterHtmlClientFactory.client = object : UpdaterHtmlClient {
+                override suspend fun get(url: String): String? {
+                    throw RuntimeException("Failed to get metadata")
+                }
+
+                fun getMetadata(url: String): String {
+                    throw RuntimeException("Failed to get metadata")
+                }
+
+                override suspend fun getFullResponse(request: UrlRequest): HttpResponse? {
+                    throw RuntimeException("Failed to get metadata")
+                }
+            }
+
+            val source = GHAssets(listOf(jdk), PageInfo(false, ""))
+
+            val ghRelease = GHRelease(GithubId("1"), "jdk9u-2018-09-27-08-50", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz")
+
+            val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
         }
     }
 }

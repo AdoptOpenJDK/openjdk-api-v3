@@ -33,9 +33,6 @@ class VersionResource {
         @PathParam("version")
         version: String?
     ): VersionData {
-        if (version == null) {
-            throw BadRequestException("Must provide a version parameter")
-        }
         try {
             return VersionParser.parse(version)
         } catch (e: FailedToParse) {
