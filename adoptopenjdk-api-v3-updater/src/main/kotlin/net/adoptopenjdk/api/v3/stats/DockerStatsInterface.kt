@@ -9,7 +9,6 @@ import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.JvmImpl
-
 import org.slf4j.LoggerFactory
 
 class DockerStatsInterface {

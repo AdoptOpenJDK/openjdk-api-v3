@@ -21,7 +21,7 @@ import net.adoptopenjdk.api.v3.models.VersionData
 import net.adoptopenjdk.api.v3.stats.GithubDownloadStatsCalculator
 import org.junit.jupiter.api.Test
 
-class StatsCalculatorTest {
+class StatsCalculatorTest : BaseTest() {
 
     @Test
     fun testGithubStatsCalculator() {
