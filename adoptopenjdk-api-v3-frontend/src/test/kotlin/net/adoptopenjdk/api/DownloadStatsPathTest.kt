@@ -82,27 +82,37 @@ class DownloadStatsPathTest : BaseTest() {
                     DockerDownloadStatsDbEntry(
                             TimeSource.now().minusDays(10),
                             20,
-                            "a-repo-name"
+                            "a-repo-name",
+                            8,
+                            JvmImpl.hotspot
                     ),
                     DockerDownloadStatsDbEntry(
                             TimeSource.now().minusDays(5),
                             30,
-                            "b-repo-name"
+                            "b-repo-name",
+                            11,
+                            JvmImpl.openj9
                     ),
                     DockerDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1),
                             40,
-                            "b-repo-name"
+                            "b-repo-name",
+                            14,
+                            JvmImpl.hotspot
                     ),
                     DockerDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1).minusMinutes(1),
                             50,
-                            "a-repo-name"
+                            "a-repo-name",
+                            10,
+                            JvmImpl.hotspot
                     ),
                     DockerDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1),
                             60,
-                            "a-repo-name"
+                            "a-repo-name",
+                            13,
+                            JvmImpl.openj9
                     )
             )
         }

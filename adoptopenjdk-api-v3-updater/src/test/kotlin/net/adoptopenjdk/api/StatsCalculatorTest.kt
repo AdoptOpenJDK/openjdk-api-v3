@@ -29,7 +29,6 @@ class StatsCalculatorTest {
         val result: List<GithubDownloadStatsDbEntry> = GithubDownloadStatsCalculator().getStats(adoptRepos)
 
         assert(result[0].feature_version == 8)
-        println(result[0].downloads)
         assert(result[0].downloads == 895L)
         assert(result[0].jvmImplDownloads[JvmImpl.hotspot] == 565L)
         assert(result[0].jvmImplDownloads[JvmImpl.openj9] == 330L)

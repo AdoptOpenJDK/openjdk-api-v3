@@ -52,10 +52,10 @@ class DockerStatsInterfaceTest {
             )
 
             coEvery { apiPersistanceMock.getDockerStats(any<ZonedDateTime>(), any<ZonedDateTime>()) } returns listOf(
-                    DockerDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(10), 100, "a-stats-repo"),
-                    DockerDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(20), 90, "a-stats-repo"),
-                    DockerDownloadStatsDbEntry(ZonedDateTime.now().minusDays(1), 80, "a-stats-repo"),
-                    DockerDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(15), 20, "a-different-stats-repo")
+                    DockerDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(10), 100, "a-stats-repo", 8, JvmImpl.hotspot),
+                    DockerDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(20), 90, "a-stats-repo", 14, JvmImpl.openj9),
+                    DockerDownloadStatsDbEntry(ZonedDateTime.now().minusDays(1), 80, "a-stats-repo", 12, JvmImpl.openj9),
+                    DockerDownloadStatsDbEntry(ZonedDateTime.now().minusMinutes(15), 20, "a-different-stats-repo", 11, JvmImpl.hotspot)
             )
 
             val downloadStatsInterface = DownloadStatsInterface(apiPersistanceMock)

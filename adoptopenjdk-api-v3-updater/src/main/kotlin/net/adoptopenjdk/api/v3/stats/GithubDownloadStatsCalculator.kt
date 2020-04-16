@@ -34,21 +34,20 @@ class GithubDownloadStatsCalculator {
                             }
 
                     // Tally up jvmImpl download stats
-                    val jvmImplMap: Map<JvmImpl, Long> = JvmImpl.values().map {
-                        jvmImpl -> 
-                            jvmImpl to
-                                featureRelease
-                                .releases
-                                .getReleases()
-                                .filter { it.vendor == Vendor.adoptopenjdk }
+                    val jvmImplMap: Map<JvmImpl, Long> = JvmImpl.values().map { jvmImpl ->
+                        jvmImpl to
+                            featureRelease
+                            .releases
+                            .getReleases()
+                            .filter { it.vendor == Vendor.adoptopenjdk }
+                            .sumBy {
+                                it.binaries
+                                .filter { it.jvm_impl == jvmImpl }
                                 .sumBy {
-                                    it.binaries
-                                    .filter { it.jvm_impl == jvmImpl }
-                                    .sumBy {
-                                        it.download_count.toInt()
-                                    }
+                                    it.download_count.toInt()
                                 }
-                                .toLong()
+                            }
+                            .toLong()
                     }.toMap()
 
                     GithubDownloadStatsDbEntry(date,
