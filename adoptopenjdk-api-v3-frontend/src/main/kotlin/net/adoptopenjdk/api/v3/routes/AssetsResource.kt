@@ -1,6 +1,7 @@
 package net.adoptopenjdk.api.v3.routes
 
 import net.adoptopenjdk.api.v3.OpenApiDocs
+import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.filters.BinaryFilter
@@ -26,6 +27,14 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
+import java.time.temporal.TemporalQuery
+import javax.ws.rs.BadRequestException
 import javax.ws.rs.GET
 import javax.ws.rs.NotFoundException
 import javax.ws.rs.Path
@@ -92,6 +101,16 @@ class AssetsResource {
         @QueryParam("project")
         project: Project?,
 
+        @Parameter(
+            name = "before",
+            description = "Return binaries whose updated_at is before the given date/time. When a date is given the match is inclusive of the given day.",
+            schema = Schema(type = SchemaType.STRING),
+            example = "2020-01-21, 2020-01-21T10:15:30, 20200121, 2020-12-21T10:15:30Z, 2020-12-21+01:00",
+            required = false
+        )
+        @QueryParam("before")
+        before: String?,
+
         @Parameter(name = "page_size", description = "Pagination page size",
             schema = Schema(defaultValue = "10", type = SchemaType.INTEGER), required = false
         )
@@ -111,8 +130,10 @@ class AssetsResource {
     ): List<Release> {
         val order = sortOrder ?: SortOrder.DESC
 
+        val beforeParsed = parseDate(before)
+
         val releaseFilter = ReleaseFilter(releaseType = release_type, featureVersion = version, vendor = vendor)
-        val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
+        val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project, beforeParsed)
         val repos = APIDataStore.getAdoptRepos().getFeatureRelease(version!!)
 
         if (repos == null) {
@@ -124,6 +145,43 @@ class AssetsResource {
             .getFilteredReleases(version, releaseFilter, binaryFilter, order)
 
         return getPage(pageSize, page, releases)
+    }
+
+    private fun parseDate(before: String?): ZonedDateTime? {
+        return if (before != null) {
+            try {
+                val date = LocalDate.parse(before, DateTimeFormatter.ISO_DATE)
+                return date.plusDays(1).atStartOfDay(TimeSource.ZONE)
+            } catch (e: DateTimeParseException) {
+                // NOP
+            }
+
+            try {
+                val date = DateTimeFormatter.ISO_DATE_TIME.parseBest(before,
+                    TemporalQuery { p0 -> ZonedDateTime.from(p0) },
+                    TemporalQuery { p0 -> OffsetDateTime.from(p0) },
+                    TemporalQuery { p0 -> LocalDateTime.from(p0) }
+                )
+
+                return when (date) {
+                    is LocalDateTime -> date.atZone(TimeSource.ZONE)
+                    is OffsetDateTime -> date.atZoneSameInstant(TimeSource.ZONE)
+                    is ZonedDateTime -> date
+                    else -> null
+                }
+            } catch (e: DateTimeParseException) {
+                // NOP
+            }
+
+            try {
+                val date = LocalDate.parse(before, DateTimeFormatter.BASIC_ISO_DATE)
+                return date.plusDays(1).atStartOfDay(TimeSource.ZONE)
+            } catch (e: DateTimeParseException) {
+                throw BadRequestException("Cannot parse date")
+            }
+        } else {
+            null
+        }
     }
 
     @GET
@@ -201,12 +259,10 @@ class AssetsResource {
     ): List<Release> {
         val order = sortOrder ?: SortOrder.DESC
 
-        // Require GA due to version range having no meaning for nightlies
-
         val range = VersionRangeFilter(version)
 
         val releaseFilter = ReleaseFilter(releaseType = release_type, vendor = vendor, versionRange = range, lts = lts)
-        val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
+        val binaryFilter = BinaryFilter(os = os, arch = arch, imageType = image_type, jvmImpl = jvm_impl, heapSize = heap_size, project = project)
 
         val releases = APIDataStore
             .getAdoptRepos()
