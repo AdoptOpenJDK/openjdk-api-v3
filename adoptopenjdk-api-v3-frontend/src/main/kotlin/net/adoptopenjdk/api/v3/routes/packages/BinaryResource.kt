@@ -1,17 +1,13 @@
-package net.adoptopenjdk.api.v3.routes
+package net.adoptopenjdk.api.v3.routes.packages
 
-import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.OpenApiDocs
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
-import net.adoptopenjdk.api.v3.dataSources.SortOrder
-import net.adoptopenjdk.api.v3.filters.BinaryFilter
-import net.adoptopenjdk.api.v3.filters.ReleaseFilter
-import net.adoptopenjdk.api.v3.models.APIError
 import net.adoptopenjdk.api.v3.models.Architecture
+import net.adoptopenjdk.api.v3.models.Binary
 import net.adoptopenjdk.api.v3.models.HeapSize
 import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.OperatingSystem
+import net.adoptopenjdk.api.v3.models.Package
 import net.adoptopenjdk.api.v3.models.Project
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
@@ -25,7 +21,6 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
-import java.net.URI
 import javax.ws.rs.GET
 import javax.ws.rs.HEAD
 import javax.ws.rs.HeaderParam
@@ -39,7 +34,7 @@ import javax.ws.rs.core.Response
 @Tag(name = "Binary")
 @Path("/v3/binary/")
 @Produces(MediaType.APPLICATION_JSON)
-class BinaryResource {
+class BinaryResource : PackageEndpoint() {
 
     @GET
     @HEAD
@@ -94,66 +89,27 @@ class BinaryResource {
         @HeaderParam("User-Agent")
         userAgent: String
     ): Response {
+        val releases = getReleases(release_name, vendor, os, arch, image_type, jvm_impl, heap_size, project)
         return when (request.method) {
-            "HEAD" -> versionHead(userAgent, release_name, vendor, os, arch, image_type, jvm_impl, heap_size, project)
-            else -> versionGet(release_name, vendor, os, arch, image_type, jvm_impl, heap_size, project)
-        }
-    }
-
-    private fun versionGet(
-        release_name: String?,
-        vendor: Vendor?,
-        os: OperatingSystem?,
-        arch: Architecture?,
-        image_type: ImageType?,
-        jvm_impl: JvmImpl?,
-        heap_size: HeapSize?,
-        project: Project?
-    ): Response {
-        return getBinary(release_name, vendor, os, arch, image_type, jvm_impl, heap_size, project) { `package` ->
-            Response.temporaryRedirect(URI.create(`package`.link)).build()
+            "HEAD" -> versionHead(userAgent, releases)
+            else -> formResponse(releases)
         }
     }
 
     private fun versionHead(
         userAgent: String,
-        release_name: String?,
-        vendor: Vendor?,
-        os: OperatingSystem?,
-        arch: Architecture?,
-        image_type: ImageType?,
-        jvm_impl: JvmImpl?,
-        heap_size: HeapSize?,
-        project: Project?
+        releases: List<Release>
     ): Response {
         return if (userAgent.contains("Gradle")) {
-            getBinary(release_name, vendor, os, arch, image_type, jvm_impl, heap_size, project) { `package` ->
+            return formResponse(releases) { `package` ->
                 Response.status(200)
                     .header("size", `package`.size)
                     .header("content-disposition", """attachment; filename="${`package`.name}"; filename*=UTF-8''${`package`.name}""")
                     .build()
             }
         } else {
-            versionGet(release_name, vendor, os, arch, image_type, jvm_impl, heap_size, project)
+            formResponse(releases)
         }
-    }
-
-    private fun getBinary(
-        release_name: String?,
-        vendor: Vendor?,
-        os: OperatingSystem?,
-        arch: Architecture?,
-        image_type: ImageType?,
-        jvm_impl: JvmImpl?,
-        heap_size: HeapSize?,
-        project: Project?,
-        createResponse: (net.adoptopenjdk.api.v3.models.Package) -> Response
-    ): Response {
-        val releaseFilter = ReleaseFilter(releaseName = release_name, vendor = vendor)
-        val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
-        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
-
-        return formResponse(releases, createResponse)
     }
 
     @GET
@@ -205,53 +161,21 @@ class BinaryResource {
         @QueryParam("project")
         project: Project?
     ): Response {
-        val releaseFilter = ReleaseFilter(releaseType = release_type, featureVersion = version, vendor = vendor)
-        val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
-        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
+        val releaseList = getRelease(release_type, version, vendor, os, arch, image_type, jvm_impl, heap_size, project)
 
-        val comparator = compareBy<Release> { it.version_data.major }
-            .thenBy { it.version_data.minor }
-            .thenBy { it.version_data.security }
-            .thenBy { it.version_data.pre }
-            .thenBy { it.version_data.build }
-            .thenBy { it.version_data.adopt_build_number }
-            .thenBy { it.version_data.optional }
+        val release = releaseList.lastOrNull()
 
-        val release = releases.sortedWith(comparator).lastOrNull()
-
-        return formResponse(if (release == null) emptyList() else listOf(release)) { `package` ->
-            Response.temporaryRedirect(URI.create(`package`.link)).build()
-        }
+        return formResponse(if (release == null) emptyList() else listOf(release))
     }
 
-    private fun formResponse(releases: List<Release>, createResponse: (net.adoptopenjdk.api.v3.models.Package) -> Response): Response {
-        if (releases.size == 0) {
-            return formErrorResponse(Response.Status.NOT_FOUND, "No releases match the request")
-        } else if (releases.size > 1) {
-            val versions = releases
-                .map { it.release_name }
-            return formErrorResponse(Response.Status.BAD_REQUEST, "Multiple releases match request: $versions")
-        } else {
-            val binaries = releases.get(0).binaries
-            val packages = binaries
-                .map { it.`package` }
-                .filterNotNull()
-
-            if (packages.size == 0) {
-                return formErrorResponse(Response.Status.NOT_FOUND, "No binaries match the request")
-            } else if (packages.size > 1) {
-                val names = packages.map { it.name }
-                return formErrorResponse(Response.Status.BAD_REQUEST, "Multiple binaries match request: $names")
-            } else {
-                return createResponse(packages.first())
-            }
-        }
+    protected fun formResponse(
+        releases: List<Release>,
+        createResponse: (Package) -> Response = redirectToAsset()
+    ): Response {
+        return formResponse(releases, extractPackage(), createResponse)
     }
 
-    private fun formErrorResponse(status: Response.Status, message: String): Response {
-        return Response
-            .status(status)
-            .entity(JsonMapper.mapper.writeValueAsString(APIError(message)))
-            .build()
+    private fun extractPackage(): (binary: Binary) -> Package {
+        return { binary -> binary.`package` }
     }
 }
