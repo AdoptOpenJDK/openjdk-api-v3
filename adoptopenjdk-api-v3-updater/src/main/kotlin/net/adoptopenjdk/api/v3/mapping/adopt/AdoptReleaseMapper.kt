@@ -42,7 +42,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
                 .entries
                 .groupBy {
                     val version = it.value.version
-                    "${version.major}.${version.minor}.${version.security}.${version.build}.${version.adopt_build_number}"
+                    "${version.major}.${version.minor}.${version.security}.${version.build}.${version.adopt_build_number}.${version.pre}"
                 }
 
             return groupedByVersion
