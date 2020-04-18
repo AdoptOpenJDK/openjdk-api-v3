@@ -6,37 +6,70 @@ import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.Vendor
+import org.slf4j.LoggerFactory
 import java.time.ZonedDateTime
 
 class GithubDownloadStatsCalculator {
     private val database: ApiPersistence = ApiPersistenceFactory.get()
+
+    companion object {
+        @JvmStatic
+        private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    }
 
     suspend fun saveStats(repos: AdoptRepos) {
 
         val stats = getStats(repos)
 
         database.addGithubDownloadStatsEntries(stats)
+
+        printSizeStats(repos)
+    }
+
+    fun printSizeStats(repos: AdoptRepos) {
+        val stats = repos
+            .repos
+            .values
+            .map { featureRelease ->
+                val total = featureRelease
+                    .releases
+                    .getReleases()
+                    .filter { it.vendor == Vendor.adoptopenjdk }
+                    .flatMap { release ->
+                        release
+                            .binaries
+                            .map { it.`package`.size + if (it.installer == null) 0 else it.installer!!.size }
+                            .asSequence()
+                    }
+                    .sum()
+
+                LOGGER.info("Stats ${featureRelease.featureVersion} $total")
+                total
+            }
+            .sum()
+        LOGGER.info("Stats total $stats")
     }
 
     public fun getStats(repos: AdoptRepos): List<GithubDownloadStatsDbEntry> {
         val date: ZonedDateTime = TimeSource.now()
         val stats = repos
-                .repos
-                .values
-                .map { featureRelease ->
-                    val total = featureRelease
-                            .releases
-                            .getReleases()
-                            .filter { it.vendor == Vendor.adoptopenjdk }
-                            .sumBy {
-                                it.download_count.toInt()
-                            }
+            .repos
+            .values
+            .map { featureRelease ->
+                val total = featureRelease
+                    .releases
+                    .getReleases()
+                    .filter { it.vendor == Vendor.adoptopenjdk }
+                    .sumBy {
+                        it.download_count.toInt()
+                    }
 
-                    GithubDownloadStatsDbEntry(date,
-                            total.toLong(),
-                            featureRelease.featureVersion)
-                }
-                .toList()
+                GithubDownloadStatsDbEntry(date,
+                    total.toLong(),
+                    featureRelease.featureVersion
+                )
+            }
+            .toList()
         return stats
     }
 }
