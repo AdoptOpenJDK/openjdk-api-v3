@@ -22,101 +22,139 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
     @TestFactory
     fun noFilter(): Stream<DynamicTest> {
         return (8..12)
-                .flatMap { version ->
-                    ReleaseType.values()
-                            .map { "/v3/assets/feature_releases/$version/$it" }
-                            .map {
-                                DynamicTest.dynamicTest(it) {
-                                    RestAssured.given()
-                                            .`when`()
-                                            .get(it)
-                                            .then()
-                                            .statusCode(200)
-                                }
-                            }
-                }
-                .stream()
+            .flatMap { version ->
+                ReleaseType.values()
+                    .map { "/v3/assets/feature_releases/$version/$it" }
+                    .map {
+                        DynamicTest.dynamicTest(it) {
+                            RestAssured.given()
+                                .`when`()
+                                .get(it)
+                                .then()
+                                .statusCode(200)
+                        }
+                    }
+            }
+            .stream()
     }
 
     @Test
     fun badReleaseType() {
         RestAssured.given()
-                .`when`()
-                .get("${getPath()}/8/foo")
-                .then()
-                .statusCode(404)
+            .`when`()
+            .get("${getPath()}/8/foo")
+            .then()
+            .statusCode(404)
     }
 
     @Test
     fun badVersion() {
         RestAssured.given()
-                .`when`()
-                .get("2/${getPath()}")
-                .then()
-                .statusCode(404)
+            .`when`()
+            .get("2/${getPath()}")
+            .then()
+            .statusCode(404)
     }
 
     @Test
     fun sortOrderASCIsHonoured() {
         getReleases(SortOrder.ASC)
-                .fold(null, { previous: Release?, next: Release ->
-                    if (previous != null) {
-                        if (Releases.VERSION_COMPARATOR.compare(previous, next) > 0) {
-                            fail("${previous.version_data} is before ${next.version_data}")
-                        }
+            .fold(null, { previous: Release?, next: Release ->
+                if (previous != null) {
+                    if (Releases.VERSION_COMPARATOR.compare(previous, next) > 0) {
+                        fail("${previous.version_data} is before ${next.version_data}")
                     }
-                    next
-                })
+                }
+                next
+            })
     }
 
     @Test
     fun sortOrderDESIsHonoured() {
         getReleases(SortOrder.DESC)
-                .fold(null, { previous: Release?, next: Release ->
-                    if (previous != null) {
-                        if (Releases.VERSION_COMPARATOR.compare(previous, next) < 0) {
-                            fail("${previous.version_data} is before ${next.version_data}")
-                        }
+            .fold(null, { previous: Release?, next: Release ->
+                if (previous != null) {
+                    if (Releases.VERSION_COMPARATOR.compare(previous, next) < 0) {
+                        fail("${previous.version_data} is before ${next.version_data}")
                     }
-                    next
-                })
+                }
+                next
+            })
     }
 
     override fun <T> runFilterTest(filterParamName: String, values: Array<T>): Stream<DynamicTest> {
         return ReleaseType.values()
-                .flatMap { releaseType ->
-                    // test the ltses and 1 non-lts
-                    listOf(8, 11, 12)
-                            .flatMap { version ->
-                                createTest(values, "${getPath()}/$version/$releaseType", filterParamName, { element ->
-                                    getExclusions(version, element)
-                                })
-                            }
-                }
-                .stream()
+            .flatMap { releaseType ->
+                // test the ltses and 1 non-lts
+                listOf(8, 11, 12)
+                    .flatMap { version ->
+                        createTest(values, "${getPath()}/$version/$releaseType", filterParamName, { element ->
+                            getExclusions(version, element)
+                        })
+                    }
+            }
+            .stream()
     }
 
     private fun <T> getExclusions(version: Int, element: T): Boolean {
         return version == 11 && element == OperatingSystem.solaris ||
-                version == 12 && element == OperatingSystem.solaris ||
-                version == 8 && element == Architecture.arm ||
-                version != 8 && element == Architecture.sparcv9 ||
-                version == 8 && element == ImageType.testimage ||
-                version == 11 && element == ImageType.testimage ||
-                version == 12 && element == ImageType.testimage ||
-                element == ImageType.debugimage
+            version == 12 && element == OperatingSystem.solaris ||
+            version == 8 && element == Architecture.arm ||
+            version != 8 && element == Architecture.sparcv9 ||
+            version == 8 && element == ImageType.testimage ||
+            version == 11 && element == ImageType.testimage ||
+            version == 12 && element == ImageType.testimage ||
+            element == ImageType.debugimage
     }
 
     companion object {
         fun getPath() = "/v3/assets/feature_releases"
         fun getReleases(sortOrder: SortOrder): List<Release> {
             val body = RestAssured.given()
-                    .`when`()
-                    .get("${getPath()}/8/ga?sort_order=${sortOrder.name}")
-                    .body
+                .`when`()
+                .get("${getPath()}/8/ga?sort_order=${sortOrder.name}")
+                .body
 
             val releasesStr = body.prettyPrint()
             return JsonMapper.mapper.readValue(releasesStr, JsonMapper.mapper.getTypeFactory().constructCollectionType(MutableList::class.java, Release::class.java))
         }
+    }
+
+    @Test
+    fun pagination() {
+        RestAssured.given()
+            .`when`()
+            .get("${getPath()}/8/ga?pageSize=1&page=1")
+            .then()
+            .statusCode(200)
+    }
+
+    @TestFactory
+    fun beforeFilter(): Stream<DynamicTest> {
+        return listOf(
+            Pair("2099-01-01", 200),
+            Pair("2099-01-01T10:15:30", 200),
+            Pair("20990101", 200),
+            Pair("2099-12-03T10:15:30Z", 200),
+            Pair("2099-12-03+01:00", 200),
+
+            Pair("2000-01-01", 404),
+            Pair("2000-01-01T10:15:30", 404),
+            Pair("20000101", 404),
+            Pair("2000-12-03T10:15:30Z", 404),
+            Pair("2000-12-03+01:00", 404),
+
+            Pair("foo", 400)
+        )
+            .map {
+                DynamicTest.dynamicTest(it.first) {
+                    RestAssured.given()
+                        .`when`()
+                        .get("${getPath()}/11/ea?before=${it.first}")
+                        .then()
+                        .statusCode(it.second)
+                }
+            }
+            .stream()
     }
 }
