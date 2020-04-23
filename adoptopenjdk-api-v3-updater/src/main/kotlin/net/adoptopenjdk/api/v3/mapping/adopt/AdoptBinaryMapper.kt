@@ -43,7 +43,6 @@ object AdoptBinaryMapper : BinaryMapper() {
     ): Deferred<Binary?> {
         return GlobalScope.async {
             try {
-                val downloadCount = asset.downloadCount
                 val updatedAt = getUpdatedTime(asset)
 
                 val binaryMetadata = metadata[asset]
@@ -52,6 +51,7 @@ object AdoptBinaryMapper : BinaryMapper() {
 
                 val installer = getInstaller(asset, fullAssetList)
                 val pack = getPackage(fullAssetList, asset, binaryMetadata)
+                val downloadCount = pack.download_count + (installer?.download_count ?: 0)
 
                 if (binaryMetadata != null) {
                     return@async binaryFromMetadata(
