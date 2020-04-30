@@ -42,8 +42,7 @@ object UpstreamBinaryMapper : BinaryMapper() {
                 val architecture = getEnumFromFileName(asset.name, Architecture.values())
                 val imageType = getEnumFromFileName(asset.name, ImageType.values(), ImageType.jdk)
                 val updatedAt = getUpdatedTime(asset)
-
-                val projectType = getProjectType(asset)
+                val projectType = getEnumFromFileName(asset.name, Project.values(), Project.jdk)
 
                 Binary(
                     pack,
@@ -65,16 +64,7 @@ object UpstreamBinaryMapper : BinaryMapper() {
         }
     }
 
-    private fun getProjectType(asset: GHAsset): Project {
-        return if (asset.name.contains("-jfr")) {
-            Project.jfr
-        } else {
-            Project.jdk
-        }
-    }
-
-    private fun isArchive(asset: GHAsset) =
-        BinaryMapper.ARCHIVE_WHITELIST.any { asset.name.endsWith(it) }
+    private fun isArchive(asset: GHAsset) = ARCHIVE_WHITELIST.any { asset.name.endsWith(it) }
 
     private fun getSignatureLink(assets: List<GHAsset>, binary_name: String): String? {
         return assets
