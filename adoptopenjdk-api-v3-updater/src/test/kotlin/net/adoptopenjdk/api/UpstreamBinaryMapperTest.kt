@@ -59,6 +59,7 @@ class UpstreamBinaryMapperTest {
                 "OpenJDK11U-x64_linux_11.0.3_7.tar.gz",
                 "OpenJDK11U-x64_windows_11.0.3_6_ea.zip",
                 "OpenJDK11U-testimage_x64_linux_11.0.5_10.tar.gz",
+                "OpenJDK11U-static-libs_x64_linux_11.0.5_10.tar.gz",
                 "OpenJDK11U-jre_aarch64_linux_11.0.5_10.tar.gz",
                 "OpenJDK11U-jdk_aarch64_linux_11.0.5_10-debuginfo.tar.gz",
                 "OpenJDK11U-sources_11.0.5_10.tar.gz"
@@ -67,11 +68,12 @@ class UpstreamBinaryMapperTest {
         runBlocking {
             val binaryList = UpstreamBinaryMapper.toBinaryList(assets)
 
-            assertEquals(4, binaryList.size)
+            assertEquals(5, binaryList.size)
             assertEquals(ImageType.jdk, binaryList[0].image_type)
             assertEquals(ImageType.jdk, binaryList[1].image_type)
             assertEquals(ImageType.testimage, binaryList[2].image_type)
-            assertEquals(ImageType.jre, binaryList[3].image_type)
+            assertEquals(ImageType.staticlibs, binaryList[3].image_type)
+            assertEquals(ImageType.jre, binaryList[4].image_type)
         }
     }
 
