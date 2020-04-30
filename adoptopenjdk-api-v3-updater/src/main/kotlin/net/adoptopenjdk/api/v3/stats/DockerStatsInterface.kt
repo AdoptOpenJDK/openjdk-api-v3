@@ -45,10 +45,14 @@ class DockerStatsInterface {
                         now,
                         it.getJsonNumber("pull_count").longValue(),
                         it.getString("name"),
-                        "openjdk[0-9]+".toRegex().find(it.getString("name"))!!.value.substring(7).toInt(),
-                        if (it.getString("name").contains("openj9")) JvmImpl.openj9 else JvmImpl.hotspot
+                        getOpenjdkVersionFromString(it.getString("name")),
+                        if (it.getString("name").contains("openj9")) JvmImpl.openj9 else JvmImpl.hotspot //Will need to be updated with a new JVMImpl
                     )
                 }
+    }
+
+    public fun getOpenjdkVersionFromString(name: String): Int? {
+        return "openjdk(?<featureNum>[0-9]+)".toRegex().matchEntire(name)?.groups?.get("featureNum")?.value?.toInt()
     }
 
     private fun pullOfficalStats(): DockerDownloadStatsDbEntry {

@@ -19,6 +19,7 @@ import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.models.VersionData
 import net.adoptopenjdk.api.v3.stats.GithubDownloadStatsCalculator
+import net.adoptopenjdk.api.v3.stats.DockerStatsInterface
 import org.junit.jupiter.api.Test
 
 class StatsCalculatorTest : BaseTest() {
@@ -30,8 +31,17 @@ class StatsCalculatorTest : BaseTest() {
 
         assert(result[0].feature_version == 8)
         assert(result[0].downloads == 895L)
-        assert(result[0].jvmImplDownloads[JvmImpl.hotspot] == 565L)
-        assert(result[0].jvmImplDownloads[JvmImpl.openj9] == 330L)
+        assert(result[0].jvmImplDownloads!![JvmImpl.hotspot] == 565L)
+        assert(result[0].jvmImplDownloads!![JvmImpl.openj9] == 330L)
+    }
+
+    @Test
+    fun testDockerVersionNumber() {
+        val dsi = DockerStatsInterface()
+        assert(dsi.getOpenjdkVersionFromString("openjdk11") == 11)
+        assert(dsi.getOpenjdkVersionFromString("openjdk7") == 7)
+        assert(dsi.getOpenjdkVersionFromString("openjdk") == null)
+        assert(dsi.getOpenjdkVersionFromString("blah") == null)
     }
 
     private fun generateFeatureRelease(): FeatureRelease {

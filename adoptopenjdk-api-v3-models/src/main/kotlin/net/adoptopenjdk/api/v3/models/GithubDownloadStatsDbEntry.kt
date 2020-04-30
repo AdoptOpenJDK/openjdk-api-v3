@@ -5,7 +5,7 @@ import java.time.ZonedDateTime
 class GithubDownloadStatsDbEntry(
     date: ZonedDateTime,
     val downloads: Long,
-    val jvmImplDownloads: Map<JvmImpl, Long>,
+    val jvmImplDownloads: Map<JvmImpl, Long>?,
     val feature_version: Int
 ) : DbStatsEntry<Int>(date) {
     override fun getMetric(): Long = downloads
