@@ -20,7 +20,7 @@ object UpstreamBinaryMapper : BinaryMapper() {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-    private val EXCLUDES = listOf("static-libs", "sources", "debuginfo")
+    private val EXCLUDES = listOf("sources", "debuginfo")
 
     suspend fun toBinaryList(assets: List<GHAsset>): List<Binary> {
         return assets
