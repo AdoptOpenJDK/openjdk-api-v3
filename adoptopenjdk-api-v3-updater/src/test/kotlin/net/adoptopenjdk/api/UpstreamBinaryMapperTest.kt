@@ -1,12 +1,13 @@
 package net.adoptopenjdk.api
 
-import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.mapping.upstream.UpstreamBinaryMapper
 import net.adoptopenjdk.api.v3.models.ImageType
+import net.adoptopenjdk.api.v3.models.Project
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 
 class UpstreamBinaryMapperTest {
 
@@ -22,18 +23,20 @@ class UpstreamBinaryMapperTest {
     private fun getAssetList(names: List<String>): List<GHAsset> {
         return names.flatMap { name ->
             listOf(
-                    GHAsset(
-                            name,
-                            1L,
-                            "",
-                            1L,
-                            "2013-02-27T19:35:32Z"),
-                    GHAsset(
-                            "$name.sign",
-                            1L,
-                            "a-signature-link to $name",
-                            1L,
-                            "2013-02-27T19:35:32Z")
+                GHAsset(
+                    name,
+                    1L,
+                    "",
+                    1L,
+                    "2013-02-27T19:35:32Z"
+                ),
+                GHAsset(
+                    "$name.sign",
+                    1L,
+                    "a-signature-link to $name",
+                    1L,
+                    "2013-02-27T19:35:32Z"
+                )
             )
         }
     }
@@ -41,9 +44,10 @@ class UpstreamBinaryMapperTest {
     @Test
     fun filtersOutDebugInfo() {
         val assets = getAssetList(listOf(
-                "OpenJDK8U-jdk_x64_linux_8u232b09.tar.gz",
-                "OpenJDK8U-jdk_x64_linux_8u232b09-debuginfo.tar.gz"
-        ))
+            "OpenJDK8U-jdk_x64_linux_8u232b09.tar.gz",
+            "OpenJDK8U-jdk_x64_linux_8u232b09-debuginfo.tar.gz"
+        )
+        )
         runBlocking {
             val binaryList = UpstreamBinaryMapper.toBinaryList(assets)
 
@@ -78,11 +82,33 @@ class UpstreamBinaryMapperTest {
     }
 
     @Test
+    fun correctlyClassifiesProjectType() {
+        val assets = getAssetList(listOf(
+            "OpenJDK8U-jdk-jfr_x64_linux_8u262b01_ea.tar.gz",
+            "OpenJDK8U-jdk_x64_linux_8u262b01_ea.tar.gz",
+            "OpenJDK8U-jre-jfr_x64_linux_8u262b01_ea.tar.gz",
+            "OpenJDK8U-jre_x64_linux_8u262b01_ea.tar.gz"
+        )
+        )
+
+        runBlocking {
+            val binaryList = UpstreamBinaryMapper.toBinaryList(assets)
+
+            assertEquals(4, binaryList.size)
+            assertEquals(Project.jfr, binaryList[0].project)
+            assertEquals(Project.jdk, binaryList[1].project)
+            assertEquals(Project.jfr, binaryList[2].project)
+            assertEquals(Project.jdk, binaryList[3].project)
+        }
+    }
+
+    @Test
     fun addsSignatureLink() {
 
         val assets = getAssetList(listOf(
-                "OpenJDK11U-x64_linux_11.0.3_7.tar.gz"
-        ))
+            "OpenJDK11U-x64_linux_11.0.3_7.tar.gz"
+        )
+        )
 
         runBlocking {
             val binaryList = UpstreamBinaryMapper.toBinaryList(assets)

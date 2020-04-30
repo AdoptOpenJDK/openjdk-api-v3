@@ -24,10 +24,10 @@ object UpstreamBinaryMapper : BinaryMapper() {
 
     suspend fun toBinaryList(assets: List<GHAsset>): List<Binary> {
         return assets
-                .filter(this::isArchive)
-                .filter { !assetIsExcluded(it) }
-                .map { asset -> assetToBinaryAsync(asset, assets) }
-                .mapNotNull { it.await() }
+            .filter(this::isArchive)
+            .filter { !assetIsExcluded(it) }
+            .map { asset -> assetToBinaryAsync(asset, assets) }
+            .mapNotNull { it.await() }
     }
 
     private fun assetIsExcluded(asset: GHAsset) = EXCLUDES.any { exclude -> asset.name.contains(exclude) }
@@ -42,19 +42,20 @@ object UpstreamBinaryMapper : BinaryMapper() {
                 val architecture = getEnumFromFileName(asset.name, Architecture.values())
                 val imageType = getEnumFromFileName(asset.name, ImageType.values(), ImageType.jdk)
                 val updatedAt = getUpdatedTime(asset)
+                val projectType = getEnumFromFileName(asset.name, Project.values(), Project.jdk)
 
                 Binary(
-                        pack,
-                        asset.downloadCount,
-                        updatedAt,
-                        null,
-                        null,
-                        HeapSize.normal,
-                        os,
-                        architecture,
-                        imageType,
-                        JvmImpl.hotspot,
-                        Project.jdk
+                    pack,
+                    asset.downloadCount,
+                    updatedAt,
+                    null,
+                    null,
+                    HeapSize.normal,
+                    os,
+                    architecture,
+                    imageType,
+                    JvmImpl.hotspot,
+                    projectType
                 )
             } catch (e: Exception) {
                 LOGGER.error("Failed to parse binary data", e)
@@ -63,13 +64,12 @@ object UpstreamBinaryMapper : BinaryMapper() {
         }
     }
 
-    private fun isArchive(asset: GHAsset) =
-            BinaryMapper.ARCHIVE_WHITELIST.any { asset.name.endsWith(it) }
+    private fun isArchive(asset: GHAsset) = ARCHIVE_WHITELIST.any { asset.name.endsWith(it) }
 
     private fun getSignatureLink(assets: List<GHAsset>, binary_name: String): String? {
         return assets
-                .firstOrNull { asset ->
-                    asset.name == "$binary_name.sign"
-                }?.downloadUrl
+            .firstOrNull { asset ->
+                asset.name == "$binary_name.sign"
+            }?.downloadUrl
     }
 }
