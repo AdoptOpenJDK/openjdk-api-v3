@@ -17,7 +17,7 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: ktlint
-      run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.35.0/ktlint && chmod a+x ktlint && ./ktlint
+      run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.36.0/ktlint && chmod a+x ktlint && ./ktlint
 
     - name: Build app
       run: ./mvnw --batch-mode clean install jacoco:report jacoco:report-aggregate
@@ -30,7 +30,7 @@ jobs:
       run: |
         cd adoptopenjdk-api-v3-frontend
         unzip target/adoptopenjdk-api-v3-frontend-*-runner.jar META-INF/quarkus-generated-openapi-doc.YAML
-        ../mvnw --batch-mode org.openapitools:openapi-generator-maven-plugin:4.2.2:generate \
+        ../mvnw --batch-mode org.openapitools:openapi-generator-maven-plugin:4.3.0:generate \
                 -Dopenapi.generator.maven.plugin.inputSpec=META-INF/quarkus-generated-openapi-doc.YAML
 
     - name: Zip Javascript client

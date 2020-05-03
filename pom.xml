@@ -340,6 +340,7 @@
                     <artifactId>maven-filtering</artifactId>
                     <version>3.1.1</version>
                 </plugin>
+                <!-- Moving to 3.0.0-M1 created a multi-module packaging issue -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-install-plugin</artifactId>
@@ -690,7 +691,6 @@
                 <reportSets>
                     <reportSet>
                         <reports>
-                            <!-- select non-aggregate reports -->
                             <report>report</report>
                             <report>report-aggregate</report>
                         </reports>
