@@ -5,3 +5,7 @@ adoptopenjdk-api.iml
 .idea
 *.iml
 *.log
+.classpath
+.project
+.settings
+.vscode
