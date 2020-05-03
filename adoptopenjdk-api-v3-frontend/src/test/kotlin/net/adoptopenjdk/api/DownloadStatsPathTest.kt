@@ -10,6 +10,7 @@ import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.DownloadStats
 import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.JvmImpl
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
 import org.junit.jupiter.api.BeforeAll
@@ -46,26 +47,31 @@ class DownloadStatsPathTest : BaseTest() {
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(10),
                             10,
+                            mapOf(JvmImpl.hotspot to 10L),
                             8
                     ),
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(5),
                             20,
+                            mapOf(JvmImpl.hotspot to 16L, JvmImpl.openj9 to 4L),
                             9
                     ),
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1),
                             40,
+                            mapOf(JvmImpl.hotspot to 30L, JvmImpl.openj9 to 10L),
                             9
                     ),
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1).minusMinutes(1),
                             25,
+                            mapOf(JvmImpl.hotspot to 20L, JvmImpl.openj9 to 5L),
                             8
                     ),
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1),
                             30,
+                            mapOf(JvmImpl.hotspot to 20L, JvmImpl.openj9 to 10L),
                             8
                     )
             )
@@ -76,27 +82,37 @@ class DownloadStatsPathTest : BaseTest() {
                     DockerDownloadStatsDbEntry(
                             TimeSource.now().minusDays(10),
                             20,
-                            "a-repo-name"
+                            "a-repo-name",
+                            8,
+                            JvmImpl.hotspot
                     ),
                     DockerDownloadStatsDbEntry(
                             TimeSource.now().minusDays(5),
                             30,
-                            "b-repo-name"
+                            "b-repo-name",
+                            11,
+                            JvmImpl.openj9
                     ),
                     DockerDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1),
                             40,
-                            "b-repo-name"
+                            "b-repo-name",
+                            14,
+                            JvmImpl.hotspot
                     ),
                     DockerDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1).minusMinutes(1),
                             50,
-                            "a-repo-name"
+                            "a-repo-name",
+                            10,
+                            JvmImpl.hotspot
                     ),
                     DockerDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1),
                             60,
-                            "a-repo-name"
+                            "a-repo-name",
+                            13,
+                            JvmImpl.openj9
                     )
             )
         }

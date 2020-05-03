@@ -8,6 +8,7 @@ import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.JvmImpl
 import org.slf4j.LoggerFactory
 
 class DockerStatsInterface {
@@ -40,15 +41,25 @@ class DockerStatsInterface {
 
         return pullAllStats()
                 .map {
-                    DockerDownloadStatsDbEntry(now, it.getJsonNumber("pull_count").longValue(), it.getString("name"))
+                    DockerDownloadStatsDbEntry(
+                        now,
+                        it.getJsonNumber("pull_count").longValue(),
+                        it.getString("name"),
+                        getOpenjdkVersionFromString(it.getString("name")),
+                        if (it.getString("name").contains("openj9")) JvmImpl.openj9 else JvmImpl.hotspot // Will need to be updated with a new JVMImpl
+                    )
                 }
+    }
+
+    public fun getOpenjdkVersionFromString(name: String): Int? {
+        return "openjdk(?<featureNum>[0-9]+)".toRegex().matchEntire(name)?.groups?.get("featureNum")?.value?.toInt()
     }
 
     private fun pullOfficalStats(): DockerDownloadStatsDbEntry {
         val result = getStatsForUrl(officialStatsUrl)
         val now = TimeSource.now()
 
-        return DockerDownloadStatsDbEntry(now, result.getJsonNumber("pull_count").longValue(), "official")
+        return DockerDownloadStatsDbEntry(now, result.getJsonNumber("pull_count").longValue(), "official", null, null)
     }
 
     private fun pullAllStats(): ArrayList<JsonObject> {
