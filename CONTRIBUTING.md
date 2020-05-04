@@ -19,7 +19,7 @@ eventually merge into `master` for a real Production deployment.
 
 ### Pre-Requisites
 
-Java 11 is a requirement to build to project.
+Java 11 is a requirement to build the project.
 
 ### Build Tool
 
