@@ -19,7 +19,7 @@ eventually merge into `master` for a real Production deployment.
 
 ### Pre-Requisites
 
-Java 11 is a requirement to build to project.
+Java 11 is a requirement to build the project.
 
 ### Build Tool
 
@@ -35,14 +35,14 @@ To perform a full build and test you run the following:
 
 `./mvnw clean install`
 
-If you wish to view all fo the Maven reporting about the project you run the following:
+If you wish to view all of the Maven reporting about the project you run the following:
 
 `./mvnw clean install site`
 
 ## Testing
 
-**WARN** This API is critical to the success of AdoptOpenJDK, so we have a strong preference that 
-for any new functionality, you must add tests. 
+**WARN** This API is critical to the success of AdoptOpenJDK therefore it is 
+essential that tests are provided for all new functionality. 
 
 ### Code Coverage
 
@@ -52,8 +52,8 @@ TBD
 
 ### Pull Requests
 
-There is a [Travis YAML](.github\workflows\build.yml) file which the Travis CI 
-system in GitHub uses to build and test a Pull Request.
+There is a [GitHub Action](.github\workflows\build.yml) file which the CI system 
+in GitHub uses to build and test a Pull Request.
 
 **NOTE:** Please update the dependencies in this file if you have changed the versions of:
  
@@ -84,34 +84,7 @@ calls via the GitHub API in order to retrieve AdoptOpenJDK binaries and metadata
 
 Since the GitHub API is rate limited we use MongoDB as a caching mechanism.
 
-### Code Architecture
-
-We split the API into 4 modules:
-
-1. [models](adoptopenjdk-api-v3-models) - The core domain modeling for the API.
-2. [persistence](adoptopenjdk-api-v3-persistence) - The layer that interacts with the Mongo DB cache.
-3. [updater](adoptopenjdk-api-v3-updater) - The layer that interacts with the GitHub repositories (where we store JDK / JRE binaries). 
-4. [frontend](adoptopenjdk-api-v3-frontend) - The layer that responds to requests.
-
-### Models
-
-Contains the domain modeling for the API, including download stats.
-
-Contains the important [VersionParser](adoptopenjdk-api-v3-models/src/main/kotlin/net/adoptopenjdk/api/v3/parser/VersionParser.kt) and 
-its corresponding [VersionParserTest](adoptopenjdk-api-v3-models/src/test/kotlin/net/adoptopenjdk/api/VersionParserTest.kt).
-
-### Persistence
-
-The layer that interacts with the Mongo DB cache.
-
-### Updater
-
-The layer that interacts with the AdoptOpenJDK JDK/JRE binary repositories on GitHub.
-
-### Frontend
-
-Contains the important [Platforms JSON](adoptopenjdk-api-v3-frontend/src/main/resources/JSON/platforms.json) and 
-[Variants JSON](adoptopenjdk-api-v3-frontend/src/main/resources/JSON/variants.json).
+See [./docs/STRUCTURE.md](Code Structure) doc for more details.
 
 ## Common Tasks
 
