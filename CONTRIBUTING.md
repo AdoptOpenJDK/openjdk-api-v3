@@ -2,7 +2,7 @@
 
 ## Overview
 
-The AdoptOpenJDK API V3 is a Kotlin application (fronted by Swagger and OpenAPI) which makes 
+The AdoptOpenJDK API V3 is a Kotlin application (frontend by Swagger and OpenAPI) which makes 
 calls via the GitHub API in order to retrieve AdoptOpenJDK binaries and metadata.
 
 Since the GitHub API is rate limited we use MongoDB as a caching mechanism.
@@ -20,6 +20,12 @@ eventually merge into `master` for a real Production deployment.
 ### Pre-Requisites
 
 Java 11 is a requirement to build the project.
+
+You also need mongod installed. If you are on mac, I used this guide https://zellwk.com/blog/install-mongodb/ which uses homebrew.
+
+### Set-up
+
+If you want to use the updater tool to add entries into mongo, you need to generate a github token, which can be done here: https://github.com/settings/tokens. It doesn't need any specific permissions. Once you have a token generated, create a file at ~/.adopt_api/token.properties and type token=your-token-here
 
 ### Build Tool
 
