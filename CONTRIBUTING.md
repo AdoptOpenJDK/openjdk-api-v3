@@ -21,11 +21,11 @@ eventually merge into `master` for a real Production deployment.
 
 Java 11 is a requirement to build the project.
 
-You also need mongod installed. If you are on mac, I used this guide https://zellwk.com/blog/install-mongodb/ which uses homebrew.
+### Optional Set-up
 
-### Set-up
+If you want to use the updater tool to add entries into the database, you need to generate a github token, which can be done here: https://github.com/settings/tokens. It doesn't need any specific permissions. Once you have a token generated, create a file at ~/.adopt_api/token.properties and type token=your-token-here
 
-If you want to use the updater tool to add entries into mongo, you need to generate a github token, which can be done here: https://github.com/settings/tokens. It doesn't need any specific permissions. Once you have a token generated, create a file at ~/.adopt_api/token.properties and type token=your-token-here
+The production server uses mongodb to store data, however you can also use Fongo. If you would like to install mongodb and are on mac, I used this guide https://zellwk.com/blog/install-mongodb/ which utilises homebrew.
 
 ### Build Tool
 
