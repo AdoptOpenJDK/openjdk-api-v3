@@ -58,4 +58,17 @@ class VersionPathTest {
                 .then()
                 .statusCode(400)
     }
+
+    @Test
+    fun supportsPageSize() {
+
+        val parsed = VersionParser.parse("jdk-11.0.5+10")
+
+        RestAssured.given()
+                .`when`()
+                .get("/v3/version/jdk-11.0.5+10?page_size=50")
+                .then()
+                .statusCode(200)
+                .body(VersionDataMatcher(parsed))
+    }
 }

@@ -1,6 +1,9 @@
 package net.adoptopenjdk.api.v3.routes
 
 import net.adoptopenjdk.api.v3.OpenApiDocs
+import net.adoptopenjdk.api.v3.Pagination.defaultPageSize
+import net.adoptopenjdk.api.v3.Pagination.getPage
+import net.adoptopenjdk.api.v3.Pagination.maxPageSize
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
@@ -40,7 +43,6 @@ import javax.ws.rs.NotFoundException
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
-import kotlin.math.min
 
 @Tag(name = "Assets")
 @Path("/v3/assets/")
@@ -112,7 +114,7 @@ class AssetsResource {
         before: String?,
 
         @Parameter(name = "page_size", description = "Pagination page size",
-            schema = Schema(defaultValue = "10", type = SchemaType.INTEGER), required = false
+            schema = Schema(defaultValue = defaultPageSize, maximum = maxPageSize, type = SchemaType.INTEGER), required = false
         )
         @QueryParam("page_size")
         pageSize: Int?,
@@ -144,7 +146,7 @@ class AssetsResource {
             .getAdoptRepos()
             .getFilteredReleases(version, releaseFilter, binaryFilter, order)
 
-        return getPage(pageSize, page, releases)
+        return getPage(pageSize, page, releases) ?: throw NotFoundException("Page not available")
     }
 
     private fun parseDate(before: String?): ZonedDateTime? {
@@ -241,7 +243,7 @@ class AssetsResource {
         release_type: ReleaseType?,
 
         @Parameter(name = "page_size", description = "Pagination page size",
-            schema = Schema(defaultValue = "20", type = SchemaType.INTEGER), required = false
+            schema = Schema(defaultValue = defaultPageSize, maximum = maxPageSize, type = SchemaType.INTEGER), required = false
         )
         @QueryParam("page_size")
         pageSize: Int?,
@@ -268,21 +270,7 @@ class AssetsResource {
             .getAdoptRepos()
             .getFilteredReleases(releaseFilter, binaryFilter, order)
 
-        return getPage(pageSize, page, releases)
-    }
-
-    private fun getPage(pageSize: Int?, page: Int?, releases: Sequence<Release>): List<Release> {
-        val pageSizeNum = min(20, (pageSize ?: 10))
-        val pageNum = page ?: 0
-
-        val chunked = releases.chunked(pageSizeNum)
-
-        try {
-            val res = chunked.elementAt(pageNum)
-            return res
-        } catch (e: IndexOutOfBoundsException) {
-            throw NotFoundException("Page not available")
-        }
+        return getPage(pageSize, page, releases) ?: throw NotFoundException("Page not available")
     }
 
     data class binaryPermutation(

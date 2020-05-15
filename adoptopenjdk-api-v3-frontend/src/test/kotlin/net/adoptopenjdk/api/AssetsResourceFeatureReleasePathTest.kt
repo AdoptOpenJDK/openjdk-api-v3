@@ -15,6 +15,7 @@ import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import java.util.stream.Stream
+import kotlin.test.assertTrue
 
 @QuarkusTest
 class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
@@ -117,17 +118,32 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                 .body
 
             val releasesStr = body.prettyPrint()
-            return JsonMapper.mapper.readValue(releasesStr, JsonMapper.mapper.getTypeFactory().constructCollectionType(MutableList::class.java, Release::class.java))
+            return parseReleases(releasesStr)
         }
+        fun parseReleases(json: String?): List<Release> =
+                JsonMapper.mapper.readValue(json, JsonMapper.mapper.getTypeFactory().constructCollectionType(MutableList::class.java, Release::class.java))
     }
 
     @Test
     fun pagination() {
         RestAssured.given()
             .`when`()
-            .get("${getPath()}/8/ga?pageSize=1&page=1")
+            .get("${getPath()}/8/ga?page_size=1&page=1")
             .then()
             .statusCode(200)
+    }
+
+    @Test
+    fun pageSizeIsWorking() {
+        val body = RestAssured.given()
+                .`when`()
+                .get("${getPath()}/11/ea?page_size=5")
+                .body
+
+        val releasesStr = body.prettyPrint()
+        val releases = parseReleases(releasesStr)
+
+        assertTrue { releases.size == 5 }
     }
 
     @TestFactory

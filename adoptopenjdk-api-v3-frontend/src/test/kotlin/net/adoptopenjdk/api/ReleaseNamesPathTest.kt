@@ -17,6 +17,16 @@ class ReleaseNamesPathTest : BaseTest() {
     }
 
     @Test
+    fun releaseNamesPageSize() {
+
+        RestAssured.given()
+                .`when`()
+                .get("/v3/info/release_names?page_size=50")
+                .then()
+                .statusCode(200)
+    }
+
+    @Test
     fun releaseNamesSortOrder() {
 
         RestAssured.given()
@@ -32,6 +42,16 @@ class ReleaseNamesPathTest : BaseTest() {
         RestAssured.given()
                 .`when`()
                 .get("/v3/info/release_versions")
+                .then()
+                .statusCode(200)
+    }
+
+    @Test
+    fun releaseVersionsPageSize() {
+
+        RestAssured.given()
+                .`when`()
+                .get("/v3/info/release_versions?page_size=50")
                 .then()
                 .statusCode(200)
     }

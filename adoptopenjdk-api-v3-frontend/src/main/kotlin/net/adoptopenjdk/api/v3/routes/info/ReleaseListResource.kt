@@ -1,6 +1,8 @@
 package net.adoptopenjdk.api.v3.routes.info
 
 import net.adoptopenjdk.api.v3.OpenApiDocs
+import net.adoptopenjdk.api.v3.Pagination
+import net.adoptopenjdk.api.v3.Pagination.getPage
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.filters.ReleaseFilter
@@ -17,6 +19,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
 import javax.ws.rs.GET
+import javax.ws.rs.NotFoundException
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
@@ -42,7 +45,7 @@ class ReleaseListResource {
         @QueryParam("vendor")
         vendor: Vendor?,
 
-        @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "10", type = SchemaType.INTEGER), required = false)
+        @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = Pagination.defaultPageSize, maximum = Pagination.maxPageSize, type = SchemaType.INTEGER), required = false)
         @QueryParam("page_size")
         pageSize: Int?,
 
@@ -61,9 +64,10 @@ class ReleaseListResource {
 
         val releases = filteredReleases
             .map { it.release_name }
-            .toList()
 
-        return ReleaseList(releases.toTypedArray())
+        val pagedReleases = getPage(pageSize, page, releases) ?: throw NotFoundException("Page not available")
+
+        return ReleaseList(pagedReleases.toTypedArray())
     }
 
     @Path("/release_versions")
@@ -82,7 +86,7 @@ class ReleaseListResource {
         @QueryParam("vendor")
         vendor: Vendor?,
 
-        @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = "10", type = SchemaType.INTEGER), required = false)
+        @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = Pagination.defaultPageSize, maximum = Pagination.maxPageSize, type = SchemaType.INTEGER), required = false)
         @QueryParam("page_size")
         pageSize: Int?,
 
@@ -102,9 +106,10 @@ class ReleaseListResource {
         val releases = filteredReleases
             .map { it.version_data }
             .distinct()
-            .toList()
 
-        return ReleaseVersionList(releases.toTypedArray())
+        val pagedReleases = getPage(pageSize, page, releases) ?: throw NotFoundException("Page not available")
+
+        return ReleaseVersionList(pagedReleases.toTypedArray())
     }
 
     private fun getReleases(release_type: ReleaseType?, vendor: Vendor?, version: String?, sortOrder: SortOrder): Sequence<Release> {
