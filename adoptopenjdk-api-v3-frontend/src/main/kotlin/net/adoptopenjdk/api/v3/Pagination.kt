@@ -5,7 +5,7 @@ import kotlin.math.min
 
 object Pagination {
     private const val defaultPageSizeNum = 10
-    private const val maxPageSizeNum = 500
+    private const val maxPageSizeNum = 100
     const val defaultPageSize = defaultPageSizeNum.toString()
     const val maxPageSize = maxPageSizeNum.toString()
 
