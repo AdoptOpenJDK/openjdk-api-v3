@@ -146,7 +146,7 @@ class AssetsResource {
             .getAdoptRepos()
             .getFilteredReleases(version, releaseFilter, binaryFilter, order)
 
-        return getPage(pageSize, page, releases) ?: throw NotFoundException("Page not available")
+        return getPage(pageSize, page, releases)
     }
 
     private fun parseDate(before: String?): ZonedDateTime? {
@@ -270,7 +270,7 @@ class AssetsResource {
             .getAdoptRepos()
             .getFilteredReleases(releaseFilter, binaryFilter, order)
 
-        return getPage(pageSize, page, releases) ?: throw NotFoundException("Page not available")
+        return getPage(pageSize, page, releases)
     }
 
     data class binaryPermutation(

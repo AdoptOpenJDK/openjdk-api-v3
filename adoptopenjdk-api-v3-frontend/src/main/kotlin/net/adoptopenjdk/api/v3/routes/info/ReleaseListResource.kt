@@ -65,7 +65,7 @@ class ReleaseListResource {
         val releases = filteredReleases
             .map { it.release_name }
 
-        val pagedReleases = getPage(pageSize, page, releases) ?: throw NotFoundException("Page not available")
+        val pagedReleases = getPage(pageSize, page, releases)
 
         return ReleaseList(pagedReleases.toTypedArray())
     }
@@ -107,7 +107,7 @@ class ReleaseListResource {
             .map { it.version_data }
             .distinct()
 
-        val pagedReleases = getPage(pageSize, page, releases) ?: throw NotFoundException("Page not available")
+        val pagedReleases = getPage(pageSize, page, releases)
 
         return ReleaseVersionList(pagedReleases.toTypedArray())
     }
