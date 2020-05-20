@@ -85,6 +85,8 @@ open class PackageEndpoint {
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
 
         val comparator = VERSION_COMPARATOR.thenBy { it.version_data.optional }
+            .thenBy { it.updated_at }
+            .thenBy { it.timestamp }
 
         return releases.sortedWith(comparator)
     }
