@@ -159,6 +159,8 @@ abstract class BaseTest {
         @AfterAll
         fun closeMongo() {
             mongodExecutable!!.stop()
+            ApiPersistenceFactory.set(null)
+            MongoClientFactory.set(null)
         }
     }
 

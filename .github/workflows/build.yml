@@ -10,20 +10,28 @@ jobs:
     steps:
     - uses: actions/setup-java@v1
       with:
-        java-version: '11.0.3'
+        java-version: '11.0.7'
         java-package: jdk
         architecture: x64
+
     - uses: actions/checkout@v1
+
     - name: ktlint
-      run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.35.0/ktlint && chmod a+x ktlint && ./ktlint
+      run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.36.0/ktlint && chmod a+x ktlint && ./ktlint
+
     - name: Build app
-      run: ./mvnw clean install jacoco:report jacoco:report-aggregate
+      run: ./mvnw --batch-mode clean install jacoco:report jacoco:report-aggregate
+
     - uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+
     - name: Extract openapi doc
-      run: cd adoptopenjdk-api-v3-frontend && unzip target/adoptopenjdk-api-v3-frontend-*-runner.jar META-INF/quarkus-generated-openapi-doc.YAML
-    - name:
-      run: cd adoptopenjdk-api-v3-frontend && ../mvnw org.openapitools:openapi-generator-maven-plugin:4.2.2:generate -Dopenapi.generator.maven.plugin.inputSpec=META-INF/quarkus-generated-openapi-doc.YAML
+      run: |
+        cd adoptopenjdk-api-v3-frontend
+        unzip target/adoptopenjdk-api-v3-frontend-*-runner.jar META-INF/quarkus-generated-openapi-doc.YAML
+        ../mvnw --batch-mode org.openapitools:openapi-generator-maven-plugin:4.3.0:generate \
+                -Dopenapi.generator.maven.plugin.inputSpec=META-INF/quarkus-generated-openapi-doc.YAML
+
     - name: Zip Javascript client
       run: zip javascript-client.zip adoptopenjdk-api-v3-frontend/target/generated-sources/openapi

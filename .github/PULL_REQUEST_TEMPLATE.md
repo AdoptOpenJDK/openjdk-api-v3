@@ -3,8 +3,9 @@ Thank you for your pull request. Please provide a description above and review
 the requirements below.
 -->
 
-##### Checklist
+# Checklist
 <!-- Remove items that do not apply. For completed items, change [ ] to [x]. -->
 
-- [ ] `mvn clean package` build and test completes
-- [ ] documentation is changed or added
+- [ ] You added tests to cover the change
+- [ ] `mvn clean install` build and test completes
+- [ ] You changed or added to the documentation
