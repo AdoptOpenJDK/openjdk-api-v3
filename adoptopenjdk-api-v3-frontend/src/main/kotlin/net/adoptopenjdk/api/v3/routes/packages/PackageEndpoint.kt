@@ -84,7 +84,10 @@ open class PackageEndpoint {
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
 
+        // We use updated_at and timestamp as well JIC we've made a mistake and respun the same version number twice, in which case newest wins.
         val comparator = VERSION_COMPARATOR.thenBy { it.version_data.optional }
+            .thenBy { it.updated_at }
+            .thenBy { it.timestamp }
 
         return releases.sortedWith(comparator)
     }
