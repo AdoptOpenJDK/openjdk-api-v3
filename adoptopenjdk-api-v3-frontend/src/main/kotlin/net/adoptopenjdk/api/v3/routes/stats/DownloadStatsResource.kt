@@ -5,6 +5,7 @@ import kotlinx.coroutines.launch
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
+import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.StatsSource
@@ -111,12 +112,15 @@ class DownloadStatsResource {
         @Parameter(name = "source", description = "Stats data source", schema = Schema(defaultValue = "all"), required = false)
         @QueryParam("source")
         source: StatsSource?,
-        @Parameter(name = "feature_version", description = "Feature version (i.e 8, 9, 10...), only valid on github source requests", required = false)
+        @Parameter(name = "feature_version", description = "Feature version (i.e 8, 9, 10...). Does not use offical docker repo stats", required = false)
         @QueryParam("feature_version")
         featureVersion: Int?,
         @Parameter(name = "docker_repo", description = "Docker repo to filter stats by", required = false)
         @QueryParam("docker_repo")
         dockerRepo: String?,
+        @Parameter(name = "jvm_impl", description = "JVM Implementation to filter stats by. Does not use offical docker repo stats", required = false)
+        @QueryParam("jvm_impl")
+        jvmImplStr: String?,
         @Parameter(name = "from", description = "Date from which to calculate stats (inclusive)", schema = Schema(example = "YYYY-MM-dd"), required = false)
         @QueryParam("from")
         from: String?,
@@ -125,18 +129,48 @@ class DownloadStatsResource {
         to: String?
     ): CompletionStage<Response> {
         return runAsync {
-            if (featureVersion != null && source != StatsSource.github) {
-                throw BadRequestException("feature_version can only be used with source=github")
-            }
-
             if (dockerRepo != null && source != StatsSource.dockerhub) {
                 throw BadRequestException("docker_repo can only be used with source=dockerhub")
             }
 
+            val jvmImpl = parseJvmImpl(jvmImplStr)
             val fromDate = parseDate(from)?.atStartOfDay()?.atZone(TimeSource.ZONE)
             val toDate = parseDate(to)?.plusDays(1)?.atStartOfDay()?.atZone(TimeSource.ZONE)
 
-            return@runAsync statsInterface.getTrackingStats(days, fromDate, toDate, source, featureVersion, dockerRepo)
+            return@runAsync statsInterface.getTrackingStats(days, fromDate, toDate, source, featureVersion, dockerRepo, jvmImpl)
+        }
+    }
+
+    @GET
+    @Path("/monthly")
+    @Operation(summary = "Get download stats for feature verson", description = "stats", hidden = true)
+    @Schema(hidden = true)
+    fun tracking(
+        @Parameter(name = "source", description = "Stats data source", schema = Schema(defaultValue = "all"), required = false)
+        @QueryParam("source")
+        source: StatsSource?,
+        @Parameter(name = "feature_version", description = "Feature version (i.e 8, 9, 10...). Does not use offical docker repo stats", required = false)
+        @QueryParam("feature_version")
+        featureVersion: Int?,
+        @Parameter(name = "docker_repo", description = "Docker repo to filter stats by", required = false)
+        @QueryParam("docker_repo")
+        dockerRepo: String?,
+        @Parameter(name = "jvm_impl", description = "JVM Implementation to filter stats by. Does not use offical docker repo stats", required = false)
+        @QueryParam("jvm_impl")
+        jvmImplStr: String?,
+        @Parameter(name = "to", description = "Month from which to calculate stats (inclusive)", schema = Schema(example = "YYYY-MM-dd"), required = false)
+        @QueryParam("to")
+        to: String?
+    ): CompletionStage<Response> {
+        return runAsync {
+            if (dockerRepo != null && source != StatsSource.dockerhub) {
+                throw BadRequestException("docker_repo can only be used with source=dockerhub")
+            }
+
+            val jvmImpl = parseJvmImpl(jvmImplStr)
+            val toDate = parseDate(to)?.withDayOfMonth(1)?.plusMonths(1)?.atStartOfDay()?.atZone(TimeSource.ZONE)
+
+            return@runAsync statsInterface.getMonthlyTrackingStats(toDate, source, featureVersion, dockerRepo, jvmImpl)
         }
     }
 
@@ -149,6 +183,15 @@ class DownloadStatsResource {
             } catch (e: Exception) {
                 throw BadRequestException("Cannot parse date $date")
             }
+        }
+    }
+
+    private fun parseJvmImpl(jvmImpl: String?): JvmImpl? {
+        return when (jvmImpl) {
+            "hotspot" -> JvmImpl.hotspot
+            "openj9" -> JvmImpl.openj9
+            null -> null
+            else -> throw BadRequestException("jvm_impl not recognized. Must be one of: hotspot, openj9")
         }
     }
 

@@ -45,22 +45,28 @@ class DownloadStatsPathTest : BaseTest() {
         private fun createGithubData(): List<GithubDownloadStatsDbEntry> {
             return listOf(
                     GithubDownloadStatsDbEntry(
+                            TimeSource.now().minusDays(15),
+                            0,
+                            null,
+                            11
+                    ),
+                    GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(10),
                             10,
                             mapOf(JvmImpl.hotspot to 10L),
-                            8
+                            11
                     ),
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(5),
                             20,
                             mapOf(JvmImpl.hotspot to 16L, JvmImpl.openj9 to 4L),
-                            9
+                            8
                     ),
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1),
                             40,
                             mapOf(JvmImpl.hotspot to 30L, JvmImpl.openj9 to 10L),
-                            9
+                            11
                     ),
                     GithubDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1).minusMinutes(1),
@@ -80,38 +86,45 @@ class DownloadStatsPathTest : BaseTest() {
         private fun createDockerStatsWithRepoName(): List<DockerDownloadStatsDbEntry> {
             return listOf(
                     DockerDownloadStatsDbEntry(
+                            TimeSource.now().minusDays(15),
+                            0,
+                            "b-repo-name",
+                            null,
+                            null
+                    ),
+                    DockerDownloadStatsDbEntry(
                             TimeSource.now().minusDays(10),
                             20,
                             "a-repo-name",
-                            8,
-                            JvmImpl.hotspot
+                            11,
+                            JvmImpl.openj9
                     ),
                     DockerDownloadStatsDbEntry(
                             TimeSource.now().minusDays(5),
                             30,
                             "b-repo-name",
-                            11,
-                            JvmImpl.openj9
+                            8,
+                            JvmImpl.hotspot
                     ),
                     DockerDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1),
                             40,
                             "b-repo-name",
-                            14,
+                            11,
                             JvmImpl.hotspot
                     ),
                     DockerDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1).minusMinutes(1),
                             50,
                             "a-repo-name",
-                            10,
-                            JvmImpl.hotspot
+                            8,
+                            JvmImpl.openj9
                     ),
                     DockerDownloadStatsDbEntry(
                             TimeSource.now().minusDays(1),
                             60,
                             "a-repo-name",
-                            13,
+                            8,
                             JvmImpl.openj9
                     )
             )
@@ -137,7 +150,7 @@ class DownloadStatsPathTest : BaseTest() {
                                     stats.total_downloads.docker_pulls == 100L &&
                                     stats.total_downloads.github_downloads == 70L &&
                                     stats.github_downloads[8] == 30L &&
-                                    stats.github_downloads[9] == 40L &&
+                                    stats.github_downloads[11] == 40L &&
                                     stats.docker_pulls["a-repo-name"] == 60L &&
                                     stats.docker_pulls["b-repo-name"] == 40L
                         }
@@ -224,9 +237,86 @@ class DownloadStatsPathTest : BaseTest() {
 
                         override fun matchesSafely(p0: String?): Boolean {
                             val stats = JsonMapper.mapper.readValue(p0, List::class.java)
-                            return stats.isNotEmpty() &&
-                                    (stats[1] as Map<String, *>).get("total") == 170 &&
-                                    (stats[1] as Map<String, *>).get("daily") == 30
+                            return stats.size == 3 &&
+                                    (stats[0] as Map<String, *>).get("total") == 30 &&
+                                    (stats[0] as Map<String, *>).get("daily") == 6 &&
+                                    (stats[1] as Map<String, *>).get("total") == 50 &&
+                                    (stats[1] as Map<String, *>).get("daily") == 4 &&
+                                    (stats[2] as Map<String, *>).get("total") == 170 &&
+                                    (stats[2] as Map<String, *>).get("daily") == 30
+                        }
+                    })
+        }
+    }
+
+    @Test
+    fun trackingFeatureVersionRetrunsSaneData() {
+        runBlocking {
+            RestAssured.given()
+                    .`when`()
+                    .get("/v3/stats/downloads/tracking?feature_version=11")
+                    .then()
+                    .body(object : TypeSafeMatcher<String>() {
+
+                        override fun describeTo(description: Description?) {
+                            description!!.appendText("json")
+                        }
+
+                        override fun matchesSafely(p0: String?): Boolean {
+                            val stats = JsonMapper.mapper.readValue(p0, List::class.java)
+                            return stats.size == 2 &&
+                                    (stats[0] as Map<String, *>).get("total") == 30 &&
+                                    (stats[0] as Map<String, *>).get("daily") == 6 &&
+                                    (stats[1] as Map<String, *>).get("total") == 80 &&
+                                    (stats[1] as Map<String, *>).get("daily") == 5
+                        }
+                    })
+        }
+    }
+
+    @Test
+    fun trackingJvmImplRetrunsSaneData() {
+        runBlocking {
+            RestAssured.given()
+                    .`when`()
+                    .get("/v3/stats/downloads/tracking?jvm_impl=hotspot")
+                    .then()
+                    .body(object : TypeSafeMatcher<String>() {
+
+                        override fun describeTo(description: Description?) {
+                            description!!.appendText("json")
+                        }
+
+                        override fun matchesSafely(p0: String?): Boolean {
+                            val stats = JsonMapper.mapper.readValue(p0, List::class.java)
+                            return stats.size == 2 &&
+                                    (stats[0] as Map<String, *>).get("total") == 46 &&
+                                    (stats[0] as Map<String, *>).get("daily") == 7 &&
+                                    (stats[1] as Map<String, *>).get("total") == 90 &&
+                                    (stats[1] as Map<String, *>).get("daily") == 11
+                        }
+                    })
+        }
+    }
+
+    @Test
+    fun trackingDockerRepoRetrunsSaneData() {
+        runBlocking {
+            RestAssured.given()
+                    .`when`()
+                    .get("/v3/stats/downloads/tracking?source=dockerhub&docker_repo=a-repo-name")
+                    .then()
+                    .body(object : TypeSafeMatcher<String>() {
+
+                        override fun describeTo(description: Description?) {
+                            description!!.appendText("json")
+                        }
+
+                        override fun matchesSafely(p0: String?): Boolean {
+                            val stats = JsonMapper.mapper.readValue(p0, List::class.java)
+                            return stats.size == 1 &&
+                                    (stats[0] as Map<String, *>).get("total") == 60 &&
+                                    (stats[0] as Map<String, *>).get("daily") == 4
                         }
                     })
         }
@@ -249,12 +339,14 @@ class DownloadStatsPathTest : BaseTest() {
     fun dateRangeFilterWithEndIsCorrect() {
         requestStats(
                 null,
-                TimeSource.date().format(DateTimeFormatter.ISO_DATE),
+                TimeSource.date().minusDays(2).format(DateTimeFormatter.ISO_DATE),
                 null,
                 { stats ->
                     stats.size == 2 &&
-                            (stats[0] as Map<String, *>).get("total") == 50 &&
-                            (stats[0] as Map<String, *>).get("daily") == 4
+                            (stats[0] as Map<String, *>).get("total") == 30 &&
+                            (stats[0] as Map<String, *>).get("daily") == 6 &&
+                            (stats[1] as Map<String, *>).get("total") == 50 &&
+                            (stats[1] as Map<String, *>).get("daily") == 4
                 })
     }
 
