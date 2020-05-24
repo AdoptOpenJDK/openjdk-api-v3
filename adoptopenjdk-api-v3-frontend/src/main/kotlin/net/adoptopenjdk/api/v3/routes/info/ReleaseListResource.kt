@@ -19,7 +19,6 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
 import javax.ws.rs.GET
-import javax.ws.rs.NotFoundException
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
