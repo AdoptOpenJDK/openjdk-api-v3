@@ -60,14 +60,15 @@ class UpstreamBinaryMapperTest {
     fun correctlyClassifiesImageType() {
 
         val assets = getAssetList(listOf(
-                "OpenJDK11U-x64_linux_11.0.3_7.tar.gz",
-                "OpenJDK11U-x64_windows_11.0.3_6_ea.zip",
-                "OpenJDK11U-testimage_x64_linux_11.0.5_10.tar.gz",
-                "OpenJDK11U-static-libs_x64_linux_11.0.5_10.tar.gz",
-                "OpenJDK11U-jre_aarch64_linux_11.0.5_10.tar.gz",
-                "OpenJDK11U-jdk_aarch64_linux_11.0.5_10-debuginfo.tar.gz",
-                "OpenJDK11U-sources_11.0.5_10.tar.gz"
-        ))
+            "OpenJDK11U-x64_linux_11.0.3_7.tar.gz",
+            "OpenJDK11U-x64_windows_11.0.3_6_ea.zip",
+            "OpenJDK11U-testimage_x64_linux_11.0.5_10.tar.gz",
+            "OpenJDK11U-static-libs_x64_linux_11.0.5_10.tar.gz",
+            "OpenJDK11U-jre_aarch64_linux_11.0.5_10.tar.gz",
+            "OpenJDK11U-jdk_aarch64_linux_11.0.5_10-debuginfo.tar.gz",
+            "OpenJDK11U-sources_11.0.5_10.tar.gz"
+        )
+        )
 
         runBlocking {
             val binaryList = UpstreamBinaryMapper.toBinaryList(assets)
