@@ -2,10 +2,19 @@ package net.adoptopenjdk.api
 
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
 @QuarkusTest
 class ReleaseNamesPathTest : BaseTest() {
+    companion object {
+        @JvmStatic
+        @BeforeAll
+        fun before() {
+            populateDb()
+        }
+    }
+
     @Test
     fun releaseNames() {
 
