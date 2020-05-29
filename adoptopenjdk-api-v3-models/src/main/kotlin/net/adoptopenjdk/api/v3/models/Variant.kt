@@ -49,7 +49,6 @@ class Variant {
 }
 
 class Variants {
-
     val variants: Array<Variant>
     val versions: Array<Int>
     val latestVersion: Int
@@ -69,10 +68,10 @@ class Variants {
         latestLtsVersion = ltsVersions.last()
 
         variants
-                .forEach {
-                    if (it.version == latestVersion) {
-                        it.latest = true
-                    }
+            .forEach {
+                if (it.version == latestVersion) {
+                    it.latest = true
                 }
+            }
     }
 }

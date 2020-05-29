@@ -1,21 +1,22 @@
 package net.adoptopenjdk.api.v3.stats
 
+import javax.inject.Inject
+import javax.inject.Singleton
 import net.adoptopenjdk.api.v3.DownloadStatsInterface
 import net.adoptopenjdk.api.v3.TimeSource
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.StatsSource
 import org.slf4j.LoggerFactory
 import java.time.ZonedDateTime
 
-class StatsInterface {
-
-    private val githubDownloadStatsCalculator: GithubDownloadStatsCalculator = GithubDownloadStatsCalculator()
-    private val dockerStatsInterface: DockerStatsInterface = DockerStatsInterface()
-    private var database: ApiPersistence = ApiPersistenceFactory.get()
-
-    private val downloadStatsInterface = DownloadStatsInterface()
+@Singleton
+class StatsInterface @Inject constructor(
+    private val database: ApiPersistence,
+    private val githubDownloadStatsCalculator: GithubDownloadStatsCalculator,
+    private val dockerStatsInterface: DockerStatsInterface,
+    private val downloadStatsInterface: DownloadStatsInterface
+) {
 
     companion object {
         @JvmStatic
@@ -33,14 +34,14 @@ class StatsInterface {
     private suspend fun removeBadDownloadStats() {
         val tracking = downloadStatsInterface.getTrackingStats(days = 10, source = StatsSource.all)
         tracking
-                .filter { it.daily <= 0 }
-                .forEach { entry ->
-                    val start = entry.date.toLocalDate().atStartOfDay().atZone(TimeSource.ZONE)
-                    val end = entry.date.toLocalDate().plusDays(1).atStartOfDay().atZone(TimeSource.ZONE)
+            .filter { it.daily <= 0 }
+            .forEach { entry ->
+                val start = entry.date.toLocalDate().atStartOfDay().atZone(TimeSource.ZONE)
+                val end = entry.date.toLocalDate().plusDays(1).atStartOfDay().atZone(TimeSource.ZONE)
 
-                    printStatDebugInfo(start, end)
-                    database.removeStatsBetween(start, end)
-                }
+                printStatDebugInfo(start, end)
+                database.removeStatsBetween(start, end)
+            }
     }
 
     private suspend fun printStatDebugInfo(start: ZonedDateTime, end: ZonedDateTime) {
@@ -52,15 +53,15 @@ class StatsInterface {
 
     private suspend fun printStats(start: ZonedDateTime, end: ZonedDateTime) {
         database
-                .getGithubStats(start, end)
-                .forEach { stat ->
-                    LOGGER.info("github stat: ${stat.feature_version} ${stat.downloads}")
-                }
+            .getGithubStats(start, end)
+            .forEach { stat ->
+                LOGGER.info("github stat: ${stat.feature_version} ${stat.downloads}")
+            }
 
         database
-                .getDockerStats(start, end)
-                .forEach { stat ->
-                    LOGGER.info("docker stat: ${stat.repo} ${stat.pulls}")
-                }
+            .getDockerStats(start, end)
+            .forEach { stat ->
+                LOGGER.info("docker stat: ${stat.repo} ${stat.pulls}")
+            }
     }
 }

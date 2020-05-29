@@ -5,23 +5,27 @@ import io.aexp.nodes.graphql.GraphQLResponseEntity
 import io.aexp.nodes.graphql.GraphQLTemplate
 import io.aexp.nodes.graphql.Variable
 import io.aexp.nodes.graphql.exceptions.GraphQLException
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.temporal.ChronoUnit
-import java.util.concurrent.TimeUnit
-import javax.json.JsonObject
-import kotlin.math.max
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.adoptopenjdk.api.v3.TimeSource
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.github.GithubAuth
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.HasRateLimit
+import net.adoptopenjdk.api.v3.dataSources.http.UrlRequest
+import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGithubHtmlClient
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.json.JsonObject
+import kotlin.math.max
 
-open class GraphQLGitHubInterface() {
+open class GraphQLGitHubInterface @Inject constructor(
+    val cachedGithubHtmlClient: CachedGithubHtmlClient
+) {
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
@@ -45,11 +49,12 @@ open class GraphQLGitHubInterface() {
 
     fun request(query: String): GraphQLRequestEntity.RequestBuilder {
         return GraphQLRequestEntity.Builder()
-                .url(BASE_URL)
-                .headers(mapOf(
-                        "Authorization" to "Bearer $TOKEN"
-                ))
-                .request(query.trimIndent().replace("\n", ""))
+            .url(BASE_URL)
+            .headers(mapOf(
+                "Authorization" to "Bearer $TOKEN"
+            )
+            )
+            .request(query.trimIndent().replace("\n", ""))
     }
 
     protected suspend fun <E, F : HasRateLimit> getAll(
@@ -116,7 +121,7 @@ open class GraphQLGitHubInterface() {
 
     private suspend fun getRemainingQuota(): Pair<Int, Long> {
         try {
-            val response = UpdaterHtmlClientFactory.client.get("https://api.github.com/rate_limit")
+            val response = cachedGithubHtmlClient.getNonCached(UrlRequest("https://api.github.com/rate_limit"), false)
             if (response != null) {
                 return processResponse(response)
             }
@@ -129,11 +134,11 @@ open class GraphQLGitHubInterface() {
     private fun processResponse(result: String): Pair<Int, Long> {
         val json = UpdaterJsonMapper.mapper.readValue(result, JsonObject::class.java)
         val remainingQuota = json.getJsonObject("resources")
-                ?.getJsonObject("graphql")
-                ?.getInt("remaining")
+            ?.getJsonObject("graphql")
+            ?.getInt("remaining")
         val resetTime = json.getJsonObject("resources")
-                ?.getJsonObject("graphql")
-                ?.getJsonNumber("reset")?.longValue()
+            ?.getJsonObject("graphql")
+            ?.getJsonNumber("reset")?.longValue()
 
         if (resetTime != null && remainingQuota != null) {
             val delayTime = if (remainingQuota > THRESHOLD_HARD_FLOOR) {

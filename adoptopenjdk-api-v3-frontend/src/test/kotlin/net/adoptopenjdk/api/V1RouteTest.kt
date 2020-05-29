@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 import javax.ws.rs.core.Response
 
 @QuarkusTest
-class V1RouteTest : BaseTest() {
+class V1RouteTest : FrontEndTest() {
     @Test
     fun v1ReturnsGone() {
         listOf("/v1",

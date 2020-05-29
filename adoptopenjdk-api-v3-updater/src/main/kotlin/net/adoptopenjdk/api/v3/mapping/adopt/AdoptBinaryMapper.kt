@@ -18,12 +18,17 @@ import net.adoptopenjdk.api.v3.models.Package
 import net.adoptopenjdk.api.v3.models.Project
 import org.slf4j.LoggerFactory
 import java.time.ZonedDateTime
+import javax.inject.Inject
 
-object AdoptBinaryMapper : BinaryMapper() {
+class AdoptBinaryMapper @Inject constructor(
+    val cachedGithubHtmlClient: CachedGithubHtmlClient
+) : BinaryMapper() {
 
-    @JvmStatic
-    private val LOGGER = LoggerFactory.getLogger(this::class.java)
-    private const val HOTSPOT_JFR = "hotspot-jfr"
+    companion object {
+        @JvmStatic
+        private val LOGGER = LoggerFactory.getLogger(this::class.java)
+        private const val HOTSPOT_JFR = "hotspot-jfr"
+    }
 
     private val EXCLUDED = listOf<String>()
 
@@ -188,7 +193,7 @@ object AdoptBinaryMapper : BinaryMapper() {
     }
 
     private fun parseProject(binaryMetadata: GHMetaData): Project {
-        return if (binaryMetadata.variant == HOTSPOT_JFR) {
+        return if (binaryMetadata.variant == Companion.HOTSPOT_JFR) {
             Project.jfr
         } else {
             Project.jdk
@@ -196,7 +201,7 @@ object AdoptBinaryMapper : BinaryMapper() {
     }
 
     private fun parseJvmImpl(binaryMetadata: GHMetaData): JvmImpl {
-        return if (binaryMetadata.variant == HOTSPOT_JFR) {
+        return if (binaryMetadata.variant == Companion.HOTSPOT_JFR) {
             JvmImpl.hotspot
         } else {
             JvmImpl.valueOf(binaryMetadata.variant)
@@ -208,7 +213,7 @@ object AdoptBinaryMapper : BinaryMapper() {
             if (!(binary_checksum_link == null || binary_checksum_link.isEmpty())) {
                 LOGGER.debug("Pulling checksum for $binary_checksum_link")
 
-                val checksum = CachedGithubHtmlClient.getUrl(binary_checksum_link)
+                val checksum = cachedGithubHtmlClient.getUrl(binary_checksum_link)
                 if (checksum != null) {
                     val tokens = checksum.split(" ")
                     if (tokens.size > 1) {

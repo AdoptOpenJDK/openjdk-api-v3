@@ -5,10 +5,9 @@ import io.restassured.RestAssured
 import org.junit.jupiter.api.Test
 
 @QuarkusTest
-class AvailableReleasesPathTest : BaseTest() {
+class AvailableReleasesPathTest : FrontEndTest() {
     @Test
     fun availableReleases() {
-
         RestAssured.given()
                 .`when`()
                 .get("/v3/info/available_releases")

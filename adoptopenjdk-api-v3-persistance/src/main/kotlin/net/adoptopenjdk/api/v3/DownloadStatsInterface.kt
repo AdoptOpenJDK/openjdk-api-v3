@@ -1,18 +1,19 @@
 package net.adoptopenjdk.api.v3
 
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DbStatsEntry
 import net.adoptopenjdk.api.v3.models.DownloadDiff
-import net.adoptopenjdk.api.v3.models.MonthlyDownloadDiff
 import net.adoptopenjdk.api.v3.models.DownloadStats
 import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.JvmImpl
+import net.adoptopenjdk.api.v3.models.MonthlyDownloadDiff
 import net.adoptopenjdk.api.v3.models.StatsSource
 import net.adoptopenjdk.api.v3.models.TotalStats
+import net.adoptopenjdk.api.v3.models.Variants
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.max
 import kotlin.math.min
 
@@ -21,8 +22,10 @@ class StatEntry(
     val count: Long
 )
 
-class DownloadStatsInterface(
-    private val dataStore: ApiPersistence = ApiPersistenceFactory.get()
+@Singleton
+class DownloadStatsInterface @Inject constructor(
+    private val dataStore: ApiPersistence,
+    private val variants: Variants
 ) {
 
     suspend fun getTrackingStats(
@@ -96,8 +99,8 @@ class DownloadStatsInterface(
         return stats.groupBy { it.dateTime.toLocalDate() }
             .map { grouped ->
                 StatEntry(
-                        grouped.value.map { it.dateTime }.max()!!,
-                        grouped.value.map { it.count }.sum()
+                    grouped.value.map { it.dateTime }.max()!!,
+                    grouped.value.map { it.count }.sum()
                 )
             }
             .sortedBy { it.dateTime }
@@ -114,7 +117,7 @@ class DownloadStatsInterface(
         return getStats(start, end, featureVersion, dockerRepo, jvmImpl, statsSource)
             .groupBy { it.dateTime.getMonth() }
             .map { grouped ->
-                    grouped.value.maxBy { it.dateTime }!!
+                grouped.value.maxBy { it.dateTime }!!
             }
     }
 
@@ -151,80 +154,80 @@ class DownloadStatsInterface(
 
     private suspend fun getGithubDownloadStatsByDate(start: ZonedDateTime, end: ZonedDateTime, featureVersion: Int?, jvmImpl: JvmImpl?): List<StatEntry> {
         return sumDailyStats(
-                dataStore
-                        .getGithubStats(start, end)
-                        .groupBy { it.date.toLocalDate() }
-                        .flatMap { grouped ->
-                            grouped.value
-                                    .groupBy { it.feature_version }
-                                    .map { featureVersionsForDay ->
-                                        featureVersionsForDay.value.maxBy { it.date }!!
-                                    }
+            dataStore
+                .getGithubStats(start, end)
+                .groupBy { it.date.toLocalDate() }
+                .flatMap { grouped ->
+                    grouped.value
+                        .groupBy { it.feature_version }
+                        .map { featureVersionsForDay ->
+                            featureVersionsForDay.value.maxBy { it.date }!!
                         }
-                        .filter {
-                            (featureVersion == null || it.feature_version == featureVersion) &&
-                            (jvmImpl == null || it.jvmImplDownloads != null)
-                        }
-                        .sortedBy { it.date },
-                jvmImpl
+                }
+                .filter {
+                    (featureVersion == null || it.feature_version == featureVersion) &&
+                        (jvmImpl == null || it.jvmImplDownloads != null)
+                }
+                .sortedBy { it.date },
+            jvmImpl
         )
     }
 
     private suspend fun getDockerDownloadStatsByDate(start: ZonedDateTime, end: ZonedDateTime, featureVersion: Int?, dockerRepo: String?, jvmImpl: JvmImpl?): List<StatEntry> {
         return sumDailyStats(
-                dataStore
-                        .getDockerStats(start, end)
-                        .groupBy { it.date.toLocalDate() }
-                        .flatMap { grouped ->
-                            grouped.value
-                                    .groupBy { it.repo }
-                                    .map { repoForDay ->
-                                        repoForDay.value.maxBy { it.date }!!
-                                    }
+            dataStore
+                .getDockerStats(start, end)
+                .groupBy { it.date.toLocalDate() }
+                .flatMap { grouped ->
+                    grouped.value
+                        .groupBy { it.repo }
+                        .map { repoForDay ->
+                            repoForDay.value.maxBy { it.date }!!
                         }
-                        .filter {
-                            (dockerRepo == null || it.repo == dockerRepo) &&
-                            (featureVersion == null || it.feature_version == featureVersion) &&
-                            (jvmImpl == null || it.jvm_impl == jvmImpl)
-                        }
-                        .sortedBy { it.date }
+                }
+                .filter {
+                    (dockerRepo == null || it.repo == dockerRepo) &&
+                        (featureVersion == null || it.feature_version == featureVersion) &&
+                        (jvmImpl == null || it.jvm_impl == jvmImpl)
+                }
+                .sortedBy { it.date }
         )
     }
 
     private fun <T> sumDailyStats(stats: List<DbStatsEntry<T>>): List<StatEntry> {
         return stats
-                .groupBy { it.date.toLocalDate() }
-                .map { grouped -> StatEntry(getLastDate(grouped.value), formTotalDownloads(grouped.value)) }
+            .groupBy { it.date.toLocalDate() }
+            .map { grouped -> StatEntry(getLastDate(grouped.value), formTotalDownloads(grouped.value)) }
     }
 
     private fun sumDailyStats(githubStats: List<GithubDownloadStatsDbEntry>, jvmImpl: JvmImpl?): List<StatEntry> {
         jvmImpl ?: return sumDailyStats(githubStats)
 
         return githubStats
-                .groupBy { it.date.toLocalDate() }
-                .map { grouped -> StatEntry(getLastDate(grouped.value), formTotalDownloads(grouped.value, jvmImpl)) }
+            .groupBy { it.date.toLocalDate() }
+            .map { grouped -> StatEntry(getLastDate(grouped.value), formTotalDownloads(grouped.value, jvmImpl)) }
     }
 
     private fun <T> getLastDate(grouped: List<DbStatsEntry<T>>): ZonedDateTime {
         return grouped
-                .maxBy { it.date }!!
-                .date
+            .maxBy { it.date }!!
+            .date
     }
 
     private fun <T> formTotalDownloads(stats: List<DbStatsEntry<T>>): Long {
         return stats
-                .groupBy { it.getId() }
-                .map { grouped -> grouped.value.maxBy { it.date } }
-                .map { it!!.getMetric() }
-                .sum()
+            .groupBy { it.getId() }
+            .map { grouped -> grouped.value.maxBy { it.date } }
+            .map { it!!.getMetric() }
+            .sum()
     }
 
     private fun formTotalDownloads(stats: List<GithubDownloadStatsDbEntry>, jvmImpl: JvmImpl): Long {
         return stats
-                .groupBy { it.getId() }
-                .map { grouped -> grouped.value.maxBy { it.date } }
-                .map { (it!!.jvmImplDownloads?.get(jvmImpl) ?: 0) }
-                .sum()
+            .groupBy { it.getId() }
+            .map { grouped -> grouped.value.maxBy { it.date } }
+            .map { (it!!.jvmImplDownloads?.get(jvmImpl) ?: 0) }
+            .sum()
     }
 
     suspend fun getTotalDownloadStats(): DownloadStats {
@@ -233,29 +236,29 @@ class DownloadStatsInterface(
         val githubStats = getGithubStats()
 
         val dockerPulls = dockerStats
-                .map { it.pulls }
-                .sum()
+            .map { it.pulls }
+            .sum()
 
         val githubDownloads = githubStats
-                .map { it.downloads }
-                .sum()
+            .map { it.downloads }
+            .sum()
 
         val dockerBreakdown = dockerStats
-                .map { Pair(it.repo, it.pulls) }
-                .toMap()
+            .map { Pair(it.repo, it.pulls) }
+            .toMap()
 
         val githubBreakdown = githubStats
-                .map { Pair(it.feature_version, it.downloads) }
-                .toMap()
+            .map { Pair(it.feature_version, it.downloads) }
+            .toMap()
 
         val totalStats = TotalStats(dockerPulls, githubDownloads, dockerPulls + githubDownloads)
         return DownloadStats(TimeSource.now(), totalStats, githubBreakdown, dockerBreakdown)
     }
 
     private suspend fun getGithubStats(): List<GithubDownloadStatsDbEntry> {
-        return APIDataStore.variants.versions
-                .mapNotNull { featureVersion ->
-                    dataStore.getLatestGithubStatsForFeatureVersion(featureVersion)
-                }
+        return variants.versions
+            .mapNotNull { featureVersion ->
+                dataStore.getLatestGithubStatsForFeatureVersion(featureVersion)
+            }
     }
 }

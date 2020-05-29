@@ -1,12 +1,14 @@
 package net.adoptopenjdk.api.v3.dataSources.github.graphql.clients
 
+import com.google.inject.Inject
 import io.aexp.nodes.graphql.GraphQLRequestEntity
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHReleaseResult
 import net.adoptopenjdk.api.v3.dataSources.models.GithubId
+import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGithubHtmlClient
 import org.slf4j.LoggerFactory
 
-open class GraphQLGitHubReleaseClient : GraphQLGitHubReleaseRequest() {
+open class GraphQLGitHubReleaseClient @Inject constructor(cachedGithubHtmlClient: CachedGithubHtmlClient) : GraphQLGitHubReleaseRequest(cachedGithubHtmlClient) {
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
@@ -60,6 +62,7 @@ open class GraphQLGitHubReleaseClient : GraphQLGitHubReleaseRequest() {
                                 remaining
                             }
                         }
-                    """)
+                    """
+        )
     }
 }

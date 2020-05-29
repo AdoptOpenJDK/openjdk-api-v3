@@ -8,21 +8,12 @@ import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.OperatingSystem
 import org.hamcrest.Matchers
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 import java.util.stream.Stream
 
 @QuarkusTest
-abstract class AssetsPathTest : BaseTest() {
-
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun before() {
-            populateDb()
-        }
-    }
+abstract class AssetsPathTest : FrontEndTest() {
 
     abstract fun <T> runFilterTest(filterParamName: String, values: Array<T>): Stream<DynamicTest>
 

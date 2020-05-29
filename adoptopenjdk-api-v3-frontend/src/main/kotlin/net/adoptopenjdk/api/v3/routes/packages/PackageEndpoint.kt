@@ -5,7 +5,7 @@ import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.models.Releases.Companion.VERSION_COMPARATOR
 import net.adoptopenjdk.api.v3.filters.BinaryFilter
-import net.adoptopenjdk.api.v3.filters.ReleaseFilter
+import net.adoptopenjdk.api.v3.filters.ReleaseFilterFactory
 import net.adoptopenjdk.api.v3.models.APIError
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Asset
@@ -19,9 +19,13 @@ import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import java.net.URI
+import javax.inject.Inject
 import javax.ws.rs.core.Response
 
-open class PackageEndpoint {
+open class PackageEndpoint @Inject constructor(
+    private val apiDataStore: APIDataStore,
+    private val releaseFilterFactory: ReleaseFilterFactory
+) {
 
     fun getReleases(
         release_name: String?,
@@ -33,9 +37,9 @@ open class PackageEndpoint {
         heap_size: HeapSize?,
         project: Project?
     ): List<Release> {
-        val releaseFilter = ReleaseFilter(releaseName = release_name, vendor = vendor)
+        val releaseFilter = releaseFilterFactory.create(releaseName = release_name, vendor = vendor)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
-        return APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
+        return apiDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
     }
 
     protected fun <T : Asset> formResponse(
@@ -80,9 +84,9 @@ open class PackageEndpoint {
     }
 
     fun getRelease(release_type: ReleaseType?, version: Int?, vendor: Vendor?, os: OperatingSystem?, arch: Architecture?, image_type: ImageType?, jvm_impl: JvmImpl?, heap_size: HeapSize?, project: Project?): List<Release> {
-        val releaseFilter = ReleaseFilter(releaseType = release_type, featureVersion = version, vendor = vendor)
+        val releaseFilter = releaseFilterFactory.create(releaseType = release_type, featureVersion = version, vendor = vendor)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
-        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
+        val releases = apiDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
 
         // We use updated_at and timestamp as well JIC we've made a mistake and respun the same version number twice, in which case newest wins.
         val comparator = VERSION_COMPARATOR.thenBy { it.version_data.optional }

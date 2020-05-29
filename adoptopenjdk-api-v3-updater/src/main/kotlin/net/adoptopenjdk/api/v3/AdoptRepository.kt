@@ -16,21 +16,7 @@ import net.adoptopenjdk.api.v3.mapping.adopt.AdoptReleaseMapper
 import net.adoptopenjdk.api.v3.mapping.upstream.UpstreamReleaseMapper
 import net.adoptopenjdk.api.v3.models.Release
 import org.slf4j.LoggerFactory
-
-object AdoptRepositoryFactory {
-    private var adoptRepository: AdoptRepository? = null
-
-    fun getAdoptRepository(): AdoptRepository {
-        if (adoptRepository == null) {
-            adoptRepository = AdoptRepositoryImpl
-        }
-        return adoptRepository!!
-    }
-
-    fun setAdoptRepository(repo: AdoptRepository) {
-        this.adoptRepository = repo
-    }
-}
+import javax.inject.Inject
 
 interface AdoptRepository {
     suspend fun getRelease(version: Int): FeatureRelease?
@@ -38,69 +24,75 @@ interface AdoptRepository {
     suspend fun getReleaseById(id: GithubId): List<Release>?
 }
 
-object AdoptRepositoryImpl : AdoptRepository {
-    @JvmStatic
-    private val LOGGER = LoggerFactory.getLogger(this::class.java)
+class AdoptRepositoryImpl @Inject constructor(
+    val upstreamReleaseMapper: UpstreamReleaseMapper,
+    val adoptReleaseMapper: AdoptReleaseMapper,
+    val client: GraphQLGitHubClient
+) : AdoptRepository {
 
-    val client = GraphQLGitHubClient()
+    companion object {
+        @JvmStatic
+        private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    }
 
     fun getMapperForRepo(url: String): ReleaseMapper {
         if (url.matches(".*/openjdk\\d+-upstream-binaries/.*".toRegex())) {
-            return UpstreamReleaseMapper
+            return upstreamReleaseMapper
         } else {
-            return AdoptReleaseMapper
+            return adoptReleaseMapper
         }
     }
 
     override suspend fun getReleaseById(githubId: GithubId): List<Release>? {
         val release = client.getReleaseById(githubId)
         return getMapperForRepo(release.url)
-                .toAdoptRelease(release)
+            .toAdoptRelease(release)
     }
 
     override suspend fun getRelease(version: Int): FeatureRelease {
         val repo = getDataForEachRepo(version, ::getRepository)
-                .await()
-                .filterNotNull()
-                .map { AdoptRepo(it) }
+            .await()
+            .filterNotNull()
+            .map { AdoptRepo(it) }
         return FeatureRelease(version, repo)
     }
 
     override suspend fun getSummary(version: Int): GHRepositorySummary {
         val releaseSummaries = getDataForEachRepo(version, { repoName: String -> client.getRepositorySummary(repoName) })
-                .await()
-                .filterNotNull()
-                .flatMap { it.releases.releases }
-                .toList()
+            .await()
+            .filterNotNull()
+            .flatMap { it.releases.releases }
+            .toList()
         return GHRepositorySummary(GHReleasesSummary(releaseSummaries, PageInfo(false, "")))
     }
 
     private suspend fun getRepository(repoName: String): List<Release> {
         return client
-                .getRepository(repoName)
-                .getReleases()
-                .flatMap<GHRelease, Release> {
-                    try {
-                        val releases = getMapperForRepo(it.url).toAdoptRelease(it)
-                        if (releases != null) {
-                            return@flatMap releases
-                        }
-                    } catch (e: Exception) {
+            .getRepository(repoName)
+            .getReleases()
+            .flatMap<GHRelease, Release> {
+                try {
+                    val releases = getMapperForRepo(it.url).toAdoptRelease(it)
+                    if (releases != null) {
+                        return@flatMap releases
                     }
-                    return@flatMap emptyList<Release>()
+                } catch (e: Exception) {
                 }
+                return@flatMap emptyList<Release>()
+            }
     }
 
     private suspend fun <E> getDataForEachRepo(version: Int, getFun: suspend (String) -> E): Deferred<List<E?>> {
         LOGGER.info("getting $version")
         return GlobalScope.async {
             return@async listOf(
-                    getRepoDataAsync("openjdk$version-openj9-releases", getFun),
-                    getRepoDataAsync("openjdk$version-openj9-nightly", getFun),
-                    getRepoDataAsync("openjdk$version-nightly", getFun),
-                    getRepoDataAsync("openjdk$version-binaries", getFun),
-                    getRepoDataAsync("openjdk$version-upstream-binaries", getFun))
-                    .map { repo -> repo.await() }
+                getRepoDataAsync("openjdk$version-openj9-releases", getFun),
+                getRepoDataAsync("openjdk$version-openj9-nightly", getFun),
+                getRepoDataAsync("openjdk$version-nightly", getFun),
+                getRepoDataAsync("openjdk$version-binaries", getFun),
+                getRepoDataAsync("openjdk$version-upstream-binaries", getFun)
+            )
+                .map { repo -> repo.await() }
         }
     }
 

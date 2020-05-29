@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertTrue
 
 @QuarkusTest
-class JsonSerializationTest : BaseTest() {
+class JsonSerializationTest : FrontEndTest() {
 
     class PrettyPrintMatcher : TypeSafeMatcher<String>() {
 

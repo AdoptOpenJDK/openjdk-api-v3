@@ -1,17 +1,22 @@
 package net.adoptopenjdk.api.v3.stats
 
-import javax.json.JsonObject
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.TimeSource
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
+import net.adoptopenjdk.api.v3.dataSources.http.HttpClient
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.JvmImpl
 import org.slf4j.LoggerFactory
+import javax.inject.Inject
+import javax.inject.Singleton
+import javax.json.JsonObject
 
-class DockerStatsInterface {
+@Singleton
+class DockerStatsInterface @Inject constructor(
+    private val database: ApiPersistence,
+    private val httpClient: HttpClient
+) {
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
@@ -19,8 +24,6 @@ class DockerStatsInterface {
 
     private val downloadStatsUrl = "https://hub.docker.com/v2/repositories/adoptopenjdk/"
     private val officialStatsUrl = "https://hub.docker.com/v2/repositories/library/adoptopenjdk/"
-
-    private var database: ApiPersistence = ApiPersistenceFactory.get()
 
     suspend fun updateDb() {
         try {
@@ -40,15 +43,15 @@ class DockerStatsInterface {
         val now = TimeSource.now()
 
         return pullAllStats()
-                .map {
-                    DockerDownloadStatsDbEntry(
-                        now,
-                        it.getJsonNumber("pull_count").longValue(),
-                        it.getString("name"),
-                        getOpenjdkVersionFromString(it.getString("name")),
-                        if (it.getString("name").contains("openj9")) JvmImpl.openj9 else JvmImpl.hotspot // Will need to be updated with a new JVMImpl
-                    )
-                }
+            .map {
+                DockerDownloadStatsDbEntry(
+                    now,
+                    it.getJsonNumber("pull_count").longValue(),
+                    it.getString("name"),
+                    getOpenjdkVersionFromString(it.getString("name")),
+                    if (it.getString("name").contains("openj9")) JvmImpl.openj9 else JvmImpl.hotspot // Will need to be updated with a new JVMImpl
+                )
+            }
     }
 
     public fun getOpenjdkVersionFromString(name: String): Int? {
@@ -76,7 +79,8 @@ class DockerStatsInterface {
 
     private fun getStatsForUrl(url: String): JsonObject {
         return runBlocking {
-            val stats = UpdaterHtmlClientFactory.client.get(url)
+
+            val stats = httpClient.get(url)
             if (stats == null) {
                 throw Exception("Stats not returned")
             }

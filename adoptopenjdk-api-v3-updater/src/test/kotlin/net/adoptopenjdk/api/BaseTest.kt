@@ -9,24 +9,17 @@ import de.flapdoodle.embed.process.runtime.Network
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
-import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.AdoptRepository
-import net.adoptopenjdk.api.v3.AdoptRepositoryFactory
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
-import net.adoptopenjdk.api.v3.dataSources.UrlRequest
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleasesSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
+import net.adoptopenjdk.api.v3.dataSources.http.HttpClient
+import net.adoptopenjdk.api.v3.dataSources.http.UrlRequest
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.GithubId
-import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoClientFactory
 import net.adoptopenjdk.api.v3.models.Release
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
@@ -43,13 +36,50 @@ import kotlin.random.Random
 
 @ExtendWith(MockKExtension::class)
 abstract class BaseTest {
-
     companion object {
         @JvmStatic
-        private val LOGGER = LoggerFactory.getLogger(this::class.java)
+        val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-        fun mockkHttpClient(): UpdaterHtmlClient {
-            return object : UpdaterHtmlClient {
+        private var mongodExecutable: MongodExecutable? = null
+
+        val adoptRepos = UpdaterJsonMapper.mapper.readValue(GZIPInputStream(BaseTest::class.java.classLoader.getResourceAsStream("example-data.json.gz")), AdoptRepos::class.java)
+
+        @JvmStatic
+        @BeforeAll
+        fun startDb() {
+            System.setProperty("GITHUB_TOKEN", "stub-token")
+            startFongo()
+            LOGGER.info("Done startup")
+        }
+
+        @JvmStatic
+        fun startFongo() {
+            val starter = MongodStarter.getDefaultInstance()
+
+            val bindIp = "localhost"
+            val port = Random.nextInt(10000, 16000)
+            val mongodConfig = MongodConfigBuilder()
+                .version(Version.V4_0_2)
+                .net(Net(bindIp, port, Network.localhostIsIPv6()))
+                .build()
+
+            LOGGER.info("Mongo \"mongodb://localhost:${port}\"")
+            System.setProperty("MONGO_DB", "mongodb://localhost:$port")
+
+            mongodExecutable = starter.prepare(mongodConfig)
+            mongodExecutable!!.start()
+
+            LOGGER.info("FMongo started")
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun closeMongo() {
+            mongodExecutable!!.stop()
+        }
+
+        fun mockkHttpClient(): HttpClient {
+            return object : HttpClient {
                 override suspend fun get(url: String): String? {
                     if (url.endsWith("sha256.txt")) {
                         return "CAFE123 IAmAChecksum"
@@ -71,56 +101,8 @@ abstract class BaseTest {
             }
         }
 
-        private var mongodExecutable: MongodExecutable? = null
-
-        @JvmStatic
-        @BeforeAll
-        fun startDb() {
-            System.setProperty("GITHUB_TOKEN", "stub-token")
-            UpdaterHtmlClientFactory.client = mockkHttpClient()
-            startFongo()
-            mockRepo()
-            LOGGER.info("Done startup")
-        }
-
-        @JvmStatic
-        fun mockRepo() {
-            val adoptRepos = UpdaterJsonMapper.mapper.readValue(GZIPInputStream(BaseTest::class.java.classLoader.getResourceAsStream("example-data.json.gz")), AdoptRepos::class.java)
-
-            AdoptRepositoryFactory.setAdoptRepository(MockRepository(adoptRepos!!))
-        }
-
-        @JvmStatic
-        fun startFongo() {
-            val starter = MongodStarter.getDefaultInstance()
-
-            val bindIp = "localhost"
-            val port = Random.nextInt(10000, 16000)
-            val mongodConfig = MongodConfigBuilder()
-                    .version(Version.V4_0_2)
-                    .net(Net(bindIp, port, Network.localhostIsIPv6()))
-                    .build()
-
-            LOGGER.info("Mongo \"mongodb://localhost:${port}\"")
-            System.setProperty("MONGO_DB", "mongodb://localhost:$port")
-
-            mongodExecutable = starter.prepare(mongodConfig)
-            mongodExecutable!!.start()
-
-            ApiPersistenceFactory.set(null)
-            MongoClientFactory.set(null)
-            LOGGER.info("FMongo started")
-        }
-
-        @JvmStatic
-        fun populateDb() {
-            runBlocking {
-                val repo = AdoptReposBuilder.build(APIDataStore.variants.versions)
-                // Reset connection
-                ApiPersistenceFactory.set(null)
-                ApiPersistenceFactory.get().updateAllRepos(repo)
-                APIDataStore.loadDataFromDb()
-            }
+        fun mockRepo(): AdoptRepository {
+            return MockRepository(adoptRepos!!)
         }
 
         fun MockRepository(adoptRepos: AdoptRepos): AdoptRepository {
@@ -142,29 +124,18 @@ abstract class BaseTest {
                 protected fun repoToSummary(featureRelease: FeatureRelease): GHRepositorySummary {
 
                     val gHReleaseSummarys = featureRelease.releases.getReleases()
-                            .map {
-                                GHReleaseSummary(
-                                        GithubId(it.id),
-                                        DateTimeFormatter.ISO_INSTANT.format(it.timestamp),
-                                        DateTimeFormatter.ISO_INSTANT.format(it.updated_at))
-                            }
-                            .toList()
+                        .map {
+                            GHReleaseSummary(
+                                GithubId(it.id),
+                                DateTimeFormatter.ISO_INSTANT.format(it.timestamp),
+                                DateTimeFormatter.ISO_INSTANT.format(it.updated_at)
+                            )
+                        }
+                        .toList()
 
                     return GHRepositorySummary(GHReleasesSummary(gHReleaseSummarys, PageInfo(false, "")))
                 }
             }
         }
-
-        @JvmStatic
-        @AfterAll
-        fun closeMongo() {
-            mongodExecutable!!.stop()
-            ApiPersistenceFactory.set(null)
-            MongoClientFactory.set(null)
-        }
-    }
-
-    protected suspend fun getInitialRepo(): AdoptRepos {
-        return AdoptReposBuilder.incrementalUpdate(AdoptReposBuilder.build(APIDataStore.variants.versions))
     }
 }

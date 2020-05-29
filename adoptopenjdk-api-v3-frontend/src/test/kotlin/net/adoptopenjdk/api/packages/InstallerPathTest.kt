@@ -1,6 +1,11 @@
 package net.adoptopenjdk.api.packages
 
+import io.mockk.coEvery
+import io.mockk.mockk
+import io.quarkus.test.junit.QuarkusMock
 import io.quarkus.test.junit.QuarkusTest
+import net.adoptopenjdk.api.v3.dataSources.http.HttpClient
+import net.adoptopenjdk.api.v3.dataSources.persitence.ReleaseInfoFactory
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.HeapSize
 import net.adoptopenjdk.api.v3.models.ImageType
@@ -10,6 +15,7 @@ import net.adoptopenjdk.api.v3.models.Project
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import org.hamcrest.Matchers
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 @QuarkusTest
@@ -17,6 +23,13 @@ class InstallerPathTest : PackageEndpointTest() {
 
     override fun getPath(): String {
         return "/v3/installer"
+    }
+
+    @BeforeEach
+    fun mockHttpClient() {
+        val client = mockk<HttpClient>()
+        coEvery { client.get(ReleaseInfoFactory.VERSION_FILE_URL) } answers { call -> "DEFAULT_VERSION_FEATURE=15" }
+        QuarkusMock.installMockForType(client, HttpClient::class.java)
     }
 
     @Test

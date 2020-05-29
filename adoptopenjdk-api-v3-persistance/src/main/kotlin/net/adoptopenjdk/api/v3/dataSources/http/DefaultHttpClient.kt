@@ -1,17 +1,18 @@
-package net.adoptopenjdk.api.v3.dataSources
+package net.adoptopenjdk.api.v3.dataSources.http
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
-import net.adoptopenjdk.api.v3.HttpClientFactory
-import net.adoptopenjdk.api.v3.dataSources.github.GithubAuth
 import org.apache.commons.io.IOUtils
 import org.apache.http.HttpResponse
 import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.concurrent.FutureCallback
+import org.apache.http.nio.client.HttpAsyncClient
 import org.slf4j.LoggerFactory
 import java.io.StringWriter
 import java.net.URL
 import java.nio.charset.Charset
+import javax.inject.Inject
+import javax.inject.Named
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -22,21 +23,42 @@ data class UrlRequest(
     val lastModified: String? = null
 )
 
-interface UpdaterHtmlClient {
+interface HttpClient {
     suspend fun get(url: String): String?
     suspend fun getFullResponse(request: UrlRequest): HttpResponse?
 }
 
-object UpdaterHtmlClientFactory {
-    var client: UpdaterHtmlClient = DefaultUpdaterHtmlClient()
-}
+class DefaultHttpClient : HttpClient {
 
-class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
+    private val TOKEN: String?
+    private val nonRedirectHttpClient: HttpAsyncClient
+    private val redirectHttpClient: HttpAsyncClient
+
+    @Inject
+    constructor(
+        @Named("non-redirect")
+        nonRedirectHttpClient: HttpAsyncClient,
+        @Named("redirect")
+        redirectHttpClient: HttpAsyncClient
+    ) {
+        this.nonRedirectHttpClient = nonRedirectHttpClient
+        this.redirectHttpClient = redirectHttpClient
+        TOKEN = null
+    }
+
+    constructor(
+        nonRedirectHttpClient: HttpAsyncClient,
+        redirectHttpClient: HttpAsyncClient,
+        TOKEN: String? = null
+    ) {
+        this.nonRedirectHttpClient = nonRedirectHttpClient
+        this.redirectHttpClient = redirectHttpClient
+        this.TOKEN = TOKEN
+    }
 
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
-        private val TOKEN: String? = GithubAuth.readToken()
         private const val REQUEST_TIMEOUT = 12000L
 
         fun extractBody(response: HttpResponse?): String? {
@@ -50,7 +72,7 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
     }
 
     class ResponseHandler(
-        val client: DefaultUpdaterHtmlClient,
+        val client: DefaultHttpClient,
         private val continuation: Continuation<HttpResponse>,
         val request: UrlRequest?
     ) : FutureCallback<HttpResponse> {
@@ -84,9 +106,9 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
 
         private fun isARedirect(response: HttpResponse): Boolean {
             return response.statusLine.statusCode == 307 ||
-                    response.statusLine.statusCode == 301 ||
-                    response.statusLine.statusCode == 302 ||
-                    response.statusLine.statusCode == 303
+                response.statusLine.statusCode == 301 ||
+                response.statusLine.statusCode == 302 ||
+                response.statusLine.statusCode == 303
         }
 
         override fun failed(e: java.lang.Exception?) {
@@ -102,9 +124,9 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
         try {
             val url = URL(urlRequest.url)
             val request = RequestBuilder
-                    .get(url.toURI())
-                    .setConfig(HttpClientFactory.REQUEST_CONFIG)
-                    .build()
+                .get(url.toURI())
+                .setConfig(AsyncHttpClientFactory.REQUEST_CONFIG)
+                .build()
 
             if (urlRequest.lastModified != null) {
                 request.addHeader("If-Modified-Since", urlRequest.lastModified)
@@ -115,11 +137,11 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
             }
 
             val client =
-                    if (url.host.endsWith("github.com")) {
-                        HttpClientFactory.getNonRedirectHttpClient()
-                    } else {
-                        HttpClientFactory.getHttpClient()
-                    }
+                if (url.host.endsWith("github.com")) {
+                    nonRedirectHttpClient
+                } else {
+                    redirectHttpClient
+                }
 
             client.execute(request, ResponseHandler(this, continuation, urlRequest))
         } catch (e: Exception) {

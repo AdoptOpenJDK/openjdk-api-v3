@@ -5,7 +5,7 @@ import io.restassured.RestAssured
 import org.junit.jupiter.api.Test
 
 @QuarkusTest
-class VariantsPathTest : BaseTest() {
+class VariantsPathTest : FrontEndTest() {
     @Test
     fun variants() {
 

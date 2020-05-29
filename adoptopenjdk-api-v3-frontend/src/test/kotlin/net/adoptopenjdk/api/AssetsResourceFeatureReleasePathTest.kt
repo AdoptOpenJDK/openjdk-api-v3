@@ -2,7 +2,6 @@ package net.adoptopenjdk.api
 
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
-import junit.framework.Assert.fail
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
@@ -14,6 +13,7 @@ import net.adoptopenjdk.api.v3.models.ReleaseType
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import org.junit.jupiter.api.fail
 import java.util.stream.Stream
 
 @QuarkusTest
@@ -88,9 +88,9 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                 // test the ltses and 1 non-lts
                 listOf(8, 11, 12)
                     .flatMap { version ->
-                        createTest(values, "${getPath()}/$version/$releaseType", filterParamName, { element ->
+                        createTest(values, "${getPath()}/$version/$releaseType", filterParamName) { element ->
                             getExclusions(version, element)
-                        })
+                        }
                     }
             }
             .stream()
@@ -117,7 +117,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                 .body
 
             val releasesStr = body.prettyPrint()
-            return JsonMapper.mapper.readValue(releasesStr, JsonMapper.mapper.getTypeFactory().constructCollectionType(MutableList::class.java, Release::class.java))
+            return JsonMapper.mapper.readValue(releasesStr, JsonMapper.mapper.typeFactory.constructCollectionType(MutableList::class.java, Release::class.java))
         }
     }
 

@@ -2,6 +2,7 @@ package net.adoptopenjdk.api
 
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
+import net.adoptopenjdk.api.v3.GuiceBinding
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.models.Variants
 import java.io.File
@@ -19,7 +20,9 @@ class TestResourceGenerator {
                 val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
                 val variants = UpdaterJsonMapper.mapper.readValue(variantData, Variants::class.java)
 
-                val repo = AdoptReposBuilder.build(variants.versions)
+                val builder = GuiceBinding.getInjector().getInstance(AdoptReposBuilder::class.java)
+
+                val repo = builder.build(variants.versions)
 
                 File("adoptopenjdk-api-v3-updater/src/test/resources/example-data.json.gz").delete()
 

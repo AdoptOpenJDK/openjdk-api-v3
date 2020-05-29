@@ -1,57 +1,62 @@
 package net.adoptopenjdk.api.v3.dataSources
 
 import com.google.common.annotations.VisibleForTesting
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.timerTask
 import kotlinx.coroutines.runBlocking
-import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
-import net.adoptopenjdk.api.v3.models.Platforms
+import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
+import net.adoptopenjdk.api.v3.dataSources.persitence.ReleaseInfoFactory
+import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import net.adoptopenjdk.api.v3.models.Variants
 import org.slf4j.LoggerFactory
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.concurrent.timerTask
 
-object APIDataStore {
+@Singleton
+class APIDataStore @Inject constructor(
+    private val apiPersistence: ApiPersistence,
+    private val variants: Variants,
+    private val releaseInfoFactory: ReleaseInfoFactory
+) {
+
+    companion object {
+        @JvmStatic
+        private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    }
+
     private var binaryRepos: AdoptRepos
-
-    @JvmStatic
-    private val LOGGER = LoggerFactory.getLogger(this::class.java)
-
-    val platforms: Platforms
-    val variants: Variants
+    var releaseInfo: ReleaseInfo
 
     init {
-
-        val platformData = this.javaClass.getResource("/JSON/platforms.json").readText()
-        platforms = JsonMapper.mapper.readValue(platformData, Platforms::class.java)
-
-        val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
-        variants = JsonMapper.mapper.readValue(variantData, Variants::class.java)
-
-        try {
-            binaryRepos = loadDataFromDb()
+        binaryRepos = try {
+            loadDataFromDb()
         } catch (e: Exception) {
             LOGGER.error("Failed to read db", e)
-            binaryRepos = AdoptRepos(listOf())
+            AdoptRepos(listOf())
         }
-
-        Executors
+        releaseInfo = releaseInfoFactory.formReleaseInfo(binaryRepos, variants)
+        val disableUpdate = System.getProperty("DISABLE_UPDATE", "false")!!.toBoolean()
+        if (!disableUpdate) {
+            Executors
                 .newSingleThreadScheduledExecutor()
                 .scheduleWithFixedDelay(timerTask {
                     periodicUpdate()
                 }, 0, 15, TimeUnit.MINUTES)
+        }
     }
 
     @VisibleForTesting
     fun loadDataFromDb(): AdoptRepos {
         binaryRepos = runBlocking {
             val data = variants
-                    .versions
-                    .map { version ->
-                        ApiPersistenceFactory.get().readReleaseData(version)
-                    }
-                    .filter { it.releases.nodes.isNotEmpty() }
-                    .toList()
+                .versions
+                .map { version ->
+                    apiPersistence.readReleaseData(version)
+                }
+                .filter { it.releases.nodes.isNotEmpty() }
+                .toList()
 
             AdoptRepos(data)
         }
@@ -74,5 +79,6 @@ object APIDataStore {
         } catch (e: Exception) {
             LOGGER.error("Failed to load db", e)
         }
+        releaseInfo = releaseInfoFactory.formReleaseInfo(binaryRepos, variants)
     }
 }

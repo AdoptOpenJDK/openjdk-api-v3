@@ -1,6 +1,8 @@
 package net.adoptopenjdk.api.v3.routes.packages
 
 import net.adoptopenjdk.api.v3.OpenApiDocs
+import net.adoptopenjdk.api.v3.dataSources.APIDataStore
+import net.adoptopenjdk.api.v3.filters.ReleaseFilterFactory
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Binary
 import net.adoptopenjdk.api.v3.models.HeapSize
@@ -21,16 +23,29 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
+import org.slf4j.LoggerFactory
+import javax.inject.Inject
 import javax.ws.rs.GET
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
+import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
 
 @Tag(name = "Installer")
 @Path("/v3/installer/")
 @Produces(MediaType.APPLICATION_JSON)
-class InstallerResource : PackageEndpoint() {
+class InstallerResource @Inject constructor(
+    @Context
+    private val apiDataStore: APIDataStore,
+    @Context
+    private val releaseFilterFactory: ReleaseFilterFactory
+) : PackageEndpoint(apiDataStore, releaseFilterFactory) {
+
+    companion object {
+        @JvmStatic
+        private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    }
 
     @GET
     @Path("/version/{release_name}/{os}/{arch}/{image_type}/{jvm_impl}/{heap_size}/{vendor}")
@@ -136,7 +151,6 @@ class InstallerResource : PackageEndpoint() {
             .lastOrNull { release ->
                 release.binaries.any { it.installer != null }
             }
-
         return formResponseInstaller(if (release == null) emptyList() else listOf(release))
     }
 

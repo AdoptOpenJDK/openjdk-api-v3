@@ -1,14 +1,16 @@
 package net.adoptopenjdk.api.v3.dataSources.github.graphql.clients
 
+import com.google.inject.Inject
 import io.aexp.nodes.graphql.GraphQLRequestEntity
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAssets
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.ReleaseQueryData
 import net.adoptopenjdk.api.v3.dataSources.models.GithubId
+import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGithubHtmlClient
 import org.slf4j.LoggerFactory
 
-open class GraphQLGitHubReleaseRequest : GraphQLGitHubInterface() {
+open class GraphQLGitHubReleaseRequest @Inject constructor(cachedGithubHtmlClient: CachedGithubHtmlClient) : GraphQLGitHubInterface(cachedGithubHtmlClient) {
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
@@ -19,14 +21,15 @@ open class GraphQLGitHubReleaseRequest : GraphQLGitHubInterface() {
         val getMore = getMoreReleasesQuery(release.id)
         LOGGER.info("Getting release assets ${release.id}")
         val moreAssets = getAll(getMore,
-                { asset ->
-                    if (asset.assetNode == null) listOf()
-                    else asset.assetNode.releaseAssets.assets
-                },
-                { it.assetNode!!.releaseAssets.pageInfo.hasNextPage },
-                { it.assetNode!!.releaseAssets.pageInfo.endCursor },
-                release.releaseAssets.pageInfo.endCursor,
-                null, ReleaseQueryData::class.java)
+            { asset ->
+                if (asset.assetNode == null) listOf()
+                else asset.assetNode.releaseAssets.assets
+            },
+            { it.assetNode!!.releaseAssets.pageInfo.hasNextPage },
+            { it.assetNode!!.releaseAssets.pageInfo.endCursor },
+            release.releaseAssets.pageInfo.endCursor,
+            null, ReleaseQueryData::class.java
+        )
 
         val assets = release.releaseAssets.assets.union(moreAssets)
 
@@ -57,6 +60,7 @@ open class GraphQLGitHubReleaseRequest : GraphQLGitHubInterface() {
                                 remaining
                               }
                             }
-                    """)
+                    """
+        )
     }
 }

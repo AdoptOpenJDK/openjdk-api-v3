@@ -1,6 +1,8 @@
 package net.adoptopenjdk.api.v3.routes.packages
 
 import net.adoptopenjdk.api.v3.OpenApiDocs
+import net.adoptopenjdk.api.v3.dataSources.APIDataStore
+import net.adoptopenjdk.api.v3.filters.ReleaseFilterFactory
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Binary
 import net.adoptopenjdk.api.v3.models.HeapSize
@@ -21,6 +23,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
+import javax.inject.Inject
 import javax.ws.rs.GET
 import javax.ws.rs.HEAD
 import javax.ws.rs.HeaderParam
@@ -34,7 +37,12 @@ import javax.ws.rs.core.Response
 @Tag(name = "Binary")
 @Path("/v3/binary/")
 @Produces(MediaType.APPLICATION_JSON)
-class BinaryResource : PackageEndpoint() {
+class BinaryResource @Inject constructor(
+    @Context
+    private val apiDataStore: APIDataStore,
+    @Context
+    private val releaseFilterFactory: ReleaseFilterFactory
+) : PackageEndpoint(apiDataStore, releaseFilterFactory) {
 
     @GET
     @HEAD

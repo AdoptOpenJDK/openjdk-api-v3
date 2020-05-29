@@ -1,14 +1,16 @@
 package net.adoptopenjdk.api.v3.dataSources.github.graphql.clients
 
+import com.google.inject.Inject
 import io.aexp.nodes.graphql.GraphQLRequestEntity
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.QuerySummaryData
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleasesSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
+import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGithubHtmlClient
 import org.slf4j.LoggerFactory
 
-class GraphQLGitHubSummaryClient : GraphQLGitHubInterface() {
+class GraphQLGitHubSummaryClient @Inject constructor(cachedGithubHtmlClient: CachedGithubHtmlClient) : GraphQLGitHubInterface(cachedGithubHtmlClient) {
 
     companion object {
         @JvmStatic
@@ -21,10 +23,11 @@ class GraphQLGitHubSummaryClient : GraphQLGitHubInterface() {
         LOGGER.info("Getting repo summary $repoName")
 
         val releases = getAll(requestEntityBuilder,
-                { request -> getSummary(request) },
-                { it.repository!!.releases.pageInfo.hasNextPage },
-                { it.repository!!.releases.pageInfo.endCursor },
-                clazz = QuerySummaryData::class.java)
+            { request -> getSummary(request) },
+            { it.repository!!.releases.pageInfo.hasNextPage },
+            { it.repository!!.releases.pageInfo.endCursor },
+            clazz = QuerySummaryData::class.java
+        )
 
         LOGGER.info("Done getting summary $repoName")
 
@@ -59,6 +62,7 @@ class GraphQLGitHubSummaryClient : GraphQLGitHubInterface() {
                                 remaining
                             }
                         }
-                    """)
+                    """
+        )
     }
 }

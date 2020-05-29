@@ -1,9 +1,7 @@
 package net.adoptopenjdk.api
 
-import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
-import net.adoptopenjdk.api.v3.AdoptRepositoryFactory
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.models.GithubId
 import net.adoptopenjdk.api.v3.models.Release
@@ -11,19 +9,18 @@ import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.models.VersionData
 import org.junit.jupiter.api.Test
+import kotlin.test.assertTrue
 
-class AdoptReposBuilderTest : BaseTest() {
+class AdoptReposBuilderTest : UpdaterTest() {
 
     @Test
     fun removedReleaseIsRemovedWhenUpdated() {
         runBlocking {
-            val repo = getInitialRepo()
+            val repo = getAdoptRepos()
             val toRemove = repo.getFeatureRelease(8)!!.releases.nodes.values.first()
             val removedRepo = repo.removeRelease(8, toRemove)
 
-            AdoptRepositoryFactory.setAdoptRepository(MockRepository(removedRepo))
-
-            val updated = AdoptReposBuilder.incrementalUpdate(repo)
+            val updated = AdoptReposBuilder(MockRepository(removedRepo)).incrementalUpdate(repo)
 
             assertTrue { repo.getFeatureRelease(8)!!.releases.hasReleaseId(GithubId(toRemove.id)) }
             assertTrue { !updated.getFeatureRelease(8)!!.releases.hasReleaseId(GithubId(toRemove.id)) }
@@ -34,18 +31,17 @@ class AdoptReposBuilderTest : BaseTest() {
     @Test
     fun addReleaseIsAddWhenUpdated() {
         runBlocking {
-            val repo = getInitialRepo()
+            val repo = getAdoptRepos()
             val toAdd = Release("foo", ReleaseType.ga, "a", "b",
-                    TimeSource.now().minusMinutes(20),
-                    TimeSource.now().minusMinutes(20),
-                    arrayOf(), 2, Vendor.adoptopenjdk,
-                    VersionData(1, 2, 3, "", 1, 4, "", ""))
+                TimeSource.now().minusMinutes(20),
+                TimeSource.now().minusMinutes(20),
+                arrayOf(), 2, Vendor.adoptopenjdk,
+                VersionData(1, 2, 3, "", 1, 4, "", "")
+            )
 
             val removedRepo = repo.addRelease(8, toAdd)
 
-            AdoptRepositoryFactory.setAdoptRepository(MockRepository(removedRepo))
-
-            val updated = AdoptReposBuilder.incrementalUpdate(repo)
+            val updated = AdoptReposBuilder(MockRepository(removedRepo)).incrementalUpdate(repo)
 
             assertTrue { !repo.getFeatureRelease(8)!!.releases.hasReleaseId(GithubId(toAdd.id)) }
             assertTrue { updated.getFeatureRelease(8)!!.releases.getReleases().contains(toAdd) }
@@ -56,18 +52,17 @@ class AdoptReposBuilderTest : BaseTest() {
     @Test
     fun releaseLessThan10MinOldIsNotUpdated() {
         runBlocking {
-            val repo = getInitialRepo()
+            val repo = getAdoptRepos()
 
             val toAdd = Release("foo", ReleaseType.ga, "a", "b",
-                    TimeSource.now(),
-                    TimeSource.now(), arrayOf(), 2, Vendor.adoptopenjdk,
-                    VersionData(1, 2, 3, "", 1, 4, "", ""))
+                TimeSource.now(),
+                TimeSource.now(), arrayOf(), 2, Vendor.adoptopenjdk,
+                VersionData(1, 2, 3, "", 1, 4, "", "")
+            )
 
             val removedRepo = repo.addRelease(8, toAdd)
 
-            AdoptRepositoryFactory.setAdoptRepository(MockRepository(removedRepo))
-
-            val updated = AdoptReposBuilder.incrementalUpdate(repo)
+            val updated = AdoptReposBuilder(MockRepository(removedRepo)).incrementalUpdate(repo)
 
             assertTrue { updated == repo }
         }
@@ -76,21 +71,20 @@ class AdoptReposBuilderTest : BaseTest() {
     @Test
     fun updatedReleaseIsUpdatedWhenUpdated() {
         runBlocking {
-            val repo = getInitialRepo()
+            val repo = getAdoptRepos()
 
             val original = repo.getFeatureRelease(8)!!.releases.nodes.values.first()
 
             val toUpdate = Release(original.id, ReleaseType.ga, "a", "b",
-                    TimeSource.now(),
-                    TimeSource.now().minusMinutes(20),
-                    arrayOf(), 2, Vendor.adoptopenjdk,
-                    VersionData(1, 2, 3, "", 1, 4, "", ""))
+                TimeSource.now(),
+                TimeSource.now().minusMinutes(20),
+                arrayOf(), 2, Vendor.adoptopenjdk,
+                VersionData(1, 2, 3, "", 1, 4, "", "")
+            )
 
             val updatedRepo = repo.removeRelease(8, original) // .addRelease(8, toUpdate)
 
-            AdoptRepositoryFactory.setAdoptRepository(MockRepository(updatedRepo))
-
-            val updated = AdoptReposBuilder.incrementalUpdate(repo)
+            val updated = AdoptReposBuilder(MockRepository(updatedRepo)).incrementalUpdate(repo)
 
             assertTrue { repo.getFeatureRelease(8)!!.releases.getReleases().contains(original) }
             assertTrue { !updated.getFeatureRelease(8)!!.releases.getReleases().contains(original) }
@@ -102,8 +96,8 @@ class AdoptReposBuilderTest : BaseTest() {
     @Test
     fun updatedReleaseIsNotUpdatedWhenThingsDontChange() {
         runBlocking {
-            val repo = getInitialRepo()
-            val updated = AdoptReposBuilder.incrementalUpdate(repo)
+            val repo = getAdoptRepos()
+            val updated = AdoptReposBuilder(MockRepository(repo)).incrementalUpdate(repo)
 
             assertTrue { updated == repo }
         }

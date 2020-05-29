@@ -1,9 +1,11 @@
 package net.adoptopenjdk.api
 
+import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHVersion
+import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGithubHtmlClient
 import net.adoptopenjdk.api.v3.mapping.adopt.AdoptBinaryMapper
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Binary
@@ -60,7 +62,7 @@ class AdoptBinaryMapperTest {
                     "2013-02-27T19:35:32Z"
                 )
             )
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
+            val binaryList = adoptBinaryMapper().toBinaryList(assets, assets, emptyMap())
 
             assertEquals("a-download-link", binaryList.get(0).`package`.checksum_link)
         }
@@ -77,7 +79,7 @@ class AdoptBinaryMapperTest {
                 "2013-02-27T19:35:32Z"
             )
             )
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
+            val binaryList = adoptBinaryMapper().toBinaryList(assets, assets, emptyMap())
 
             assertEquals(JvmImpl.openj9, binaryList.get(0).jvm_impl)
             assertEquals(Architecture.ppc64le, binaryList.get(0).architecture)
@@ -89,7 +91,7 @@ class AdoptBinaryMapperTest {
     @Test
     fun parsesJfrFromName() {
         runBlocking {
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
+            val binaryList = adoptBinaryMapper().toBinaryList(assets, assets, emptyMap())
             assertParsedHotspotJfr(binaryList)
         }
     }
@@ -97,7 +99,7 @@ class AdoptBinaryMapperTest {
     @Test
     fun projectDefaultsToJdk() {
         runBlocking {
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
+            val binaryList = adoptBinaryMapper().toBinaryList(assets, assets, emptyMap())
             assertEquals(Project.jdk, binaryList.get(1).project)
         }
     }
@@ -113,7 +115,7 @@ class AdoptBinaryMapperTest {
                 ImageType.jdk,
                 ""
             )
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, mapOf(Pair(jdk, metadata)))
+            val binaryList = adoptBinaryMapper().toBinaryList(assets, assets, mapOf(Pair(jdk, metadata)))
             assertParsedHotspotJfr(binaryList)
         }
     }
@@ -137,10 +139,15 @@ class AdoptBinaryMapperTest {
                 "2013-02-27T19:35:32Z"
             )
 
-            val binaryList = AdoptBinaryMapper.toBinaryList(listOf(asset), listOf(asset, checksum), emptyMap())
+            val binaryList = adoptBinaryMapper().toBinaryList(listOf(asset), listOf(asset, checksum), emptyMap())
 
             assertEquals("a-download-link", binaryList.get(0).`package`.checksum_link)
         }
+    }
+
+    private fun adoptBinaryMapper(): AdoptBinaryMapper {
+        val ghClient = mockk<CachedGithubHtmlClient>()
+        return AdoptBinaryMapper(ghClient)
     }
 
     private fun assertParsedHotspotJfr(binaryList: List<Binary>) {

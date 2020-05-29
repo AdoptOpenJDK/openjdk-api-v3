@@ -5,6 +5,7 @@ import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
 import org.slf4j.LoggerFactory
+import javax.inject.Singleton
 
 object MongoClientFactory {
     // Current default impl is mongo impl
@@ -22,17 +23,27 @@ object MongoClientFactory {
     }
 }
 
+@Singleton
 class MongoClient {
-    val database: CoroutineDatabase
-    val client: CoroutineClient
+    private lateinit var dbName: String
+    lateinit var database: CoroutineDatabase
+    lateinit var client: CoroutineClient
 
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
     }
 
-    init {
-        val dbName = System.getenv("MONGODB_DBNAME") ?: "api-data"
+    constructor() {
+        connect(System.getenv("MONGODB_DBNAME") ?: "api-data")
+    }
+
+    constructor(dbName: String) {
+        connect(dbName)
+    }
+
+    fun connect(dbName: String) {
+        this.dbName = dbName
         val username = System.getenv("MONGODB_USER")
         val password = System.getenv("MONGODB_PASSWORD")
         val host = System.getenv("MONGODB_HOST") ?: "localhost"

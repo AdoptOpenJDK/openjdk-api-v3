@@ -5,7 +5,7 @@ import io.restassured.RestAssured
 import org.junit.jupiter.api.Test
 
 @QuarkusTest
-class ReleaseNamesPathTest : BaseTest() {
+class ReleaseNamesPathTest : FrontEndTest() {
     @Test
     fun releaseNames() {
 

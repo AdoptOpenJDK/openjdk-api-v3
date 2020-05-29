@@ -6,18 +6,30 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import net.adoptopenjdk.api.v3.dataSources.DefaultUpdaterHtmlClient
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
-import net.adoptopenjdk.api.v3.dataSources.UrlRequest
+import net.adoptopenjdk.api.v3.dataSources.github.GithubAuth
+import net.adoptopenjdk.api.v3.dataSources.http.DefaultHttpClient
+import net.adoptopenjdk.api.v3.dataSources.http.UrlRequest
+import org.apache.http.nio.client.HttpAsyncClient
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 
-object CachedGithubHtmlClient {
-    @JvmStatic
-    private val LOGGER = LoggerFactory.getLogger(this::class.java)
+@Singleton
+class CachedGithubHtmlClient @Inject constructor(
+    @Named("non-redirect")
+    nonRedirectHttpClient: HttpAsyncClient,
+    @Named("redirect")
+    redirectHttpClient: HttpAsyncClient
+) {
+    companion object {
+        @JvmStatic
+        private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    }
 
-    @JvmStatic
+    private val httpClient: DefaultHttpClient
     private val backgroundHtmlDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
     private val internalDbStore = InternalDbStoreFactory.get()
@@ -28,12 +40,14 @@ object CachedGithubHtmlClient {
     init {
         // Do refresh in the background
         GlobalScope.launch(backgroundHtmlDispatcher, block = cacheRefreshDaemonThread())
+        val TOKEN: String? = GithubAuth.readToken()
+        this.httpClient = DefaultHttpClient(nonRedirectHttpClient, redirectHttpClient, TOKEN)
     }
 
     suspend fun getUrl(url: String): String? {
         val cachedEntry = internalDbStore.getCachedWebpage(url)
         return if (cachedEntry == null) {
-            get(UrlRequest(url))
+            getNonCached(UrlRequest(url))
         } else {
             LOGGER.info("Scheduling for refresh $url ${cachedEntry.lastModified} ${workList.size}")
             workList.offer(UrlRequest(url, cachedEntry.lastModified))
@@ -47,29 +61,31 @@ object CachedGithubHtmlClient {
                 val request = workList.take()
                 async {
                     LOGGER.info("Enqueuing ${request.url} ${request.lastModified} ${workList.size}")
-                    return@async get(request)
+                    return@async getNonCached(request)
                 }.await()
             }
         }
     }
 
-    private suspend fun get(request: UrlRequest): String? {
+    suspend fun getNonCached(request: UrlRequest, updateCache: Boolean = true): String? {
         // Retry up to 10 times
         for (retryCount in 1..10) {
             try {
                 LOGGER.info("Getting  ${request.url} ${request.lastModified}")
-                val response = UpdaterHtmlClientFactory.client.getFullResponse(request)
+                val response = httpClient.getFullResponse(request)
 
                 if (response?.statusLine?.statusCode == 304) {
                     // asset has not updated
                     return null
                 }
 
-                val body = DefaultUpdaterHtmlClient.extractBody(response)
+                val body = DefaultHttpClient.extractBody(response)
 
                 val lastModified = response?.getFirstHeader("Last-Modified")?.value
 
-                internalDbStore.putCachedWebpage(request.url, lastModified, body)
+                if (updateCache) {
+                    internalDbStore.putCachedWebpage(request.url, lastModified, body)
+                }
                 LOGGER.info("Got ${request.url}")
                 return body
             } catch (e: Exception) {

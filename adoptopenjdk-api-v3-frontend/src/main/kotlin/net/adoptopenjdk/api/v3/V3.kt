@@ -1,14 +1,13 @@
 package net.adoptopenjdk.api.v3
 
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.routes.AssetsResource
-import net.adoptopenjdk.api.v3.routes.packages.BinaryResource
 import net.adoptopenjdk.api.v3.routes.V1Route
 import net.adoptopenjdk.api.v3.routes.VersionResource
 import net.adoptopenjdk.api.v3.routes.info.AvailableReleasesResource
 import net.adoptopenjdk.api.v3.routes.info.PlatformsResource
 import net.adoptopenjdk.api.v3.routes.info.ReleaseListResource
 import net.adoptopenjdk.api.v3.routes.info.VariantsResource
+import net.adoptopenjdk.api.v3.routes.packages.BinaryResource
 import net.adoptopenjdk.api.v3.routes.packages.InstallerResource
 import net.adoptopenjdk.api.v3.routes.stats.DownloadStatsResource
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition
@@ -44,20 +43,18 @@ problems as an issue in the <a href=\"https://github.com/AdoptOpenJDK/openjdk-ap
 @ApplicationPath("/")
 class V3 : Application() {
 
-    private val resourceClasses: Set<Class<out Any>>
-    private val cors: Set<Any>
+    private val singletons: Set<Any>
 
     init {
-        cors = setOf(object : ContainerResponseFilter {
+        singletons = setOf(object : ContainerResponseFilter {
             override fun filter(requestContext: ContainerRequestContext?, responseContext: ContainerResponseContext) {
                 responseContext.headers.add("Access-Control-Allow-Origin", "*")
             }
         })
+    }
 
-        // Eagerly fetch repo from db on app startup
-        APIDataStore.getAdoptRepos()
-
-        resourceClasses = setOf(
+    override fun getClasses(): Set<Class<*>> {
+        return setOf(
             V1Route::class.java,
             AssetsResource::class.java,
             BinaryResource::class.java,
@@ -72,10 +69,6 @@ class V3 : Application() {
     }
 
     override fun getSingletons(): Set<Any> {
-        return cors
-    }
-
-    override fun getClasses(): Set<Class<*>> {
-        return resourceClasses
+        return singletons
     }
 }

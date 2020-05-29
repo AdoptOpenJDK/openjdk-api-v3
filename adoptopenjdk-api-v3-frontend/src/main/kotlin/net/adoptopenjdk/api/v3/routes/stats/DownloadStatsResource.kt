@@ -2,6 +2,7 @@ package net.adoptopenjdk.api.v3.routes.stats
 
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import net.adoptopenjdk.api.v3.DownloadStatsInterface
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
@@ -18,19 +19,25 @@ import org.jboss.resteasy.annotations.jaxrs.PathParam
 import java.time.LocalDate
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
+import javax.inject.Inject
 import javax.ws.rs.BadRequestException
 import javax.ws.rs.GET
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
+import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
 
 @Path("/v3/stats/downloads")
 @Produces(MediaType.APPLICATION_JSON)
 @Schema(hidden = true)
-class DownloadStatsResource {
-    private val statsInterface = net.adoptopenjdk.api.v3.DownloadStatsInterface()
+class DownloadStatsResource @Inject constructor(
+    @Context
+    private val apiDataStore: APIDataStore,
+    @Context
+    private val statsInterface: DownloadStatsInterface
+) {
 
     @GET
     @Path("/total")
@@ -51,7 +58,7 @@ class DownloadStatsResource {
         @PathParam("feature_version")
         featureVersion: Int
     ): Map<String, Long> {
-        val release = APIDataStore.getAdoptRepos().getFeatureRelease(featureVersion)
+        val release = apiDataStore.getAdoptRepos().getFeatureRelease(featureVersion)
             ?: throw BadRequestException("Unable to find version $featureVersion")
 
         return getAdoptReleases(release)
@@ -77,7 +84,7 @@ class DownloadStatsResource {
         @PathParam("release_name")
         releaseName: String
     ): Map<String, Long> {
-        val release = APIDataStore.getAdoptRepos().getFeatureRelease(featureVersion)
+        val release = apiDataStore.getAdoptRepos().getFeatureRelease(featureVersion)
             ?: throw BadRequestException("Unable to find version $featureVersion")
 
         return getAdoptReleases(release)

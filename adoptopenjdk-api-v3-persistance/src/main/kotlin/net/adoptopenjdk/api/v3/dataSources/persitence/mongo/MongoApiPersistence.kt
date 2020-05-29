@@ -1,8 +1,9 @@
 package net.adoptopenjdk.api.v3.dataSources.persitence.mongo
 
+import javax.inject.Inject
+import javax.inject.Singleton
 import com.mongodb.client.model.InsertManyOptions
 import com.mongodb.reactivestreams.client.ClientSession
-import java.time.ZonedDateTime
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
@@ -16,8 +17,10 @@ import org.bson.BsonDocument
 import org.bson.Document
 import org.litote.kmongo.coroutine.CoroutineCollection
 import org.slf4j.LoggerFactory
+import java.time.ZonedDateTime
 
-class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient), ApiPersistence {
+@Singleton
+class MongoApiPersistence @Inject constructor(mongoClient: MongoClient) : MongoInterface(mongoClient), ApiPersistence {
     private val releasesCollection: CoroutineCollection<Release> = createCollection(database, RELEASE_DB)
     private val githubStatsCollection: CoroutineCollection<GithubDownloadStatsDbEntry> = createCollection(database, GITHUB_STATS_DB)
     private val dockerStatsCollection: CoroutineCollection<DockerDownloadStatsDbEntry> = createCollection(database, DOCKER_STATS_DB)
@@ -42,10 +45,10 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
         try {
             session?.startTransaction()
             repos
-                    .repos
-                    .forEach { repo ->
-                        writeReleases(session, repo.key, repo.value)
-                    }
+                .repos
+                .forEach { repo ->
+                    writeReleases(session, repo.key, repo.value)
+                }
         } finally {
             session?.commitTransaction()
             session?.close()
@@ -67,8 +70,8 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
 
     override suspend fun readReleaseData(featureVersion: Int): FeatureRelease {
         val releases = releasesCollection
-                .find(majorVersionMatcher(featureVersion))
-                .toList()
+            .find(majorVersionMatcher(featureVersion))
+            .toList()
 
         return FeatureRelease(featureVersion, Releases(releases))
     }
@@ -79,29 +82,29 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
 
     override suspend fun getStatsForFeatureVersion(featureVersion: Int): List<GithubDownloadStatsDbEntry> {
         return githubStatsCollection.find(Document("version.major", featureVersion))
-                .toList()
+            .toList()
     }
 
     override suspend fun getLatestGithubStatsForFeatureVersion(featureVersion: Int): GithubDownloadStatsDbEntry? {
         return githubStatsCollection
-                .find(Document("feature_version", featureVersion))
-                .sort(Document("date", -1))
-                .limit(1)
-                .first()
+            .find(Document("feature_version", featureVersion))
+            .sort(Document("date", -1))
+            .limit(1)
+            .first()
     }
 
     override suspend fun getGithubStats(start: ZonedDateTime, end: ZonedDateTime): List<GithubDownloadStatsDbEntry> {
         return githubStatsCollection
-                .find(betweenDates(start, end))
-                .sort(Document("date", 1))
-                .toList()
+            .find(betweenDates(start, end))
+            .sort(Document("date", 1))
+            .toList()
     }
 
     override suspend fun getDockerStats(start: ZonedDateTime, end: ZonedDateTime): List<DockerDownloadStatsDbEntry> {
         return dockerStatsCollection
-                .find(betweenDates(start, end))
-                .sort(Document("date", 1))
-                .toList()
+            .find(betweenDates(start, end))
+            .sort(Document("date", 1))
+            .toList()
     }
 
     override suspend fun addDockerDownloadStatsEntries(stats: List<DockerDownloadStatsDbEntry>) {
@@ -113,14 +116,14 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
         val repoNames = dockerStatsCollection.distinct<String>("repo").toList()
 
         return repoNames
-                .mapNotNull {
-                    dockerStatsCollection
-                            .find(Document("repo", it))
-                            .sort(Document("date", -1))
-                            .limit(1)
-                            .first()
-                }
-                .toList()
+            .mapNotNull {
+                dockerStatsCollection
+                    .find(Document("repo", it))
+                    .sort(Document("date", -1))
+                    .limit(1)
+                    .first()
+            }
+            .toList()
     }
 
     override suspend fun removeStatsBetween(start: ZonedDateTime, end: ZonedDateTime) {
@@ -131,10 +134,11 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
 
     private fun betweenDates(start: ZonedDateTime, end: ZonedDateTime): Document {
         return Document("\$and",
-                BsonArray(listOf(
-                        BsonDocument("date", BsonDocument("\$gt", BsonDateTime(start.toInstant().toEpochMilli()))),
-                        BsonDocument("date", BsonDocument("\$lt", BsonDateTime(end.toInstant().toEpochMilli())))
-                ))
+            BsonArray(listOf(
+                BsonDocument("date", BsonDocument("\$gt", BsonDateTime(start.toInstant().toEpochMilli()))),
+                BsonDocument("date", BsonDocument("\$lt", BsonDateTime(end.toInstant().toEpochMilli())))
+            )
+            )
         )
     }
 

@@ -3,7 +3,7 @@ package net.adoptopenjdk.api.v3.routes.info
 import net.adoptopenjdk.api.v3.OpenApiDocs
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
-import net.adoptopenjdk.api.v3.filters.ReleaseFilter
+import net.adoptopenjdk.api.v3.filters.ReleaseFilterFactory
 import net.adoptopenjdk.api.v3.filters.VersionRangeFilter
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseList
@@ -16,15 +16,22 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
+import javax.inject.Inject
 import javax.ws.rs.GET
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
+import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
 
 @Tag(name = "Release Info")
 @Path("/v3/info")
 @Produces(MediaType.APPLICATION_JSON)
-class ReleaseListResource {
+class ReleaseListResource @Inject constructor(
+    @Context
+    private val apiDataStore: APIDataStore,
+    @Context
+    private val releaseFilterFactory: ReleaseFilterFactory
+) {
 
     @GET
     @Path("/release_names")
@@ -109,8 +116,8 @@ class ReleaseListResource {
 
     private fun getReleases(release_type: ReleaseType?, vendor: Vendor?, version: String?, sortOrder: SortOrder): Sequence<Release> {
         val range = VersionRangeFilter(version)
-        val releaseFilter = ReleaseFilter(releaseType = release_type, vendor = vendor, versionRange = range)
-        return APIDataStore
+        val releaseFilter = releaseFilterFactory.create(releaseType = release_type, vendor = vendor, versionRange = range)
+        return apiDataStore
             .getAdoptRepos()
             .getReleases(releaseFilter, sortOrder)
     }

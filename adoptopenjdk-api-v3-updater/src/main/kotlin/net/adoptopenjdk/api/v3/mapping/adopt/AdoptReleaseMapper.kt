@@ -21,10 +21,16 @@ import java.security.MessageDigest
 import java.time.ZonedDateTime
 import java.util.*
 import java.util.regex.Pattern
+import javax.inject.Inject
 
-object AdoptReleaseMapper : ReleaseMapper() {
-    @JvmStatic
-    private val LOGGER = LoggerFactory.getLogger(this::class.java)
+class AdoptReleaseMapper @Inject constructor(
+    val cachedGithubHtmlClient: CachedGithubHtmlClient,
+    val adoptBinaryMapper: AdoptBinaryMapper
+) : ReleaseMapper() {
+    companion object {
+        @JvmStatic
+        private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    }
 
     override suspend fun toAdoptRelease(release: GHRelease): List<Release> {
         val releaseType: ReleaseType = formReleaseType(release)
@@ -101,7 +107,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
         fullAssetList: List<GHAsset>
     ): Release {
         LOGGER.info("Getting binaries $releaseName")
-        val binaries = AdoptBinaryMapper.toBinaryList(assets, fullAssetList, metadata)
+        val binaries = adoptBinaryMapper.toBinaryList(assets, fullAssetList, metadata)
         LOGGER.info("Done Getting binaries $releaseName")
 
         val downloadCount = assets
@@ -164,7 +170,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
                 metadataAsset.name.startsWith(it.name)
             }
 
-        val metadataString = CachedGithubHtmlClient.getUrl(metadataAsset.downloadUrl)
+        val metadataString = cachedGithubHtmlClient.getUrl(metadataAsset.downloadUrl)
         if (binaryAsset != null && metadataString != null) {
             try {
                 return withContext(Dispatchers.IO) {

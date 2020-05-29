@@ -1,5 +1,7 @@
 package net.adoptopenjdk.api.v3
 
+import javax.inject.Inject
+import javax.inject.Singleton
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
@@ -12,24 +14,27 @@ import org.slf4j.LoggerFactory
 import java.time.temporal.ChronoUnit
 import kotlin.math.absoluteValue
 
-object AdoptReposBuilder {
+@Singleton
+class AdoptReposBuilder @Inject constructor(val adoptRepository: AdoptRepository) {
 
-    @JvmStatic
-    private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    companion object {
+        @JvmStatic
+        private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    }
 
     private val excluded: MutableSet<GithubId> = HashSet()
 
     suspend fun incrementalUpdate(repo: AdoptRepos): AdoptRepos {
         val updated = repo
-                .repos
-                .map { entry -> getUpdatedFeatureRelease(entry, repo) }
-                .filterNotNull()
+            .repos
+            .map { entry -> getUpdatedFeatureRelease(entry, repo) }
+            .filterNotNull()
 
         return AdoptRepos(updated)
     }
 
     private suspend fun getUpdatedFeatureRelease(entry: Map.Entry<Int, FeatureRelease>, repo: AdoptRepos): FeatureRelease? {
-        val summary = AdoptRepositoryFactory.getAdoptRepository().getSummary(entry.key)
+        val summary = adoptRepository.getSummary(entry.key)
 
         // Update cycle
         // 1) remove missing ones
@@ -47,8 +52,8 @@ object AdoptReposBuilder {
             val updatedReleases = getUpdatedReleases(summary, pruned)
 
             pruned
-                    .add(newReleases)
-                    .add(updatedReleases)
+                .add(newReleases)
+                .add(updatedReleases)
         } else {
             val newReleases = getNewReleases(summary, FeatureRelease(entry.key, emptyList()))
             FeatureRelease(entry.key, Releases(newReleases))
@@ -57,18 +62,18 @@ object AdoptReposBuilder {
 
     private suspend fun getUpdatedReleases(summary: GHRepositorySummary, pruned: FeatureRelease): List<Release> {
         return summary.releases.releases
-                .filter { !excluded.contains(it.id) }
-                .filter { pruned.releases.hasReleaseBeenUpdated(it.id, it.getUpdatedTime()) }
-                .filter { isReleaseOldEnough(it.publishedAt) } // Ignore artifacts for the first 10 min while they are still uploading
-                .flatMap { getReleaseById(it) }
+            .filter { !excluded.contains(it.id) }
+            .filter { pruned.releases.hasReleaseBeenUpdated(it.id, it.getUpdatedTime()) }
+            .filter { isReleaseOldEnough(it.publishedAt) } // Ignore artifacts for the first 10 min while they are still uploading
+            .flatMap { getReleaseById(it) }
     }
 
     private suspend fun getNewReleases(summary: GHRepositorySummary, currentRelease: FeatureRelease): List<Release> {
         return summary.releases.releases
-                .filter { !excluded.contains(it.id) }
-                .filter { !currentRelease.releases.hasReleaseId(it.id) }
-                .filter { isReleaseOldEnough(it.publishedAt) } // Ignore artifacts for the first 10 min while they are still uploading
-                .flatMap { getReleaseById(it) }
+            .filter { !excluded.contains(it.id) }
+            .filter { !currentRelease.releases.hasReleaseId(it.id) }
+            .filter { isReleaseOldEnough(it.publishedAt) } // Ignore artifacts for the first 10 min while they are still uploading
+            .flatMap { getReleaseById(it) }
     }
 
     private fun isReleaseOldEnough(timestamp: String): Boolean {
@@ -78,7 +83,7 @@ object AdoptReposBuilder {
 
     private suspend fun getReleaseById(it: GHReleaseSummary): List<Release> {
         return try {
-            val result = AdoptRepositoryFactory.getAdoptRepository().getReleaseById(it.id)
+            val result = adoptRepository.getReleaseById(it.id)
             return result ?: emptyList()
         } catch (e: Exception) {
             LOGGER.info("Excluding ${it.id} from update")
@@ -91,13 +96,13 @@ object AdoptReposBuilder {
         excluded.clear()
         // Fetch repos in parallel
         val reposMap = versions
-                .reversed()
-                .map { version ->
-                    AdoptRepositoryFactory.getAdoptRepository().getRelease(version)
-                }
-                .filterNotNull()
-                .map { Pair(it.featureVersion, it) }
-                .toMap()
+            .reversed()
+            .map { version ->
+                adoptRepository.getRelease(version)
+            }
+            .filterNotNull()
+            .map { Pair(it.featureVersion, it) }
+            .toMap()
         LOGGER.info("DONE")
         return AdoptRepos(reposMap)
     }

@@ -18,16 +18,14 @@ import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.models.VersionData
-import net.adoptopenjdk.api.v3.stats.GithubDownloadStatsCalculator
-import net.adoptopenjdk.api.v3.stats.DockerStatsInterface
 import org.junit.jupiter.api.Test
 
-class StatsCalculatorTest : BaseTest() {
+class StatsCalculatorTest : UpdaterTest() {
 
     @Test
     fun testGithubStatsCalculator() {
         val adoptRepos = AdoptRepos(listOf(generateFeatureRelease()))
-        val result: List<GithubDownloadStatsDbEntry> = GithubDownloadStatsCalculator().getStats(adoptRepos)
+        val result: List<GithubDownloadStatsDbEntry> = getGithubDownloadStatsCalculator().getStats(adoptRepos)
 
         assert(result[0].feature_version == 8)
         assert(result[0].downloads == 895L)
@@ -37,7 +35,7 @@ class StatsCalculatorTest : BaseTest() {
 
     @Test
     fun testDockerVersionNumber() {
-        val dsi = DockerStatsInterface()
+        val dsi = getDockerStatsInterface()
         assert(dsi.getOpenjdkVersionFromString("openjdk11") == 11)
         assert(dsi.getOpenjdkVersionFromString("openjdk7") == 7)
         assert(dsi.getOpenjdkVersionFromString("openjdk") == null)
@@ -69,84 +67,86 @@ class StatsCalculatorTest : BaseTest() {
                         JvmImpl.hotspot,
                         Project.jdk
                     ), Binary(
-                        Package("a", "b", 1L, "v", "c", 250L, "d"),
-                        250L,
-                        time,
-                        "d",
-                        null,
-                        HeapSize.normal,
-                        OperatingSystem.linux,
-                        Architecture.x64,
-                        ImageType.jdk,
-                        JvmImpl.hotspot,
-                        Project.jdk
-                    ), Binary(
-                        Package("a", "b", 1L, "v", "c", 60L, "d"),
-                        60L,
-                        time,
-                        "d",
-                        null,
-                        HeapSize.normal,
-                        OperatingSystem.linux,
-                        Architecture.x64,
-                        ImageType.jdk,
-                        JvmImpl.openj9,
-                        Project.jdk
-                    ), Binary(
-                        Package("a", "b", 1L, "v", "c", 120L, "d"),
-                        120L,
-                        time,
-                        "d",
-                        null,
-                        HeapSize.normal,
-                        OperatingSystem.linux,
-                        Architecture.x64,
-                        ImageType.jdk,
-                        JvmImpl.openj9,
-                        Project.jdk
-                    )
+                    Package("a", "b", 1L, "v", "c", 250L, "d"),
+                    250L,
+                    time,
+                    "d",
+                    null,
+                    HeapSize.normal,
+                    OperatingSystem.linux,
+                    Architecture.x64,
+                    ImageType.jdk,
+                    JvmImpl.hotspot,
+                    Project.jdk
+                ), Binary(
+                    Package("a", "b", 1L, "v", "c", 60L, "d"),
+                    60L,
+                    time,
+                    "d",
+                    null,
+                    HeapSize.normal,
+                    OperatingSystem.linux,
+                    Architecture.x64,
+                    ImageType.jdk,
+                    JvmImpl.openj9,
+                    Project.jdk
+                ), Binary(
+                    Package("a", "b", 1L, "v", "c", 120L, "d"),
+                    120L,
+                    time,
+                    "d",
+                    null,
+                    HeapSize.normal,
+                    OperatingSystem.linux,
+                    Architecture.x64,
+                    ImageType.jdk,
+                    JvmImpl.openj9,
+                    Project.jdk
+                )
                 ),
                 445,
                 Vendor.adoptopenjdk,
                 VersionData(1, 2, 3, "a", 4, 5, "c", "d")
             ), Release(
-                "b",
-                ReleaseType.ga,
-                "b",
-                "c",
-                TimeSource.now(),
+            "b",
+            ReleaseType.ga,
+            "b",
+            "c",
+            TimeSource.now(),
+            time,
+            arrayOf(
+                Binary(
+                    Package("a", "b", 1L, "v", "c", 300L, "d"),
+                    300L, // Download count
+                    time,
+                    "d",
+                    Installer("a", "b", 1L, "v", "c", 3L),
+                    HeapSize.normal,
+                    OperatingSystem.linux,
+                    Architecture.x64,
+                    ImageType.jdk,
+                    JvmImpl.hotspot,
+                    Project.jdk
+                ), Binary(
+                Package("a", "b", 1L, "v", "c", 150L, "d"),
+                150L,
                 time,
-                arrayOf(
-                    Binary(
-                        Package("a", "b", 1L, "v", "c", 300L, "d"),
-                        300L, // Download count
-                        time,
-                        "d",
-                        Installer("a", "b", 1L, "v", "c", 3L),
-                        HeapSize.normal,
-                        OperatingSystem.linux,
-                        Architecture.x64,
-                        ImageType.jdk,
-                        JvmImpl.hotspot,
-                        Project.jdk
-                    ), Binary(
-                        Package("a", "b", 1L, "v", "c", 150L, "d"),
-                        150L,
-                        time,
-                        "d",
-                        null,
-                        HeapSize.normal,
-                        OperatingSystem.linux,
-                        Architecture.x64,
-                        ImageType.jdk,
-                        JvmImpl.openj9,
-                        Project.jdk
-                    )
-                ),
-                450,
-                Vendor.adoptopenjdk,
-                VersionData(1, 2, 3, "a", 4, 5, "c", "d")
+                "d",
+                null,
+                HeapSize.normal,
+                OperatingSystem.linux,
+                Architecture.x64,
+                ImageType.jdk,
+                JvmImpl.openj9,
+                Project.jdk
             )
-        )))
+            ),
+            450,
+            Vendor.adoptopenjdk,
+            VersionData(1, 2, 3, "a", 4, 5, "c", "d")
+        )
+        )
+        )
+        )
     }
 }

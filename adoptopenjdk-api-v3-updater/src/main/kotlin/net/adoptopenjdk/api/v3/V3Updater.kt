@@ -1,23 +1,27 @@
 package net.adoptopenjdk.api.v3
 
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.timerTask
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
-import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.Variants
 import net.adoptopenjdk.api.v3.stats.StatsInterface
 import org.slf4j.LoggerFactory
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.concurrent.timerTask
 
-class V3Updater {
-    private var database: ApiPersistence
-    private val variants: Variants
+@Singleton
+class V3Updater @Inject constructor(
+    private val database: ApiPersistence,
+    private val apiDataStore: APIDataStore,
+    private val statsInterface: StatsInterface,
+    private val variants: Variants,
+    private val adoptReposBuilder: AdoptReposBuilder
+) {
     private var repo: AdoptRepos
-    private val statsInterface: StatsInterface
 
     companion object {
         @JvmStatic
@@ -25,20 +29,18 @@ class V3Updater {
 
         @JvmStatic
         fun main(args: Array<String>) {
-            V3Updater().run(true)
+            val updater: V3Updater = GuiceBinding.getInjector().getInstance(V3Updater::class.java)
+
+            updater.run(true)
         }
     }
 
     init {
-        val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
-        variants = UpdaterJsonMapper.mapper.readValue(variantData, Variants::class.java)
-        database = ApiPersistenceFactory.get()
         repo = try {
-            APIDataStore.loadDataFromDb()
+            apiDataStore.loadDataFromDb()
         } catch (e: java.lang.Exception) {
             AdoptRepos(emptyList())
         }
-        statsInterface = StatsInterface()
     }
 
     fun run(instantFullUpdate: Boolean) {
@@ -65,7 +67,7 @@ class V3Updater {
             runBlocking {
 
                 LOGGER.info("Starting Full update")
-                repo = AdoptReposBuilder.build(variants.versions)
+                repo = adoptReposBuilder.build(variants.versions)
                 database.updateAllRepos(repo)
                 statsInterface.update(repo)
                 LOGGER.info("Full update done")
@@ -80,7 +82,7 @@ class V3Updater {
         try {
             runBlocking {
                 LOGGER.info("Starting Incremental update")
-                val updatedRepo = AdoptReposBuilder.incrementalUpdate(repo)
+                val updatedRepo = adoptReposBuilder.incrementalUpdate(repo)
 
                 if (updatedRepo != repo) {
                     repo = updatedRepo

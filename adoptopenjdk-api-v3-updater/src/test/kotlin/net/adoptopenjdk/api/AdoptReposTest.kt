@@ -21,7 +21,7 @@ import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.models.VersionData
 import org.junit.jupiter.api.Test
 
-class AdoptReposTest : BaseTest() {
+class AdoptReposTest : UpdaterTest() {
 
     @Test
     fun repoEqualityCheckIsCorrect() {
