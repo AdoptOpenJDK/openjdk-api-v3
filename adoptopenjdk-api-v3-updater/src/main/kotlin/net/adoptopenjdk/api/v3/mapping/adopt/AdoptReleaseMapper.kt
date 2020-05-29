@@ -68,9 +68,20 @@ object AdoptReleaseMapper : ReleaseMapper() {
                         throw Exception("Failed to parse version $releaseName")
                     }
                 }
+                .filter { release -> !excludeRelease(release) }
         } catch (e: FailedToParse) {
             LOGGER.error("Failed to parse $releaseName")
             throw e
+        }
+    }
+
+    private fun excludeRelease(release: Release): Boolean {
+        return if (release.release_type == ReleaseType.ea) {
+            // remove all 14.0.1+7.1 and 15.0.0+24.1 nightlies
+            release.version_data.semver.startsWith("14.0.1+7.1.") ||
+                release.version_data.semver.startsWith("15.0.0+24.1.")
+        } else {
+            false
         }
     }
 
