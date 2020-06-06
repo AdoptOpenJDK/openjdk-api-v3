@@ -38,6 +38,7 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
         private val TOKEN: String? = GithubAuth.readToken()
         private const val REQUEST_TIMEOUT = 12000L
+        private val GITHUB_DOMAINS = listOf("api.github.com", "github.com")
 
         fun extractBody(response: HttpResponse?): String? {
             if (response == null) {
@@ -84,9 +85,9 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
 
         private fun isARedirect(response: HttpResponse): Boolean {
             return response.statusLine.statusCode == 307 ||
-                    response.statusLine.statusCode == 301 ||
-                    response.statusLine.statusCode == 302 ||
-                    response.statusLine.statusCode == 303
+                response.statusLine.statusCode == 301 ||
+                response.statusLine.statusCode == 302 ||
+                response.statusLine.statusCode == 303
         }
 
         override fun failed(e: java.lang.Exception?) {
@@ -102,24 +103,24 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
         try {
             val url = URL(urlRequest.url)
             val request = RequestBuilder
-                    .get(url.toURI())
-                    .setConfig(HttpClientFactory.REQUEST_CONFIG)
-                    .build()
+                .get(url.toURI())
+                .setConfig(HttpClientFactory.REQUEST_CONFIG)
+                .build()
 
             if (urlRequest.lastModified != null) {
                 request.addHeader("If-Modified-Since", urlRequest.lastModified)
             }
 
-            if (url.host.endsWith("github.com") && TOKEN != null) {
+            if (GITHUB_DOMAINS.contains(url.host) && TOKEN != null) {
                 request.setHeader("Authorization", "token $TOKEN")
             }
 
             val client =
-                    if (url.host.endsWith("github.com")) {
-                        HttpClientFactory.getNonRedirectHttpClient()
-                    } else {
-                        HttpClientFactory.getHttpClient()
-                    }
+                if (url.host.endsWith("github.com")) {
+                    HttpClientFactory.getNonRedirectHttpClient()
+                } else {
+                    HttpClientFactory.getHttpClient()
+                }
 
             client.execute(request, ResponseHandler(this, continuation, urlRequest))
         } catch (e: Exception) {

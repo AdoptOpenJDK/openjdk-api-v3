@@ -1,10 +1,11 @@
 package net.adoptopenjdk.api.v3.dataSources.persitence
 
-import java.time.ZonedDateTime
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.ReleaseInfo
+import java.time.ZonedDateTime
 
 interface ApiPersistence {
     suspend fun updateAllRepos(repos: AdoptRepos)
@@ -18,4 +19,6 @@ interface ApiPersistence {
     suspend fun addDockerDownloadStatsEntries(stats: List<DockerDownloadStatsDbEntry>)
     suspend fun getLatestAllDockerStats(): List<DockerDownloadStatsDbEntry>
     suspend fun removeStatsBetween(start: ZonedDateTime, end: ZonedDateTime)
+    suspend fun setReleaseInfo(version: ReleaseInfo)
+    suspend fun getReleaseInfo(): ReleaseInfo?
 }
