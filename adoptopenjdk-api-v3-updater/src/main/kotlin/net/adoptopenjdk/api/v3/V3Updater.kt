@@ -6,6 +6,7 @@ import kotlin.concurrent.timerTask
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+import net.adoptopenjdk.api.v3.dataSources.ReleaseVersionResolver
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
@@ -63,11 +64,11 @@ class V3Updater {
         // Must catch errors or may kill the scheduler
         try {
             runBlocking {
-
                 LOGGER.info("Starting Full update")
                 repo = AdoptReposBuilder.build(variants.versions)
                 database.updateAllRepos(repo)
                 statsInterface.update(repo)
+                ReleaseVersionResolver.updateDbVersion(repo)
                 LOGGER.info("Full update done")
             }
         } catch (e: Exception) {
@@ -85,6 +86,7 @@ class V3Updater {
                 if (updatedRepo != repo) {
                     repo = updatedRepo
                     database.updateAllRepos(repo)
+                    ReleaseVersionResolver.updateDbVersion(repo)
                     LOGGER.info("Incremental update done")
                 }
             }

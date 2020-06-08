@@ -3,15 +3,10 @@ package net.adoptopenjdk.api
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
 import kotlinx.coroutines.runBlocking
-import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
-import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
-import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
-import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.models.ReleaseInfo
-import net.adoptopenjdk.api.v3.models.ReleaseType
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
 import org.junit.jupiter.api.BeforeEach
@@ -23,18 +18,18 @@ class AvailableReleasesPathTest : BaseTest() {
     @BeforeEach
     fun initDB() {
         runBlocking {
-            val repo = AdoptReposBuilder.build(APIDataStore.variants.versions)
-
-            val releases = repo.allReleases.getReleases()
-                .filter { it.version_data.major < 13 || it.version_data.major == 13 && it.release_type == ReleaseType.ea }
-                .groupBy { it.version_data.major }
-                .toMap()
-                .map { FeatureRelease(it.key, Releases(it.value)) }
-
             // Reset connection
             ApiPersistenceFactory.set(null)
-            ApiPersistenceFactory.get().updateAllRepos(AdoptRepos(releases))
-            APIDataStore.loadDataFromDb()
+            ApiPersistenceFactory.get().setReleaseInfo(ReleaseInfo(
+                arrayOf(8, 9, 10, 11, 12),
+                arrayOf(8, 11),
+                11,
+                12,
+                13,
+                15
+            )
+            )
+            APIDataStore.loadReleaseInfo()
         }
     }
 
