@@ -2,11 +2,13 @@ package net.adoptopenjdk.api.v3.mapping.adopt
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.adoptopenjdk.api.v3.ReleaseResult
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAssets
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
+import net.adoptopenjdk.api.v3.dataSources.models.GithubId
 import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGithubHtmlClient
 import net.adoptopenjdk.api.v3.mapping.BinaryMapper
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
@@ -25,8 +27,13 @@ import java.util.regex.Pattern
 object AdoptReleaseMapper : ReleaseMapper() {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    private val excludedReleases: MutableCollection<GithubId> = mutableListOf()
 
-    override suspend fun toAdoptRelease(release: GHRelease): List<Release> {
+    override suspend fun toAdoptRelease(release: GHRelease): ReleaseResult {
+        if (excludedReleases.contains(release.id)) {
+            return ReleaseResult(error = "Excluded")
+        }
+
         val releaseType: ReleaseType = formReleaseType(release)
 
         val releaseLink = release.url
@@ -45,7 +52,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
                     "${version.major}.${version.minor}.${version.security}.${version.build}.${version.adopt_build_number}.${version.pre}"
                 }
 
-            return groupedByVersion
+            val releases = groupedByVersion
                 .entries
                 .map { grouped ->
                     val version = grouped.value.sortedBy { it.value.version.toApiVersion() }
@@ -68,18 +75,28 @@ object AdoptReleaseMapper : ReleaseMapper() {
                         throw Exception("Failed to parse version $releaseName")
                     }
                 }
-                .filter { release -> !excludeRelease(release) }
+                .filter { updatedRelease -> !excludeRelease(release, updatedRelease) }
+
+            return ReleaseResult(result = releases)
         } catch (e: FailedToParse) {
             LOGGER.error("Failed to parse $releaseName")
             throw e
         }
     }
 
-    private fun excludeRelease(release: Release): Boolean {
+    private fun excludeRelease(ghRelease: GHRelease, release: Release): Boolean {
+        if (excludedReleases.contains(ghRelease.id)) return true
+
         return if (release.release_type == ReleaseType.ea) {
             // remove all 14.0.1+7.1 and 15.0.0+24.1 nightlies - https://github.com/AdoptOpenJDK/openjdk-api-v3/issues/213
-            release.version_data.semver.startsWith("14.0.1+7.1.") ||
-                release.version_data.semver.startsWith("15.0.0+24.1.")
+            if (release.version_data.semver.startsWith("14.0.1+7.1.") ||
+                release.version_data.semver.startsWith("15.0.0+24.1.")) {
+                // Found an excluded release, mark it for future reference
+                excludedReleases.add(ghRelease.id)
+                true
+            } else {
+                false
+            }
         } else {
             false
         }

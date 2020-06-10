@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api.v3.mapping.upstream
 
+import net.adoptopenjdk.api.v3.ReleaseResult
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.mapping.BinaryMapper
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
@@ -18,7 +19,7 @@ object UpstreamReleaseMapper : ReleaseMapper() {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-    override suspend fun toAdoptRelease(release: GHRelease): List<Release>? {
+    override suspend fun toAdoptRelease(release: GHRelease): ReleaseResult {
         val release_type: ReleaseType = if (release.name.contains(" GA ")) ReleaseType.ga else ReleaseType.ea
 
         val releaseLink = release.url
@@ -26,10 +27,10 @@ object UpstreamReleaseMapper : ReleaseMapper() {
         val timestamp = parseDate(release.publishedAt)
         val updatedAt = parseDate(release.updatedAt)
         val downloadCount = release.releaseAssets.assets
-                .filter { asset ->
-                    BinaryMapper.BINARY_EXTENSIONS.any { asset.name.endsWith(it) }
-                }
-                .map { it.downloadCount }.sum()
+            .filter { asset ->
+                BinaryMapper.BINARY_EXTENSIONS.any { asset.name.endsWith(it) }
+            }
+            .map { it.downloadCount }.sum()
 
         val vendor = Vendor.openjdk
 
@@ -50,20 +51,20 @@ object UpstreamReleaseMapper : ReleaseMapper() {
 
             val sourcePackage = getSourcePackage(release)
 
-            return listOf(Release(release.id.githubId, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, versionData, sourcePackage))
+            return ReleaseResult(result = listOf(Release(release.id.githubId, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, versionData, sourcePackage)))
         } catch (e: FailedToParse) {
             LOGGER.error("Failed to parse $releaseName")
-            return null
+            return ReleaseResult(error = "Failed to parse")
         }
     }
 
     private fun getSourcePackage(release: GHRelease): SourcePackage? {
         return release.releaseAssets
-                .assets
-                .filter { it.name.endsWith("tar.gz") }
-                .filter { it.name.contains("-sources") }
-                .map { SourcePackage(it.name, it.downloadUrl, it.size) }
-                .firstOrNull()
+            .assets
+            .filter { it.name.endsWith("tar.gz") }
+            .filter { it.name.contains("-sources") }
+            .map { SourcePackage(it.name, it.downloadUrl, it.size) }
+            .firstOrNull()
     }
 
     private fun getVersionData(release_name: String): VersionData {

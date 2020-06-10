@@ -66,7 +66,7 @@ class AdoptReleaseMapperTest : BaseTest() {
 
             val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
 
-            assertEquals(1, release.first().download_count)
+            assertEquals(1, release.result!!.first().download_count)
         }
     }
 
@@ -80,7 +80,7 @@ class AdoptReleaseMapperTest : BaseTest() {
 
             val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
 
-            assertEquals(ReleaseType.ea, release.first().release_type)
+            assertEquals(ReleaseType.ea, release.result!!.first().release_type)
         }
     }
 
@@ -178,12 +178,12 @@ class AdoptReleaseMapperTest : BaseTest() {
 
             val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
 
-            assertEquals(2, release.size)
-            assertEquals(1, release[0].binaries.size)
-            assertEquals(2, release[1].binaries.size)
+            assertEquals(2, release.result!!.size)
+            assertEquals(1, release.result!![0].binaries.size)
+            assertEquals(2, release.result!![1].binaries.size)
 
-            assertEquals(1, release[0].download_count)
-            assertEquals(3, release[1].download_count)
+            assertEquals(1, release.result!![0].download_count)
+            assertEquals(3, release.result!![1].download_count)
         }
     }
 

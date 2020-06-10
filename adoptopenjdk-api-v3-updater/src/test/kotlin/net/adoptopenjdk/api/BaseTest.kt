@@ -13,6 +13,7 @@ import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.AdoptRepository
 import net.adoptopenjdk.api.v3.AdoptRepositoryFactory
+import net.adoptopenjdk.api.v3.ReleaseResult
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
@@ -27,7 +28,6 @@ import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.GithubId
 import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoClientFactory
-import net.adoptopenjdk.api.v3.models.Release
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.ProtocolVersion
@@ -97,9 +97,9 @@ abstract class BaseTest {
             val bindIp = "localhost"
             val port = Random.nextInt(10000, 16000)
             val mongodConfig = MongodConfigBuilder()
-                    .version(Version.V4_0_2)
-                    .net(Net(bindIp, port, Network.localhostIsIPv6()))
-                    .build()
+                .version(Version.V4_0_2)
+                .net(Net(bindIp, port, Network.localhostIsIPv6()))
+                .build()
 
             LOGGER.info("Mongo \"mongodb://localhost:${port}\"")
             System.setProperty("MONGO_DB", "mongodb://localhost:$port")
@@ -125,10 +125,10 @@ abstract class BaseTest {
 
         fun MockRepository(adoptRepos: AdoptRepos): AdoptRepository {
             return object : AdoptRepository {
-                override suspend fun getReleaseById(id: GithubId): List<Release>? {
-                    return adoptRepos.allReleases.getReleases().filter {
+                override suspend fun getReleaseById(id: GithubId): ReleaseResult {
+                    return ReleaseResult(result = adoptRepos.allReleases.getReleases().filter {
                         it.id.startsWith(id.githubId)
-                    }.toList()
+                    }.toList())
                 }
 
                 override suspend fun getRelease(version: Int): FeatureRelease? {
@@ -142,13 +142,14 @@ abstract class BaseTest {
                 protected fun repoToSummary(featureRelease: FeatureRelease): GHRepositorySummary {
 
                     val gHReleaseSummarys = featureRelease.releases.getReleases()
-                            .map {
-                                GHReleaseSummary(
-                                        GithubId(it.id),
-                                        DateTimeFormatter.ISO_INSTANT.format(it.timestamp),
-                                        DateTimeFormatter.ISO_INSTANT.format(it.updated_at))
-                            }
-                            .toList()
+                        .map {
+                            GHReleaseSummary(
+                                GithubId(it.id),
+                                DateTimeFormatter.ISO_INSTANT.format(it.timestamp),
+                                DateTimeFormatter.ISO_INSTANT.format(it.updated_at)
+                            )
+                        }
+                        .toList()
 
                     return GHRepositorySummary(GHReleasesSummary(gHReleaseSummarys, PageInfo(false, "")))
                 }
