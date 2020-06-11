@@ -27,7 +27,7 @@ import java.util.regex.Pattern
 object AdoptReleaseMapper : ReleaseMapper() {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
-    private val excludedReleases: MutableCollection<GithubId> = mutableListOf()
+    private val excludedReleases: MutableSet<GithubId> = mutableSetOf()
 
     override suspend fun toAdoptRelease(release: GHRelease): ReleaseResult {
         if (excludedReleases.contains(release.id)) {
@@ -79,8 +79,9 @@ object AdoptReleaseMapper : ReleaseMapper() {
 
             return ReleaseResult(result = releases)
         } catch (e: FailedToParse) {
+            excludedReleases.add(release.id)
             LOGGER.error("Failed to parse $releaseName")
-            throw e
+            return ReleaseResult(error = "Failed to parse $releaseName")
         }
     }
 
