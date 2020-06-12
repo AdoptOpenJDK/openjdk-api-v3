@@ -19,26 +19,29 @@ import org.apache.http.ProtocolVersion
 import org.apache.http.message.BasicHeader
 import org.apache.http.message.BasicStatusLine
 import org.junit.jupiter.api.Test
-import java.lang.RuntimeException
 import java.util.*
 import kotlin.test.assertEquals
-import kotlin.test.fail
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class AdoptReleaseMapperTest : BaseTest() {
 
     val jdk = GHAsset(
-            "OpenJDK8U-jre_x64_linux_hotspot-123244354325.tar.gz",
-            1L,
-            "",
-            1L,
-            "2013-02-27T19:35:32Z")
+        "OpenJDK8U-jre_x64_linux_hotspot-123244354325.tar.gz",
+        1L,
+        "",
+        1L,
+        "2013-02-27T19:35:32Z"
+    )
 
     val checksum = GHAsset(
-            "OpenJDK8U-jre_x64_linux_hotspot-123244354325.tar.gz.sha256.txt",
-            1L,
-            "",
-            1L,
-            "2013-02-27T19:35:32Z")
+        "OpenJDK8U-jre_x64_linux_hotspot-123244354325.tar.gz.sha256.txt",
+        1L,
+        "",
+        1L,
+        "2013-02-27T19:35:32Z"
+    )
 
     @Test
     fun ignoresUnparsableVersion() {
@@ -47,12 +50,10 @@ class AdoptReleaseMapperTest : BaseTest() {
 
             val ghRelease = GHRelease(GithubId("1"), "OpenJDK 123244354325", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "a-url")
 
-            try {
-                AdoptReleaseMapper.toAdoptRelease(ghRelease)
-                fail("Did not throw exception")
-            } catch (e: Exception) {
-                return@runBlocking
-            }
+            val result = AdoptReleaseMapper.toAdoptRelease(ghRelease)
+            assertFalse(result.succeeded())
+            assertNotNull(result.error)
+            assertNull(result.result)
         }
     }
 
@@ -94,39 +95,46 @@ class AdoptReleaseMapperTest : BaseTest() {
                     1L,
                     "",
                     1L,
-                    "2013-02-27T19:35:32Z"),
+                    "2013-02-27T19:35:32Z"
+                ),
                 GHAsset(
                     "OpenJDK8U-jre_x64_linux_hotspot-1.tar.gz.json",
                     1L,
                     "1",
                     1L,
-                    "2013-02-27T19:35:32Z"),
+                    "2013-02-27T19:35:32Z"
+                ),
                 GHAsset(
                     "OpenJDK8U-jre_x64_linux_hotspot-2.tar.gz",
                     1L,
                     "",
                     1L,
-                    "2013-02-27T19:35:32Z"),
+                    "2013-02-27T19:35:32Z"
+                ),
                 GHAsset(
                     "OpenJDK8U-jre_x64_linux_hotspot-2.tar.gz.json",
                     1L,
                     "2",
                     1L,
-                    "2013-02-27T19:35:32Z"),
+                    "2013-02-27T19:35:32Z"
+                ),
                 GHAsset(
                     "OpenJDK8U-jre_x64_linux_hotspot-3.tar.gz",
                     1L,
                     "",
                     2L,
-                    "2013-02-27T19:35:32Z"),
+                    "2013-02-27T19:35:32Z"
+                ),
                 GHAsset(
                     "OpenJDK8U-jre_x64_linux_hotspot-3.tar.gz.json",
                     1L,
                     "2",
                     1L,
-                    "2013-02-27T19:35:32Z")
+                    "2013-02-27T19:35:32Z"
+                )
 
-            ), PageInfo(false, ""))
+            ), PageInfo(false, "")
+            )
 
             UpdaterHtmlClientFactory.client = object : UpdaterHtmlClient {
                 override suspend fun get(url: String): String? {

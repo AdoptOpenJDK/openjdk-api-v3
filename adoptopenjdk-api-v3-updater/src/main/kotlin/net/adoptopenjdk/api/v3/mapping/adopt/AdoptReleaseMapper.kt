@@ -72,7 +72,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
 
                         return@ifEmpty listOf(toRelease(releaseName, assets, metadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version, assets))
                     } catch (e: Exception) {
-                        throw Exception("Failed to parse version $releaseName")
+                        throw FailedToParse("Failed to parse version $releaseName", e)
                     }
                 }
                 .filter { updatedRelease -> !excludeRelease(release, updatedRelease) }

@@ -1,12 +1,12 @@
 package net.adoptopenjdk.api.v3.parser
 
+import net.adoptopenjdk.api.v3.models.VersionData
+import org.slf4j.LoggerFactory
 /* ktlint-disable no-wildcard-imports */
 import java.util.*
 /* ktlint-enable no-wildcard-imports */
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import net.adoptopenjdk.api.v3.models.VersionData
-import org.slf4j.LoggerFactory
 
 // This is a port of the Groovy VersionParser in the openjdk-build project
 // Should probably look at exporting it as a common lib rather than having 2 implementations
@@ -49,9 +49,10 @@ object VersionParser {
         val optRegex = "(?<opt>[-a-zA-Z0-9\\.]+)"
 
         return Arrays.asList(
-                "(?:jdk\\-)?(?<version>$vnumRegex(\\-$preRegex)?\\+$buildRegex(\\-$optRegex)?)",
-                "(?:jdk\\-)?(?<version>$vnumRegex\\-$preRegex(\\-$optRegex)?)",
-                "(?:jdk\\-)?(?<version>$vnumRegex(\\+\\-$optRegex)?)")
+            "(?:jdk\\-)?(?<version>$vnumRegex(\\-$preRegex)?\\+$buildRegex(\\-$optRegex)?)",
+            "(?:jdk\\-)?(?<version>$vnumRegex\\-$preRegex(\\-$optRegex)?)",
+            "(?:jdk\\-)?(?<version>$vnumRegex(\\+\\-$optRegex)?)"
+        )
     }
 
     private fun jep223(): List<String> {
@@ -63,9 +64,10 @@ object VersionParser {
         val optRegex = "(?<opt>[-a-zA-Z0-9\\.]+)"
 
         return Arrays.asList(
-                "(?:jdk\\-)?(?<version>$vnumRegex(\\-$preRegex)?\\+$buildRegex(\\-$optRegex)?)",
-                "(?:jdk\\-)?(?<version>$vnumRegex\\-$preRegex(\\-$optRegex)?)",
-                "(?:jdk\\-)?(?<version>$vnumRegex(\\+\\-$optRegex)?)")
+            "(?:jdk\\-)?(?<version>$vnumRegex(\\-$preRegex)?\\+$buildRegex(\\-$optRegex)?)",
+            "(?:jdk\\-)?(?<version>$vnumRegex\\-$preRegex(\\-$optRegex)?)",
+            "(?:jdk\\-)?(?<version>$vnumRegex(\\+\\-$optRegex)?)"
+        )
     }
 
     private fun adoptNightly(): String {
@@ -198,32 +200,32 @@ object VersionParser {
 
     private fun matchVersion(versionString: String): VersionData? {
         REGEXES
-                .forEach { regex ->
-                    val matched = regex.matcher(versionString)
-                    if (matched.matches()) {
-                        val major = matched.group("major").toInt()
-                        val minor = getOrDefaultNumber(matched, "minor")
-                        val security = getOrDefaultNumber(matched, "security")
-                        var pre: String? = null
-                        if (regex.pattern().contains("pre") && matched.group("pre") != null) {
-                            pre = matched.group("pre")
-                        }
-                        val build = getOrDefaultNumber(matched, "build")
-                        val adopt_build_number = getOrDefaultNumber(matched, "adoptBuild")
-                        var opt: String? = null
-                        if (matched.group("opt") != null) {
-                            opt = matched.group("opt")
-                        }
-                        val version = matched.group("version")
+            .forEach { regex ->
+                val matched = regex.matcher(versionString)
+                if (matched.matches()) {
+                    val major = matched.group("major").toInt()
+                    val minor = getOrDefaultNumber(matched, "minor")
+                    val security = getOrDefaultNumber(matched, "security")
+                    var pre: String? = null
+                    if (regex.pattern().contains("pre") && matched.group("pre") != null) {
+                        pre = matched.group("pre")
+                    }
+                    val build = getOrDefaultNumber(matched, "build")
+                    val adopt_build_number = getOrDefaultNumber(matched, "adoptBuild")
+                    var opt: String? = null
+                    if (matched.group("opt") != null) {
+                        opt = matched.group("opt")
+                    }
+                    val version = matched.group("version")
 
-                        val parsed = VersionData(major, minor, security, pre, adopt_build_number, build, opt, version)
-                        if (sanityCheck(parsed)) {
-                            return parsed
-                        }
+                    val parsed = VersionData(major, minor, security, pre, adopt_build_number, build, opt, version)
+                    if (sanityCheck(parsed)) {
+                        return parsed
                     }
                 }
+            }
         return null
     }
 }
 
-class FailedToParse(message: String) : Exception(message)
+class FailedToParse(message: String, e: Throwable? = null) : Exception(message, e)
