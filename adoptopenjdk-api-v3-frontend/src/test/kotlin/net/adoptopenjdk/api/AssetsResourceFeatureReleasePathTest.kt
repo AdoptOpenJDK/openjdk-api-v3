@@ -120,8 +120,9 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
             val releasesStr = body.prettyPrint()
             return parseReleases(releasesStr)
         }
+
         fun parseReleases(json: String?): List<Release> =
-                JsonMapper.mapper.readValue(json, JsonMapper.mapper.getTypeFactory().constructCollectionType(MutableList::class.java, Release::class.java))
+            JsonMapper.mapper.readValue(json, JsonMapper.mapper.getTypeFactory().constructCollectionType(MutableList::class.java, Release::class.java))
     }
 
     @Test
@@ -136,9 +137,9 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
     @Test
     fun pageSizeIsWorking() {
         val body = RestAssured.given()
-                .`when`()
-                .get("${getPath()}/11/ea?page_size=5")
-                .body
+            .`when`()
+            .get("${getPath()}/11/ea?page_size=5")
+            .body
 
         val releasesStr = body.prettyPrint()
         val releases = parseReleases(releasesStr)
