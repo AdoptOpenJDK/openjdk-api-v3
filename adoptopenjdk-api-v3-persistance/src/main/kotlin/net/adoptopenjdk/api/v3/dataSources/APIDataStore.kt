@@ -8,11 +8,13 @@ import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.models.Platforms
+import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import net.adoptopenjdk.api.v3.models.Variants
 import org.slf4j.LoggerFactory
 
 object APIDataStore {
     private var binaryRepos: AdoptRepos
+    private var releaseInfo: ReleaseInfo
 
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
@@ -35,23 +37,47 @@ object APIDataStore {
             binaryRepos = AdoptRepos(listOf())
         }
 
+        releaseInfo = loadReleaseInfo()
+
         Executors
-                .newSingleThreadScheduledExecutor()
-                .scheduleWithFixedDelay(timerTask {
-                    periodicUpdate()
-                }, 0, 15, TimeUnit.MINUTES)
+            .newSingleThreadScheduledExecutor()
+            .scheduleWithFixedDelay(timerTask {
+                periodicUpdate()
+            }, 0, 15, TimeUnit.MINUTES)
+    }
+
+    fun loadReleaseInfo(): ReleaseInfo {
+        releaseInfo = runBlocking {
+            val releaseInfo = try {
+                ApiPersistenceFactory.get().getReleaseInfo()
+            } catch (e: Exception) {
+                LOGGER.error("Failed to read db", e)
+                null
+            }
+
+            // Default for first time when DB is still being populated
+            releaseInfo ?: ReleaseInfo(
+                arrayOf(8, 9, 10, 11, 12, 13, 14),
+                arrayOf(8, 11),
+                11,
+                14,
+                15,
+                15
+            )
+        }
+        return releaseInfo
     }
 
     @VisibleForTesting
     fun loadDataFromDb(): AdoptRepos {
         binaryRepos = runBlocking {
             val data = variants
-                    .versions
-                    .map { version ->
-                        ApiPersistenceFactory.get().readReleaseData(version)
-                    }
-                    .filter { it.releases.nodes.isNotEmpty() }
-                    .toList()
+                .versions
+                .map { version ->
+                    ApiPersistenceFactory.get().readReleaseData(version)
+                }
+                .filter { it.releases.nodes.isNotEmpty() }
+                .toList()
 
             AdoptRepos(data)
         }
@@ -71,8 +97,13 @@ object APIDataStore {
         // Must catch errors or may kill the scheduler
         try {
             binaryRepos = loadDataFromDb()
+            releaseInfo = loadReleaseInfo()
         } catch (e: Exception) {
             LOGGER.error("Failed to load db", e)
         }
+    }
+
+    fun getReleaseInfo(): ReleaseInfo {
+        return releaseInfo
     }
 }

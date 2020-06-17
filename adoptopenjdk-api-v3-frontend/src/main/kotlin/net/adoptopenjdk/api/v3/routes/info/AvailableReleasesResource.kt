@@ -13,16 +13,10 @@ import javax.ws.rs.core.MediaType
 @Path("/v3/info/")
 @Produces(MediaType.APPLICATION_JSON)
 class AvailableReleasesResource {
-
     @GET
     @Path("/available_releases/")
     @Operation(summary = "Returns information about available releases")
     fun get(): ReleaseInfo {
-        return ReleaseInfo(
-            APIDataStore.variants.versions,
-            APIDataStore.variants.ltsVersions,
-            APIDataStore.variants.latestLtsVersion,
-            APIDataStore.variants.latestVersion
-        )
+        return APIDataStore.getReleaseInfo()
     }
 }

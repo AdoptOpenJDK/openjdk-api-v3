@@ -4,11 +4,17 @@ import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertTrue
 
 @QuarkusTest
 class JsonSerializationTest : BaseTest() {
+
+    @BeforeEach
+    fun beforeEach() {
+        populateDb()
+    }
 
     class PrettyPrintMatcher : TypeSafeMatcher<String>() {
 
@@ -25,10 +31,10 @@ class JsonSerializationTest : BaseTest() {
     @Test
     fun isPrettyPrinted() {
         RestAssured.given()
-                .`when`()
-                .get("/v3/info/available_releases")
-                .then()
-                .statusCode(200)
-                .body(PrettyPrintMatcher())
+            .`when`()
+            .get("/v3/info/available_releases")
+            .then()
+            .statusCode(200)
+            .body(PrettyPrintMatcher())
     }
 }

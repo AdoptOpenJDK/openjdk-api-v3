@@ -5,7 +5,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema
 
 @Schema(type = SchemaType.STRING, enumeration = ["normal", "large"], example = "normal")
 enum class HeapSize : FileNameMatcher {
-    normal, large("XL");
+    normal, large("XL", "LinuxLH");
 
     override lateinit var names: List<String>
 

@@ -7,6 +7,7 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHVersion
 import net.adoptopenjdk.api.v3.mapping.adopt.AdoptBinaryMapper
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Binary
+import net.adoptopenjdk.api.v3.models.HeapSize
 import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.OperatingSystem
@@ -140,6 +141,23 @@ class AdoptBinaryMapperTest {
             val binaryList = AdoptBinaryMapper.toBinaryList(listOf(asset), listOf(asset, checksum), emptyMap())
 
             assertEquals("a-download-link", binaryList.get(0).`package`.checksum_link)
+        }
+    }
+
+    @Test
+    fun oldLargeHeapIsCorrectlyIdentified() {
+        runBlocking {
+            val asset = GHAsset(
+                "OPENJ9_x64_LinuxLH_jdk8u181-b13_openj9-0.9.0.tar.gz",
+                1L,
+                "",
+                1L,
+                "2013-02-27T19:35:32Z"
+            )
+
+            val binaryList = AdoptBinaryMapper.toBinaryList(listOf(asset), listOf(asset), emptyMap())
+
+            assertEquals(HeapSize.large, binaryList.get(0).heap_size)
         }
     }
 
