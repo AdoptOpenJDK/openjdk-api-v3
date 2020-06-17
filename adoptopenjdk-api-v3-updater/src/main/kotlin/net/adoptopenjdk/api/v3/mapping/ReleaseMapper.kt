@@ -13,7 +13,7 @@ abstract class ReleaseMapper {
     companion object {
         fun parseDate(date: String): ZonedDateTime {
             return Instant.from(DateTimeFormatter.ISO_INSTANT.parse(date))
-                    .atZone(TimeSource.ZONE)
+                .atZone(TimeSource.ZONE)
         }
     }
 }

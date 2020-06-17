@@ -1,6 +1,9 @@
 package net.adoptopenjdk.api.v3.dataSources
 
 import com.google.common.annotations.VisibleForTesting
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.timerTask
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
@@ -8,9 +11,6 @@ import net.adoptopenjdk.api.v3.models.Platforms
 import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import net.adoptopenjdk.api.v3.models.Variants
 import org.slf4j.LoggerFactory
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.timerTask
 
 object APIDataStore {
     private var binaryRepos: AdoptRepos
