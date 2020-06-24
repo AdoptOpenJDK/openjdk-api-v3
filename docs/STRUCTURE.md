@@ -41,14 +41,23 @@ to make sure it is up to date.
 ### Docker
 The docker repositories are only required for displaying stats. We pull data from the Dockerhub api inside DockerStatsInterface.
 
+### Running
+To run the updater tool, generate the artifacts by running `mvnw clean install`. You then need to cd into the `adoptopenjdk-api-v3-updater` directory and run `java -jar ./target/adoptopenjdk-api-v3-updater-3.0.0-SNAPSHOT-jar-with-dependencies.jar`
+
 ### Database
 The database stores 3 main types of data:
-1. Repos - The binary data extracted from Github
-1. Stats - Download statistics
-1. HTTP Cache - Cached data used to speed up requests
+1. Release - The raw binary data extracted from Github
+1. Stats - Download statistics. Updated at the end of a full refresh.
+    - DockerStats - Broken down into each docker repository
+    - GitHubStats - Broken down into each feature version
+1. Web-Cache - Cached data used to speed up requests
 
  
 ## Frontend
 
 The frontend is a Quarkus application that uses OpenAPI for documentation. Data is polled from the database into memory and requests are then
 serviced from that dataset.
+
+### Running
+To run the frontend quarkus tool, cd into the `adoptopenjdk-api-v3-frontend` directory and run `../mvnw quarkus:dev`. This will then run the tool on port 8080.
+NOTE: You will need to have let the Updater run a full cycle before any data is shown.
