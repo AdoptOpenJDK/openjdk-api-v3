@@ -68,16 +68,13 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
                 versionRange.equals(JAVA8_212) && element == Architecture.arm ||
                 versionRange.equals(JAVA8_212) && element == HeapSize.large ||
                 versionRange.equals(JAVA8_212) && element == ImageType.testimage ||
-                // versionRange.equals(JAVA8_212) && element == Architecture.riscv64 ||
 
                 versionRange.equals(RANGE_8_METADATA) && element == Architecture.aarch64 ||
                 versionRange.equals(RANGE_8_METADATA) && element == Architecture.arm ||
                 versionRange.equals(RANGE_8_METADATA) && element == ImageType.testimage ||
-                // versionRange.equals(RANGE_8_METADATA) && element == Architecture.riscv64 ||
 
                 versionRange.equals(RANGE_11_12) && element == OperatingSystem.solaris ||
                 versionRange.equals(RANGE_11_12) && element == Architecture.sparcv9 ||
-                // versionRange.equals(RANGE_11_12) && element == Architecture.riscv64 ||
 
                 versionRange.equals(JAVA11) && element == Architecture.x32 ||
                 versionRange.equals(JAVA11) && element == OperatingSystem.solaris ||
@@ -85,7 +82,7 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
                 versionRange.equals(JAVA11) && element == ImageType.testimage ||
                 versionRange.equals(BELOW_11) && element == ImageType.testimage ||
 
-                element == Architecture.riscv64 ||
+                element == Architecture.riscv64 || // Temporary until riscv ga
 
                 element == ImageType.debugimage ||
                 element == ImageType.staticlibs
