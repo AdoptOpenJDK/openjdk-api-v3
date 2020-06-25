@@ -81,6 +81,9 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
                 versionRange.equals(JAVA11) && element == Architecture.sparcv9 ||
                 versionRange.equals(JAVA11) && element == ImageType.testimage ||
                 versionRange.equals(BELOW_11) && element == ImageType.testimage ||
+
+                element == Architecture.riscv64 || // Temporary until riscv ga
+
                 element == ImageType.debugimage ||
                 element == ImageType.staticlibs
     }
