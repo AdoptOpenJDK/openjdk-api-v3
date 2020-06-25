@@ -105,6 +105,9 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
             version == 8 && element == ImageType.testimage ||
             version == 11 && element == ImageType.testimage ||
             version == 12 && element == ImageType.testimage ||
+
+            element == Architecture.riscv64 || // Temporary until riscv ga
+
             element == ImageType.debugimage ||
             element == ImageType.staticlibs
     }
