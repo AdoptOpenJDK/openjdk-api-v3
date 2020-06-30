@@ -58,6 +58,30 @@ The database stores 3 main types of data:
 The frontend is a Quarkus application that uses OpenAPI for documentation. Data is polled from the database into memory and requests are then
 serviced from that dataset.
 
+### Examples
+
+Fetch binaries and installers:
+- https://api.adoptopenjdk.net/v3/binary/latest/11/ga/mac/x64/jdk/hotspot/normal/adoptopenjdk
+- https://api.adoptopenjdk.net/v3/installer/latest/14/ea/linux/s390x/jre/openj9/large/adoptopenjdk
+
+Raw asset data:
+- https://api.adoptopenjdk.net/v3/assets/feature_releases/11/ga
+- https://api.adoptopenjdk.net/v3/assets/feature_releases/14/ea?architecture=s390x&jvm_impl=openj9
+- https://api.adoptopenjdk.net/v3/assets/latest/8/openj9
+- https://api.adoptopenjdk.net/v3/assets/version/11.0.4+11.1
+
+Release info:
+- https://api.adoptopenjdk.net/v3/info/available_releases
+- https://api.adoptopenjdk.net/v3/info/release_names
+- https://api.adoptopenjdk.net/v3/info/release_names?page_size=20&release_type=ga
+- https://api.adoptopenjdk.net/v3/info/release_versions
+
+Download statistics:
+- https://api.adoptopenjdk.net/v3/stats/downloads/total
+- https://api.adoptopenjdk.net/v3/stats/downloads/tracking
+- https://api.adoptopenjdk.net/v3/stats/downloads/tracking?source=dockerhub&feature_version=11
+- https://api.adoptopenjdk.net/v3/stats/downloads/monthly
+
 ### Running
 To run the frontend quarkus tool, cd into the `adoptopenjdk-api-v3-frontend` directory and run `../mvnw quarkus:dev`. This will then run the tool on port 8080.
 NOTE: You will need to have let the Updater run a full cycle before any data is shown.
