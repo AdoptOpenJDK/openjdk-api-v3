@@ -74,4 +74,18 @@ class DockerStatsInterfaceTest {
             assertEquals(240, stats[0].total)
         }
     }
+
+    @Test
+    fun testGetOpenjdkVersionFromString() {
+        runBlocking {
+            val downloadStatsInterface = DockerStatsInterface()
+
+            assertEquals(11, downloadStatsInterface.getOpenjdkVersionFromString("openjdk11"))
+            assertEquals(8, downloadStatsInterface.getOpenjdkVersionFromString("openjdk8-openj9"))
+            assertEquals(12, downloadStatsInterface.getOpenjdkVersionFromString("maven-openjdk12"))
+            assertEquals(14, downloadStatsInterface.getOpenjdkVersionFromString("maven-openjdk14-openj9"))
+
+            assertEquals(null, downloadStatsInterface.getOpenjdkVersionFromString("official"))
+        }
+    }
 }

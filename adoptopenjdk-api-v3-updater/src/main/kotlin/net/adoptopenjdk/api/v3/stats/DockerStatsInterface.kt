@@ -52,7 +52,7 @@ class DockerStatsInterface {
     }
 
     public fun getOpenjdkVersionFromString(name: String): Int? {
-        return "openjdk(?<featureNum>[0-9]+)".toRegex().matchEntire(name)?.groups?.get("featureNum")?.value?.toInt()
+        return "openjdk(?<featureNum>[0-9]+)".toRegex().find(name)?.groups?.get("featureNum")?.value?.toInt()
     }
 
     private fun pullOfficalStats(): DockerDownloadStatsDbEntry {
