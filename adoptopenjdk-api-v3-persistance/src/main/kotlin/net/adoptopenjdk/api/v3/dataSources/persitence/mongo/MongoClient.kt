@@ -42,7 +42,7 @@ class MongoClient {
         var uri = if (username != null && password != null) {
             "mongodb://$username:$password@$host:$port/$dbName"
         } else {
-            "mongodb://$host:$port"
+            "mongodb://$host:$port/?serverSelectionTimeoutMS=100"
         }
 
         if (System.getProperty("MONGO_DB") != null) {
