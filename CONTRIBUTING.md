@@ -90,7 +90,7 @@ calls via the GitHub API in order to retrieve AdoptOpenJDK binaries and metadata
 
 Since the GitHub API is rate limited we use MongoDB as a caching mechanism.
 
-See [./docs/STRUCTURE.md](Code Structure) doc for more details.
+See [Code Structure](./docs/STRUCTURE.md) doc for more details.
 
 ## Common Tasks
 
