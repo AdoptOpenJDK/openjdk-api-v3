@@ -39,14 +39,12 @@ class MongoClient {
         val port = System.getenv("MONGODB_PORT") ?: "27017"
 
         LOGGER.info("Connecting to mongodb://$username:a-password@$host:$port/$dbName")
-        var uri = if (username != null && password != null) {
+        var uri = if (System.getProperty("MONGO_DB") != null) {
+            System.getProperty("MONGO_DB")
+        } else if (username != null && password != null) {
             "mongodb://$username:$password@$host:$port/$dbName"
         } else {
             "mongodb://$host:$port/?serverSelectionTimeoutMS=100"
-        }
-
-        if (System.getProperty("MONGO_DB") != null) {
-            uri = System.getProperty("MONGO_DB")
         }
 
         client = KMongo.createClient(uri).coroutine
