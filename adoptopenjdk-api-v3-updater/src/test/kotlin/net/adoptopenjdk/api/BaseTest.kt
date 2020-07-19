@@ -101,8 +101,9 @@ abstract class BaseTest {
                 .net(Net(bindIp, port, Network.localhostIsIPv6()))
                 .build()
 
-            LOGGER.info("Mongo \"mongodb://localhost:${port}\"")
-            System.setProperty("MONGO_DB", "mongodb://localhost:$port")
+            val mongodbTestConnectionString = "mongodb://${bindIp}:${port}"
+            LOGGER.info("Mongo test connection string - $mongodbTestConnectionString")
+            System.setProperty("MONGODB_TEST_CONNECTION_STRING", mongodbTestConnectionString)
 
             mongodExecutable = starter.prepare(mongodConfig)
             mongodExecutable!!.start()
