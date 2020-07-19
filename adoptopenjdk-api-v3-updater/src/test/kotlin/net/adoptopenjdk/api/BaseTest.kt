@@ -101,7 +101,7 @@ abstract class BaseTest {
                 .net(Net(bindIp, port, Network.localhostIsIPv6()))
                 .build()
 
-            val mongodbTestConnectionString = "mongodb://${bindIp}:${port}"
+            val mongodbTestConnectionString = "mongodb://$bindIp:$port"
             LOGGER.info("Mongo test connection string - $mongodbTestConnectionString")
             System.setProperty("MONGODB_TEST_CONNECTION_STRING", mongodbTestConnectionString)
 
