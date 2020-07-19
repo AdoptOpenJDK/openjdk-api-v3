@@ -45,7 +45,7 @@ class MongoClient {
         val host = System.getenv("MONGODB_HOST") ?: DefaultMongoClientConfig.HOST
         val port = System.getenv("MONGODB_PORT") ?: DefaultMongoClientConfig.PORT
 
-        val uri = System.getProperty("MONGODB_TEST_CONNECTION_STRING")
+        val connectionString = System.getProperty("MONGODB_TEST_CONNECTION_STRING")
                 ?: if (username != null && password != null) {
                     LOGGER.info("Connecting to mongodb://$username:a-password@$host:$port/$dbName")
                     "mongodb://$username:$password@$host:$port/$dbName"
@@ -56,7 +56,7 @@ class MongoClient {
                     developmentConnectionString
                 }
 
-        client = KMongo.createClient(uri).coroutine
+        client = KMongo.createClient(connectionString).coroutine
         database = client.getDatabase(dbName)
     }
 }
