@@ -22,13 +22,6 @@ object MongoClientFactory {
     }
 }
 
-object DefaultMongoClientConfig {
-    const val DBNAME = "api-data"
-    const val HOST = "localhost"
-    const val PORT = "27017"
-    const val SERVER_SELECTION_TIMEOUT_MILLIS = 100
-}
-
 class MongoClient {
     val database: CoroutineDatabase
     val client: CoroutineClient
