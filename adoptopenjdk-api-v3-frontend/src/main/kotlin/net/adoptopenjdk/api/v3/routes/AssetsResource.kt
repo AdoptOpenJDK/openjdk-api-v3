@@ -6,6 +6,7 @@ import net.adoptopenjdk.api.v3.Pagination.getPage
 import net.adoptopenjdk.api.v3.Pagination.maxPageSize
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
+import net.adoptopenjdk.api.v3.dataSources.SortMethod
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.filters.BinaryFilter
 import net.adoptopenjdk.api.v3.filters.ReleaseFilter
@@ -127,10 +128,15 @@ class AssetsResource {
 
         @Parameter(name = "sort_order", description = "Result sort order", required = false)
         @QueryParam("sort_order")
-        sortOrder: SortOrder?
+        sortOrder: SortOrder?,
+
+        @Parameter(name = "sort_method", description = "Result sort method", required = false)
+        @QueryParam("sort_method")
+        sortMethod: SortMethod?
 
     ): List<Release> {
         val order = sortOrder ?: SortOrder.DESC
+        val sortMethod = sortMethod ?: SortMethod.DEFAULT
 
         val beforeParsed = parseDate(before)
 
@@ -144,7 +150,7 @@ class AssetsResource {
 
         val releases = APIDataStore
             .getAdoptRepos()
-            .getFilteredReleases(version, releaseFilter, binaryFilter, order)
+            .getFilteredReleases(version, releaseFilter, binaryFilter, order, sortMethod)
 
         return getPage(pageSize, page, releases)
     }
@@ -256,10 +262,14 @@ class AssetsResource {
 
         @Parameter(name = "sort_order", description = "Result sort order", required = false)
         @QueryParam("sort_order")
-        sortOrder: SortOrder?
+        sortOrder: SortOrder?,
 
+        @Parameter(name = "sort_method", description = "Result sort method", required = false)
+        @QueryParam("sort_method")
+        sortMethod: SortMethod?
     ): List<Release> {
         val order = sortOrder ?: SortOrder.DESC
+        val sortMethod = sortMethod ?: SortMethod.DEFAULT
 
         val range = VersionRangeFilter(version)
 
@@ -268,7 +278,7 @@ class AssetsResource {
 
         val releases = APIDataStore
             .getAdoptRepos()
-            .getFilteredReleases(releaseFilter, binaryFilter, order)
+            .getFilteredReleases(releaseFilter, binaryFilter, order, sortMethod)
 
         return getPage(pageSize, page, releases)
     }
@@ -300,7 +310,7 @@ class AssetsResource {
         val binaryFilter = BinaryFilter(null, null, null, jvm_impl, null, null)
         val releases = APIDataStore
             .getAdoptRepos()
-            .getFilteredReleases(version, releaseFilter, binaryFilter, SortOrder.ASC)
+            .getFilteredReleases(version, releaseFilter, binaryFilter, SortOrder.ASC, SortMethod.DEFAULT)
 
         return releases
             .flatMap { release ->
