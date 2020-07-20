@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import net.adoptopenjdk.api.v3.dataSources.SortMethod
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.models.Binary
 import net.adoptopenjdk.api.v3.models.Release
@@ -42,23 +43,24 @@ class AdoptRepos {
             .map { Pair(it.featureVersion, it) }
             .toMap())
 
-    fun getReleases(releaseFilter: Predicate<Release>, sortOrder: SortOrder): Sequence<Release> {
-        return allReleases.getReleases(releaseFilter, sortOrder)
+    fun getReleases(releaseFilter: Predicate<Release>, sortOrder: SortOrder, sortMethod: SortMethod): Sequence<Release> {
+        return allReleases.getReleases(releaseFilter, sortOrder, sortMethod)
     }
 
     fun getFilteredReleases(
         version: Int,
         releaseFilter: Predicate<Release>,
         binaryFilter: Predicate<Binary>,
-        sortOrder: SortOrder
+        sortOrder: SortOrder,
+        sortMethod: SortMethod
     ): Sequence<Release> {
         val featureRelease = getFeatureRelease(version) ?: return emptySequence()
 
-        return getFilteredReleases(featureRelease.releases.getReleases(releaseFilter, sortOrder), binaryFilter)
+        return getFilteredReleases(featureRelease.releases.getReleases(releaseFilter, sortOrder, sortMethod), binaryFilter)
     }
 
-    fun getFilteredReleases(releaseFilter: Predicate<Release>, binaryFilter: Predicate<Binary>, sortOrder: SortOrder): Sequence<Release> {
-        return getFilteredReleases(allReleases.getReleases(releaseFilter, sortOrder), binaryFilter)
+    fun getFilteredReleases(releaseFilter: Predicate<Release>, binaryFilter: Predicate<Binary>, sortOrder: SortOrder, sortMethod: SortMethod): Sequence<Release> {
+        return getFilteredReleases(allReleases.getReleases(releaseFilter, sortOrder, sortMethod), binaryFilter)
     }
 
     private fun getFilteredReleases(releases: Sequence<Release>, binaryFilter: Predicate<Binary>): Sequence<Release> {
