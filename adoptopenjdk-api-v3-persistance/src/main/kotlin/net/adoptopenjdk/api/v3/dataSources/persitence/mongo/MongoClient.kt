@@ -36,25 +36,41 @@ class MongoClient {
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
-    }
+        private const val DEFAULT_DBNAME = "api-data"
+        private const val DEFAULT_HOST = "localhost"
+        private const val DEFAULT_PORT = "27017"
+        private const val DEFAULT_SERVER_SELECTION_TIMEOUT_MILLIS = "100"
 
-    init {
-        val dbName = System.getenv("MONGODB_DBNAME") ?: DefaultMongoClientConfig.DBNAME
-        val username = System.getenv("MONGODB_USER")
-        val password = System.getenv("MONGODB_PASSWORD")
-        val host = System.getenv("MONGODB_HOST") ?: DefaultMongoClientConfig.HOST
-        val port = System.getenv("MONGODB_PORT") ?: DefaultMongoClientConfig.PORT
-
-        val connectionString = System.getProperty("MONGODB_TEST_CONNECTION_STRING")
+        fun createConnectionString(
+            dbName: String,
+            username: String? = null,
+            password: String? = null,
+            host: String? = DEFAULT_HOST,
+            port: String? = DEFAULT_PORT,
+            serverSelectionTimeoutMills: String? = DEFAULT_SERVER_SELECTION_TIMEOUT_MILLIS
+        ): String {
+            return System.getProperty("MONGODB_TEST_CONNECTION_STRING")
                 ?: if (username != null && password != null) {
                     LOGGER.info("Connecting to mongodb://$username:a-password@$host:$port/$dbName")
                     "mongodb://$username:$password@$host:$port/$dbName"
                 } else {
-                    val serverSelectionTimeoutMills = System.getenv("MONGODB_SERVER_SELECTION_TIMEOUT_MILLIS") ?: DefaultMongoClientConfig.SERVER_SELECTION_TIMEOUT_MILLIS
                     val developmentConnectionString = "mongodb://$host:$port/?serverSelectionTimeoutMS=$serverSelectionTimeoutMills"
                     LOGGER.info("Using development connection string - $developmentConnectionString")
                     developmentConnectionString
                 }
+        }
+    }
+
+    init {
+        val dbName = System.getenv("MONGODB_DBNAME") ?: DEFAULT_DBNAME
+        val connectionString = createConnectionString(
+            dbName,
+            username = System.getenv("MONGODB_USER"),
+            password = System.getenv("MONGODB_PASSWORD"),
+            host = System.getenv("MONGODB_HOST"),
+            port = System.getenv("MONGODB_PORT"),
+            serverSelectionTimeoutMills = System.getenv("MONGODB_SERVER_SELECTION_TIMEOUT_MILLIS")
+        )
 
         client = KMongo.createClient(connectionString).coroutine
         database = client.getDatabase(dbName)
