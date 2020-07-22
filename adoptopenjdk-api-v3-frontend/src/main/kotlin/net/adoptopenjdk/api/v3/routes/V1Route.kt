@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api.v3.routes
 
+import org.eclipse.microprofile.metrics.annotation.Timed
 import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import javax.ws.rs.GET
@@ -11,6 +12,7 @@ import javax.ws.rs.core.Response
 @Path("/v1/")
 @Schema(hidden = true)
 @Produces(MediaType.TEXT_PLAIN)
+@Timed
 class V1Route {
 
     // Cant find a way to match nothing and something in the same request, so need 2

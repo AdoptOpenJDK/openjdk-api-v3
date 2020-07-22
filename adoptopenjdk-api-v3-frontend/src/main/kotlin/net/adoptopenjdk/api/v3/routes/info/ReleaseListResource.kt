@@ -12,6 +12,7 @@ import net.adoptopenjdk.api.v3.models.ReleaseList
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.ReleaseVersionList
 import net.adoptopenjdk.api.v3.models.Vendor
+import org.eclipse.microprofile.metrics.annotation.Timed
 import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
@@ -26,6 +27,7 @@ import javax.ws.rs.core.MediaType
 @Tag(name = "Release Info")
 @Path("/v3/info")
 @Produces(MediaType.APPLICATION_JSON)
+@Timed
 class ReleaseListResource {
 
     @GET
