@@ -24,6 +24,7 @@ cp adoptopenjdk-api-v3-frontend/target/adoptopenjdk-api-*-runner.jar /deployment
 mkdir -p /deployments/scripts
 cp scripts/* /deployments/scripts/
 
+rm -rf /tmp/jboss || true
+rm -rf /tmp/hsperfdata_* || true
+rm -rf /tmp/vert* || true
 rm /tmp/updater.log || true
-
-
