@@ -3,6 +3,7 @@ package net.adoptopenjdk.api.v3.dataSources.models
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import net.adoptopenjdk.api.v3.dataSources.SortMethod
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.models.Release
 import java.time.ZonedDateTime
@@ -18,38 +19,46 @@ class Releases {
 
     @JsonIgnore
     val nodeList: TreeSet<Release> = TreeSet(VERSION_THEN_TIME_SORTER)
+    private val nodeListTimeThenVersion: TreeSet<Release> = TreeSet(TIME_THEN_VERSION_SORTER)
 
     constructor(nodes: List<Release>) {
         this.nodes = nodes
-                .map { it.id to it }
-                .toMap()
+            .map { it.id to it }
+            .toMap()
         nodeList.addAll(nodes)
+        nodeListTimeThenVersion.addAll(nodes)
     }
 
     @JsonCreator
     constructor(@JsonProperty("nodes") nodes: Map<String, Release>) {
         this.nodes = nodes
         nodeList.addAll(nodes.values)
+        nodeListTimeThenVersion.addAll(nodes.values)
     }
 
     @JsonIgnore
-    fun getReleases(filter: Predicate<Release>, sortOrder: SortOrder): Sequence<Release> {
-        return getReleases(sortOrder)
-                .filter {
-                    return@filter filter.test(it)
-                }
+    fun getReleases(filter: Predicate<Release>, sortOrder: SortOrder, sortMethod: SortMethod): Sequence<Release> {
+        return getReleases(sortOrder, sortMethod)
+            .filter {
+                return@filter filter.test(it)
+            }
     }
 
     @JsonIgnore
-    fun getReleases(sortOrder: SortOrder): Sequence<Release> {
-        val nodes = if (sortOrder == SortOrder.ASC) nodeList.iterator() else nodeList.descendingIterator()
+    fun getReleases(sortOrder: SortOrder, sortMethod: SortMethod): Sequence<Release> {
+        val list = when (sortMethod) {
+            SortMethod.DATE -> nodeListTimeThenVersion
+            SortMethod.DEFAULT -> nodeList
+        }
+
+        val nodes = if (sortOrder == SortOrder.ASC) list.iterator() else list.descendingIterator()
 
         return nodes.asSequence()
     }
 
     @JsonIgnore
     fun getReleases(): Sequence<Release> {
-        return getReleases(SortOrder.ASC)
+        return getReleases(SortOrder.ASC, SortMethod.DEFAULT)
     }
 
     fun retain(githubId: List<GithubId>): Releases {
@@ -58,15 +67,15 @@ class Releases {
 
     fun hasReleaseId(githubId: GithubId): Boolean {
         return nodes
-                .any { it.key.startsWith(githubId.githubId) }
+            .any { it.key.startsWith(githubId.githubId) }
     }
 
     fun hasReleaseBeenUpdated(githubId: GithubId, updatedAt: ZonedDateTime): Boolean {
         return nodes
-                .filter { it.key.startsWith(githubId.githubId) }
-                .any {
-                    ChronoUnit.SECONDS.between(it.value.updated_at, updatedAt) != 0L
-                }
+            .filter { it.key.startsWith(githubId.githubId) }
+            .any {
+                ChronoUnit.SECONDS.between(it.value.updated_at, updatedAt) != 0L
+            }
     }
 
     fun add(newReleases: List<Release>): Releases {
@@ -95,16 +104,25 @@ class Releases {
     companion object {
         // Cant use the default sort as we want to ignore optional
         val VERSION_COMPARATOR = compareBy<Release> { it.version_data.major }
-                .thenBy { it.version_data.minor }
-                .thenBy { it.version_data.security }
-                .thenBy { it.version_data.pre }
-                .thenBy { it.version_data.build }
-                .thenBy { it.version_data.adopt_build_number }
+            .thenBy { it.version_data.minor }
+            .thenBy { it.version_data.security }
+            .thenBy { it.version_data.pre }
+            .thenBy { it.version_data.build }
+            .thenBy { it.version_data.adopt_build_number }
+
+        private val TIME_COMPARATOR = compareBy { release: Release -> release.timestamp }
+
+        private val RELEASE_NAME_AND_ID_COMPARATOR = compareBy { release: Release -> release.release_name }
+            .thenComparing { release: Release -> release.id }
 
         val VERSION_THEN_TIME_SORTER: Comparator<Release> =
-                VERSION_COMPARATOR
-                        .thenComparing { release: Release -> release.timestamp }
-                        .thenComparing { release: Release -> release.release_name }
-                        .thenComparing { release: Release -> release.id }
+            VERSION_COMPARATOR
+                .then(TIME_COMPARATOR)
+                .then(RELEASE_NAME_AND_ID_COMPARATOR)
+
+        val TIME_THEN_VERSION_SORTER: Comparator<Release> =
+            TIME_COMPARATOR
+                .then(VERSION_COMPARATOR)
+                .then(RELEASE_NAME_AND_ID_COMPARATOR)
     }
 }

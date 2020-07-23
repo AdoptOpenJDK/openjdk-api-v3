@@ -16,3 +16,5 @@ The AdoptOpenJDK API provides a way to consume JSON information about the AdoptO
 
 The api is documented via swagger.  The swagger documentation can be viewed at: [swagger-ui](https://api.adoptopenjdk.net/swagger-ui). 
 The open api definition for this can be viewed at [openapi](https://api.adoptopenjdk.net/openapi).
+
+For more information, including example queries, please look at [STRUCTURE.md](https://github.com/AdoptOpenJDK/openjdk-api-v3/blob/master/docs/STRUCTURE.md)

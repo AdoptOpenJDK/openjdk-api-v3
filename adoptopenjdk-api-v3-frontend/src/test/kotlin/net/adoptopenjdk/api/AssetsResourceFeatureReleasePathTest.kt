@@ -4,6 +4,7 @@ import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
 import junit.framework.Assert.fail
 import net.adoptopenjdk.api.v3.JsonMapper
+import net.adoptopenjdk.api.v3.dataSources.SortMethod
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.models.Architecture
@@ -118,6 +119,16 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
             val body = RestAssured.given()
                 .`when`()
                 .get("${getPath()}/8/ga?sort_order=${sortOrder.name}")
+                .body
+
+            val releasesStr = body.prettyPrint()
+            return parseReleases(releasesStr)
+        }
+
+        fun getReleasesWithSortMethod(sortOrder: SortOrder, sortMethod: SortMethod): List<Release> {
+            val body = RestAssured.given()
+                .`when`()
+                .get("${getPath()}/8/ga?sort_order=${sortOrder.name}&sort_method=${sortMethod.name}")
                 .body
 
             val releasesStr = body.prettyPrint()

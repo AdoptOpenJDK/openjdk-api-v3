@@ -2,7 +2,7 @@
 
 ## Overview
 
-The AdoptOpenJDK API V3 is a Kotlin application (frontend by Swagger and OpenAPI) which makes 
+The AdoptOpenJDK API V3 is a Kotlin application (fronted by Swagger and OpenAPI) which makes 
 calls via the GitHub API in order to retrieve AdoptOpenJDK binaries and metadata.
 
 Since the GitHub API is rate limited we use MongoDB as a caching mechanism.
@@ -23,9 +23,9 @@ Java 11 is a requirement to build the project.
 
 ### Optional Set-up
 
-If you want to use the updater tool to add entries into the database, you need to generate a github token, which can be done here: https://github.com/settings/tokens. It doesn't need any specific permissions. Once you have a token generated, create a file at ~/.adopt_api/token.properties and type token=your-token-here
+If you want to use the updater tool to add entries into the database, you need to generate a github token, which can be done here: https://github.com/settings/tokens. It doesn't need any specific permissions. Once you have a token generated, create a file at ~/.adopt_api/token.properties and type `token=your-token-here`
 
-The production server uses mongodb to store data, however you can also use Fongo. If you would like to install mongodb and are on mac, I used this guide https://zellwk.com/blog/install-mongodb/ which utilises homebrew.
+The production server uses mongodb to store data, however you can also use Fongo. If you would like to install mongodb and are on mac, I used this guide https://zellwk.com/blog/install-mongodb/ which utilises homebrew. You can also install `mongo` which is a command-line tool that gives you access to your mongodb, allowing you to manually search through the database.
 
 ### Build Tool
 
@@ -90,7 +90,7 @@ calls via the GitHub API in order to retrieve AdoptOpenJDK binaries and metadata
 
 Since the GitHub API is rate limited we use MongoDB as a caching mechanism.
 
-See [./docs/STRUCTURE.md](Code Structure) doc for more details.
+See [Code Structure](./docs/STRUCTURE.md) doc for more details.
 
 ## Common Tasks
 

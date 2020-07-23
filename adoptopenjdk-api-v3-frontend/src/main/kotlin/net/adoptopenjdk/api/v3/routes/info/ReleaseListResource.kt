@@ -4,6 +4,7 @@ import net.adoptopenjdk.api.v3.OpenApiDocs
 import net.adoptopenjdk.api.v3.Pagination
 import net.adoptopenjdk.api.v3.Pagination.getPage
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
+import net.adoptopenjdk.api.v3.dataSources.SortMethod
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.filters.VersionRangeFilter
@@ -56,12 +57,17 @@ class ReleaseListResource {
 
         @Parameter(name = "sort_order", description = "Result sort order", required = false)
         @QueryParam("sort_order")
-        sortOrder: SortOrder?
+        sortOrder: SortOrder?,
+
+        @Parameter(name = "sort_method", description = "Result sort method", required = false)
+        @QueryParam("sort_method")
+        sortMethod: SortMethod?
 
     ): ReleaseList {
         val order = sortOrder ?: SortOrder.DESC
+        val sortMethod = sortMethod ?: SortMethod.DEFAULT
 
-        val filteredReleases = getReleases(release_type, vendor, version, order)
+        val filteredReleases = getReleases(release_type, vendor, version, order, sortMethod)
 
         val releases = filteredReleases
             .map { it.release_name }
@@ -97,12 +103,17 @@ class ReleaseListResource {
 
         @Parameter(name = "sort_order", description = "Result sort order", required = false)
         @QueryParam("sort_order")
-        sortOrder: SortOrder?
+        sortOrder: SortOrder?,
+
+        @Parameter(name = "sort_method", description = "Result sort method", required = false)
+        @QueryParam("sort_method")
+        sortMethod: SortMethod?
 
     ): ReleaseVersionList {
         val order = sortOrder ?: SortOrder.DESC
+        val sortMethod = sortMethod ?: SortMethod.DEFAULT
 
-        val filteredReleases = getReleases(release_type, vendor, version, order)
+        val filteredReleases = getReleases(release_type, vendor, version, order, sortMethod)
 
         val releases = filteredReleases
             .map { it.version_data }
@@ -113,11 +124,11 @@ class ReleaseListResource {
         return ReleaseVersionList(pagedReleases.toTypedArray())
     }
 
-    private fun getReleases(release_type: ReleaseType?, vendor: Vendor?, version: String?, sortOrder: SortOrder): Sequence<Release> {
+    private fun getReleases(release_type: ReleaseType?, vendor: Vendor?, version: String?, sortOrder: SortOrder, sortMethod: SortMethod): Sequence<Release> {
         val range = VersionRangeFilter(version)
         val releaseFilter = ReleaseFilter(releaseType = release_type, vendor = vendor, versionRange = range)
         return APIDataStore
             .getAdoptRepos()
-            .getReleases(releaseFilter, sortOrder)
+            .getReleases(releaseFilter, sortOrder, sortMethod)
     }
 }

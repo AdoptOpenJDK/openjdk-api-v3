@@ -2,6 +2,7 @@ package net.adoptopenjdk.api.v3.routes.packages
 
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
+import net.adoptopenjdk.api.v3.dataSources.SortMethod
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.models.Releases.Companion.VERSION_COMPARATOR
 import net.adoptopenjdk.api.v3.filters.BinaryFilter
@@ -35,7 +36,7 @@ open class PackageEndpoint {
     ): List<Release> {
         val releaseFilter = ReleaseFilter(releaseName = release_name, vendor = vendor)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
-        return APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
+        return APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC, SortMethod.DEFAULT).toList()
     }
 
     protected fun <T : Asset> formResponse(
@@ -82,7 +83,7 @@ open class PackageEndpoint {
     fun getRelease(release_type: ReleaseType?, version: Int?, vendor: Vendor?, os: OperatingSystem?, arch: Architecture?, image_type: ImageType?, jvm_impl: JvmImpl?, heap_size: HeapSize?, project: Project?): List<Release> {
         val releaseFilter = ReleaseFilter(releaseType = release_type, featureVersion = version, vendor = vendor)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
-        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC).toList()
+        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC, SortMethod.DEFAULT).toList()
 
         // We use updated_at and timestamp as well JIC we've made a mistake and respun the same version number twice, in which case newest wins.
         val comparator = VERSION_COMPARATOR.thenBy { it.version_data.optional }
