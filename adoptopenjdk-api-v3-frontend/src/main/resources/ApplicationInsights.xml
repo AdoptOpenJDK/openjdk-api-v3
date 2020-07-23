@@ -3,4 +3,8 @@
     <PerformanceCounters>
         <UseBuiltIn>true</UseBuiltIn>
     </PerformanceCounters>
+    <SDKLogger type="CONSOLE">
+        <Level>TRACE</Level>
+        <UniquePrefix>AI</UniquePrefix>
+    </SDKLogger>
 </ApplicationInsights>
