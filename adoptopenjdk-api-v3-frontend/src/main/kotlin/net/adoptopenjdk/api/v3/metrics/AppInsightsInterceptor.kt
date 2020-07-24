@@ -1,118 +1,81 @@
 package net.adoptopenjdk.api.v3.metrics
 
-import com.microsoft.applicationinsights.TelemetryClient
+import com.microsoft.applicationinsights.telemetry.Duration
 import com.microsoft.applicationinsights.telemetry.RequestTelemetry
-import org.eclipse.microprofile.metrics.annotation.Timed
-import java.io.File
-import java.io.FileOutputStream
-import java.nio.file.Files
-import java.nio.file.Path
 import java.util.*
-import javax.annotation.Priority
-import javax.interceptor.AroundInvoke
-import javax.interceptor.Interceptor
-import javax.interceptor.InvocationContext
-import javax.ws.rs.WebApplicationException
-import javax.ws.rs.core.Response
+import javax.ws.rs.container.ContainerRequestContext
+import javax.ws.rs.container.ContainerRequestFilter
+import javax.ws.rs.container.ContainerResponseContext
+import javax.ws.rs.container.ContainerResponseFilter
+import javax.ws.rs.ext.Provider
+import javax.ws.rs.ext.WriterInterceptor
+import javax.ws.rs.ext.WriterInterceptorContext
 
-@Timed
-@Suppress("unused")
-@Interceptor
-@Priority(Interceptor.Priority.LIBRARY_BEFORE + 10)
-class AppInsightsInterceptor {
-    private val telemetryClient: TelemetryClient
+private const val START_TIME_KEY = "appInsightsRequestStartTime"
+private const val TELEMETERY_KEY = "appInsightsTelemetery"
 
-    init {
-        telemetryClient = loadTelemetryClient()
+private fun nanoToMilliseconds(time: Long): Double = time / 1000000.0
+
+private fun millisecondsSince(startTime: Long): Double {
+    return nanoToMilliseconds(System.nanoTime() - startTime)
+}
+
+@Provider
+class BeforeContainerRequest : ContainerRequestFilter {
+    override fun filter(context: ContainerRequestContext?) {
+        context?.setProperty(START_TIME_KEY, System.nanoTime())
     }
+}
 
-    private fun loadTelemetryClient(): TelemetryClient {
-        val path = saveConfigToFile()
-        try {
-            return TelemetryClient()
-        } finally {
-            val tmpDir = System.getProperty("java.io.tmpdir")
-            val isTmpDir = path?.startsWith(tmpDir)
-            if (isTmpDir != null && isTmpDir) {
-                path.toFile().deleteRecursively()
+@Provider
+class AfterContainerFilter : ContainerResponseFilter {
+    override fun filter(requestContext: ContainerRequestContext?, responseContext: ContainerResponseContext?) {
+
+        val startTime = requestContext?.getProperty(START_TIME_KEY)
+
+        if (requestContext != null &&
+            responseContext != null &&
+            startTime != null &&
+            startTime is Long) {
+
+            val duration = millisecondsSince(startTime)
+
+            val requestTelemetry = RequestTelemetry(
+                requestContext.uriInfo.path,
+                Date(),
+                duration.toLong(),
+                responseContext.status.toString(),
+                responseContext.status < 400
+            )
+            requestTelemetry.metrics["processingTime"] = duration
+
+            val userAgent = requestContext.headers.getFirst("User-Agent")
+            if (userAgent != null) {
+                requestTelemetry.properties["User-Agent"] = userAgent
             }
+            requestContext.setProperty(TELEMETERY_KEY, requestTelemetry)
         }
     }
+}
 
-    // Unfortunate hack to get around that we seem unable to load ApplicationInsights.xml from the classpath
-    // from inside the module
-    private fun saveConfigToFile(): Path? {
-        val inputStream = AppInsightsInterceptor::class.java.classLoader.getResourceAsStream("ApplicationInsights.xml")
+@Provider
+class Writer : WriterInterceptor {
+    override fun aroundWriteTo(context: WriterInterceptorContext?) {
 
-        inputStream?.use {
-            val configPath = Files.createTempDirectory("appInsightsConfig").toAbsolutePath()
-            val configFile = File(configPath.toString(), "ApplicationInsights.xml")
-            configFile.deleteOnExit()
-            configPath.toFile().deleteOnExit()
-            System.setProperty("applicationinsights.configurationDirectory", configPath.toString())
+        val startTime = context?.getProperty(START_TIME_KEY)
+        val requestTelemetry = context?.getProperty(TELEMETERY_KEY)
 
-            val outputStream = FileOutputStream(configFile)
-
-            outputStream.use { fileOut ->
-                inputStream.copyTo(fileOut)
-            }
-
-            return configPath
+        if (requestTelemetry != null && requestTelemetry is RequestTelemetry && startTime != null && startTime is Long) {
+            val duration = millisecondsSince(startTime)
+            requestTelemetry.duration = Duration(duration.toLong())
         }
-        return null
-    }
 
-    @AroundInvoke
-    @Throws(Exception::class)
-    fun timedMethod(context: InvocationContext): Any? {
-        var response: Any? = null
-        var success = true
-        var status = 200
-        var exception: Throwable? = null
+        context?.proceed()
 
-        val methodName = context.method.toGenericString()
-        val start = System.nanoTime()
-        try {
-            response = context.proceed()
-            when (response) {
-                null -> {
-                    status = 404
-                    success = false
-                }
-                is Response -> {
-                    status = response.status
-                    success = response.status < 400
-                }
-                else -> {
-                    status = 200
-                    success = true
-                }
-            }
-        } catch (e: Throwable) {
-            exception = e
-            success = false
-            status = if (e is WebApplicationException) {
-                e.response.status
-            } else {
-                500
-            }
-        } finally {
-            try {
-                val duration = (System.nanoTime() - start) / 1000000
-                val requestTelemetry = RequestTelemetry(
-                    methodName,
-                    Date(),
-                    duration,
-                    status.toString(),
-                    success
-                )
-                telemetryClient.trackRequest(requestTelemetry)
-            } finally {
-                if (exception != null) {
-                    throw exception
-                }
-                return response
-            }
+        if (requestTelemetry != null && requestTelemetry is RequestTelemetry && startTime != null && startTime is Long) {
+            val duration = millisecondsSince(startTime)
+            requestTelemetry.metrics["writeTime"] = duration
+            AppInsightsTelemetery.telemetryClient.trackRequest(requestTelemetry)
         }
     }
 }
