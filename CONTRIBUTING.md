@@ -52,11 +52,14 @@ For convenience, you can build the API components with `Docker` and `docker-comp
 docker-compose build
 ``` 
 
-Using a multi-stage [Dockerfile](Dockerfile) build, a Docker image is produced that supports running both the updater and the front-end.
+Using a multi-stage [Dockerfile](Dockerfile) build, a Docker image is created that supports running both the updater and the front-end.
 
-The [docker-compose.yml](docker-compose.yml) also defines a service for each component, as well a dependency on MongoDB, allowing you to spin up the full stack required for the API.
+The [docker-compose.yml](docker-compose.yml) defines a service for each component, as well a dependency on MongoDB, allowing you to spin up the full stack required for the API.
+
+You just need to provide your GitHub access token as an environment variable and run `docker-compose up`. For example:
 
 ```bash
+export GITHUB_TOKEN=your-personal-github-token
 docker-compose up
 ``` 
 

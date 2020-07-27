@@ -25,5 +25,5 @@ services:
       dockerfile: Dockerfile
     environment:
       MONGODB_HOST: mongodb
-      GITHUB_TOKEN: ${ADOPT_GITHUB_TOKEN}
+      GITHUB_TOKEN: "${GITHUB_TOKEN}"
 
