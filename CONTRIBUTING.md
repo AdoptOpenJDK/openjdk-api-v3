@@ -63,7 +63,11 @@ export GITHUB_TOKEN=your-personal-github-token
 docker-compose up
 ``` 
 
-You will need to wait the updater to complete its first full run before the API is usable. There is currently no persistence between runs.  
+You will need to wait the updater to complete its first full run before the API is usable. There is currently no persistence between runs.
+
+The front-end app will be available at <http://localhost:8080>.
+
+You can connect to the MongoDB instance using your Mongo client at <mongodb://localhost:27017>.   
 
 ## Testing
 
