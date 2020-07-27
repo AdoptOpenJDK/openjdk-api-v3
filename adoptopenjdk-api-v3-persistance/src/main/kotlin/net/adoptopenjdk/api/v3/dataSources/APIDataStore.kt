@@ -1,9 +1,6 @@
 package net.adoptopenjdk.api.v3.dataSources
 
 import com.google.common.annotations.VisibleForTesting
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.timerTask
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
@@ -11,6 +8,9 @@ import net.adoptopenjdk.api.v3.models.Platforms
 import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import net.adoptopenjdk.api.v3.models.Variants
 import org.slf4j.LoggerFactory
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.timerTask
 
 object APIDataStore {
     private var binaryRepos: AdoptRepos
@@ -96,11 +96,36 @@ object APIDataStore {
     private fun periodicUpdate() {
         // Must catch errors or may kill the scheduler
         try {
-            binaryRepos = loadDataFromDb()
+            val newData = loadDataFromDb()
+
+            showStats(binaryRepos, newData)
+
+            binaryRepos = newData
+
             releaseInfo = loadReleaseInfo()
         } catch (e: Exception) {
             LOGGER.error("Failed to load db", e)
         }
+    }
+
+    private fun showStats(binaryRepos: AdoptRepos, newData: AdoptRepos) {
+        newData.allReleases.getReleases()
+            .forEach { release ->
+                val oldRelease = binaryRepos.allReleases.nodes.get(release.id)
+                if (oldRelease == null) {
+                    LOGGER.info("New release: ${release.release_name} ${release.binaries.size}")
+                } else if (oldRelease.binaries.size != release.binaries.size) {
+                    LOGGER.info("Binary count changed ${release.release_name} ${oldRelease.binaries.size} -> ${release.binaries.size}")
+                }
+            }
+
+        binaryRepos.allReleases.getReleases()
+            .forEach { oldRelease ->
+                val newRelease = binaryRepos.allReleases.nodes.get(oldRelease.id)
+                if (newRelease == null) {
+                    LOGGER.info("Removed release: ${oldRelease.release_name} ${oldRelease.binaries.size}")
+                }
+            }
     }
 
     fun getReleaseInfo(): ReleaseInfo {
