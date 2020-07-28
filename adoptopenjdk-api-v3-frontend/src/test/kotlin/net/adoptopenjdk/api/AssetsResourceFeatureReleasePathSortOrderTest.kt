@@ -63,7 +63,8 @@ class AssetsResourceFeatureReleasePathSortOrderTest : BaseTest() {
                 "v",
                 "c",
                 3,
-                "d"
+                "d",
+                "e"
             ),
             2L,
             TimeSource.now(),
@@ -73,7 +74,9 @@ class AssetsResourceFeatureReleasePathSortOrderTest : BaseTest() {
                 1L,
                 "v",
                 "c",
-                4
+                4,
+                "d,",
+                "e"
             ),
             HeapSize.normal,
             OperatingSystem.linux,

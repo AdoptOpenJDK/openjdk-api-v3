@@ -25,6 +25,9 @@ open class Asset {
     @Schema(example = "2")
     val download_count: Long
 
+    @Schema(example = "https://github.com/AdoptOpenJDK/openjdk8-openj9-releases/ga/download/jdk8u162-b12_openj9-0.8.0/OpenJDK8-OPENJ9_x64_Linux_jdk8u162-b12_openj9-0.8.0.tar.gz.json")
+    val metadata_link: String?
+
     constructor(
         name: String,
         link: String,
@@ -32,7 +35,8 @@ open class Asset {
         checksum: String?,
         checksum_link: String?,
         signature_link: String?,
-        download_count: Long
+        download_count: Long,
+        metadata_link: String?
     ) {
         this.name = name
         this.link = link
@@ -41,6 +45,7 @@ open class Asset {
         this.checksum_link = checksum_link
         this.signature_link = signature_link
         this.download_count = download_count
+        this.metadata_link = metadata_link
     }
 
     override fun equals(other: Any?): Boolean {
@@ -55,6 +60,7 @@ open class Asset {
         if (checksum != other.checksum) return false
         if (checksum_link != other.checksum_link) return false
         if (signature_link != other.signature_link) return false
+        if (metadata_link != other.metadata_link) return false
 
         return true
     }
@@ -66,6 +72,7 @@ open class Asset {
         result = 31 * result + (checksum?.hashCode() ?: 0)
         result = 31 * result + (checksum_link?.hashCode() ?: 0)
         result = 31 * result + (signature_link?.hashCode() ?: 0)
+        result = 31 * result + (metadata_link?.hashCode() ?: 0)
         return result
     }
 }

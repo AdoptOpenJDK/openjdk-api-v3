@@ -36,7 +36,7 @@ object UpstreamBinaryMapper : BinaryMapper() {
         return GlobalScope.async {
             try {
                 val signatureLink = getSignatureLink(assets, asset.name)
-                val pack = Package(asset.name, asset.downloadUrl, asset.size, null, null, asset.downloadCount, signatureLink)
+                val pack = Package(asset.name, asset.downloadUrl, asset.size, null, null, asset.downloadCount, signatureLink, null)
 
                 val os = getEnumFromFileName(asset.name, OperatingSystem.values())
                 val architecture = getEnumFromFileName(asset.name, Architecture.values())
