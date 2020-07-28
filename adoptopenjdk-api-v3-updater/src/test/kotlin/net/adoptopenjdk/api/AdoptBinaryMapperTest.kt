@@ -34,13 +34,15 @@ class AdoptBinaryMapperTest {
         "2013-02-27T19:35:32Z"
     )
 
-    val assets = listOf(jdk, GHAsset(
-        "OpenJDK8U-jdk_x64_linux_hotspot_2019-11-22-16-01.tar.gz",
-        1L,
-        "",
-        1L,
-        "2013-02-27T19:35:32Z"
-    )
+    val assets = listOf(
+        jdk,
+        GHAsset(
+            "OpenJDK8U-jdk_x64_linux_hotspot_2019-11-22-16-01.tar.gz",
+            1L,
+            "",
+            1L,
+            "2013-02-27T19:35:32Z"
+        )
     )
 
     @Test
@@ -63,7 +65,7 @@ class AdoptBinaryMapperTest {
             )
             val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
 
-            assertEquals("a-download-link", binaryList.get(0).`package`.checksum_link)
+            assertEquals("a-download-link", binaryList[0].`package`.checksum_link)
         }
     }
 
@@ -80,10 +82,10 @@ class AdoptBinaryMapperTest {
             )
             val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
 
-            assertEquals(JvmImpl.openj9, binaryList.get(0).jvm_impl)
-            assertEquals(Architecture.ppc64le, binaryList.get(0).architecture)
-            assertEquals(OperatingSystem.linux, binaryList.get(0).os)
-            assertEquals(Project.jdk, binaryList.get(0).project)
+            assertEquals(JvmImpl.openj9, binaryList[0].jvm_impl)
+            assertEquals(Architecture.ppc64le, binaryList[0].architecture)
+            assertEquals(OperatingSystem.linux, binaryList[0].os)
+            assertEquals(Project.jdk, binaryList[0].project)
         }
     }
 
@@ -99,7 +101,7 @@ class AdoptBinaryMapperTest {
     fun projectDefaultsToJdk() {
         runBlocking {
             val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
-            assertEquals(Project.jdk, binaryList.get(1).project)
+            assertEquals(Project.jdk, binaryList[1].project)
         }
     }
 
@@ -140,7 +142,7 @@ class AdoptBinaryMapperTest {
 
             val binaryList = AdoptBinaryMapper.toBinaryList(listOf(asset), listOf(asset, checksum), emptyMap())
 
-            assertEquals("a-download-link", binaryList.get(0).`package`.checksum_link)
+            assertEquals("a-download-link", binaryList[0].`package`.checksum_link)
         }
     }
 
@@ -157,12 +159,37 @@ class AdoptBinaryMapperTest {
 
             val binaryList = AdoptBinaryMapper.toBinaryList(listOf(asset), listOf(asset), emptyMap())
 
-            assertEquals(HeapSize.large, binaryList.get(0).heap_size)
+            assertEquals(HeapSize.large, binaryList[0].heap_size)
+        }
+    }
+
+    @Test
+    fun createsMetadataLinkForPackage() {
+        runBlocking {
+            val assets = listOf(
+                GHAsset(
+                    "OpenJDK11U-jdk_x64_linux_hotspot_11.0.8_10.tar.gz",
+                    1L,
+                    "",
+                    1L,
+                    "2013-02-27T19:35:32Z"
+                ),
+                GHAsset(
+                    "OpenJDK11U-jdk_x64_linux_hotspot_11.0.8_10.tar.gz.json",
+                    1L,
+                    "a-download-link",
+                    1L,
+                    "2013-02-27T19:35:32Z"
+                )
+            )
+            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
+
+            assertEquals("a-download-link", binaryList[0].`package`.metadata_link)
         }
     }
 
     private fun assertParsedHotspotJfr(binaryList: List<Binary>) {
-        assertEquals(JvmImpl.hotspot, binaryList.get(0).jvm_impl)
-        assertEquals(Project.jfr, binaryList.get(0).project)
+        assertEquals(JvmImpl.hotspot, binaryList[0].jvm_impl)
+        assertEquals(Project.jfr, binaryList[0].project)
     }
 }

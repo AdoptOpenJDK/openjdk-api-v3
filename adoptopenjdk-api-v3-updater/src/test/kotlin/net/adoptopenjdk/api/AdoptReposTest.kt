@@ -49,7 +49,8 @@ class AdoptReposTest : BaseTest() {
                                 "v",
                                 "c",
                                 3,
-                                "d"
+                                "d",
+                            "e"
                         ),
                         2L,
                         time,
@@ -59,7 +60,9 @@ class AdoptReposTest : BaseTest() {
                                 1L,
                                 "v",
                                 "c",
-                                4),
+                                4,
+                        "d",
+                        "e"),
                         HeapSize.normal,
                         OperatingSystem.linux,
                         Architecture.x64,
