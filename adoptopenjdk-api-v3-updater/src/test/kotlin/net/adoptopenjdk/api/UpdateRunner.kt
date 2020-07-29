@@ -1,6 +1,5 @@
 package net.adoptopenjdk.api
 
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptRepositoryFactory
 import net.adoptopenjdk.api.v3.AdoptRepositoryImpl
@@ -12,6 +11,7 @@ import net.adoptopenjdk.api.v3.models.Release
 import org.awaitility.Awaitility
 import org.junit.Ignore
 import org.junit.jupiter.api.Test
+import java.util.concurrent.TimeUnit
 
 @Ignore("For manual execution")
 class UpdateRunner : BaseTest() {
@@ -30,8 +30,8 @@ class UpdateRunner : BaseTest() {
             val r = Release(modify.id, modify.release_type, modify.release_link, modify.release_name, modify.timestamp, TimeSource.now(), modify.binaries, modify.download_count, modify.vendor, modify.version_data)
             repo = repo.addRelease(8, r)
 
-            ApiPersistenceFactory.get().updateAllRepos(repo)
-            APIDataStore.loadDataFromDb()
+            ApiPersistenceFactory.get().updateAllRepos(repo, "")
+            APIDataStore.loadDataFromDb(true)
         }
         AdoptRepositoryFactory.setAdoptRepository(AdoptRepositoryImpl)
         V3Updater().run(false)

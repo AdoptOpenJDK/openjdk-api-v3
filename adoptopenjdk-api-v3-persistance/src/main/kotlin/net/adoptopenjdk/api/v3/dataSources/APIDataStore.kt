@@ -4,15 +4,18 @@ import com.google.common.annotations.VisibleForTesting
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
+import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.UpdatedInfo
 import net.adoptopenjdk.api.v3.models.Platforms
 import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import net.adoptopenjdk.api.v3.models.Variants
 import org.slf4j.LoggerFactory
+import java.time.ZonedDateTime
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.timerTask
 
 object APIDataStore {
+    private var updatedAt: UpdatedInfo = UpdatedInfo(ZonedDateTime.now().minusYears(10), "111")
     private var binaryRepos: AdoptRepos
     private var releaseInfo: ReleaseInfo
 
@@ -31,7 +34,7 @@ object APIDataStore {
         variants = JsonMapper.mapper.readValue(variantData, Variants::class.java)
 
         try {
-            binaryRepos = loadDataFromDb()
+            binaryRepos = loadDataFromDb(true)
         } catch (e: Exception) {
             LOGGER.error("Failed to read db", e)
             binaryRepos = AdoptRepos(listOf())
@@ -43,7 +46,7 @@ object APIDataStore {
             .newSingleThreadScheduledExecutor()
             .scheduleWithFixedDelay(timerTask {
                 periodicUpdate()
-            }, 0, 15, TimeUnit.MINUTES)
+            }, 0, 1, TimeUnit.MINUTES)
     }
 
     fun loadReleaseInfo(): ReleaseInfo {
@@ -69,17 +72,28 @@ object APIDataStore {
     }
 
     @VisibleForTesting
-    fun loadDataFromDb(): AdoptRepos {
+    fun loadDataFromDb(forceUpdate: Boolean): AdoptRepos {
         binaryRepos = runBlocking {
-            val data = variants
-                .versions
-                .map { version ->
-                    ApiPersistenceFactory.get().readReleaseData(version)
-                }
-                .filter { it.releases.nodes.isNotEmpty() }
-                .toList()
+            val updated = ApiPersistenceFactory.get().getUpdatedAt()
 
-            AdoptRepos(data)
+            if (forceUpdate || updated != updatedAt) {
+                val data = variants
+                    .versions
+                    .map { version ->
+                        ApiPersistenceFactory.get().readReleaseData(version)
+                    }
+                    .filter { it.releases.nodes.isNotEmpty() }
+                    .toList()
+                updatedAt = ApiPersistenceFactory.get().getUpdatedAt()
+
+                LOGGER.info("Loaded Version: $updatedAt")
+
+                val newData = AdoptRepos(data)
+                showStats(binaryRepos, newData)
+                newData
+            } else {
+                binaryRepos
+            }
         }
 
         return binaryRepos
@@ -96,9 +110,7 @@ object APIDataStore {
     private fun periodicUpdate() {
         // Must catch errors or may kill the scheduler
         try {
-            val newData = loadDataFromDb()
-
-            showStats(binaryRepos, newData)
+            val newData = loadDataFromDb(false)
 
             binaryRepos = newData
 
