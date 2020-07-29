@@ -177,7 +177,7 @@ class AdoptBinaryMapperTest {
     }
 
     @Test
-    fun oldChecksumIsFound() {
+    fun `old checksum is found`() {
         runBlocking {
             val assets = listOf(GHAsset(
                 "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.tar.gz",
@@ -201,7 +201,7 @@ class AdoptBinaryMapperTest {
     }
 
     @Test
-    fun parsesOldOpenj9() {
+    fun `parses old OpenJ9`() {
         runBlocking {
             val assets = listOf(GHAsset(
                 "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.tar.gz",
@@ -221,7 +221,7 @@ class AdoptBinaryMapperTest {
     }
 
     @Test
-    fun parsesJfrFromName() {
+    fun `parses JFR from name`() {
         runBlocking {
             val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
             assertParsedHotspotJfr(binaryList)
@@ -229,7 +229,7 @@ class AdoptBinaryMapperTest {
     }
 
     @Test
-    fun projectDefaultsToJdk() {
+    fun `project defaults to jdk`() {
         runBlocking {
             val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
             assertEquals(Project.jdk, binaryList[1].project)
@@ -237,8 +237,7 @@ class AdoptBinaryMapperTest {
     }
 
     @Test
-    fun parsesJfrFromMetadata() {
-
+    fun `parses JFR from metadata`() {
         runBlocking {
             val metadata = GHMetaData("", OperatingSystem.linux, Architecture.x64, "hotspot-jfr",
                 GHVersion(0, 1, 2, "", 4, "", 6, "", ""),
@@ -253,7 +252,7 @@ class AdoptBinaryMapperTest {
     }
 
     @Test
-    fun checkSumLinkFoundWhenChecksumIsSplitFromReleaseGroup() {
+    fun `checkSumLink found when checksum is split from release group`() {
         runBlocking {
             val asset = GHAsset(
                 "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.tar.gz",
@@ -278,7 +277,7 @@ class AdoptBinaryMapperTest {
     }
 
     @Test
-    fun oldLargeHeapIsCorrectlyIdentified() {
+    fun `old large heap is correctly identified`() {
         runBlocking {
             val asset = GHAsset(
                 "OPENJ9_x64_LinuxLH_jdk8u181-b13_openj9-0.9.0.tar.gz",
