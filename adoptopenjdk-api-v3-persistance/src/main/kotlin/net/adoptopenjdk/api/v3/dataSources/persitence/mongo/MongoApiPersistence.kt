@@ -3,6 +3,7 @@ package net.adoptopenjdk.api.v3.dataSources.persitence.mongo
 import com.mongodb.client.model.InsertManyOptions
 import com.mongodb.client.model.UpdateOptions
 import com.mongodb.reactivestreams.client.ClientSession
+import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
@@ -25,6 +26,7 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
     private val githubStatsCollection: CoroutineCollection<GithubDownloadStatsDbEntry> = createCollection(database, GITHUB_STATS_DB)
     private val dockerStatsCollection: CoroutineCollection<DockerDownloadStatsDbEntry> = createCollection(database, DOCKER_STATS_DB)
     private val releaseInfoCollection: CoroutineCollection<ReleaseInfo> = createCollection(database, RELEASE_INFO_DB)
+    private val updateTimeCollection: CoroutineCollection<UpdatedInfo> = createCollection(database, UPDATE_TIME_DB)
 
     companion object {
         @JvmStatic
@@ -33,9 +35,10 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
         const val GITHUB_STATS_DB = "githubStats"
         const val DOCKER_STATS_DB = "dockerStats"
         const val RELEASE_INFO_DB = "releaseInfo"
+        const val UPDATE_TIME_DB = "updateTime"
     }
 
-    override suspend fun updateAllRepos(repos: AdoptRepos) {
+    override suspend fun updateAllRepos(repos: AdoptRepos, checksum: String) {
 
         var session: ClientSession? = null
 
@@ -54,6 +57,7 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
         } finally {
             session?.commitTransaction()
             session?.close()
+            updateUpdatedTime(TimeSource.now(), checksum)
         }
     }
 
@@ -141,6 +145,21 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
             version,
             UpdateOptions().upsert(true)
         )
+    }
+
+    override suspend fun updateUpdatedTime(dateTime: ZonedDateTime, checksum: String) {
+        updateTimeCollection.updateOne(
+            Document(),
+            UpdatedInfo(dateTime, checksum),
+            UpdateOptions().upsert(true)
+        )
+        updateTimeCollection.deleteMany(Document("time", BsonDocument("\$lt", BsonDateTime(dateTime.toInstant().toEpochMilli()))))
+    }
+
+    override suspend fun getUpdatedAt(): UpdatedInfo {
+        val info = updateTimeCollection.findOne()
+        // if we have no existing time, make it 5 mins ago, should only happen on first time the db is used
+        return info ?: UpdatedInfo(TimeSource.now().minusMinutes(5), "000")
     }
 
     override suspend fun getReleaseInfo(): ReleaseInfo? {

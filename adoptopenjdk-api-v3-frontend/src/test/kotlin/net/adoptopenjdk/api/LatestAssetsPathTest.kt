@@ -29,8 +29,8 @@ class LatestAssetsPathTest : BaseTest() {
                 val repo = AdoptReposBuilder.build(APIDataStore.variants.versions)
                 // Reset connection
                 ApiPersistenceFactory.set(null)
-                ApiPersistenceFactory.get().updateAllRepos(repo)
-                APIDataStore.loadDataFromDb()
+                ApiPersistenceFactory.get().updateAllRepos(repo, "")
+                APIDataStore.loadDataFromDb(true)
             }
         }
     }
@@ -41,9 +41,9 @@ class LatestAssetsPathTest : BaseTest() {
     fun latestAssetsReturnsSaneList() {
 
         val body = RestAssured.given()
-                .`when`()
-                .get("${getPath()}/8/${JvmImpl.hotspot}")
-                .body
+            .`when`()
+            .get("${getPath()}/8/${JvmImpl.hotspot}")
+            .body
 
         val binaryStr = body.prettyPrint()
 
@@ -57,13 +57,13 @@ class LatestAssetsPathTest : BaseTest() {
 
     private fun hasEntryFor(binaries: JsonArray, os: OperatingSystem, imageType: ImageType, architecture: Architecture): Boolean {
         val hasEntry = binaries
-                .map { JsonMapper.mapper.readValue(it.toString(), BinaryAssetView::class.java) }
-                .filter({ release ->
-                    release.binary.os == os &&
-                            release.binary.image_type == imageType &&
-                            release.binary.architecture == architecture
-                })
-                .count() > 0
+            .map { JsonMapper.mapper.readValue(it.toString(), BinaryAssetView::class.java) }
+            .filter({ release ->
+                release.binary.os == os &&
+                    release.binary.image_type == imageType &&
+                    release.binary.architecture == architecture
+            })
+            .count() > 0
         return hasEntry
     }
 }

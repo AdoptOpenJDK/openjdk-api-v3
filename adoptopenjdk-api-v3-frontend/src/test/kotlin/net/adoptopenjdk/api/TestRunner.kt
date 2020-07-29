@@ -23,8 +23,8 @@ class TestRunner : BaseTest() {
                 val repo = AdoptReposBuilder.build(APIDataStore.variants.versions)
                 // Reset connection
                 ApiPersistenceFactory.set(null)
-                ApiPersistenceFactory.get().updateAllRepos(repo)
-                APIDataStore.loadDataFromDb()
+                ApiPersistenceFactory.get().updateAllRepos(repo, "")
+                APIDataStore.loadDataFromDb(true)
             }
         }
     }
