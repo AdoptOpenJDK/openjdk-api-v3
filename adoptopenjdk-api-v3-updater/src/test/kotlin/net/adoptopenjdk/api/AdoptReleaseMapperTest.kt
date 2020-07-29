@@ -28,19 +28,19 @@ import kotlin.test.assertNull
 class AdoptReleaseMapperTest : BaseTest() {
 
     val jdk = GHAsset(
-        "OpenJDK8U-jre_x64_linux_hotspot-123244354325.tar.gz",
-        1L,
-        "",
-        1L,
-        "2013-02-27T19:35:32Z"
+        name = "OpenJDK8U-jre_x64_linux_hotspot-123244354325.tar.gz",
+        size = 1L,
+        downloadUrl = "",
+        downloadCount = 1L,
+        updatedAt = "2013-02-27T19:35:32Z"
     )
 
     val checksum = GHAsset(
-        "OpenJDK8U-jre_x64_linux_hotspot-123244354325.tar.gz.sha256.txt",
-        1L,
-        "",
-        1L,
-        "2013-02-27T19:35:32Z"
+        name = "OpenJDK8U-jre_x64_linux_hotspot-123244354325.tar.gz.sha256.txt",
+        size = 1L,
+        downloadUrl = "",
+        downloadCount = 1L,
+        updatedAt = "2013-02-27T19:35:32Z"
     )
 
     @Test
@@ -48,7 +48,17 @@ class AdoptReleaseMapperTest : BaseTest() {
         runBlocking {
             val source = GHAssets(listOf(jdk), PageInfo(false, ""))
 
-            val ghRelease = GHRelease(GithubId("1"), "OpenJDK 123244354325", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "a-url")
+            val ghRelease = GHRelease(
+                id = GithubId("1"),
+                name = "OpenJDK 123244354325",
+                isPrerelease = true,
+                prerelease = true,
+                publishedAt = "2013-02-27T19:35:32Z",
+                updatedAt = "2013-02-27T19:35:32Z",
+                releaseAssets = source,
+                resourcePath = "8",
+                url = "a-url"
+            )
 
             val result = AdoptReleaseMapper.toAdoptRelease(ghRelease)
             assertFalse(result.succeeded())
@@ -63,7 +73,17 @@ class AdoptReleaseMapperTest : BaseTest() {
 
             val source = GHAssets(listOf(jdk, checksum), PageInfo(false, ""))
 
-            val ghRelease = GHRelease(GithubId("1"), "jdk9u-2018-09-27-08-50", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz")
+            val ghRelease = GHRelease(
+                id = GithubId("1"),
+                name = "jdk9u-2018-09-27-08-50",
+                isPrerelease = true,
+                prerelease = true,
+                publishedAt = "2013-02-27T19:35:32Z",
+                updatedAt = "2013-02-27T19:35:32Z",
+                releaseAssets = source,
+                resourcePath = "8",
+                url = "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz"
+            )
 
             val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
 
@@ -72,12 +92,22 @@ class AdoptReleaseMapperTest : BaseTest() {
     }
 
     @Test
-    fun obaysReleaseTypeforBinaryRepos() {
+    fun obeysReleaseTypeforBinaryRepos() {
         runBlocking {
 
             val source = GHAssets(listOf(jdk), PageInfo(false, ""))
 
-            val ghRelease = GHRelease(GithubId("1"), "jdk9u-2018-09-27-08-50", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz")
+            val ghRelease = GHRelease(
+                id = GithubId("1"),
+                name = "jdk9u-2018-09-27-08-50",
+                isPrerelease = true,
+                prerelease = true,
+                publishedAt = "2013-02-27T19:35:32Z",
+                updatedAt = "2013-02-27T19:35:32Z",
+                releaseAssets = source,
+                resourcePath = "8",
+                url = "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz"
+            )
 
             val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
 
@@ -182,7 +212,17 @@ class AdoptReleaseMapperTest : BaseTest() {
                 }
             }
 
-            val ghRelease = GHRelease(GithubId("1"), "jdk9u-2018-09-27-08-50", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz")
+            val ghRelease = GHRelease(
+                id = GithubId("1"),
+                name = "jdk9u-2018-09-27-08-50",
+                isPrerelease = true,
+                prerelease = true,
+                publishedAt = "2013-02-27T19:35:32Z",
+                updatedAt = "2013-02-27T19:35:32Z",
+                releaseAssets = source,
+                resourcePath = "8",
+                url = "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz"
+            )
 
             val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
 
@@ -215,7 +255,17 @@ class AdoptReleaseMapperTest : BaseTest() {
 
             val source = GHAssets(listOf(jdk), PageInfo(false, ""))
 
-            val ghRelease = GHRelease(GithubId("1"), "jdk9u-2018-09-27-08-50", true, true, "2013-02-27T19:35:32Z", "2013-02-27T19:35:32Z", source, "8", "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz")
+            val ghRelease = GHRelease(
+                id = GithubId("1"),
+                name = "jdk9u-2018-09-27-08-50",
+                isPrerelease = true,
+                prerelease = true,
+                publishedAt = "2013-02-27T19:35:32Z",
+                updatedAt = "2013-02-27T19:35:32Z",
+                releaseAssets = source,
+                resourcePath = "8",
+                url = "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz"
+            )
 
             val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
         }
