@@ -8,7 +8,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 abstract class ReleaseMapper {
-    abstract suspend fun toAdoptRelease(release: GHRelease): ReleaseResult
+    abstract suspend fun toAdoptRelease(ghRelease: GHRelease): ReleaseResult
 
     companion object {
         fun parseDate(date: String): ZonedDateTime {
