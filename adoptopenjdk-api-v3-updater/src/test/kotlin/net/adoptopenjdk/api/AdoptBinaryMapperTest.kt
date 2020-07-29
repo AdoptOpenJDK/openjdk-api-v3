@@ -1,19 +1,16 @@
 package net.adoptopenjdk.api
 
 import kotlinx.coroutines.runBlocking
+import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHVersion
 import net.adoptopenjdk.api.v3.mapping.adopt.AdoptBinaryMapper
-import net.adoptopenjdk.api.v3.models.Architecture
-import net.adoptopenjdk.api.v3.models.Binary
-import net.adoptopenjdk.api.v3.models.HeapSize
-import net.adoptopenjdk.api.v3.models.ImageType
-import net.adoptopenjdk.api.v3.models.JvmImpl
-import net.adoptopenjdk.api.v3.models.OperatingSystem
-import net.adoptopenjdk.api.v3.models.Project
+import net.adoptopenjdk.api.v3.models.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import java.time.Instant
+import java.time.format.DateTimeFormatter
 import kotlin.test.assertEquals
 
 class AdoptBinaryMapperTest {
@@ -44,6 +41,140 @@ class AdoptBinaryMapperTest {
             "2013-02-27T19:35:32Z"
         )
     )
+
+    @Test
+    fun `should map GitHub assets and metadata to Adopt binary`() {
+        runBlocking {
+            val updatedAt = Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2013-02-27T19:35:32Z"))
+                .atZone(TimeSource.ZONE)
+            val updatedAtFormatted = DateTimeFormatter.ISO_INSTANT.format(updatedAt)
+
+            val packageAsset = GHAsset(
+                name = "archive.tar.gz",
+                size = 1,
+                downloadUrl = "http://package-link",
+                downloadCount = 1,
+                updatedAt = updatedAtFormatted
+            )
+
+            val packageChecksumAsset = GHAsset(
+                name = "archive.tar.gz.sha256.txt",
+                size = 1,
+                downloadUrl = "http://package-checksum-link",
+                downloadCount = 1,
+                updatedAt = updatedAtFormatted
+            )
+
+            val packageMetadataAsset = GHAsset(
+                name = "archive.tar.gz.json",
+                size = 1,
+                downloadUrl = "http://package-metadata-link",
+                downloadCount = 1,
+                updatedAt = updatedAtFormatted
+            )
+
+            val packageMetadata = GHMetaData(
+                warning = "THIS METADATA FILE IS STILL IN ALPHA DO NOT USE ME",
+                os = OperatingSystem.mac,
+                arch = Architecture.x64,
+                variant = "hotspot",
+                version = GHVersion(0, 1, 2, "", 4, "", 6, "", ""),
+                scmRef = "scm-ref",
+                version_data = "",
+                binary_type = ImageType.jdk,
+                sha256 = "package-checksum"
+            )
+
+            val installerAsset = GHAsset(
+                name = "archive.msi",
+                size = 1,
+                downloadUrl = "http://installer-link",
+                downloadCount = 1,
+                updatedAt = updatedAtFormatted
+            )
+
+            val installerChecksumAsset = GHAsset(
+                name = "archive.msi.sha256.txt",
+                size = 1,
+                downloadUrl = "http://installer-checksum-link",
+                downloadCount = 1,
+                updatedAt = updatedAtFormatted
+            )
+
+            val installerMetadataAsset = GHAsset(
+                name = "archive.msi.json",
+                size = 1,
+                downloadUrl = "http://installer-metadata-link",
+                downloadCount = 1,
+                updatedAt = updatedAtFormatted
+            )
+
+            val installerMetadata = GHMetaData(
+                warning = "THIS METADATA FILE IS STILL IN ALPHA DO NOT USE ME",
+                os = OperatingSystem.mac,
+                arch = Architecture.x64,
+                variant = "hotspot",
+                version = GHVersion(0, 1, 2, "", 4, "", 6, "", ""),
+                scmRef = "",
+                version_data = "",
+                binary_type = ImageType.jdk,
+                sha256 = "installer-checksum"
+            )
+
+            val ghBinaryAssets = listOf(packageAsset, installerAsset)
+
+            val fullGhAssetList = listOf(
+                packageAsset,
+                packageChecksumAsset,
+                packageMetadataAsset,
+                installerAsset,
+                installerChecksumAsset,
+                installerMetadataAsset
+            )
+
+            val ghBinaryAssetsWithMetadata: Map<GHAsset, GHMetaData> = mapOf(
+                Pair(packageAsset, packageMetadata),
+                Pair(installerAsset, installerMetadata)
+            )
+
+            val actualBinaries = AdoptBinaryMapper.toBinaryList(ghBinaryAssets, fullGhAssetList, ghBinaryAssetsWithMetadata)
+
+            val expectedBinary =
+                Binary(
+                    `package` = Package(
+                        name = "archive.tar.gz",
+                        link = "http://package-link",
+                        size = 1,
+                        checksum = "package-checksum",
+                        checksum_link = "http://package-checksum-link",
+                        download_count = 1,
+                        signature_link = null,
+                        metadata_link = "http://package-metadata-link"
+                    ),
+                    download_count = 2,
+                    updated_at = updatedAt,
+                    scm_ref = "scm-ref",
+                    installer = Installer(
+                        name = "archive.msi",
+                        link = "http://installer-link",
+                        size = 1,
+                        checksum = null, // NOTE: HTTP lookup for checksum currently fails, we could use real links to GitHub assets
+                        checksum_link = "http://installer-checksum-link",
+                        download_count = 1,
+                        signature_link = null,
+                        metadata_link = "http://installer-metadata-link"
+                    ),
+                    heap_size = HeapSize.normal,
+                    os = OperatingSystem.mac,
+                    architecture = Architecture.x64,
+                    image_type = ImageType.jdk,
+                    jvm_impl = JvmImpl.hotspot,
+                    project = Project.jdk
+                )
+
+            assertEquals(expectedBinary, actualBinaries[0])
+        }
+    }
 
     @Test
     fun oldChecksumIsFound() {
@@ -164,7 +295,7 @@ class AdoptBinaryMapperTest {
     }
 
     @Test
-    fun createsMetadataLinkForPackage() {
+    fun `creates metadata link for package`() {
         runBlocking {
             val assets = listOf(
                 GHAsset(
