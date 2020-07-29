@@ -73,6 +73,8 @@ object APIDataStore {
 
     @VisibleForTesting
     fun loadDataFromDb(forceUpdate: Boolean): AdoptRepos {
+        val previousRepo: AdoptRepos? = binaryRepos
+
         binaryRepos = runBlocking {
             val updated = ApiPersistenceFactory.get().getUpdatedAt()
 
@@ -89,7 +91,7 @@ object APIDataStore {
                 LOGGER.info("Loaded Version: $updatedAt")
 
                 val newData = AdoptRepos(data)
-                showStats(binaryRepos, newData)
+                showStats(previousRepo, newData)
                 newData
             } else {
                 binaryRepos
@@ -110,20 +112,17 @@ object APIDataStore {
     private fun periodicUpdate() {
         // Must catch errors or may kill the scheduler
         try {
-            val newData = loadDataFromDb(false)
-
-            binaryRepos = newData
-
+            binaryRepos = loadDataFromDb(false)
             releaseInfo = loadReleaseInfo()
         } catch (e: Exception) {
             LOGGER.error("Failed to load db", e)
         }
     }
 
-    private fun showStats(binaryRepos: AdoptRepos, newData: AdoptRepos) {
+    private fun showStats(binaryRepos: AdoptRepos?, newData: AdoptRepos) {
         newData.allReleases.getReleases()
             .forEach { release ->
-                val oldRelease = binaryRepos.allReleases.nodes.get(release.id)
+                val oldRelease = binaryRepos?.allReleases?.nodes?.get(release.id)
                 if (oldRelease == null) {
                     LOGGER.info("New release: ${release.release_name} ${release.binaries.size}")
                 } else if (oldRelease.binaries.size != release.binaries.size) {
@@ -131,9 +130,9 @@ object APIDataStore {
                 }
             }
 
-        binaryRepos.allReleases.getReleases()
-            .forEach { oldRelease ->
-                val newRelease = binaryRepos.allReleases.nodes.get(oldRelease.id)
+        binaryRepos?.allReleases?.getReleases()
+            ?.forEach { oldRelease ->
+                val newRelease = binaryRepos.allReleases.nodes[oldRelease.id]
                 if (newRelease == null) {
                     LOGGER.info("Removed release: ${oldRelease.release_name} ${oldRelease.binaries.size}")
                 }
