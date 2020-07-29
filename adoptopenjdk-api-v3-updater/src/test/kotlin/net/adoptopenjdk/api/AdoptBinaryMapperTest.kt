@@ -158,7 +158,7 @@ class AdoptBinaryMapperTest {
                         name = "archive.msi",
                         link = "http://installer-link",
                         size = 1,
-                        checksum = null, // NOTE: HTTP lookup for checksum currently fails, we could use real links to GitHub assets
+                        checksum = null, // NOTE: HTTP lookup for checksum currently fails, ideally we would use a test-double to fake the response
                         checksum_link = "http://installer-checksum-link",
                         download_count = 1,
                         signature_link = null,
