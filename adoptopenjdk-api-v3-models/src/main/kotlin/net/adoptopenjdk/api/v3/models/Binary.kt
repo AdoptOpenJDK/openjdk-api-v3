@@ -103,6 +103,4 @@ class Binary {
     override fun toString(): String {
         return "Binary(os=$os, architecture=$architecture, image_type=$image_type, jvm_impl=$jvm_impl, `package`=$`package`, installer=$installer, heap_size=$heap_size, download_count=$download_count, updated_at=$updated_at, scm_ref=$scm_ref, project=$project)"
     }
-
-
 }

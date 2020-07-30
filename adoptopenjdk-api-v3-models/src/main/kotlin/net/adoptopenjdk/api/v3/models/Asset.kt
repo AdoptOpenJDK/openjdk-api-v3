@@ -79,5 +79,4 @@ open class Asset {
     override fun toString(): String {
         return "Asset(name='$name', link='$link', size=$size, checksum=$checksum, checksum_link=$checksum_link, signature_link=$signature_link, download_count=$download_count, metadata_link=$metadata_link)"
     }
-
 }
