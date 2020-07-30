@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
 import org.slf4j.LoggerFactory
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class APIDataStoreTest : BaseTest() {
@@ -55,5 +56,10 @@ class APIDataStoreTest : BaseTest() {
             assertTrue(updatedTime.time.isAfter(time))
             assertEquals("a-checksum", updatedTime.checksum)
         }
+    }
+
+    @Test
+    fun `update is not scheduled by default`() {
+        assertNull(APIDataStore.schedule)
     }
 }
