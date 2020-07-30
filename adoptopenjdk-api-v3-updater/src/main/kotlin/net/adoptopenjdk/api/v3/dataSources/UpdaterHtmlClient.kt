@@ -36,7 +36,7 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
-        private val TOKEN: String? = GithubAuth.readToken()
+        private val TOKEN: String? = GithubAuth().readToken()
         private const val REQUEST_TIMEOUT = 12000L
         private val GITHUB_DOMAINS = listOf("api.github.com", "github.com")
 
@@ -92,7 +92,7 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
 
         override fun failed(e: java.lang.Exception?) {
             if (e == null) {
-                continuation.resumeWithException(Exception("Failed Uknown reason"))
+                continuation.resumeWithException(Exception("Failed Unknown reason"))
             } else {
                 continuation.resumeWithException(e)
             }

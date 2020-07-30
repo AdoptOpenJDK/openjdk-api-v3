@@ -35,7 +35,7 @@ open class GraphQLGitHubInterface() {
     private val THRESHOLD_HARD_FLOOR = System.getenv("GITHUB_THRESHOLD_HARD_FLOOR")?.toFloatOrNull() ?: 200f
 
     init {
-        val token = GithubAuth.readToken()
+        val token = GithubAuth().readToken()
         if (token == null) {
             throw IllegalStateException("No token provided")
         } else {
