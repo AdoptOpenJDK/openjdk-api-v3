@@ -6,7 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import net.adoptopenjdk.api.v3.CredentialAccessor
-import net.adoptopenjdk.api.v3.dataSources.github.GithubAuth
+import net.adoptopenjdk.api.v3.dataSources.github.GitHubAuth
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -34,7 +34,7 @@ class GitHubAuthTest {
     fun `readToken prioritizes env var if it is defined`() {
         every { mockCredentialAccessor.getenv(any()) } returns "env-token"
 
-        val actualToken = GithubAuth(mockCredentialAccessor).readToken()
+        val actualToken = GitHubAuth(mockCredentialAccessor).readToken()
 
         assertEquals("env-token", actualToken)
 
@@ -47,7 +47,7 @@ class GitHubAuthTest {
         every { mockCredentialAccessor.getenv(any()) } returns null
         every { mockCredentialAccessor.getProperty(any()) } returns "property-token"
 
-        val actualToken = GithubAuth(mockCredentialAccessor).readToken()
+        val actualToken = GitHubAuth(mockCredentialAccessor).readToken()
 
         assertEquals("property-token", actualToken)
 
@@ -62,7 +62,7 @@ class GitHubAuthTest {
         every { mockCredentialAccessor.getProperty(any()) } returns null
         every { mockCredentialAccessor.getPropertyFromFile(any(), any()) } returns "file-token"
 
-        val actualToken = GithubAuth(mockCredentialAccessor).readToken()
+        val actualToken = GitHubAuth(mockCredentialAccessor).readToken()
 
         assertEquals("file-token", actualToken)
 
@@ -103,7 +103,7 @@ class GitHubAuthTest {
         }
 
         @Test
-        fun `GithubAuth uses SystemCredentialAccessor by default`() {
+        fun `GitHubAuth uses SystemCredentialAccessor by default`() {
             val tokenDir = File(tempDir, ".adopt_api")
             tokenDir.mkdirs()
             tokenFile = File(tokenDir, "token.properties")
@@ -111,7 +111,7 @@ class GitHubAuthTest {
                 out.println("token=real-file-token")
             }
 
-            val actualToken = GithubAuth().readToken()
+            val actualToken = GitHubAuth().readToken()
 
             assertEquals("real-file-token", actualToken)
         }
@@ -120,7 +120,7 @@ class GitHubAuthTest {
         fun readsTokenNullFromFile() {
             assertFalse(File(tempDir, ".adopt_api").exists())
 
-            assertEquals("", GithubAuth().readToken())
+            assertEquals("", GitHubAuth().readToken())
         }
     }
 }
