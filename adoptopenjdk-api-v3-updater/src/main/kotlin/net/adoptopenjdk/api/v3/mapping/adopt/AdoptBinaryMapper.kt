@@ -27,55 +27,55 @@ object AdoptBinaryMapper : BinaryMapper() {
 
     private val EXCLUDED = listOf<String>()
 
-    suspend fun toBinaryList(assets: List<GHAsset>, fullAssetList: List<GHAsset>, metadata: Map<GHAsset, GHMetaData>): List<Binary> {
+    suspend fun toBinaryList(ghBinaryAssets: List<GHAsset>, allGhAssets: List<GHAsset>, ghAssetsWithMetadata: Map<GHAsset, GHMetaData>): List<Binary> {
         // probably whitelist rather than black list
-        return assets
+        return ghBinaryAssets
             .filter(this::isArchive)
             .filter { asset -> EXCLUDED.all { excluded -> !asset.name.contains(excluded) } }
-            .map { asset -> assetToBinaryAsync(asset, metadata, fullAssetList) }
+            .map { asset -> assetToBinaryAsync(asset, ghAssetsWithMetadata, allGhAssets) }
             .mapNotNull { it.await() }
     }
 
     private fun assetToBinaryAsync(
-        asset: GHAsset,
-        metadata: Map<GHAsset, GHMetaData>,
-        fullAssetList: List<GHAsset>
+        ghBinaryAsset: GHAsset,
+        ghAssetsWithMetadata: Map<GHAsset, GHMetaData>,
+        allGhAssets: List<GHAsset>
     ): Deferred<Binary?> {
         return GlobalScope.async {
             try {
-                val updatedAt = getUpdatedTime(asset)
+                val updatedAt = getUpdatedTime(ghBinaryAsset)
 
-                val binaryMetadata = metadata[asset]
+                val binaryMetadata = ghAssetsWithMetadata[ghBinaryAsset]
 
-                val heapSize = getEnumFromFileName(asset.name, HeapSize.values(), HeapSize.normal)
+                val heapSize = getEnumFromFileName(ghBinaryAsset.name, HeapSize.values(), HeapSize.normal)
 
-                val installer = getInstaller(asset, fullAssetList)
-                val pack = getPackage(fullAssetList, asset, binaryMetadata)
-                val downloadCount = pack.download_count + (installer?.download_count ?: 0)
+                val installer = getInstaller(ghBinaryAsset, allGhAssets)
+                val `package` = getPackage(allGhAssets, ghBinaryAsset, binaryMetadata)
+                val downloadCount = `package`.download_count + (installer?.download_count ?: 0)
 
                 if (binaryMetadata != null) {
                     return@async binaryFromMetadata(
                         binaryMetadata,
-                        pack,
+                        `package`,
                         downloadCount,
                         updatedAt,
                         installer,
                         heapSize
                     )
                 } else {
-                    return@async binaryFromName(asset, pack, downloadCount, updatedAt, installer, heapSize)
+                    return@async binaryFromName(ghBinaryAsset, `package`, downloadCount, updatedAt, installer, heapSize)
                 }
             } catch (e: Exception) {
-                LOGGER.error("Failed to fetch binary ${asset.name}", e)
+                LOGGER.error("Failed to fetch binary ${ghBinaryAsset.name}", e)
                 return@async null
             }
         }
     }
 
-    private suspend fun getPackage(fullAssetList: List<GHAsset>, asset: GHAsset, binaryMetadata: GHMetaData?): Package {
-        val binaryName = asset.name
-        val binaryLink = asset.downloadUrl
-        val binarySize = asset.size
+    private suspend fun getPackage(fullAssetList: List<GHAsset>, binaryAsset: GHAsset, binaryMetadata: GHMetaData?): Package {
+        val binaryName = binaryAsset.name
+        val binaryLink = binaryAsset.downloadUrl
+        val binarySize = binaryAsset.size
         val binaryChecksumLink = getCheckSumLink(fullAssetList, binaryName)
         val binaryChecksum: String?
 
@@ -85,13 +85,24 @@ object AdoptBinaryMapper : BinaryMapper() {
             getChecksum(binaryChecksumLink)
         }
 
-        return Package(binaryName, binaryLink, binarySize, binaryChecksum, binaryChecksumLink, asset.downloadCount)
+        val metadataLink = getMetadataLink(fullAssetList, binaryName)
+
+        return Package(
+            binaryName,
+            binaryLink,
+            binarySize,
+            binaryChecksum,
+            binaryChecksumLink,
+            binaryAsset.downloadCount,
+            signature_link = null,
+            metadata_link = metadataLink
+        )
     }
 
-    private suspend fun getInstaller(ghAsset: GHAsset, fullAssetList: List<GHAsset>): Installer? {
+    private suspend fun getInstaller(binaryAsset: GHAsset, fullAssetList: List<GHAsset>): Installer? {
 
         val nameWithoutExtension =
-            BINARY_ASSET_WHITELIST.fold(ghAsset.name, { assetName, extension -> assetName.replace(extension, "") })
+            BINARY_ASSET_WHITELIST.fold(binaryAsset.name, { assetName, extension -> assetName.replace(extension, "") })
 
         val installer = fullAssetList
             .filter { it.name.startsWith(nameWithoutExtension) }
@@ -102,13 +113,24 @@ object AdoptBinaryMapper : BinaryMapper() {
         return if (installer == null) {
             null
         } else {
-            val link = getCheckSumLink(fullAssetList, installer.name)
+            val checkSumLink = getCheckSumLink(fullAssetList, installer.name)
             var checksum: String? = null
-            if (link != null) {
-                checksum = getChecksum(link)
+            if (checkSumLink != null) {
+                checksum = getChecksum(checkSumLink)
             }
 
-            Installer(installer.name, installer.downloadUrl, installer.size, checksum, link, installer.downloadCount)
+            val metadataLink = getMetadataLink(fullAssetList, installer.name)
+
+            Installer(
+                installer.name,
+                installer.downloadUrl,
+                installer.size,
+                checksum,
+                checkSumLink,
+                installer.downloadCount,
+                signature_link = null,
+                metadata_link = metadataLink
+            )
         }
     }
 
@@ -120,6 +142,17 @@ object AdoptBinaryMapper : BinaryMapper() {
                 asset.name == "$binary_name.sha256.txt" ||
                     asset.name == binary_name.split(".")[0] + ".sha256.txt" ||
                     asset.name == "$nameWithoutExtension.sha256.txt"
+            }?.downloadUrl
+    }
+
+    private fun getMetadataLink(fullAssetList: List<GHAsset>, binary_name: String): String? {
+        val nameWithoutExtension = removeExtensionFromName(binary_name)
+
+        return fullAssetList
+            .firstOrNull { asset ->
+                asset.name == "$binary_name.json" ||
+                    asset.name == binary_name.split(".")[0] + ".json" ||
+                    asset.name == "$nameWithoutExtension.json"
             }?.downloadUrl
     }
 

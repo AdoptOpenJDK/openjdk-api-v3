@@ -7,5 +7,6 @@ class Installer(
     checksum: String?,
     checksum_link: String?,
     download_count: Long,
-    signature_link: String? = null
-) : Asset(name, link, size, checksum, checksum_link, signature_link, download_count)
+    signature_link: String? = null,
+    metadata_link: String?
+) : Asset(name, link, size, checksum, checksum_link, signature_link, download_count, metadata_link)
