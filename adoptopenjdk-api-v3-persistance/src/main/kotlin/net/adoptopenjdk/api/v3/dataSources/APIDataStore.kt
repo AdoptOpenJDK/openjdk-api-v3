@@ -11,6 +11,7 @@ import net.adoptopenjdk.api.v3.models.Variants
 import org.slf4j.LoggerFactory
 import java.time.ZonedDateTime
 import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.timerTask
 
@@ -18,6 +19,7 @@ object APIDataStore {
     private var updatedAt: UpdatedInfo = UpdatedInfo(ZonedDateTime.now().minusYears(10), "111")
     private var binaryRepos: AdoptRepos
     private var releaseInfo: ReleaseInfo
+    var schedule: ScheduledFuture<*>? = null
 
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
@@ -26,27 +28,30 @@ object APIDataStore {
     val variants: Variants
 
     init {
-
         val platformData = this.javaClass.getResource("/JSON/platforms.json").readText()
         platforms = JsonMapper.mapper.readValue(platformData, Platforms::class.java)
 
         val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
         variants = JsonMapper.mapper.readValue(variantData, Variants::class.java)
 
-        try {
-            binaryRepos = loadDataFromDb(true)
+        binaryRepos = try {
+            loadDataFromDb(true)
         } catch (e: Exception) {
             LOGGER.error("Failed to read db", e)
-            binaryRepos = AdoptRepos(listOf())
+            AdoptRepos(listOf())
         }
 
         releaseInfo = loadReleaseInfo()
+    }
 
-        Executors
-            .newSingleThreadScheduledExecutor()
-            .scheduleWithFixedDelay(timerTask {
-                periodicUpdate()
-            }, 0, 1, TimeUnit.MINUTES)
+    fun schedulePeriodicUpdates() {
+        if (schedule == null) {
+            schedule = Executors
+                .newSingleThreadScheduledExecutor()
+                .scheduleWithFixedDelay(timerTask {
+                    periodicUpdate()
+                }, 0, 1, TimeUnit.MINUTES)
+        }
     }
 
     fun loadReleaseInfo(): ReleaseInfo {

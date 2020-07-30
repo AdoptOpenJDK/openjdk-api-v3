@@ -2,13 +2,13 @@ package net.adoptopenjdk.api.v3
 
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.routes.AssetsResource
-import net.adoptopenjdk.api.v3.routes.packages.BinaryResource
 import net.adoptopenjdk.api.v3.routes.V1Route
 import net.adoptopenjdk.api.v3.routes.VersionResource
 import net.adoptopenjdk.api.v3.routes.info.AvailableReleasesResource
 import net.adoptopenjdk.api.v3.routes.info.PlatformsResource
 import net.adoptopenjdk.api.v3.routes.info.ReleaseListResource
 import net.adoptopenjdk.api.v3.routes.info.VariantsResource
+import net.adoptopenjdk.api.v3.routes.packages.BinaryResource
 import net.adoptopenjdk.api.v3.routes.packages.InstallerResource
 import net.adoptopenjdk.api.v3.routes.stats.DownloadStatsResource
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition
@@ -56,6 +56,7 @@ class V3 : Application() {
 
         // Eagerly fetch repo from db on app startup
         APIDataStore.getAdoptRepos()
+        APIDataStore.schedulePeriodicUpdates()
 
         resourceClasses = setOf(
             V1Route::class.java,

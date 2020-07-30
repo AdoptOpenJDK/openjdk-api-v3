@@ -83,20 +83,23 @@ class V3Updater {
 
     fun run(instantFullUpdate: Boolean) {
         val executor = Executors.newSingleThreadScheduledExecutor()
-
-        executor.scheduleWithFixedDelay(timerTask {
-            // Full update on boot and every 24h
-            fullUpdate()
-        }, if (instantFullUpdate) 0 else 1, 1, TimeUnit.DAYS)
-
-        var incrementalUpdateDelay = 0
         if (instantFullUpdate) {
-            // if doing a full update wait 120 min before starting
-            incrementalUpdateDelay = 120
+            executor.scheduleWithFixedDelay(timerTask {
+                fullUpdate()
+
+                executor.scheduleWithFixedDelay(timerTask {
+                    repo = incrementalUpdate(repo, database)
+                }, 1, 3, TimeUnit.MINUTES)
+            }, 0, 1, TimeUnit.DAYS)
+        } else {
+            executor.scheduleWithFixedDelay(timerTask {
+                fullUpdate()
+            }, 1, 1, TimeUnit.DAYS)
+
+            executor.scheduleWithFixedDelay(timerTask {
+                repo = incrementalUpdate(repo, database)
+            }, 1, 3, TimeUnit.MINUTES)
         }
-        executor.scheduleWithFixedDelay(timerTask {
-            repo = incrementalUpdate(repo, database)
-        }, incrementalUpdateDelay.toLong(), 3, TimeUnit.MINUTES)
     }
 
     private fun fullUpdate() {
