@@ -7,6 +7,7 @@ import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class V3UpdaterTest : BaseTest() {
 
@@ -29,6 +30,16 @@ class V3UpdaterTest : BaseTest() {
             val updatedTime = ApiPersistenceFactory.get().getUpdatedAt()
 
             assertEquals("a-different-checksum", updatedTime.checksum)
+        }
+    }
+
+    @Test
+    fun `checksum works`() {
+        runBlocking {
+            val repo = getInitialRepo()
+
+            val checksum = V3Updater.calculateChecksum(repo)
+            assertTrue(checksum.length == 24)
         }
     }
 }
