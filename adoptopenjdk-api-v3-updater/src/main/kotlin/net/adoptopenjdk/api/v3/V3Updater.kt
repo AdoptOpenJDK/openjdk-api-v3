@@ -10,6 +10,7 @@ import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.Variants
 import net.adoptopenjdk.api.v3.stats.StatsInterface
 import org.slf4j.LoggerFactory
+import java.io.OutputStream
 import java.security.MessageDigest
 import java.util.Base64
 import java.util.concurrent.Executors
@@ -69,8 +70,14 @@ class V3Updater {
 
         fun calculateChecksum(repo: AdoptRepos): String {
             val md = MessageDigest.getInstance("MD5")
-            val digest = md.digest(UpdaterJsonMapper.mapper.writeValueAsString(repo).toByteArray())
-            return String(Base64.getEncoder().encode(digest))
+            val outputStream = object : OutputStream() {
+                override fun write(b: Int) {
+                    md.update(b.toByte())
+                }
+            }
+            UpdaterJsonMapper.mapper.writeValue(outputStream, repo)
+
+            return String(Base64.getEncoder().encode(md.digest()))
         }
     }
 
