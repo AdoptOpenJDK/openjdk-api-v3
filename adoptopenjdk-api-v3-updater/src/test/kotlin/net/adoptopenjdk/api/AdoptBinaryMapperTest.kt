@@ -1,13 +1,17 @@
 package net.adoptopenjdk.api
 
+import io.mockk.coEvery
+import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHVersion
+import net.adoptopenjdk.api.v3.dataSources.mongo.GithubHtmlClient
 import net.adoptopenjdk.api.v3.mapping.adopt.AdoptBinaryMapper
 import net.adoptopenjdk.api.v3.models.*
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.format.DateTimeFormatter
@@ -15,12 +19,19 @@ import kotlin.test.assertEquals
 
 class AdoptBinaryMapperTest {
 
+    private val fakeGithubHtmlClient = mockk<GithubHtmlClient>()
+
     companion object {
         @JvmStatic
         @BeforeAll
-        public fun setup() {
+        fun setup() {
             BaseTest.startFongo()
         }
+    }
+
+    @BeforeEach
+    fun beforeEach() {
+        AdoptBinaryMapper.githubHtmlClient = fakeGithubHtmlClient
     }
 
     val jdk = GHAsset(
@@ -137,6 +148,10 @@ class AdoptBinaryMapperTest {
                 Pair(installerAsset, installerMetadata)
             )
 
+
+
+            coEvery { fakeGithubHtmlClient.getUrl("http://installer-checksum-link") } returns "installer-checksum archive.msi"
+
             val actualBinaries = AdoptBinaryMapper.toBinaryList(ghBinaryAssets, fullGhAssetList, ghBinaryAssetsWithMetadata)
 
             val expectedBinary =
@@ -158,7 +173,7 @@ class AdoptBinaryMapperTest {
                         name = "archive.msi",
                         link = "http://installer-link",
                         size = 1,
-                        checksum = null, // NOTE: HTTP lookup for checksum currently fails, ideally we would use a test-double to fake the response
+                        checksum = "installer-checksum",
                         checksum_link = "http://installer-checksum-link",
                         download_count = 1,
                         signature_link = null,

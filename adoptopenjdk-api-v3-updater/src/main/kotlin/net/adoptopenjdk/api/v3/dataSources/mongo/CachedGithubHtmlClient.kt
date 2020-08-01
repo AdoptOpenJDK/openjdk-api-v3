@@ -1,11 +1,6 @@
 package net.adoptopenjdk.api.v3.dataSources.mongo
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import net.adoptopenjdk.api.v3.dataSources.DefaultUpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UrlRequest
@@ -13,7 +8,11 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
 
-object CachedGithubHtmlClient {
+interface GithubHtmlClient {
+    suspend fun getUrl(url: String): String?
+}
+
+object CachedGithubHtmlClient : GithubHtmlClient {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
@@ -30,7 +29,7 @@ object CachedGithubHtmlClient {
         GlobalScope.launch(backgroundHtmlDispatcher, block = cacheRefreshDaemonThread())
     }
 
-    suspend fun getUrl(url: String): String? {
+    override suspend fun getUrl(url: String): String? {
         val cachedEntry = internalDbStore.getCachedWebpage(url)
         return if (cachedEntry == null) {
             get(UrlRequest(url))

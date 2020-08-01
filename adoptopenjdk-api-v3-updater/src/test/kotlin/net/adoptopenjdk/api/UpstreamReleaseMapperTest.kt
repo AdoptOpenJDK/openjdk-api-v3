@@ -7,10 +7,19 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.dataSources.models.GithubId
 import net.adoptopenjdk.api.v3.mapping.upstream.UpstreamReleaseMapper
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class UpstreamReleaseMapperTest {
+
+    companion object {
+        @JvmStatic
+        @BeforeAll
+        fun setup() {
+            BaseTest.startFongo()
+        }
+    }
 
     @Test
     fun parsedSourceHasCorrectSourceInfo() {
