@@ -1,10 +1,12 @@
 package net.adoptopenjdk.api.v3.mapping
 
-import java.time.ZonedDateTime
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
+import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGithubHtmlClient
+import net.adoptopenjdk.api.v3.dataSources.mongo.GithubHtmlClient
 import net.adoptopenjdk.api.v3.models.FileNameMatcher
+import java.time.ZonedDateTime
 
-abstract class BinaryMapper {
+abstract class BinaryMapper(var githubHtmlClient: GithubHtmlClient = CachedGithubHtmlClient) {
 
     companion object {
         val INSTALLER_EXTENSIONS = listOf("msi", "pkg")
