@@ -5,16 +5,21 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
+import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGithubHtmlClient
+import net.adoptopenjdk.api.v3.dataSources.mongo.GithubHtmlClient
 import net.adoptopenjdk.api.v3.mapping.BinaryMapper
 import net.adoptopenjdk.api.v3.models.*
 import org.slf4j.LoggerFactory
 import java.time.ZonedDateTime
 
-object AdoptBinaryMapper : BinaryMapper() {
+class AdoptBinaryMapper(private val githubHtmlClient: GithubHtmlClient = CachedGithubHtmlClient) : BinaryMapper() {
 
-    @JvmStatic
-    private val LOGGER = LoggerFactory.getLogger(this::class.java)
-    private const val HOTSPOT_JFR = "hotspot-jfr"
+    companion object {
+        @JvmStatic
+        private val LOGGER = LoggerFactory.getLogger(this::class.java)
+        private const val HOTSPOT_JFR = "hotspot-jfr"
+    }
+
 
     private val EXCLUDED = listOf<String>()
 

@@ -24,11 +24,11 @@ import kotlin.test.assertEquals
 class AdoptBinaryMapperTest {
 
     private val fakeGithubHtmlClient = mockk<GithubHtmlClient>()
+    private val adoptBinaryMapper = AdoptBinaryMapper(fakeGithubHtmlClient)
 
     @BeforeAll
     fun setup() {
         BaseTest.startFongo()
-        AdoptBinaryMapper.githubHtmlClient = fakeGithubHtmlClient
     }
 
     @BeforeEach
@@ -154,7 +154,7 @@ class AdoptBinaryMapperTest {
 
             coEvery { fakeGithubHtmlClient.getUrl("http://installer-checksum-link") } returns "installer-checksum archive.msi"
 
-            val actualBinaries = AdoptBinaryMapper.toBinaryList(ghBinaryAssets, fullGhAssetList, ghBinaryAssetsWithMetadata)
+            val actualBinaries = adoptBinaryMapper.toBinaryList(ghBinaryAssets, fullGhAssetList, ghBinaryAssetsWithMetadata)
 
             val expectedBinary =
                 Binary(
@@ -211,7 +211,7 @@ class AdoptBinaryMapperTest {
                     "2013-02-27T19:35:32Z"
                 )
             )
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
+            val binaryList = adoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
 
             assertEquals("a-download-link", binaryList[0].`package`.checksum_link)
         }
@@ -228,7 +228,7 @@ class AdoptBinaryMapperTest {
                 "2013-02-27T19:35:32Z"
             )
             )
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
+            val binaryList = adoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
 
             assertEquals(JvmImpl.openj9, binaryList[0].jvm_impl)
             assertEquals(Architecture.ppc64le, binaryList[0].architecture)
@@ -240,7 +240,7 @@ class AdoptBinaryMapperTest {
     @Test
     fun `parses JFR from name`() {
         runBlocking {
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
+            val binaryList = adoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
             assertParsedHotspotJfr(binaryList)
         }
     }
@@ -248,7 +248,7 @@ class AdoptBinaryMapperTest {
     @Test
     fun `project defaults to jdk`() {
         runBlocking {
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
+            val binaryList = adoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
             assertEquals(Project.jdk, binaryList[1].project)
         }
     }
@@ -263,7 +263,7 @@ class AdoptBinaryMapperTest {
                 ImageType.jdk,
                 ""
             )
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, mapOf(Pair(jdk, metadata)))
+            val binaryList = adoptBinaryMapper.toBinaryList(assets, assets, mapOf(Pair(jdk, metadata)))
             assertParsedHotspotJfr(binaryList)
         }
     }
@@ -287,7 +287,7 @@ class AdoptBinaryMapperTest {
                 "2013-02-27T19:35:32Z"
             )
 
-            val binaryList = AdoptBinaryMapper.toBinaryList(listOf(asset), listOf(asset, checksum), emptyMap())
+            val binaryList = adoptBinaryMapper.toBinaryList(listOf(asset), listOf(asset, checksum), emptyMap())
 
             assertEquals("a-download-link", binaryList[0].`package`.checksum_link)
         }
@@ -304,7 +304,7 @@ class AdoptBinaryMapperTest {
                 "2013-02-27T19:35:32Z"
             )
 
-            val binaryList = AdoptBinaryMapper.toBinaryList(listOf(asset), listOf(asset), emptyMap())
+            val binaryList = adoptBinaryMapper.toBinaryList(listOf(asset), listOf(asset), emptyMap())
 
             assertEquals(HeapSize.large, binaryList[0].heap_size)
         }
@@ -329,7 +329,7 @@ class AdoptBinaryMapperTest {
                     "2013-02-27T19:35:32Z"
                 )
             )
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
+            val binaryList = adoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
 
             assertEquals("a-download-link", binaryList[0].`package`.metadata_link)
         }
