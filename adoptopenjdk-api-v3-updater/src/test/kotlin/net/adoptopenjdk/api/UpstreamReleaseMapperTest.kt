@@ -9,16 +9,16 @@ import net.adoptopenjdk.api.v3.dataSources.models.GithubId
 import net.adoptopenjdk.api.v3.mapping.upstream.UpstreamReleaseMapper
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle
 import kotlin.test.assertEquals
 
+@TestInstance(Lifecycle.PER_CLASS)
 class UpstreamReleaseMapperTest {
 
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun setup() {
-            BaseTest.startFongo()
-        }
+    @BeforeAll
+    fun setup() {
+        BaseTest.startFongo()
     }
 
     @Test

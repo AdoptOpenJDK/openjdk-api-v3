@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api
 
+import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -13,25 +14,26 @@ import net.adoptopenjdk.api.v3.models.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import kotlin.test.assertEquals
 
+@TestInstance(Lifecycle.PER_CLASS)
 class AdoptBinaryMapperTest {
 
     private val fakeGithubHtmlClient = mockk<GithubHtmlClient>()
 
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun setup() {
-            BaseTest.startFongo()
-        }
+    @BeforeAll
+    fun setup() {
+        BaseTest.startFongo()
+        AdoptBinaryMapper.githubHtmlClient = fakeGithubHtmlClient
     }
 
     @BeforeEach
     fun beforeEach() {
-        AdoptBinaryMapper.githubHtmlClient = fakeGithubHtmlClient
+        clearMocks(fakeGithubHtmlClient)
     }
 
     val jdk = GHAsset(
