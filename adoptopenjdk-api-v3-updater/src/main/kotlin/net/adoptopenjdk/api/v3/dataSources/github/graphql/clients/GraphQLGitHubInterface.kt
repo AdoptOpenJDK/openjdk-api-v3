@@ -17,7 +17,7 @@ import kotlinx.coroutines.withContext
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
-import net.adoptopenjdk.api.v3.dataSources.github.GitHubAuth
+import net.adoptopenjdk.api.v3.dataSources.github.GithubAuth
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.HasRateLimit
 import org.slf4j.LoggerFactory
 
@@ -35,7 +35,7 @@ open class GraphQLGitHubInterface() {
     private val THRESHOLD_HARD_FLOOR = System.getenv("GITHUB_THRESHOLD_HARD_FLOOR")?.toFloatOrNull() ?: 200f
 
     init {
-        val token = GitHubAuth().readToken()
+        val token = GithubAuth.readToken()
         if (token == null) {
             throw IllegalStateException("No token provided")
         } else {
