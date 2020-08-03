@@ -19,7 +19,7 @@ eventually merge into `master` for a real Production deployment.
 
 ### Pre-Requisites
 
-Java 11 is a requirement to build the project.
+[Java 11](https://adoptopenjdk.net/releases.html?variant=openjdk11) is a requirement to build the project.
 
 ### Optional Set-up
 
@@ -29,10 +29,14 @@ The production server uses mongodb to store data, however you can also use Fongo
 
 ### Build Tool
 
-We use a Maven Wrapper (mvnw) to ensure that there's a consistent, repeatable build. The 
+[Maven](https://maven.apache.org/index.html) is used to build the project.
+
+We use the [Maven Wrapper](https://github.com/takari/maven-wrapper) (`mvnw`) to ensure that there's a consistent, repeatable build. 
+
+The 
 [POM File](./pom.xml) is the place to start.
 
-**NOTE:** We use a multi-module project structure. The root level POM contains a majority 
+**NOTE:** We use a multi-module project structure. The root level [Maven POM](./pom.xml) contains the majority 
 of the configuration that the children inherit from. 
 
 ### Build Command
@@ -45,6 +49,16 @@ If you wish to view all of the Maven reporting about the project you run the fol
 
 `./mvnw clean install site`
 
+## Code Style
+
+### ktlint
+
+The project applies the [ktlint](https://github.com/pinterest/ktlint) linter to provide an opinionated set of rules that reflect the official Kotlin code style.
+
+`ktlint` is configured in the top-level Maven [POM](./pom.xml) and executed during the `validate` phase of the Maven life-cycle.
+
+Refer to `ktlint`'s [docs](https://github.com/pinterest/ktlint#-with-maven) for more info.
+
 ## Testing
 
 **WARN** This API is critical to the success of AdoptOpenJDK therefore it is 
@@ -52,7 +66,7 @@ essential that tests are provided for all new functionality.
 
 ### Code Coverage
 
-TBD
+Code coverage metrics are collected using [JaCoCo](https://www.jacoco.org/jacoco/) and configured via a plugin in the top-level [Maven POM](./pom.xml).
 
 ## Continuous Integration (CI)
 
@@ -64,7 +78,6 @@ in GitHub uses to build and test a Pull Request.
 **NOTE:** Please update the dependencies in this file if you have changed the versions of:
  
 * The JDK
-* ktlint
 * openapi-generator-maven-plugin  
 
 ## API Definition and Usage
