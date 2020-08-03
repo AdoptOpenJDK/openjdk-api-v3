@@ -19,7 +19,6 @@ import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.OperatingSystem
 import net.adoptopenjdk.api.v3.models.Package
 import net.adoptopenjdk.api.v3.models.Project
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -33,11 +32,6 @@ class AdoptBinaryMapperTest {
 
     private val fakeGithubHtmlClient = mockk<GithubHtmlClient>()
     private val adoptBinaryMapper = AdoptBinaryMapper(fakeGithubHtmlClient)
-
-    @BeforeAll
-    fun setup() {
-        BaseTest.startFongo()
-    }
 
     @BeforeEach
     fun beforeEach() {
