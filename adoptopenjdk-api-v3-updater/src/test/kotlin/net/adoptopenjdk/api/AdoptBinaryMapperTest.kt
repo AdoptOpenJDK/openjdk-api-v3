@@ -1,26 +1,41 @@
 package net.adoptopenjdk.api
 
+import io.mockk.clearMocks
+import io.mockk.coEvery
+import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHVersion
+import net.adoptopenjdk.api.v3.dataSources.mongo.GithubHtmlClient
 import net.adoptopenjdk.api.v3.mapping.adopt.AdoptBinaryMapper
-import net.adoptopenjdk.api.v3.models.*
-import org.junit.jupiter.api.BeforeAll
+import net.adoptopenjdk.api.v3.models.Architecture
+import net.adoptopenjdk.api.v3.models.Binary
+import net.adoptopenjdk.api.v3.models.HeapSize
+import net.adoptopenjdk.api.v3.models.ImageType
+import net.adoptopenjdk.api.v3.models.Installer
+import net.adoptopenjdk.api.v3.models.JvmImpl
+import net.adoptopenjdk.api.v3.models.OperatingSystem
+import net.adoptopenjdk.api.v3.models.Package
+import net.adoptopenjdk.api.v3.models.Project
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import kotlin.test.assertEquals
 
+@TestInstance(Lifecycle.PER_CLASS)
 class AdoptBinaryMapperTest {
 
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        public fun setup() {
-            BaseTest.startFongo()
-        }
+    private val fakeGithubHtmlClient = mockk<GithubHtmlClient>()
+    private val adoptBinaryMapper = AdoptBinaryMapper(fakeGithubHtmlClient)
+
+    @BeforeEach
+    fun beforeEach() {
+        clearMocks(fakeGithubHtmlClient)
     }
 
     val jdk = GHAsset(
@@ -137,7 +152,9 @@ class AdoptBinaryMapperTest {
                 Pair(installerAsset, installerMetadata)
             )
 
-            val actualBinaries = AdoptBinaryMapper.toBinaryList(ghBinaryAssets, fullGhAssetList, ghBinaryAssetsWithMetadata)
+            coEvery { fakeGithubHtmlClient.getUrl("http://installer-checksum-link") } returns "installer-checksum archive.msi"
+
+            val actualBinaries = adoptBinaryMapper.toBinaryList(ghBinaryAssets, fullGhAssetList, ghBinaryAssetsWithMetadata)
 
             val expectedBinary =
                 Binary(
@@ -158,7 +175,7 @@ class AdoptBinaryMapperTest {
                         name = "archive.msi",
                         link = "http://installer-link",
                         size = 1,
-                        checksum = null, // NOTE: HTTP lookup for checksum currently fails, ideally we would use a test-double to fake the response
+                        checksum = "installer-checksum",
                         checksum_link = "http://installer-checksum-link",
                         download_count = 1,
                         signature_link = null,
@@ -194,7 +211,7 @@ class AdoptBinaryMapperTest {
                     "2013-02-27T19:35:32Z"
                 )
             )
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
+            val binaryList = adoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
 
             assertEquals("a-download-link", binaryList[0].`package`.checksum_link)
         }
@@ -211,7 +228,7 @@ class AdoptBinaryMapperTest {
                 "2013-02-27T19:35:32Z"
             )
             )
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
+            val binaryList = adoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
 
             assertEquals(JvmImpl.openj9, binaryList[0].jvm_impl)
             assertEquals(Architecture.ppc64le, binaryList[0].architecture)
@@ -223,7 +240,7 @@ class AdoptBinaryMapperTest {
     @Test
     fun `parses JFR from name`() {
         runBlocking {
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
+            val binaryList = adoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
             assertParsedHotspotJfr(binaryList)
         }
     }
@@ -231,7 +248,7 @@ class AdoptBinaryMapperTest {
     @Test
     fun `project defaults to jdk`() {
         runBlocking {
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
+            val binaryList = adoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
             assertEquals(Project.jdk, binaryList[1].project)
         }
     }
@@ -246,7 +263,7 @@ class AdoptBinaryMapperTest {
                 ImageType.jdk,
                 ""
             )
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, mapOf(Pair(jdk, metadata)))
+            val binaryList = adoptBinaryMapper.toBinaryList(assets, assets, mapOf(Pair(jdk, metadata)))
             assertParsedHotspotJfr(binaryList)
         }
     }
@@ -270,7 +287,7 @@ class AdoptBinaryMapperTest {
                 "2013-02-27T19:35:32Z"
             )
 
-            val binaryList = AdoptBinaryMapper.toBinaryList(listOf(asset), listOf(asset, checksum), emptyMap())
+            val binaryList = adoptBinaryMapper.toBinaryList(listOf(asset), listOf(asset, checksum), emptyMap())
 
             assertEquals("a-download-link", binaryList[0].`package`.checksum_link)
         }
@@ -287,7 +304,7 @@ class AdoptBinaryMapperTest {
                 "2013-02-27T19:35:32Z"
             )
 
-            val binaryList = AdoptBinaryMapper.toBinaryList(listOf(asset), listOf(asset), emptyMap())
+            val binaryList = adoptBinaryMapper.toBinaryList(listOf(asset), listOf(asset), emptyMap())
 
             assertEquals(HeapSize.large, binaryList[0].heap_size)
         }
@@ -312,7 +329,7 @@ class AdoptBinaryMapperTest {
                     "2013-02-27T19:35:32Z"
                 )
             )
-            val binaryList = AdoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
+            val binaryList = adoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
 
             assertEquals("a-download-link", binaryList[0].`package`.metadata_link)
         }
