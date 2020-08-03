@@ -20,7 +20,6 @@ class AdoptBinaryMapper(private val githubHtmlClient: GithubHtmlClient = CachedG
         private const val HOTSPOT_JFR = "hotspot-jfr"
     }
 
-
     private val EXCLUDED = listOf<String>()
 
     suspend fun toBinaryList(ghBinaryAssets: List<GHAsset>, allGhAssets: List<GHAsset>, ghAssetsWithMetadata: Map<GHAsset, GHMetaData>): List<Binary> {
