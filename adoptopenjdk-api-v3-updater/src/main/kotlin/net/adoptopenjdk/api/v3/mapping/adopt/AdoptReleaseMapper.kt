@@ -46,34 +46,34 @@ object AdoptReleaseMapper : ReleaseMapper() {
 
         try {
             val ghAssetsGroupedByVersion = ghAssetsWithMetadata
-                    .entries
-                    .groupBy(this@AdoptReleaseMapper::getReleaseVersion)
+                .entries
+                .groupBy(this@AdoptReleaseMapper::getReleaseVersion)
 
             val releases = ghAssetsGroupedByVersion
-                    .entries
-                    .map { ghAssetsForVersion: Map.Entry<String, List<Map.Entry<GHAsset, GHMetaData>>> ->
-                        val version = ghAssetsForVersion.value
-                            .sortedBy { ghAssetWithMetadata -> ghAssetWithMetadata.value.version.toApiVersion() }
-                            .last().value.version.toApiVersion()
+                .entries
+                .map { ghAssetsForVersion: Map.Entry<String, List<Map.Entry<GHAsset, GHMetaData>>> ->
+                    val version = ghAssetsForVersion.value
+                        .sortedBy { ghAssetWithMetadata -> ghAssetWithMetadata.value.version.toApiVersion() }
+                        .last().value.version.toApiVersion()
 
-                        val ghAssets: List<GHAsset> = ghAssetsForVersion.value.map { ghAssetWithMetadata -> ghAssetWithMetadata.key }
-                        val id = generateIdForSplitRelease(version, ghRelease)
+                    val ghAssets: List<GHAsset> = ghAssetsForVersion.value.map { ghAssetWithMetadata -> ghAssetWithMetadata.key }
+                    val id = generateIdForSplitRelease(version, ghRelease)
 
-                        toRelease(releaseName, ghAssets, ghAssetsWithMetadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version, ghRelease.releaseAssets.assets)
+                    toRelease(releaseName, ghAssets, ghAssetsWithMetadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version, ghRelease.releaseAssets.assets)
+                }
+                .ifEmpty {
+                    try {
+                        // if we have no metadata resort to parsing release names
+                        val version = parseVersionInfo(ghRelease, releaseName)
+                        val ghAssets = ghRelease.releaseAssets.assets
+                        val id = ghRelease.id.githubId
+
+                        return@ifEmpty listOf(toRelease(releaseName, ghAssets, ghAssetsWithMetadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version, ghAssets))
+                    } catch (e: Exception) {
+                        throw FailedToParse("Failed to parse version $releaseName", e)
                     }
-                    .ifEmpty {
-                        try {
-                            // if we have no metadata resort to parsing release names
-                            val version = parseVersionInfo(ghRelease, releaseName)
-                            val ghAssets = ghRelease.releaseAssets.assets
-                            val id = ghRelease.id.githubId
-
-                            return@ifEmpty listOf(toRelease(releaseName, ghAssets, ghAssetsWithMetadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version, ghAssets))
-                        } catch (e: Exception) {
-                            throw FailedToParse("Failed to parse version $releaseName", e)
-                        }
-                    }
-                    .filter { updatedRelease -> !excludeRelease(ghRelease, updatedRelease) }
+                }
+                .filter { updatedRelease -> !excludeRelease(ghRelease, updatedRelease) }
 
             return ReleaseResult(result = releases)
         } catch (e: FailedToParse) {
@@ -94,7 +94,8 @@ object AdoptReleaseMapper : ReleaseMapper() {
         return if (release.release_type == ReleaseType.ea) {
             // remove all 14.0.1+7.1 and 15.0.0+24.1 nightlies - https://github.com/AdoptOpenJDK/openjdk-api-v3/issues/213
             if (release.version_data.semver.startsWith("14.0.1+7.1.") ||
-                release.version_data.semver.startsWith("15.0.0+24.1.")) {
+                release.version_data.semver.startsWith("15.0.0+24.1.")
+            ) {
                 // Found an excluded release, mark it for future reference
                 excludedReleases.add(ghRelease.id)
                 true
@@ -110,10 +111,11 @@ object AdoptReleaseMapper : ReleaseMapper() {
         // using a shortend hash as a suffix to keep id short, probability of clash still very low
         val suffix = Base64
             .getEncoder()
-            .encodeToString(MessageDigest
-                .getInstance("SHA-1")
-                .digest(version.semver.toByteArray())
-                .copyOfRange(0, 10)
+            .encodeToString(
+                MessageDigest
+                    .getInstance("SHA-1")
+                    .digest(version.semver.toByteArray())
+                    .copyOfRange(0, 10)
             )
 
         return release.id.githubId + "." + suffix
@@ -147,7 +149,8 @@ object AdoptReleaseMapper : ReleaseMapper() {
 
     private fun formReleaseType(release: GHRelease): ReleaseType {
         // TODO fix me before the year 2100
-        val dateMatcher = """.*(20[0-9]{2}-[0-9]{2}-[0-9]{2}|20[0-9]{6}).*"""
+        val dateMatcher =
+            """.*(20[0-9]{2}-[0-9]{2}-[0-9]{2}|20[0-9]{6}).*"""
         val hasDate = Pattern.compile(dateMatcher).matcher(release.name)
 
         return if (release.url.matches(Regex(".*/openjdk[0-9]+-binaries/.*"))) {

@@ -54,40 +54,42 @@ class GithubDownloadStatsCalculator {
     public fun getStats(repos: AdoptRepos): List<GithubDownloadStatsDbEntry> {
         val date: ZonedDateTime = TimeSource.now()
         val stats = repos
-                .repos
-                .values
-                .map { featureRelease ->
-                    val total = featureRelease
-                            .releases
-                            .getReleases()
-                            .filter { it.vendor == Vendor.adoptopenjdk }
-                            .sumBy {
-                                it.download_count.toInt()
-                            }
+            .repos
+            .values
+            .map { featureRelease ->
+                val total = featureRelease
+                    .releases
+                    .getReleases()
+                    .filter { it.vendor == Vendor.adoptopenjdk }
+                    .sumBy {
+                        it.download_count.toInt()
+                    }
 
-                    // Tally up jvmImpl download stats
-                    val jvmImplMap: Map<JvmImpl, Long> = JvmImpl.values().map { jvmImpl ->
-                        jvmImpl to
-                            featureRelease
+                // Tally up jvmImpl download stats
+                val jvmImplMap: Map<JvmImpl, Long> = JvmImpl.values().map { jvmImpl ->
+                    jvmImpl to
+                        featureRelease
                             .releases
                             .getReleases()
                             .filter { it.vendor == Vendor.adoptopenjdk }
                             .sumBy {
                                 it.binaries
-                                .filter { it.jvm_impl == jvmImpl }
-                                .sumBy {
-                                    it.download_count.toInt()
-                                }
+                                    .filter { it.jvm_impl == jvmImpl }
+                                    .sumBy {
+                                        it.download_count.toInt()
+                                    }
                             }
                             .toLong()
-                    }.toMap()
+                }.toMap()
 
-                    GithubDownloadStatsDbEntry(date,
-                            total.toLong(),
-                            jvmImplMap,
-                            featureRelease.featureVersion)
-                }
-                .toList()
+                GithubDownloadStatsDbEntry(
+                    date,
+                    total.toLong(),
+                    jvmImplMap,
+                    featureRelease.featureVersion
+                )
+            }
+            .toList()
         return stats
     }
 }

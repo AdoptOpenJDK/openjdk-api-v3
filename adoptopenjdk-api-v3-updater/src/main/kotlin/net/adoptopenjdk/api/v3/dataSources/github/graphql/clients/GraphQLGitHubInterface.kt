@@ -45,11 +45,13 @@ open class GraphQLGitHubInterface() {
 
     fun request(query: String): GraphQLRequestEntity.RequestBuilder {
         return GraphQLRequestEntity.Builder()
-                .url(BASE_URL)
-                .headers(mapOf(
-                        "Authorization" to "Bearer $TOKEN"
-                ))
-                .request(query.trimIndent().replace("\n", ""))
+            .url(BASE_URL)
+            .headers(
+                mapOf(
+                    "Authorization" to "Bearer $TOKEN"
+                )
+            )
+            .request(query.trimIndent().replace("\n", ""))
     }
 
     protected suspend fun <E, F : HasRateLimit> getAll(
@@ -129,11 +131,11 @@ open class GraphQLGitHubInterface() {
     private fun processResponse(result: String): Pair<Int, Long> {
         val json = UpdaterJsonMapper.mapper.readValue(result, JsonObject::class.java)
         val remainingQuota = json.getJsonObject("resources")
-                ?.getJsonObject("graphql")
-                ?.getInt("remaining")
+            ?.getJsonObject("graphql")
+            ?.getInt("remaining")
         val resetTime = json.getJsonObject("resources")
-                ?.getJsonObject("graphql")
-                ?.getJsonNumber("reset")?.longValue()
+            ?.getJsonObject("graphql")
+            ?.getJsonNumber("reset")?.longValue()
 
         if (resetTime != null && remainingQuota != null) {
             val delayTime = if (remainingQuota > THRESHOLD_HARD_FLOOR) {

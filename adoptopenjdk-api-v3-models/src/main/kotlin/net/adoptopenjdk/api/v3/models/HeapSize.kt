@@ -16,8 +16,8 @@ enum class HeapSize : FileNameMatcher {
     override fun matchesFile(fileName: String): Boolean {
         val lowerCaseFileName = fileName.toLowerCase()
         return names
-                .firstOrNull {
-                    lowerCaseFileName.contains(Regex("${it}_"))
-                } != null
+            .firstOrNull {
+                lowerCaseFileName.contains(Regex("${it}_"))
+            } != null
     }
 }

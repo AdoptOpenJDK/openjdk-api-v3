@@ -54,22 +54,26 @@ class AssetsResource {
 
     @GET
     @Path("/feature_releases/{feature_version}/{release_type}")
-    @Operation(summary = "Returns release information",
+    @Operation(
+        summary = "Returns release information",
         description = "List of information about builds that match the current query"
     )
-    @APIResponses(value = [
-        APIResponse(responseCode = "200", description = "search results matching criteria",
-            content = [Content(schema = Schema(type = SchemaType.ARRAY, implementation = Release::class))]
-        ),
-        APIResponse(responseCode = "400", description = "bad input parameter")
-    ]
+    @APIResponses(
+        value = [
+            APIResponse(
+                responseCode = "200", description = "search results matching criteria",
+                content = [Content(schema = Schema(type = SchemaType.ARRAY, implementation = Release::class))]
+            ),
+            APIResponse(responseCode = "400", description = "bad input parameter")
+        ]
     )
     fun get(
         @Parameter(name = "release_type", description = OpenApiDocs.RELEASE_TYPE, required = true)
         @PathParam("release_type")
         release_type: ReleaseType?,
 
-        @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
+        @Parameter(
+            name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
             schema = Schema(defaultValue = "8", type = SchemaType.INTEGER)
         )
         @PathParam("feature_version")
@@ -99,9 +103,13 @@ class AssetsResource {
         @QueryParam("vendor")
         vendor: Vendor?,
 
-        @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk",
-            enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false
-        ), required = false
+        @Parameter(
+            name = "project", description = "Project",
+            schema = Schema(
+                defaultValue = "jdk",
+                enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false
+            ),
+            required = false
         )
         @QueryParam("project")
         project: Project?,
@@ -116,13 +124,15 @@ class AssetsResource {
         @QueryParam("before")
         before: String?,
 
-        @Parameter(name = "page_size", description = "Pagination page size",
+        @Parameter(
+            name = "page_size", description = "Pagination page size",
             schema = Schema(defaultValue = defaultPageSize, maximum = maxPageSize, type = SchemaType.INTEGER), required = false
         )
         @QueryParam("page_size")
         pageSize: Int?,
 
-        @Parameter(name = "page", description = "Pagination page number",
+        @Parameter(
+            name = "page", description = "Pagination page number",
             schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false
         )
         @QueryParam("page")
@@ -167,7 +177,8 @@ class AssetsResource {
             }
 
             try {
-                val date = DateTimeFormatter.ISO_DATE_TIME.parseBest(before,
+                val date = DateTimeFormatter.ISO_DATE_TIME.parseBest(
+                    before,
                     TemporalQuery { p0 -> ZonedDateTime.from(p0) },
                     TemporalQuery { p0 -> OffsetDateTime.from(p0) },
                     TemporalQuery { p0 -> LocalDateTime.from(p0) }
@@ -196,15 +207,18 @@ class AssetsResource {
 
     @GET
     @Path("/version/{version}")
-    @Operation(summary = "Returns release information about the specified version.",
+    @Operation(
+        summary = "Returns release information about the specified version.",
         description = "List of information about builds that match the current query "
     )
-    @APIResponses(value = [
-        APIResponse(responseCode = "200", description = "search results matching criteria",
-            content = [Content(schema = Schema(type = SchemaType.ARRAY, implementation = Release::class))]
-        ),
-        APIResponse(responseCode = "400", description = "bad input parameter")
-    ]
+    @APIResponses(
+        value = [
+            APIResponse(
+                responseCode = "200", description = "search results matching criteria",
+                content = [Content(schema = Schema(type = SchemaType.ARRAY, implementation = Release::class))]
+            ),
+            APIResponse(responseCode = "400", description = "bad input parameter")
+        ]
     )
     fun getReleaseVersion(
         @Parameter(name = "version", description = OpenApiDocs.VERSION_RANGE, required = true)
@@ -235,9 +249,13 @@ class AssetsResource {
         @QueryParam("vendor")
         vendor: Vendor?,
 
-        @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk",
-            enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false
-        ), required = false
+        @Parameter(
+            name = "project", description = "Project",
+            schema = Schema(
+                defaultValue = "jdk",
+                enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false
+            ),
+            required = false
         )
         @QueryParam("project")
         project: Project?,
@@ -250,13 +268,15 @@ class AssetsResource {
         @QueryParam("release_type")
         release_type: ReleaseType?,
 
-        @Parameter(name = "page_size", description = "Pagination page size",
+        @Parameter(
+            name = "page_size", description = "Pagination page size",
             schema = Schema(defaultValue = defaultPageSize, maximum = maxPageSize, type = SchemaType.INTEGER), required = false
         )
         @QueryParam("page_size")
         pageSize: Int?,
 
-        @Parameter(name = "page", description = "Pagination page number",
+        @Parameter(
+            name = "page", description = "Pagination page number",
             schema = Schema(defaultValue = "0", type = SchemaType.INTEGER), required = false
         )
         @QueryParam("page")
@@ -297,7 +317,8 @@ class AssetsResource {
     @Operation(summary = "Returns list of latest assets for the given feature version and jvm impl")
     fun getLatestAssets(
 
-        @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
+        @Parameter(
+            name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
             schema = Schema(defaultValue = "8", type = SchemaType.INTEGER)
         )
         @PathParam("feature_version")

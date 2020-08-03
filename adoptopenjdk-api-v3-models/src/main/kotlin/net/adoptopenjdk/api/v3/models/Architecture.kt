@@ -29,8 +29,8 @@ enum class Architecture : FileNameMatcher {
         @JsonCreator
         fun forValue(value: String): Architecture {
             return values()
-                    .filter { it.names.contains(value) }
-                    .first()
+                .filter { it.names.contains(value) }
+                .first()
         }
     }
 }

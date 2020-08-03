@@ -6,15 +6,15 @@ interface FileNameMatcher {
     fun matchesFile(fileName: String): Boolean {
         val lowerCaseFileName = fileName.toLowerCase()
         return names
-                .firstOrNull {
-                    lowerCaseFileName.contains(Regex("[\\-_]${it}_"))
-                } != null
+            .firstOrNull {
+                lowerCaseFileName.contains(Regex("[\\-_]${it}_"))
+            } != null
     }
 
     fun setNames(instanceName: String, alternativeNames: List<String>) {
         names = listOf(instanceName)
-                .union(alternativeNames.toList())
-                .map { it.toLowerCase() }
-                .toList()
+            .union(alternativeNames.toList())
+            .map { it.toLowerCase() }
+            .toList()
     }
 }

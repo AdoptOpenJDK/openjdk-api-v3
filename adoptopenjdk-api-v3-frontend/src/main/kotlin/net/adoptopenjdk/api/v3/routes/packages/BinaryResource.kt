@@ -41,11 +41,12 @@ class BinaryResource : PackageEndpoint() {
     @Path("/version/{release_name}/{os}/{arch}/{image_type}/{jvm_impl}/{heap_size}/{vendor}")
     @Produces("application/octet-stream")
     @Operation(summary = "Redirects to the binary that matches your current query", description = "Redirects to the binary that matches your current query")
-    @APIResponses(value = [
-        APIResponse(responseCode = "307", description = "link to binary that matches your current query"),
-        APIResponse(responseCode = "400", description = "bad input parameter"),
-        APIResponse(responseCode = "404", description = "No matching binary found")
-    ]
+    @APIResponses(
+        value = [
+            APIResponse(responseCode = "307", description = "link to binary that matches your current query"),
+            APIResponse(responseCode = "400", description = "bad input parameter"),
+            APIResponse(responseCode = "404", description = "No matching binary found")
+        ]
     )
     fun returnBinaryByVersion(
         @Parameter(name = "os", description = "Operating System", required = true)
@@ -56,7 +57,8 @@ class BinaryResource : PackageEndpoint() {
         @PathParam("arch")
         arch: Architecture?,
 
-        @Parameter(name = "release_name", description = OpenApiDocs.RELASE_NAME, required = true,
+        @Parameter(
+            name = "release_name", description = OpenApiDocs.RELASE_NAME, required = true,
             schema = Schema(defaultValue = "jdk-11.0.6+10", type = SchemaType.STRING)
         )
         @PathParam("release_name")
@@ -116,14 +118,16 @@ class BinaryResource : PackageEndpoint() {
     @Path("/latest/{feature_version}/{release_type}/{os}/{arch}/{image_type}/{jvm_impl}/{heap_size}/{vendor}")
     @Produces("application/octet-stream")
     @Operation(summary = "Redirects to the binary that matches your current query", description = "Redirects to the binary that matches your current query")
-    @APIResponses(value = [
-        APIResponse(responseCode = "307", description = "link to binary that matches your current query"),
-        APIResponse(responseCode = "400", description = "bad input parameter"),
-        APIResponse(responseCode = "404", description = "No matching binary found")
-    ]
+    @APIResponses(
+        value = [
+            APIResponse(responseCode = "307", description = "link to binary that matches your current query"),
+            APIResponse(responseCode = "400", description = "bad input parameter"),
+            APIResponse(responseCode = "404", description = "No matching binary found")
+        ]
     )
     fun returnBinary(
-        @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
+        @Parameter(
+            name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
             schema = Schema(defaultValue = "8", type = SchemaType.INTEGER)
         )
         @PathParam("feature_version")

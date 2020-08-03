@@ -40,15 +40,15 @@ class DockerStatsInterface {
         val now = TimeSource.now()
 
         return pullAllStats()
-                .map {
-                    DockerDownloadStatsDbEntry(
-                        now,
-                        it.getJsonNumber("pull_count").longValue(),
-                        it.getString("name"),
-                        getOpenjdkVersionFromString(it.getString("name")),
-                        if (it.getString("name").contains("openj9")) JvmImpl.openj9 else JvmImpl.hotspot // Will need to be updated with a new JVMImpl
-                    )
-                }
+            .map {
+                DockerDownloadStatsDbEntry(
+                    now,
+                    it.getJsonNumber("pull_count").longValue(),
+                    it.getString("name"),
+                    getOpenjdkVersionFromString(it.getString("name")),
+                    if (it.getString("name").contains("openj9")) JvmImpl.openj9 else JvmImpl.hotspot // Will need to be updated with a new JVMImpl
+                )
+            }
     }
 
     public fun getOpenjdkVersionFromString(name: String): Int? {

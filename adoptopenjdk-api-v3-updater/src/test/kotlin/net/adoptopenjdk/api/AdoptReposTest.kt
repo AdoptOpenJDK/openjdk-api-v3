@@ -35,54 +35,66 @@ class AdoptReposTest : BaseTest() {
     }
 
     private fun formFeatureRelease(time: ZonedDateTime): FeatureRelease {
-        return FeatureRelease(8, Releases(listOf(Release(
-                "a",
-                ReleaseType.ga,
-                "b",
-                "c",
-                TimeSource.now(),
-                time,
-                arrayOf(Binary(
-                        Package("a",
-                                "b",
-                                1L,
-                                "v",
-                                "c",
-                                3,
-                                "d",
-                            "e"
-                        ),
-                        2L,
-                        time,
-                        "d",
-                        Installer("a",
-                                "b",
-                                1L,
-                                "v",
-                                "c",
-                                4,
-                        "d",
-                        "e"),
-                        HeapSize.normal,
-                        OperatingSystem.linux,
-                        Architecture.x64,
-                        ImageType.jdk,
-                        JvmImpl.hotspot,
-                        Project.jdk
-                )),
-                2,
-                Vendor.adoptopenjdk,
-                VersionData(
-                        1,
-                        2,
-                        3,
+        return FeatureRelease(
+            8,
+            Releases(
+                listOf(
+                    Release(
                         "a",
-                        4,
-                        5,
+                        ReleaseType.ga,
+                        "b",
                         "c",
-                        "d"
-                )
+                        TimeSource.now(),
+                        time,
+                        arrayOf(
+                            Binary(
+                                Package(
+                                    "a",
+                                    "b",
+                                    1L,
+                                    "v",
+                                    "c",
+                                    3,
+                                    "d",
+                                    "e"
+                                ),
+                                2L,
+                                time,
+                                "d",
+                                Installer(
+                                    "a",
+                                    "b",
+                                    1L,
+                                    "v",
+                                    "c",
+                                    4,
+                                    "d",
+                                    "e"
+                                ),
+                                HeapSize.normal,
+                                OperatingSystem.linux,
+                                Architecture.x64,
+                                ImageType.jdk,
+                                JvmImpl.hotspot,
+                                Project.jdk
+                            )
+                        ),
+                        2,
+                        Vendor.adoptopenjdk,
+                        VersionData(
+                            1,
+                            2,
+                            3,
+                            "a",
+                            4,
+                            5,
+                            "c",
+                            "d"
+                        )
 
-        ))))
+                    )
+                )
+            )
+        )
     }
 }
