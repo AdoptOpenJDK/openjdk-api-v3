@@ -5,21 +5,21 @@ import io.aexp.nodes.graphql.GraphQLResponseEntity
 import io.aexp.nodes.graphql.GraphQLTemplate
 import io.aexp.nodes.graphql.Variable
 import io.aexp.nodes.graphql.exceptions.GraphQLException
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.temporal.ChronoUnit
-import java.util.concurrent.TimeUnit
-import javax.json.JsonObject
-import kotlin.math.max
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
-import net.adoptopenjdk.api.v3.dataSources.github.GithubAuth
+import net.adoptopenjdk.api.v3.dataSources.github.GitHubAuth
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.HasRateLimit
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
+import java.util.concurrent.TimeUnit
+import javax.json.JsonObject
+import kotlin.math.max
 
 open class GraphQLGitHubInterface() {
     companion object {
@@ -35,7 +35,7 @@ open class GraphQLGitHubInterface() {
     private val THRESHOLD_HARD_FLOOR = System.getenv("GITHUB_THRESHOLD_HARD_FLOOR")?.toFloatOrNull() ?: 200f
 
     init {
-        val token = GithubAuth.readToken()
+        val token = GitHubAuth.readToken()
         if (token == null) {
             throw IllegalStateException("No token provided")
         } else {
