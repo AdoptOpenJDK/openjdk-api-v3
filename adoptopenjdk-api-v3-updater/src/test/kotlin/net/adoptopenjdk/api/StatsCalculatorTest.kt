@@ -57,11 +57,11 @@ class StatsCalculatorTest : BaseTest() {
                 time,
                 arrayOf(
                     Binary(
-                        Package("a", "b", 1L, "v", "c", 12L, "d"),
+                        Package("a", "b", 1L, "v", "c", 12L, "d", "e"),
                         15L, // Download count
                         time,
                         "d",
-                        Installer("a", "b", 1L, "v", "c", 3L),
+                        Installer("a", "b", 1L, "v", "c", 3L, "d", "e"),
                         HeapSize.normal,
                         OperatingSystem.linux,
                         Architecture.x64,
@@ -69,7 +69,7 @@ class StatsCalculatorTest : BaseTest() {
                         JvmImpl.hotspot,
                         Project.jdk
                     ), Binary(
-                        Package("a", "b", 1L, "v", "c", 250L, "d"),
+                        Package("a", "b", 1L, "v", "c", 250L, "d", "e"),
                         250L,
                         time,
                         "d",
@@ -81,7 +81,7 @@ class StatsCalculatorTest : BaseTest() {
                         JvmImpl.hotspot,
                         Project.jdk
                     ), Binary(
-                        Package("a", "b", 1L, "v", "c", 60L, "d"),
+                        Package("a", "b", 1L, "v", "c", 60L, "d", "e"),
                         60L,
                         time,
                         "d",
@@ -93,7 +93,7 @@ class StatsCalculatorTest : BaseTest() {
                         JvmImpl.openj9,
                         Project.jdk
                     ), Binary(
-                        Package("a", "b", 1L, "v", "c", 120L, "d"),
+                        Package("a", "b", 1L, "v", "c", 120L, "d", "e"),
                         120L,
                         time,
                         "d",
@@ -118,11 +118,11 @@ class StatsCalculatorTest : BaseTest() {
                 time,
                 arrayOf(
                     Binary(
-                        Package("a", "b", 1L, "v", "c", 300L, "d"),
+                        Package("a", "b", 1L, "v", "c", 300L, "d", "e"),
                         300L, // Download count
                         time,
                         "d",
-                        Installer("a", "b", 1L, "v", "c", 3L),
+                        Installer("a", "b", 1L, "v", "c", 3L, "d", "e"),
                         HeapSize.normal,
                         OperatingSystem.linux,
                         Architecture.x64,
@@ -130,7 +130,7 @@ class StatsCalculatorTest : BaseTest() {
                         JvmImpl.hotspot,
                         Project.jdk
                     ), Binary(
-                        Package("a", "b", 1L, "v", "c", 150L, "d"),
+                        Package("a", "b", 1L, "v", "c", 150L, "d", "e"),
                         150L,
                         time,
                         "d",

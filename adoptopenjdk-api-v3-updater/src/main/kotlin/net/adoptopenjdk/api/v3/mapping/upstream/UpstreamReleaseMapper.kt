@@ -19,14 +19,14 @@ object UpstreamReleaseMapper : ReleaseMapper() {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-    override suspend fun toAdoptRelease(release: GHRelease): ReleaseResult {
-        val release_type: ReleaseType = if (release.name.contains(" GA ")) ReleaseType.ga else ReleaseType.ea
+    override suspend fun toAdoptRelease(ghRelease: GHRelease): ReleaseResult {
+        val release_type: ReleaseType = if (ghRelease.name.contains(" GA ")) ReleaseType.ga else ReleaseType.ea
 
-        val releaseLink = release.url
-        val releaseName = release.name
-        val timestamp = parseDate(release.publishedAt)
-        val updatedAt = parseDate(release.updatedAt)
-        val downloadCount = release.releaseAssets.assets
+        val releaseLink = ghRelease.url
+        val releaseName = ghRelease.name
+        val timestamp = parseDate(ghRelease.publishedAt)
+        val updatedAt = parseDate(ghRelease.updatedAt)
+        val downloadCount = ghRelease.releaseAssets.assets
             .filter { asset ->
                 BinaryMapper.BINARY_EXTENSIONS.any { asset.name.endsWith(it) }
             }
@@ -35,7 +35,7 @@ object UpstreamReleaseMapper : ReleaseMapper() {
         val vendor = Vendor.openjdk
 
         LOGGER.info("Getting binaries $releaseName")
-        val binaries = UpstreamBinaryMapper.toBinaryList(release.releaseAssets.assets)
+        val binaries = UpstreamBinaryMapper.toBinaryList(ghRelease.releaseAssets.assets)
         LOGGER.info("Done Getting binaries $releaseName")
 
         try {
@@ -49,9 +49,9 @@ object UpstreamReleaseMapper : ReleaseMapper() {
                 versionData = getVersionData(releaseName)
             }
 
-            val sourcePackage = getSourcePackage(release)
+            val sourcePackage = getSourcePackage(ghRelease)
 
-            return ReleaseResult(result = listOf(Release(release.id.githubId, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, versionData, sourcePackage)))
+            return ReleaseResult(result = listOf(Release(ghRelease.id.githubId, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, versionData, sourcePackage)))
         } catch (e: FailedToParse) {
             LOGGER.error("Failed to parse $releaseName")
             return ReleaseResult(error = "Failed to parse")

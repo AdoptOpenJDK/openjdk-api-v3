@@ -29,60 +29,63 @@ object AdoptReleaseMapper : ReleaseMapper() {
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
     private val excludedReleases: MutableSet<GithubId> = mutableSetOf()
 
-    override suspend fun toAdoptRelease(release: GHRelease): ReleaseResult {
-        if (excludedReleases.contains(release.id)) {
+    override suspend fun toAdoptRelease(ghRelease: GHRelease): ReleaseResult {
+        if (excludedReleases.contains(ghRelease.id)) {
             return ReleaseResult(error = "Excluded")
         }
 
-        val releaseType: ReleaseType = formReleaseType(release)
+        val releaseType: ReleaseType = formReleaseType(ghRelease)
 
-        val releaseLink = release.url
-        val releaseName = release.name
-        val timestamp = parseDate(release.publishedAt)
-        val updatedAt = parseDate(release.updatedAt)
+        val releaseLink = ghRelease.url
+        val releaseName = ghRelease.name
+        val timestamp = parseDate(ghRelease.publishedAt)
+        val updatedAt = parseDate(ghRelease.updatedAt)
         val vendor = Vendor.adoptopenjdk
 
-        val metadata = getMetadata(release.releaseAssets)
+        val ghAssetsWithMetadata = associateMetadataWithBinaries(ghRelease.releaseAssets)
 
         try {
-            val groupedByVersion = metadata
-                .entries
-                .groupBy {
-                    val version = it.value.version
-                    "${version.major}.${version.minor}.${version.security}.${version.build}.${version.adopt_build_number}.${version.pre}"
-                }
+            val ghAssetsGroupedByVersion = ghAssetsWithMetadata
+                    .entries
+                    .groupBy(this@AdoptReleaseMapper::getReleaseVersion)
 
-            val releases = groupedByVersion
-                .entries
-                .map { grouped ->
-                    val version = grouped.value.sortedBy { it.value.version.toApiVersion() }
-                        .last().value.version.toApiVersion()
+            val releases = ghAssetsGroupedByVersion
+                    .entries
+                    .map { ghAssetsForVersion: Map.Entry<String, List<Map.Entry<GHAsset, GHMetaData>>> ->
+                        val version = ghAssetsForVersion.value
+                            .sortedBy { ghAssetWithMetadata -> ghAssetWithMetadata.value.version.toApiVersion() }
+                            .last().value.version.toApiVersion()
 
-                    val assets = grouped.value.map { it.key }
-                    val id = generateIdForSplitRelease(version, release)
+                        val ghAssets: List<GHAsset> = ghAssetsForVersion.value.map { ghAssetWithMetadata -> ghAssetWithMetadata.key }
+                        val id = generateIdForSplitRelease(version, ghRelease)
 
-                    toRelease(releaseName, assets, metadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version, release.releaseAssets.assets)
-                }
-                .ifEmpty {
-                    try {
-                        // if we have no metadata resort to parsing release names
-                        val version = parseVersionInfo(release, releaseName)
-                        val assets = release.releaseAssets.assets
-                        val id = release.id.githubId
-
-                        return@ifEmpty listOf(toRelease(releaseName, assets, metadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version, assets))
-                    } catch (e: Exception) {
-                        throw FailedToParse("Failed to parse version $releaseName", e)
+                        toRelease(releaseName, ghAssets, ghAssetsWithMetadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version, ghRelease.releaseAssets.assets)
                     }
-                }
-                .filter { updatedRelease -> !excludeRelease(release, updatedRelease) }
+                    .ifEmpty {
+                        try {
+                            // if we have no metadata resort to parsing release names
+                            val version = parseVersionInfo(ghRelease, releaseName)
+                            val ghAssets = ghRelease.releaseAssets.assets
+                            val id = ghRelease.id.githubId
+
+                            return@ifEmpty listOf(toRelease(releaseName, ghAssets, ghAssetsWithMetadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version, ghAssets))
+                        } catch (e: Exception) {
+                            throw FailedToParse("Failed to parse version $releaseName", e)
+                        }
+                    }
+                    .filter { updatedRelease -> !excludeRelease(ghRelease, updatedRelease) }
 
             return ReleaseResult(result = releases)
         } catch (e: FailedToParse) {
-            excludedReleases.add(release.id)
+            excludedReleases.add(ghRelease.id)
             LOGGER.error("Failed to parse $releaseName")
             return ReleaseResult(error = "Failed to parse $releaseName")
         }
+    }
+
+    private fun getReleaseVersion(ghAssetWithMetadata: Map.Entry<GHAsset, GHMetaData>): String {
+        val version = ghAssetWithMetadata.value.version
+        return "${version.major}.${version.minor}.${version.security}.${version.build}.${version.adopt_build_number}.${version.pre}"
     }
 
     private fun excludeRelease(ghRelease: GHRelease, release: Release): Boolean {
@@ -118,8 +121,8 @@ object AdoptReleaseMapper : ReleaseMapper() {
 
     private suspend fun toRelease(
         releaseName: String,
-        assets: List<GHAsset>,
-        metadata: Map<GHAsset, GHMetaData>,
+        ghAssets: List<GHAsset>,
+        ghAssetWithMetadata: Map<GHAsset, GHMetaData>,
         id: String,
         release_type: ReleaseType,
         releaseLink: String,
@@ -127,13 +130,13 @@ object AdoptReleaseMapper : ReleaseMapper() {
         updatedAt: ZonedDateTime,
         vendor: Vendor,
         version: VersionData,
-        fullAssetList: List<GHAsset>
+        fullGhAssetList: List<GHAsset>
     ): Release {
         LOGGER.info("Getting binaries $releaseName")
-        val binaries = AdoptBinaryMapper.toBinaryList(assets, fullAssetList, metadata)
+        val binaries = AdoptBinaryMapper().toBinaryList(ghAssets, fullGhAssetList, ghAssetWithMetadata)
         LOGGER.info("Done Getting binaries $releaseName")
 
-        val downloadCount = assets
+        val downloadCount = ghAssets
             .filter { asset ->
                 BinaryMapper.BINARY_EXTENSIONS.any { asset.name.endsWith(it) }
             }
@@ -176,7 +179,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
         }
     }
 
-    private suspend fun getMetadata(releaseAssets: GHAssets): Map<GHAsset, GHMetaData> {
+    private suspend fun associateMetadataWithBinaries(releaseAssets: GHAssets): Map<GHAsset, GHMetaData> {
         return releaseAssets
             .assets
             .filter { it.name.endsWith(".json") }
