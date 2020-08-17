@@ -45,6 +45,30 @@ If you wish to view all of the Maven reporting about the project you run the fol
 
 `./mvnw clean install site`
 
+### Docker
+For convenience, you can build the API components with `Docker` and `docker-compose`. 
+
+```bash
+docker-compose build
+``` 
+
+Using a multi-stage [Dockerfile](Dockerfile) build, a Docker image is created that supports running both the updater and the front-end.
+
+The [docker-compose.yml](docker-compose.yml) defines a service for each component, as well a dependency on MongoDB, allowing you to spin up the full stack required for the API.
+
+You just need to provide your GitHub access token as an environment variable and run `docker-compose up`. For example:
+
+```bash
+export GITHUB_TOKEN=your-personal-github-token
+docker-compose up
+``` 
+
+You will need to wait the updater to complete its first full run before the API is usable. There is currently no persistence between runs.
+
+The front-end app will be available at <http://localhost:8080>.
+
+You can connect to the MongoDB instance using your Mongo client at <mongodb://localhost:27017>.   
+
 ## Testing
 
 **WARN** This API is critical to the success of AdoptOpenJDK therefore it is 

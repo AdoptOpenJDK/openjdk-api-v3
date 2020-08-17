@@ -1,0 +1,29 @@
+version: '3.6'
+services:
+  mongodb:
+    image: mongo:4.2
+    ports:
+      - "27017:27017"
+  frontend:
+    depends_on:
+      - mongodb
+    image: "adoptopenjdk-api"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      MONGODB_HOST: mongodb
+  updater:
+    depends_on:
+      - mongodb
+    image: "adoptopenjdk-api"
+    command: "java -jar /deployments/adoptopenjdk-api-v3-updater-runner.jar"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      MONGODB_HOST: mongodb
+      GITHUB_TOKEN: "${GITHUB_TOKEN}"
+
