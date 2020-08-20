@@ -1,13 +1,11 @@
 package net.adoptopenjdk.api.v3.dataSources.github
 
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Files
-/* ktlint-disable no-wildcard-imports */
-import java.util.*
-/* ktlint-enable no-wildcard-imports */
-import org.slf4j.LoggerFactory
+import java.util.Properties
 
-class GithubAuth {
+class GitHubAuth {
 
     companion object {
         @JvmStatic
