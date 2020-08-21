@@ -57,13 +57,17 @@ class StatsInterceptor : ContainerRequestFilter {
     }
 
     private fun addGuage(metricRegistry: MetricRegistry, name: String, getter: () -> Number) {
-        metricRegistry.register(ExtendedMetadata(name,
-            MetricType.GAUGE,
-            MetricUnits.NONE,
-            name,
-            true
-        ), object : Gauge<Number> {
-            override fun getValue(): Number = getter()
-        })
+        metricRegistry.register(
+            ExtendedMetadata(
+                name,
+                MetricType.GAUGE,
+                MetricUnits.NONE,
+                name,
+                true
+            ),
+            object : Gauge<Number> {
+                override fun getValue(): Number = getter()
+            }
+        )
     }
 }

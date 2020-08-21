@@ -196,13 +196,14 @@ class AdoptBinaryMapperTest {
     @Test
     fun `old checksum is found`() {
         runBlocking {
-            val assets = listOf(GHAsset(
-                "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.tar.gz",
-                1L,
-                "",
-                1L,
-                "2013-02-27T19:35:32Z"
-            ),
+            val assets = listOf(
+                GHAsset(
+                    "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.tar.gz",
+                    1L,
+                    "",
+                    1L,
+                    "2013-02-27T19:35:32Z"
+                ),
                 GHAsset(
                     "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.sha256.txt",
                     1L,
@@ -220,13 +221,14 @@ class AdoptBinaryMapperTest {
     @Test
     fun `parses old OpenJ9`() {
         runBlocking {
-            val assets = listOf(GHAsset(
-                "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.tar.gz",
-                1L,
-                "",
-                1L,
-                "2013-02-27T19:35:32Z"
-            )
+            val assets = listOf(
+                GHAsset(
+                    "OpenJDK9-OPENJ9_ppc64le_Linux_jdk-9.0.4.12_openj9-0.9.0.tar.gz",
+                    1L,
+                    "",
+                    1L,
+                    "2013-02-27T19:35:32Z"
+                )
             )
             val binaryList = adoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
 
@@ -256,7 +258,8 @@ class AdoptBinaryMapperTest {
     @Test
     fun `parses JFR from metadata`() {
         runBlocking {
-            val metadata = GHMetaData("", OperatingSystem.linux, Architecture.x64, "hotspot-jfr",
+            val metadata = GHMetaData(
+                "", OperatingSystem.linux, Architecture.x64, "hotspot-jfr",
                 GHVersion(0, 1, 2, "", 4, "", 6, "", ""),
                 "",
                 "",

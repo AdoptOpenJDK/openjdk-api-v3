@@ -59,9 +59,12 @@ class DownloadStatsResource {
         return getAdoptReleases(release)
             .filter { it.release_type == ReleaseType.ga }
             .map { grouped ->
-                Pair(grouped.release_name, grouped.binaries.map {
-                    it.download_count + ((it.installer?.download_count) ?: 0L)
-                }.sum())
+                Pair(
+                    grouped.release_name,
+                    grouped.binaries.map {
+                        it.download_count + ((it.installer?.download_count) ?: 0L)
+                    }.sum()
+                )
             }
             .toMap()
     }

@@ -32,31 +32,31 @@ class VersionPathTest {
         val parsed = VersionParser.parse("jdk-11.0.5+10")
 
         RestAssured.given()
-                .`when`()
-                .get("/v3/version/jdk-11.0.5+10")
-                .then()
-                .statusCode(200)
-                .body(VersionDataMatcher(parsed))
+            .`when`()
+            .get("/v3/version/jdk-11.0.5+10")
+            .then()
+            .statusCode(200)
+            .body(VersionDataMatcher(parsed))
     }
 
     @Test
     fun parsesNoVersion() {
 
         RestAssured.given()
-                .`when`()
-                .get("/v3/version/")
-                .then()
-                .statusCode(404)
+            .`when`()
+            .get("/v3/version/")
+            .then()
+            .statusCode(404)
     }
 
     @Test
     fun parsesBadVersion() {
 
         RestAssured.given()
-                .`when`()
-                .get("/v3/version/fooBar")
-                .then()
-                .statusCode(400)
+            .`when`()
+            .get("/v3/version/fooBar")
+            .then()
+            .statusCode(400)
     }
 
     @Test
@@ -65,10 +65,10 @@ class VersionPathTest {
         val parsed = VersionParser.parse("jdk-11.0.5+10")
 
         RestAssured.given()
-                .`when`()
-                .get("/v3/version/jdk-11.0.5+10?page_size=50")
-                .then()
-                .statusCode(200)
-                .body(VersionDataMatcher(parsed))
+            .`when`()
+            .get("/v3/version/jdk-11.0.5+10?page_size=50")
+            .then()
+            .statusCode(200)
+            .body(VersionDataMatcher(parsed))
     }
 }

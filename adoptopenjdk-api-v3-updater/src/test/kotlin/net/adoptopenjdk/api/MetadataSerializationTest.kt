@@ -13,24 +13,25 @@ import org.junit.jupiter.api.Test
 class MetadataSerializationTest {
 
     fun generateMetadata(): GHMetaData {
-        return GHMetaData("a",
-                OperatingSystem.aix,
-                Architecture.aarch64,
-                "hotspot",
-                GHVersion(
+        return GHMetaData(
+            "a",
+            OperatingSystem.aix,
+            Architecture.aarch64,
+            "hotspot",
+            GHVersion(
 
-                        1, 2, 3,
-                        "a",
-                        4,
-                        "b",
-                        5,
-                        "c",
-                        "d"
-                ),
+                1, 2, 3,
+                "a",
+                4,
                 "b",
+                5,
                 "c",
-                ImageType.jdk,
                 "d"
+            ),
+            "b",
+            "c",
+            ImageType.jdk,
+            "d"
         )
     }
 

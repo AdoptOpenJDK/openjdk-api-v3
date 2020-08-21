@@ -15,24 +15,27 @@ import java.time.ZonedDateTime
 
 class ZonedTimeUpgrader : SimpleModule() {
     init {
-        addDeserializer(ZonedDateTime::class.java, object : JsonDeserializer<ZonedDateTime>() {
-            override fun deserialize(parser: JsonParser?, context: DeserializationContext?): ZonedDateTime {
-                if (parser!!.currentToken() == JsonToken.VALUE_NUMBER_FLOAT) {
-                    return InstantDeserializer.ZONED_DATE_TIME.deserialize(parser, context)
-                } else {
-                    return LocalDateTimeDeserializer.INSTANCE.deserialize(parser, context)
+        addDeserializer(
+            ZonedDateTime::class.java,
+            object : JsonDeserializer<ZonedDateTime>() {
+                override fun deserialize(parser: JsonParser?, context: DeserializationContext?): ZonedDateTime {
+                    if (parser!!.currentToken() == JsonToken.VALUE_NUMBER_FLOAT) {
+                        return InstantDeserializer.ZONED_DATE_TIME.deserialize(parser, context)
+                    } else {
+                        return LocalDateTimeDeserializer.INSTANCE.deserialize(parser, context)
                             .atZone(TimeSource.ZONE)
+                    }
                 }
             }
-        })
+        )
     }
 }
 
 object JsonMapper {
     val mapper: ObjectMapper = ObjectMapper()
-            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            .findAndRegisterModules()
-            .registerModule(KotlinModule())
-            .registerModule(JavaTimeModule())
-            .registerModule(ZonedTimeUpgrader())
+        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+        .findAndRegisterModules()
+        .registerModule(KotlinModule())
+        .registerModule(JavaTimeModule())
+        .registerModule(ZonedTimeUpgrader())
 }

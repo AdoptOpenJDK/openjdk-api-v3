@@ -30,7 +30,8 @@ open class GraphQLGitHubReleaseClient : GraphQLGitHubReleaseRequest() {
     }
 
     private fun getReleaseByIdQuery(releaseId: GithubId): GraphQLRequestEntity.RequestBuilder {
-        return request("""query { 
+        return request(
+            """query { 
                               node(id:"${releaseId.githubId}") {
                                 ... on Release {
                                         id,
@@ -60,6 +61,7 @@ open class GraphQLGitHubReleaseClient : GraphQLGitHubReleaseRequest() {
                                 remaining
                             }
                         }
-                    """)
+                    """
+        )
     }
 }

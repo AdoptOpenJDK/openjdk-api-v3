@@ -36,7 +36,8 @@ class AfterContainerFilter : ContainerResponseFilter {
         if (requestContext != null &&
             responseContext != null &&
             startTime != null &&
-            startTime is Long) {
+            startTime is Long
+        ) {
 
             val duration = millisecondsSince(startTime)
 
