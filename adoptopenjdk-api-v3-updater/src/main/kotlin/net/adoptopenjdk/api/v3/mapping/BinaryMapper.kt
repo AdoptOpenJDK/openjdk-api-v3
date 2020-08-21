@@ -1,8 +1,8 @@
 package net.adoptopenjdk.api.v3.mapping
 
-import java.time.ZonedDateTime
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.models.FileNameMatcher
+import java.time.ZonedDateTime
 
 abstract class BinaryMapper {
 

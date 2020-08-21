@@ -3,7 +3,7 @@ package net.adoptopenjdk.api.v3.dataSources
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import net.adoptopenjdk.api.v3.HttpClientFactory
-import net.adoptopenjdk.api.v3.dataSources.github.GithubAuth
+import net.adoptopenjdk.api.v3.dataSources.github.GitHubAuth
 import org.apache.commons.io.IOUtils
 import org.apache.http.HttpResponse
 import org.apache.http.client.methods.RequestBuilder
@@ -36,7 +36,7 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
-        private val TOKEN: String? = GithubAuth.readToken()
+        private val TOKEN: String? = GitHubAuth.readToken()
         private const val REQUEST_TIMEOUT = 12000L
         private val GITHUB_DOMAINS = listOf("api.github.com", "github.com")
 
