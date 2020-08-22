@@ -116,6 +116,12 @@ Since the GitHub API is rate limited we use MongoDB as a caching mechanism.
 
 See [Code Structure](./docs/STRUCTURE.md) doc for more details.
 
+### Architecture Decisions Records
+
+For any significant project or architectural changes we use Architecture Decision Records (ADRs) to capture them.
+
+We manage ADRs using [adr-tools](https://github.com/npryce/adr-tools) in the [docs/adr](docs/adr) directory.
+
 ## Common Tasks
 
 In this section we list some common tasks and where to start.
