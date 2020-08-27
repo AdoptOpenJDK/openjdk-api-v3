@@ -84,21 +84,33 @@ class V3Updater {
     fun run(instantFullUpdate: Boolean) {
         val executor = Executors.newSingleThreadScheduledExecutor()
         if (instantFullUpdate) {
-            executor.scheduleWithFixedDelay(timerTask {
-                fullUpdate()
+            executor.scheduleWithFixedDelay(
+                timerTask {
+                    fullUpdate()
 
-                executor.scheduleWithFixedDelay(timerTask {
-                    repo = incrementalUpdate(repo, database)
-                }, 1, 3, TimeUnit.MINUTES)
-            }, 0, 1, TimeUnit.DAYS)
+                    executor.scheduleWithFixedDelay(
+                        timerTask {
+                            repo = incrementalUpdate(repo, database)
+                        },
+                        1, 3, TimeUnit.MINUTES
+                    )
+                },
+                0, 1, TimeUnit.DAYS
+            )
         } else {
-            executor.scheduleWithFixedDelay(timerTask {
-                fullUpdate()
-            }, 1, 1, TimeUnit.DAYS)
+            executor.scheduleWithFixedDelay(
+                timerTask {
+                    fullUpdate()
+                },
+                1, 1, TimeUnit.DAYS
+            )
 
-            executor.scheduleWithFixedDelay(timerTask {
-                repo = incrementalUpdate(repo, database)
-            }, 1, 3, TimeUnit.MINUTES)
+            executor.scheduleWithFixedDelay(
+                timerTask {
+                    repo = incrementalUpdate(repo, database)
+                },
+                1, 3, TimeUnit.MINUTES
+            )
         }
     }
 

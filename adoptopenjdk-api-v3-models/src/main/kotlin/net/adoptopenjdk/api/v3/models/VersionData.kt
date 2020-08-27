@@ -106,11 +106,11 @@ class VersionData : Comparable<VersionData> {
 
     companion object {
         val COMPARATOR = compareBy<VersionData> { it.major }
-                .thenBy { it.minor }
-                .thenBy { it.security }
-                .thenBy { it.pre }
-                .thenBy { it.build }
-                .thenBy { it.adopt_build_number }
-                .thenBy { it.optional }
+            .thenBy { it.minor }
+            .thenBy { it.security }
+            .thenBy { it.pre }
+            .thenBy { it.build }
+            .thenBy { it.adopt_build_number }
+            .thenBy { it.optional }
     }
 }

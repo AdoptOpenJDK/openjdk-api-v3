@@ -61,27 +61,33 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
     @Test
     fun sortOrderASCIsHonoured() {
         getReleases(SortOrder.ASC)
-            .fold(null, { previous: Release?, next: Release ->
-                if (previous != null) {
-                    if (Releases.VERSION_COMPARATOR.compare(previous, next) > 0) {
-                        fail("${previous.version_data} is before ${next.version_data}")
+            .fold(
+                null,
+                { previous: Release?, next: Release ->
+                    if (previous != null) {
+                        if (Releases.VERSION_COMPARATOR.compare(previous, next) > 0) {
+                            fail("${previous.version_data} is before ${next.version_data}")
+                        }
                     }
+                    next
                 }
-                next
-            })
+            )
     }
 
     @Test
     fun sortOrderDESIsHonoured() {
         getReleases(SortOrder.DESC)
-            .fold(null, { previous: Release?, next: Release ->
-                if (previous != null) {
-                    if (Releases.VERSION_COMPARATOR.compare(previous, next) < 0) {
-                        fail("${previous.version_data} is before ${next.version_data}")
+            .fold(
+                null,
+                { previous: Release?, next: Release ->
+                    if (previous != null) {
+                        if (Releases.VERSION_COMPARATOR.compare(previous, next) < 0) {
+                            fail("${previous.version_data} is before ${next.version_data}")
+                        }
                     }
+                    next
                 }
-                next
-            })
+            )
     }
 
     override fun <T> runFilterTest(filterParamName: String, values: Array<T>): Stream<DynamicTest> {
@@ -90,9 +96,12 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                 // test the ltses and 1 non-lts
                 listOf(8, 11, 12)
                     .flatMap { version ->
-                        createTest(values, "${getPath()}/$version/$releaseType", filterParamName, { element ->
-                            getExclusions(version, element)
-                        })
+                        createTest(
+                            values, "${getPath()}/$version/$releaseType", filterParamName,
+                            { element ->
+                                getExclusions(version, element)
+                            }
+                        )
                     }
             }
             .stream()

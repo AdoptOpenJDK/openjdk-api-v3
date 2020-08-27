@@ -2,7 +2,8 @@ package net.adoptopenjdk.api.v3
 
 object OpenApiDocs {
 
-    const val RELASE_NAME = """
+    const val RELASE_NAME =
+        """
 <p>
     Name of the release as displayed in github or <a href="https://adoptopenjdk.net/">https://adoptopenjdk.net/</a> e.g
     <code>jdk-11.0.4+11, jdk8u172-b00-201807161800</code>.
@@ -13,7 +14,8 @@ object OpenApiDocs {
 </p>
 """
 
-    const val FEATURE_RELEASE = """
+    const val FEATURE_RELEASE =
+        """
 <p>
     Feature release version you wish to download. Feature versions are whole numbers e.g. <code>8,9,10,11,12,13</code>.
 </p>
@@ -23,9 +25,11 @@ object OpenApiDocs {
 </p>
 """
 
-    const val VENDOR = """<p>Vendor of the binary. This is the organisation that produced the binary package.</p>"""
+    const val VENDOR =
+        """<p>Vendor of the binary. This is the organisation that produced the binary package.</p>"""
 
-    const val VERSION_RANGE = """
+    const val VERSION_RANGE =
+        """
 <p>Semantic version range (maven style) of versions to include.</p>
 <p>e.g: <code><ul><li>11.0.4+11.1</li><li>[1.0,2.0)</li><li>(,1.0]</li></ul></code></p>
 <p>Details of maven version ranges can be found at 
@@ -33,7 +37,8 @@ object OpenApiDocs {
 </p>
 """
 
-    const val RELEASE_TYPE = """
+    const val RELEASE_TYPE =
+        """
 <p>Type of release. Either a release version, known as General Availability(ga) or an Early Access(ea) </p>
 """
 }

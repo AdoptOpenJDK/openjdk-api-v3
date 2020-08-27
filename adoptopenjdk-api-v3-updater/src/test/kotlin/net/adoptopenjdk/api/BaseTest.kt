@@ -127,9 +127,11 @@ abstract class BaseTest {
         fun MockRepository(adoptRepos: AdoptRepos): AdoptRepository {
             return object : AdoptRepository {
                 override suspend fun getReleaseById(id: GithubId): ReleaseResult {
-                    return ReleaseResult(result = adoptRepos.allReleases.getReleases().filter {
-                        it.id.startsWith(id.githubId)
-                    }.toList())
+                    return ReleaseResult(
+                        result = adoptRepos.allReleases.getReleases().filter {
+                            it.id.startsWith(id.githubId)
+                        }.toList()
+                    )
                 }
 
                 override suspend fun getRelease(version: Int): FeatureRelease? {

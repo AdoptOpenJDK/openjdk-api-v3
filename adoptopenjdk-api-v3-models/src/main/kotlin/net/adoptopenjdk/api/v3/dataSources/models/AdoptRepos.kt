@@ -26,11 +26,11 @@ class AdoptRepos {
         this.repos = repos
 
         val releases = repos
-                .asSequence()
-                .filterNotNull()
-                .map { it.value.releases }
-                .flatMap { it.getReleases() }
-                .toList()
+            .asSequence()
+            .filterNotNull()
+            .map { it.value.releases }
+            .flatMap { it.getReleases() }
+            .toList()
 
         allReleases = Releases(releases)
     }
@@ -39,9 +39,11 @@ class AdoptRepos {
         return repos.get(version)
     }
 
-    constructor(list: List<FeatureRelease>) : this(list
+    constructor(list: List<FeatureRelease>) : this(
+        list
             .map { Pair(it.featureVersion, it) }
-            .toMap())
+            .toMap()
+    )
 
     fun getReleases(releaseFilter: Predicate<Release>, sortOrder: SortOrder, sortMethod: SortMethod): Sequence<Release> {
         return allReleases.getReleases(releaseFilter, sortOrder, sortMethod)
@@ -65,10 +67,10 @@ class AdoptRepos {
 
     private fun getFilteredReleases(releases: Sequence<Release>, binaryFilter: Predicate<Binary>): Sequence<Release> {
         return releases
-                .map { release ->
-                    release.filterBinaries(binaryFilter)
-                }
-                .filter { it.binaries.isNotEmpty() }
+            .map { release ->
+                release.filterBinaries(binaryFilter)
+            }
+            .filter { it.binaries.isNotEmpty() }
     }
 
     fun addRelease(i: Int, r: Release): AdoptRepos {

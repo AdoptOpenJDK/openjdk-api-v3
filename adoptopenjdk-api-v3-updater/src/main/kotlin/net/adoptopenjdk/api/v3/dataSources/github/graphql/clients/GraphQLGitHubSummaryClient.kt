@@ -20,11 +20,13 @@ class GraphQLGitHubSummaryClient : GraphQLGitHubInterface() {
 
         LOGGER.info("Getting repo summary $repoName")
 
-        val releases = getAll(requestEntityBuilder,
-                { request -> getSummary(request) },
-                { it.repository!!.releases.pageInfo.hasNextPage },
-                { it.repository!!.releases.pageInfo.endCursor },
-                clazz = QuerySummaryData::class.java)
+        val releases = getAll(
+            requestEntityBuilder,
+            { request -> getSummary(request) },
+            { it.repository!!.releases.pageInfo.hasNextPage },
+            { it.repository!!.releases.pageInfo.endCursor },
+            clazz = QuerySummaryData::class.java
+        )
 
         LOGGER.info("Done getting summary $repoName")
 
@@ -39,7 +41,8 @@ class GraphQLGitHubSummaryClient : GraphQLGitHubInterface() {
     }
 
     private fun getReleaseSummary(repoName: String): GraphQLRequestEntity.RequestBuilder {
-        return request("""
+        return request(
+            """
                         query(${'$'}cursorPointer:String) { 
                             repository(owner:"$OWNER", name:"$repoName") { 
                                 releases(first:50, after:${'$'}cursorPointer, orderBy: {field: CREATED_AT, direction: DESC}) {
@@ -59,6 +62,7 @@ class GraphQLGitHubSummaryClient : GraphQLGitHubInterface() {
                                 remaining
                             }
                         }
-                    """)
+                    """
+        )
     }
 }

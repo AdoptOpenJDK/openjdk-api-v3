@@ -24,7 +24,8 @@ object ServerConfig {
     const val SERVER = "https://api.adoptopenjdk.net"
 }
 
-const val DESCRIPTION = """
+const val DESCRIPTION =
+    """
 <li><strong>NOTICE:</strong> AdoptOpenJDK API v1 Has now been removed.</li>
 <li><strong>NOTICE:</strong> AdoptOpenJDK API v2 Has now been deprecated.</li>
 <li><strong>NOTICE:</strong> If you are using v2 please move to the v3 as soon as possible. Please raise any migration 

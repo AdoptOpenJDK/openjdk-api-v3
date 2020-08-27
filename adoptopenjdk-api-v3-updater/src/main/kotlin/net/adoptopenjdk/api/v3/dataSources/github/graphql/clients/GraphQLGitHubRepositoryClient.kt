@@ -17,11 +17,13 @@ open class GraphQLGitHubRepositoryClient : GraphQLGitHubReleaseRequest() {
 
         LOGGER.info("Getting repo $repoName")
 
-        val releases = getAll(requestEntityBuilder,
-                { request -> getAllAssets(request) },
-                { it.repository!!.releases.pageInfo.hasNextPage },
-                { it.repository!!.releases.pageInfo.endCursor },
-                clazz = QueryData::class.java)
+        val releases = getAll(
+            requestEntityBuilder,
+            { request -> getAllAssets(request) },
+            { it.repository!!.releases.pageInfo.hasNextPage },
+            { it.repository!!.releases.pageInfo.endCursor },
+            clazz = QueryData::class.java
+        )
 
         LOGGER.info("Done getting $repoName")
 
@@ -33,17 +35,18 @@ open class GraphQLGitHubRepositoryClient : GraphQLGitHubReleaseRequest() {
 
         // nested releases based on how we deserialise githubs data
         return request.repository.releases.releases
-                .map { release ->
-                    if (release.releaseAssets.pageInfo.hasNextPage) {
-                        getNextPage(release)
-                    } else {
-                        release
-                    }
+            .map { release ->
+                if (release.releaseAssets.pageInfo.hasNextPage) {
+                    getNextPage(release)
+                } else {
+                    release
                 }
+            }
     }
 
     private fun getReleasesRequest(repoName: String): GraphQLRequestEntity.RequestBuilder {
-        return request("""
+        return request(
+            """
                         query(${'$'}cursorPointer:String) { 
                             repository(owner:"$OWNER", name:"$repoName") { 
                                 releases(first:50, after:${'$'}cursorPointer, orderBy: {field: CREATED_AT, direction: DESC}) {
@@ -80,6 +83,7 @@ open class GraphQLGitHubRepositoryClient : GraphQLGitHubReleaseRequest() {
                                 remaining
                             }
                         }
-                    """)
+                    """
+        )
     }
 }

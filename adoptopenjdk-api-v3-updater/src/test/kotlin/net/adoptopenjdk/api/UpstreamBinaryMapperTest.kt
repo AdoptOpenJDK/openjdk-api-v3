@@ -43,10 +43,11 @@ class UpstreamBinaryMapperTest {
 
     @Test
     fun filtersOutDebugInfo() {
-        val assets = getAssetList(listOf(
-            "OpenJDK8U-jdk_x64_linux_8u232b09.tar.gz",
-            "OpenJDK8U-jdk_x64_linux_8u232b09-debuginfo.tar.gz"
-        )
+        val assets = getAssetList(
+            listOf(
+                "OpenJDK8U-jdk_x64_linux_8u232b09.tar.gz",
+                "OpenJDK8U-jdk_x64_linux_8u232b09-debuginfo.tar.gz"
+            )
         )
         runBlocking {
             val binaryList = UpstreamBinaryMapper.toBinaryList(assets)
@@ -59,15 +60,16 @@ class UpstreamBinaryMapperTest {
     @Test
     fun correctlyClassifiesImageType() {
 
-        val assets = getAssetList(listOf(
-            "OpenJDK11U-x64_linux_11.0.3_7.tar.gz",
-            "OpenJDK11U-x64_windows_11.0.3_6_ea.zip",
-            "OpenJDK11U-testimage_x64_linux_11.0.5_10.tar.gz",
-            "OpenJDK11U-static-libs_x64_linux_11.0.5_10.tar.gz",
-            "OpenJDK11U-jre_aarch64_linux_11.0.5_10.tar.gz",
-            "OpenJDK11U-jdk_aarch64_linux_11.0.5_10-debuginfo.tar.gz",
-            "OpenJDK11U-sources_11.0.5_10.tar.gz"
-        )
+        val assets = getAssetList(
+            listOf(
+                "OpenJDK11U-x64_linux_11.0.3_7.tar.gz",
+                "OpenJDK11U-x64_windows_11.0.3_6_ea.zip",
+                "OpenJDK11U-testimage_x64_linux_11.0.5_10.tar.gz",
+                "OpenJDK11U-static-libs_x64_linux_11.0.5_10.tar.gz",
+                "OpenJDK11U-jre_aarch64_linux_11.0.5_10.tar.gz",
+                "OpenJDK11U-jdk_aarch64_linux_11.0.5_10-debuginfo.tar.gz",
+                "OpenJDK11U-sources_11.0.5_10.tar.gz"
+            )
         )
 
         runBlocking {
@@ -84,12 +86,13 @@ class UpstreamBinaryMapperTest {
 
     @Test
     fun correctlyClassifiesProjectType() {
-        val assets = getAssetList(listOf(
-            "OpenJDK8U-jdk-jfr_x64_linux_8u262b01_ea.tar.gz",
-            "OpenJDK8U-jdk_x64_linux_8u262b01_ea.tar.gz",
-            "OpenJDK8U-jre-jfr_x64_linux_8u262b01_ea.tar.gz",
-            "OpenJDK8U-jre_x64_linux_8u262b01_ea.tar.gz"
-        )
+        val assets = getAssetList(
+            listOf(
+                "OpenJDK8U-jdk-jfr_x64_linux_8u262b01_ea.tar.gz",
+                "OpenJDK8U-jdk_x64_linux_8u262b01_ea.tar.gz",
+                "OpenJDK8U-jre-jfr_x64_linux_8u262b01_ea.tar.gz",
+                "OpenJDK8U-jre_x64_linux_8u262b01_ea.tar.gz"
+            )
         )
 
         runBlocking {
@@ -106,9 +109,10 @@ class UpstreamBinaryMapperTest {
     @Test
     fun addsSignatureLink() {
 
-        val assets = getAssetList(listOf(
-            "OpenJDK11U-x64_linux_11.0.3_7.tar.gz"
-        )
+        val assets = getAssetList(
+            listOf(
+                "OpenJDK11U-x64_linux_11.0.3_7.tar.gz"
+            )
         )
 
         runBlocking {
