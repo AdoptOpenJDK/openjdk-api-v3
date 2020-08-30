@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-         xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>net.adoptopenjdk.api</groupId>
@@ -9,13 +9,18 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <modelVersion>4.0.0</modelVersion>
     <artifactId>adoptopenjdk-api-v3-frontend</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-metrics</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jboss.slf4j</groupId>
+                    <artifactId>slf4j-jboss-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -64,8 +69,8 @@
             <groupId>net.adoptopenjdk.api</groupId>
             <artifactId>adoptopenjdk-api-v3-updater</artifactId>
             <version>${project.version}</version>
-            <classifier>tests</classifier>
             <type>test-jar</type>
+            <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -77,13 +82,11 @@
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
-            <version>4.0.0-rc1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.skyscreamer</groupId>
             <artifactId>jsonassert</artifactId>
-            <version>1.5.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -92,8 +95,8 @@
             <scope>test</scope>
             <exclusions>
                 <exclusion>
-                    <artifactId>slf4j-simple</artifactId>
                     <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -120,7 +123,10 @@
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>applicationinsights-core</artifactId>
-            <version>2.6.2-BETA.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>applicationinsights-logging-logback</artifactId>
         </dependency>
     </dependencies>
 
@@ -246,6 +252,7 @@
             </plugin>
         </plugins>
     </build>
+
     <profiles>
         <profile>
             <id>native</id>

@@ -132,13 +132,13 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
         // Retry up to 10 times
         for (retryCount in 1..10) {
             try {
-                LOGGER.info("Getting ${request.url} ${request.lastModified}")
+                LOGGER.debug("Getting ${request.url} ${request.lastModified}")
                 val response: HttpResponse = withTimeout(REQUEST_TIMEOUT) {
                     suspendCoroutine<HttpResponse> { continuation ->
                         getData(request, continuation)
                     }
                 }
-                LOGGER.info("Got  ${request.url}")
+                LOGGER.debug("Got  ${request.url}")
                 return response
             } catch (e: NotFoundException) {
                 return null
