@@ -108,6 +108,10 @@
             <artifactId>adoptopenjdk-api-v3-persistance</artifactId>
         </dependency>
         <dependency>
+            <groupId>net.adoptopenjdk.api</groupId>
+            <artifactId>adoptopenjdk-api-v3-telemetry</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <scope>test</scope>

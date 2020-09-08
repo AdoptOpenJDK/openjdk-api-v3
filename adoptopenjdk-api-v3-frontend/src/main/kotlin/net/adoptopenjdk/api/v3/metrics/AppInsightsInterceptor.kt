@@ -2,6 +2,7 @@ package net.adoptopenjdk.api.v3.metrics
 
 import com.microsoft.applicationinsights.telemetry.Duration
 import com.microsoft.applicationinsights.telemetry.RequestTelemetry
+import net.adoptopenjdk.api.v3.ai.AppInsightsTelemetry
 import java.util.*
 import javax.ws.rs.container.ContainerRequestContext
 import javax.ws.rs.container.ContainerRequestFilter
@@ -76,7 +77,7 @@ class Writer : WriterInterceptor {
         if (requestTelemetry != null && requestTelemetry is RequestTelemetry && startTime != null && startTime is Long) {
             val duration = millisecondsSince(startTime)
             requestTelemetry.metrics["writeTime"] = duration
-            AppInsightsTelemetery.telemetryClient.trackRequest(requestTelemetry)
+            AppInsightsTelemetry.telemetryClient.trackRequest(requestTelemetry)
         }
     }
 }
