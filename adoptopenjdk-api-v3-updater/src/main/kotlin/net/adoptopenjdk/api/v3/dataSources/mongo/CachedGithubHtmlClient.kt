@@ -39,7 +39,7 @@ object CachedGithubHtmlClient : GithubHtmlClient {
         return if (cachedEntry == null) {
             get(UrlRequest(url))
         } else {
-            LOGGER.info("Scheduling for refresh $url ${cachedEntry.lastModified} ${workList.size}")
+            LOGGER.debug("Scheduling for refresh $url ${cachedEntry.lastModified} ${workList.size}")
             workList.offer(UrlRequest(url, cachedEntry.lastModified))
             cachedEntry.data
         }
@@ -50,7 +50,7 @@ object CachedGithubHtmlClient : GithubHtmlClient {
             while (true) {
                 val request = workList.take()
                 async {
-                    LOGGER.info("Enqueuing ${request.url} ${request.lastModified} ${workList.size}")
+                    LOGGER.debug("Enqueuing ${request.url} ${request.lastModified} ${workList.size}")
                     return@async get(request)
                 }.await()
             }
@@ -61,7 +61,7 @@ object CachedGithubHtmlClient : GithubHtmlClient {
         // Retry up to 10 times
         for (retryCount in 1..10) {
             try {
-                LOGGER.info("Getting  ${request.url} ${request.lastModified}")
+                LOGGER.debug("Getting  ${request.url} ${request.lastModified}")
                 val response = UpdaterHtmlClientFactory.client.getFullResponse(request)
 
                 if (response?.statusLine?.statusCode == 304) {
@@ -74,7 +74,7 @@ object CachedGithubHtmlClient : GithubHtmlClient {
                 val lastModified = response?.getFirstHeader("Last-Modified")?.value
 
                 internalDbStore.putCachedWebpage(request.url, lastModified, body)
-                LOGGER.info("Got ${request.url}")
+                LOGGER.debug("Got ${request.url}")
                 return body
             } catch (e: Exception) {
                 LOGGER.error("Failed to read data retrying $retryCount ${request.url}", e)

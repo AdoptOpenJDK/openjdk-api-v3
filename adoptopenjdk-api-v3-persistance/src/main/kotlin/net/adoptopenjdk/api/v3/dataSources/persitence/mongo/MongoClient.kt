@@ -1,5 +1,7 @@
 package net.adoptopenjdk.api.v3.dataSources.persitence.mongo
 
+import com.mongodb.ConnectionString
+import com.mongodb.MongoClientSettings
 import org.litote.kmongo.coroutine.CoroutineClient
 import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.coroutine.coroutine
@@ -65,7 +67,11 @@ class MongoClient {
             serverSelectionTimeoutMills = System.getenv("MONGODB_SERVER_SELECTION_TIMEOUT_MILLIS")
         )
 
-        client = KMongo.createClient(connectionString).coroutine
+        val settings = MongoClientSettings.builder()
+            .applyConnectionString(ConnectionString(connectionString))
+            .build()
+
+        client = KMongo.createClient(settings).coroutine
         database = client.getDatabase(dbName)
     }
 }

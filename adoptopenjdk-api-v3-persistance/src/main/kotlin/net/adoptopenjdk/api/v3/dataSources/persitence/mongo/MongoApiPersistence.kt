@@ -2,7 +2,6 @@ package net.adoptopenjdk.api.v3.dataSources.persitence.mongo
 
 import com.mongodb.client.model.InsertManyOptions
 import com.mongodb.client.model.UpdateOptions
-import com.mongodb.reactivestreams.client.ClientSession
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
@@ -40,37 +39,22 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
 
     override suspend fun updateAllRepos(repos: AdoptRepos, checksum: String) {
 
-        var session: ClientSession? = null
-
         try {
-            session = client.startSession()
-        } catch (e: Exception) {
-            LOGGER.warn("DB does not support transactions")
-        }
-        try {
-            session?.startTransaction()
             repos
                 .repos
                 .forEach { repo ->
-                    writeReleases(session, repo.key, repo.value)
+                    writeReleases(repo.key, repo.value)
                 }
         } finally {
-            session?.commitTransaction()
-            session?.close()
             updateUpdatedTime(TimeSource.now(), checksum)
         }
     }
 
-    private suspend fun writeReleases(session: ClientSession?, featureVersion: Int, value: FeatureRelease) {
+    private suspend fun writeReleases(featureVersion: Int, value: FeatureRelease) {
         val toAdd = value.releases.getReleases().toList()
         if (toAdd.isNotEmpty()) {
-            if (session == null) {
-                releasesCollection.deleteMany(majorVersionMatcher(featureVersion))
-                releasesCollection.insertMany(toAdd, InsertManyOptions())
-            } else {
-                releasesCollection.deleteMany(session, majorVersionMatcher(featureVersion))
-                releasesCollection.insertMany(session, toAdd, InsertManyOptions())
-            }
+            releasesCollection.deleteMany(majorVersionMatcher(featureVersion))
+            releasesCollection.insertMany(toAdd, InsertManyOptions())
         }
     }
 
