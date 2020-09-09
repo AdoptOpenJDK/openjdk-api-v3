@@ -20,14 +20,15 @@ class AvailableReleasesPathTest : BaseTest() {
         runBlocking {
             // Reset connection
             ApiPersistenceFactory.set(null)
-            ApiPersistenceFactory.get().setReleaseInfo(ReleaseInfo(
-                arrayOf(8, 9, 10, 11, 12),
-                arrayOf(8, 11),
-                11,
-                12,
-                13,
-                15
-            )
+            ApiPersistenceFactory.get().setReleaseInfo(
+                ReleaseInfo(
+                    arrayOf(8, 9, 10, 11, 12),
+                    arrayOf(8, 11),
+                    11,
+                    12,
+                    13,
+                    15
+                )
             )
             APIDataStore.loadReleaseInfo()
         }

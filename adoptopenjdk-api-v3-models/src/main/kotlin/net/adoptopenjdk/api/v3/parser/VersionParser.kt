@@ -30,7 +30,8 @@ object VersionParser {
     }
 
     private fun adoptSemver(): String {
-        val vnumRegex = """(?<major>[0-9]+)\.(?<minor>[0-9]+)\.(?<security>[0-9]+)"""
+        val vnumRegex =
+            """(?<major>[0-9]+)\.(?<minor>[0-9]+)\.(?<security>[0-9]+)"""
         val preRegex = "(?<pre>[a-zA-Z0-9]+)"
         val buildRegex = "(?<build>[0-9]+)(\\.(?<adoptBuild>[0-9]+))?"
         val optRegex = "(?<opt>[-a-zA-Z0-9\\.]+)"
@@ -43,7 +44,8 @@ object VersionParser {
     private fun jep223WithAdoptBuildNum(): List<String> {
         // Regexes based on those in http://openjdk.java.net/jeps/223
         // Technically the standard supports an arbitrary number of numbers, we will support 3 for now
-        val vnumRegex = """(?<major>[0-9]+)(\.(?<minor>[0-9]+))?(\.(?<security>[0-9]+))?"""
+        val vnumRegex =
+            """(?<major>[0-9]+)(\.(?<minor>[0-9]+))?(\.(?<security>[0-9]+))?"""
         val preRegex = "(?<pre>[a-zA-Z0-9]+)"
         val buildRegex = "(?<build>[0-9]+)(\\.(?<adoptBuild>[0-9]+))?"
         val optRegex = "(?<opt>[-a-zA-Z0-9\\.]+)"
@@ -58,7 +60,8 @@ object VersionParser {
     private fun jep223(): List<String> {
         // Regexes based on those in http://openjdk.java.net/jeps/223
         // Technically the standard supports an arbitrary number of numbers, we will support 3 for now
-        val vnumRegex = """(?<major>[0-9]+)(\.(?<minor>[0-9]+))?(\.(?<security>[0-9]+))?"""
+        val vnumRegex =
+            """(?<major>[0-9]+)(\.(?<minor>[0-9]+))?(\.(?<security>[0-9]+))?"""
         val preRegex = "(?<pre>[a-zA-Z0-9]+)"
         val buildRegex = "(?<build>[0-9]+)"
         val optRegex = "(?<opt>[-a-zA-Z0-9\\.]+)"

@@ -36,11 +36,12 @@ class InstallerResource : PackageEndpoint() {
     @Path("/version/{release_name}/{os}/{arch}/{image_type}/{jvm_impl}/{heap_size}/{vendor}")
     @Produces("application/octet-stream")
     @Operation(summary = "Redirects to the installer that matches your current query", description = "Redirects to the installer that matches your current query")
-    @APIResponses(value = [
-        APIResponse(responseCode = "307", description = "link to installer that matches your current query"),
-        APIResponse(responseCode = "400", description = "bad input parameter"),
-        APIResponse(responseCode = "404", description = "No matching installer found")
-    ]
+    @APIResponses(
+        value = [
+            APIResponse(responseCode = "307", description = "link to installer that matches your current query"),
+            APIResponse(responseCode = "400", description = "bad input parameter"),
+            APIResponse(responseCode = "404", description = "No matching installer found")
+        ]
     )
     fun returnInstallerByVersion(
         @Parameter(name = "os", description = "Operating System", required = true)
@@ -51,7 +52,8 @@ class InstallerResource : PackageEndpoint() {
         @PathParam("arch")
         arch: Architecture?,
 
-        @Parameter(name = "release_name", description = OpenApiDocs.RELASE_NAME, required = true,
+        @Parameter(
+            name = "release_name", description = OpenApiDocs.RELASE_NAME, required = true,
             schema = Schema(defaultValue = "jdk-11.0.6+10", type = SchemaType.STRING)
         )
         @PathParam("release_name")
@@ -85,14 +87,16 @@ class InstallerResource : PackageEndpoint() {
     @Path("/latest/{feature_version}/{release_type}/{os}/{arch}/{image_type}/{jvm_impl}/{heap_size}/{vendor}")
     @Produces("application/octet-stream")
     @Operation(summary = "Redirects to the installer that matches your current query", description = "Redirects to the installer that matches your current query")
-    @APIResponses(value = [
-        APIResponse(responseCode = "307", description = "link to installer that matches your current query"),
-        APIResponse(responseCode = "400", description = "bad input parameter"),
-        APIResponse(responseCode = "404", description = "No matching installer found")
-    ]
+    @APIResponses(
+        value = [
+            APIResponse(responseCode = "307", description = "link to installer that matches your current query"),
+            APIResponse(responseCode = "400", description = "bad input parameter"),
+            APIResponse(responseCode = "404", description = "No matching installer found")
+        ]
     )
     fun returnInstaller(
-        @Parameter(name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
+        @Parameter(
+            name = "feature_version", description = OpenApiDocs.FEATURE_RELEASE, required = true,
             schema = Schema(defaultValue = "8", type = SchemaType.INTEGER)
         )
         @PathParam("feature_version")

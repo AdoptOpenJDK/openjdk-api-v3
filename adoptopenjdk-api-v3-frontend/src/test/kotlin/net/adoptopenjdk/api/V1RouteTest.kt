@@ -9,16 +9,18 @@ import javax.ws.rs.core.Response
 class V1RouteTest : BaseTest() {
     @Test
     fun v1ReturnsGone() {
-        listOf("/v1",
-                "/v1/",
-                "/v1/foo",
-                "/v1/foo/bar")
-                .forEach({ route ->
-                    RestAssured.given()
-                            .`when`()
-                            .get(route)
-                            .then()
-                            .statusCode(Response.Status.GONE.statusCode)
-                })
+        listOf(
+            "/v1",
+            "/v1/",
+            "/v1/foo",
+            "/v1/foo/bar"
+        )
+            .forEach({ route ->
+                RestAssured.given()
+                    .`when`()
+                    .get(route)
+                    .then()
+                    .statusCode(Response.Status.GONE.statusCode)
+            })
     }
 }

@@ -153,11 +153,13 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
     private fun releaseVersionDbEntryMatcher() = Document("tip_version", BsonDocument("\$exists", BsonBoolean(true)))
 
     private fun betweenDates(start: ZonedDateTime, end: ZonedDateTime): Document {
-        return Document("\$and",
-            BsonArray(listOf(
-                BsonDocument("date", BsonDocument("\$gt", BsonDateTime(start.toInstant().toEpochMilli()))),
-                BsonDocument("date", BsonDocument("\$lt", BsonDateTime(end.toInstant().toEpochMilli())))
-            )
+        return Document(
+            "\$and",
+            BsonArray(
+                listOf(
+                    BsonDocument("date", BsonDocument("\$gt", BsonDateTime(start.toInstant().toEpochMilli()))),
+                    BsonDocument("date", BsonDocument("\$lt", BsonDateTime(end.toInstant().toEpochMilli())))
+                )
             )
         )
     }

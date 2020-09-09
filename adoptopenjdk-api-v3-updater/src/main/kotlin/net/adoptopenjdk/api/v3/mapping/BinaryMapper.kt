@@ -18,8 +18,8 @@ abstract class BinaryMapper {
     fun <T : FileNameMatcher> getEnumFromFileName(fileName: String, values: Array<T>, default: T? = null): T {
 
         val matched = values
-                .filter { it.matchesFile(fileName) }
-                .toList()
+            .filter { it.matchesFile(fileName) }
+            .toList()
 
         if (matched.size != 1) {
             if (default != null) {

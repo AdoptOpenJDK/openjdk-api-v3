@@ -110,7 +110,7 @@ class ReleaseVersionResolverTest : BaseTest() {
                 return """
                         DEFAULT_VERSION_FEATURE=15
                         DEFAULT_VERSION_INTERIM=0
-                        """.trimIndent()
+                """.trimIndent()
             }
 
             override suspend fun getFullResponse(request: UrlRequest): HttpResponse? {

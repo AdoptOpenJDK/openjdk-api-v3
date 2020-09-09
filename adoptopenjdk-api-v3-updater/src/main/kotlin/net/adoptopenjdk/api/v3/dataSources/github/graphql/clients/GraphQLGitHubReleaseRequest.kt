@@ -18,15 +18,17 @@ open class GraphQLGitHubReleaseRequest : GraphQLGitHubInterface() {
 
         val getMore = getMoreReleasesQuery(release.id)
         LOGGER.info("Getting release assets ${release.id}")
-        val moreAssets = getAll(getMore,
-                { asset ->
-                    if (asset.assetNode == null) listOf()
-                    else asset.assetNode.releaseAssets.assets
-                },
-                { it.assetNode!!.releaseAssets.pageInfo.hasNextPage },
-                { it.assetNode!!.releaseAssets.pageInfo.endCursor },
-                release.releaseAssets.pageInfo.endCursor,
-                null, ReleaseQueryData::class.java)
+        val moreAssets = getAll(
+            getMore,
+            { asset ->
+                if (asset.assetNode == null) listOf()
+                else asset.assetNode.releaseAssets.assets
+            },
+            { it.assetNode!!.releaseAssets.pageInfo.hasNextPage },
+            { it.assetNode!!.releaseAssets.pageInfo.endCursor },
+            release.releaseAssets.pageInfo.endCursor,
+            null, ReleaseQueryData::class.java
+        )
 
         val assets = release.releaseAssets.assets.union(moreAssets)
 
@@ -34,7 +36,8 @@ open class GraphQLGitHubReleaseRequest : GraphQLGitHubInterface() {
     }
 
     private fun getMoreReleasesQuery(releaseId: GithubId): GraphQLRequestEntity.RequestBuilder {
-        return request("""query(${'$'}cursorPointer:String) { 
+        return request(
+            """query(${'$'}cursorPointer:String) { 
                               node(id:"${releaseId.githubId}") {
                                 ... on Release {
                                     releaseAssets(first:50, after:${'$'}cursorPointer) {
@@ -57,6 +60,7 @@ open class GraphQLGitHubReleaseRequest : GraphQLGitHubInterface() {
                                 remaining
                               }
                             }
-                    """)
+                    """
+        )
     }
 }

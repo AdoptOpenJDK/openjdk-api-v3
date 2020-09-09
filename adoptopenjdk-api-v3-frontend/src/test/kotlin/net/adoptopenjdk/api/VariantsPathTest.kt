@@ -10,9 +10,9 @@ class VariantsPathTest : BaseTest() {
     fun variants() {
 
         RestAssured.given()
-                .`when`()
-                .get("/v3/info/variants")
-                .then()
-                .statusCode(200)
+            .`when`()
+            .get("/v3/info/variants")
+            .then()
+            .statusCode(200)
     }
 }
