@@ -48,9 +48,12 @@ object APIDataStore {
         if (schedule == null) {
             schedule = Executors
                 .newSingleThreadScheduledExecutor()
-                .scheduleWithFixedDelay(timerTask {
-                    periodicUpdate()
-                }, 0, 1, TimeUnit.MINUTES)
+                .scheduleWithFixedDelay(
+                    timerTask {
+                        periodicUpdate()
+                    },
+                    0, 1, TimeUnit.MINUTES
+                )
         }
     }
 

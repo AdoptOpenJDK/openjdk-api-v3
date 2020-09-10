@@ -119,51 +119,53 @@ class AdoptReleaseMapperTest : BaseTest() {
     fun copesWithMultipleVersionsInSingleRelease() {
         runBlocking {
 
-            val source = GHAssets(listOf(
-                GHAsset(
-                    "OpenJDK8U-jre_x64_linux_hotspot-1.tar.gz",
-                    1L,
-                    "",
-                    1L,
-                    "2013-02-27T19:35:32Z"
-                ),
-                GHAsset(
-                    "OpenJDK8U-jre_x64_linux_hotspot-1.tar.gz.json",
-                    1L,
-                    "1",
-                    1L,
-                    "2013-02-27T19:35:32Z"
-                ),
-                GHAsset(
-                    "OpenJDK8U-jre_x64_linux_hotspot-2.tar.gz",
-                    1L,
-                    "",
-                    1L,
-                    "2013-02-27T19:35:32Z"
-                ),
-                GHAsset(
-                    "OpenJDK8U-jre_x64_linux_hotspot-2.tar.gz.json",
-                    1L,
-                    "2",
-                    1L,
-                    "2013-02-27T19:35:32Z"
-                ),
-                GHAsset(
-                    "OpenJDK8U-jre_x64_linux_hotspot-3.tar.gz",
-                    1L,
-                    "",
-                    2L,
-                    "2013-02-27T19:35:32Z"
-                ),
-                GHAsset(
-                    "OpenJDK8U-jre_x64_linux_hotspot-3.tar.gz.json",
-                    1L,
-                    "2",
-                    1L,
-                    "2013-02-27T19:35:32Z"
-                )
+            val source = GHAssets(
+                listOf(
+                    GHAsset(
+                        "OpenJDK8U-jre_x64_linux_hotspot-1.tar.gz",
+                        1L,
+                        "",
+                        1L,
+                        "2013-02-27T19:35:32Z"
+                    ),
+                    GHAsset(
+                        "OpenJDK8U-jre_x64_linux_hotspot-1.tar.gz.json",
+                        1L,
+                        "1",
+                        1L,
+                        "2013-02-27T19:35:32Z"
+                    ),
+                    GHAsset(
+                        "OpenJDK8U-jre_x64_linux_hotspot-2.tar.gz",
+                        1L,
+                        "",
+                        1L,
+                        "2013-02-27T19:35:32Z"
+                    ),
+                    GHAsset(
+                        "OpenJDK8U-jre_x64_linux_hotspot-2.tar.gz.json",
+                        1L,
+                        "2",
+                        1L,
+                        "2013-02-27T19:35:32Z"
+                    ),
+                    GHAsset(
+                        "OpenJDK8U-jre_x64_linux_hotspot-3.tar.gz",
+                        1L,
+                        "",
+                        2L,
+                        "2013-02-27T19:35:32Z"
+                    ),
+                    GHAsset(
+                        "OpenJDK8U-jre_x64_linux_hotspot-3.tar.gz.json",
+                        1L,
+                        "2",
+                        1L,
+                        "2013-02-27T19:35:32Z"
+                    )
 
-            ), PageInfo(false, "")
+                ),
+                PageInfo(false, "")
             )
 
             UpdaterHtmlClientFactory.client = object : UpdaterHtmlClient {

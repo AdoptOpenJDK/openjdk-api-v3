@@ -58,18 +58,18 @@ abstract class AssetsPathTest : BaseTest() {
         exclude: (element: T) -> Boolean = { false }
     ): List<DynamicTest> {
         return values
-                .filter { !exclude(it) }
-                .map { value ->
-                    val path2 = "$path?$filterParamName=${value.toString().toLowerCase()}"
-                    DynamicTest.dynamicTest(path2) {
-                        RestAssured.given()
-                                .`when`()
-                                .get(path2)
-                                .then()
-                                .statusCode(200)
-                                .body("binaries.$filterParamName.flatten()", Matchers.everyItem(Matchers.`is`(value.toString())))
-                                .body("binaries.$filterParamName.flatten().size()", Matchers.greaterThan(0))
-                    }
+            .filter { !exclude(it) }
+            .map { value ->
+                val path2 = "$path?$filterParamName=${value.toString().toLowerCase()}"
+                DynamicTest.dynamicTest(path2) {
+                    RestAssured.given()
+                        .`when`()
+                        .get(path2)
+                        .then()
+                        .statusCode(200)
+                        .body("binaries.$filterParamName.flatten()", Matchers.everyItem(Matchers.`is`(value.toString())))
+                        .body("binaries.$filterParamName.flatten().size()", Matchers.greaterThan(0))
                 }
+            }
     }
 }

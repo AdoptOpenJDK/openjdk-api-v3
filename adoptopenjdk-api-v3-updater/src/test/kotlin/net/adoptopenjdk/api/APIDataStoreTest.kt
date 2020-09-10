@@ -35,7 +35,8 @@ class APIDataStoreTest : BaseTest() {
             ApiPersistenceFactory.get().updateAllRepos(repo, "")
             val dbData = APIDataStore.loadDataFromDb(false)
 
-            JSONAssert.assertEquals(UpdaterJsonMapper.mapper.writeValueAsString(dbData),
+            JSONAssert.assertEquals(
+                UpdaterJsonMapper.mapper.writeValueAsString(dbData),
                 UpdaterJsonMapper.mapper.writeValueAsString(repo),
                 true
             )

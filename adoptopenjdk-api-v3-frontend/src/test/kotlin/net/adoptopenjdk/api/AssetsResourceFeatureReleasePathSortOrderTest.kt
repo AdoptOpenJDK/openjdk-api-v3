@@ -57,7 +57,8 @@ class AssetsResourceFeatureReleasePathSortOrderTest : BaseTest() {
 
     private fun createRepo(): AdoptRepos {
         val binary = Binary(
-            Package("a",
+            Package(
+                "a",
                 "b",
                 1L,
                 "v",
@@ -69,7 +70,8 @@ class AssetsResourceFeatureReleasePathSortOrderTest : BaseTest() {
             2L,
             TimeSource.now(),
             "d",
-            Installer("a",
+            Installer(
+                "a",
                 "b",
                 1L,
                 "v",
@@ -86,25 +88,31 @@ class AssetsResourceFeatureReleasePathSortOrderTest : BaseTest() {
             Project.jdk
         )
 
-        val repo = AdoptRepos(listOf(
-            FeatureRelease(8, Releases(listOf(
-                Release("foo", ReleaseType.ga, "a", "foo",
-                    ZonedDateTime.of(2010, 1, 1, 1, 1, 0, 0, TimeSource.ZONE),
-                    ZonedDateTime.of(2010, 1, 1, 1, 1, 0, 0, TimeSource.ZONE),
-                    arrayOf(binary), 2, Vendor.adoptopenjdk,
-                    VersionData(8, 0, 242, "b", null, 4, "b", "8u242-b04_openj9-0.18.0-m1")
-                ),
+        val repo = AdoptRepos(
+            listOf(
+                FeatureRelease(
+                    8,
+                    Releases(
+                        listOf(
+                            Release(
+                                "foo", ReleaseType.ga, "a", "foo",
+                                ZonedDateTime.of(2010, 1, 1, 1, 1, 0, 0, TimeSource.ZONE),
+                                ZonedDateTime.of(2010, 1, 1, 1, 1, 0, 0, TimeSource.ZONE),
+                                arrayOf(binary), 2, Vendor.adoptopenjdk,
+                                VersionData(8, 0, 242, "b", null, 4, "b", "8u242-b04_openj9-0.18.0-m1")
+                            ),
 
-                Release("bar", ReleaseType.ga, "a", "bar",
-                    ZonedDateTime.of(2010, 1, 2, 1, 1, 0, 0, TimeSource.ZONE),
-                    ZonedDateTime.of(2010, 1, 2, 1, 1, 0, 0, TimeSource.ZONE),
-                    arrayOf(binary), 2, Vendor.adoptopenjdk,
-                    VersionData(8, 0, 242, "a", null, 4, "a", "8u242-b04_openj9-0.18.0-m1")
+                            Release(
+                                "bar", ReleaseType.ga, "a", "bar",
+                                ZonedDateTime.of(2010, 1, 2, 1, 1, 0, 0, TimeSource.ZONE),
+                                ZonedDateTime.of(2010, 1, 2, 1, 1, 0, 0, TimeSource.ZONE),
+                                arrayOf(binary), 2, Vendor.adoptopenjdk,
+                                VersionData(8, 0, 242, "a", null, 4, "a", "8u242-b04_openj9-0.18.0-m1")
+                            )
+                        )
+                    )
                 )
             )
-            )
-            )
-        )
         )
         return repo
     }

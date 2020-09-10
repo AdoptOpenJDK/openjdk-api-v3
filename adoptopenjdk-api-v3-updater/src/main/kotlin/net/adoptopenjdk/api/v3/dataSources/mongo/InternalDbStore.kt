@@ -42,10 +42,11 @@ class InternalDbStoreImpl : MongoInterface(MongoClientFactory.get()), InternalDb
     override suspend fun putCachedWebpage(url: String, lastModified: String?, data: String?) {
         GlobalScope.launch {
             webCache.updateOne(
-                    Document("url", url),
-                    CacheDbEntry(url, lastModified, data),
-                    UpdateOptions().upsert(true),
-                    false)
+                Document("url", url),
+                CacheDbEntry(url, lastModified, data),
+                UpdateOptions().upsert(true),
+                false
+            )
         }
     }
 

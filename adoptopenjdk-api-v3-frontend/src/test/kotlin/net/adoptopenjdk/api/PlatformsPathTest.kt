@@ -10,9 +10,9 @@ class PlatformsPathTest : BaseTest() {
     fun platforms() {
 
         RestAssured.given()
-                .`when`()
-                .get("/v3/info/platforms")
-                .then()
-                .statusCode(200)
+            .`when`()
+            .get("/v3/info/platforms")
+            .then()
+            .statusCode(200)
     }
 }

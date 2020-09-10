@@ -15,35 +15,35 @@ object HttpClientFactory {
     private val noRedirect: HttpAsyncClient
 
     val REQUEST_CONFIG = RequestConfig
-            .copy(RequestConfig.DEFAULT)
-            .setConnectTimeout(5000)
-            .setSocketTimeout(5000)
-            .setConnectionRequestTimeout(5000)
-            .build()!!
+        .copy(RequestConfig.DEFAULT)
+        .setConnectTimeout(5000)
+        .setSocketTimeout(5000)
+        .setConnectionRequestTimeout(5000)
+        .build()!!
 
     init {
 
         val client = HttpAsyncClients.custom()
-                .setConnectionReuseStrategy(NoConnectionReuseStrategy())
-                .disableCookieManagement()
-                .setDefaultRequestConfig(REQUEST_CONFIG)
-                .build()
+            .setConnectionReuseStrategy(NoConnectionReuseStrategy())
+            .disableCookieManagement()
+            .setDefaultRequestConfig(REQUEST_CONFIG)
+            .build()
         client.start()
         this.client = client
 
         val noRedirect = HttpAsyncClients.custom()
-                .setRedirectStrategy(object : RedirectStrategy {
-                    override fun getRedirect(p0: HttpRequest?, p1: HttpResponse?, p2: HttpContext?): HttpUriRequest? {
-                        return null
-                    }
+            .setRedirectStrategy(object : RedirectStrategy {
+                override fun getRedirect(p0: HttpRequest?, p1: HttpResponse?, p2: HttpContext?): HttpUriRequest? {
+                    return null
+                }
 
-                    override fun isRedirected(p0: HttpRequest?, p1: HttpResponse?, p2: HttpContext?): Boolean {
-                        return false
-                    }
-                })
-                .setConnectionReuseStrategy(NoConnectionReuseStrategy())
-                .setDefaultRequestConfig(REQUEST_CONFIG)
-                .build()
+                override fun isRedirected(p0: HttpRequest?, p1: HttpResponse?, p2: HttpContext?): Boolean {
+                    return false
+                }
+            })
+            .setConnectionReuseStrategy(NoConnectionReuseStrategy())
+            .setDefaultRequestConfig(REQUEST_CONFIG)
+            .build()
         noRedirect.start()
         this.noRedirect = noRedirect
     }

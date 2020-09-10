@@ -26,17 +26,17 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
     @TestFactory
     fun filtersLts(): Stream<DynamicTest> {
         return listOf(
-                Pair("${getPath()}/$JAVA8_212?lts=true", 200),
-                Pair("${getPath()}/$JAVA8_212?lts=false", 404),
-                Pair("${getPath()}/$ABOVE_8?lts=false", 200),
-                Pair("${getPath()}/$ABOVE_8?lts=false", 200)
+            Pair("${getPath()}/$JAVA8_212?lts=true", 200),
+            Pair("${getPath()}/$JAVA8_212?lts=false", 404),
+            Pair("${getPath()}/$ABOVE_8?lts=false", 200),
+            Pair("${getPath()}/$ABOVE_8?lts=false", 200)
         ).map { request ->
             DynamicTest.dynamicTest(request.first) {
                 val response = RestAssured.given()
-                        .`when`()
-                        .get(request.first)
-                        .then()
-                        .statusCode(request.second)
+                    .`when`()
+                    .get(request.first)
+                    .then()
+                    .statusCode(request.second)
                 if (request.second == 200) {
                     response.body("binaries.lts.flatten().size()", Matchers.greaterThan(0))
                 } else {
@@ -49,42 +49,42 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
     override fun <T> runFilterTest(filterParamName: String, values: Array<T>): Stream<DynamicTest> {
 
         return listOf(
-                ABOVE_8,
-                BELOW_11,
-                JAVA8_212,
-                RANGE_11_12,
-                RANGE_8_METADATA,
-                JAVA11
+            ABOVE_8,
+            BELOW_11,
+            JAVA8_212,
+            RANGE_11_12,
+            RANGE_8_METADATA,
+            JAVA11
         )
-                .flatMap { versionRange ->
-                    createTest(values, getPath() + "/" + versionRange, filterParamName, { element -> getExclusions(versionRange, element) })
-                }
-                .stream()
+            .flatMap { versionRange ->
+                createTest(values, getPath() + "/" + versionRange, filterParamName, { element -> getExclusions(versionRange, element) })
+            }
+            .stream()
     }
 
     private fun <T> getExclusions(versionRange: String, element: T): Boolean {
         return versionRange.equals(JAVA8_212) && element == JvmImpl.openj9 ||
-                versionRange.equals(JAVA8_212) && element == Architecture.aarch64 ||
-                versionRange.equals(JAVA8_212) && element == Architecture.arm ||
-                versionRange.equals(JAVA8_212) && element == HeapSize.large ||
-                versionRange.equals(JAVA8_212) && element == ImageType.testimage ||
+            versionRange.equals(JAVA8_212) && element == Architecture.aarch64 ||
+            versionRange.equals(JAVA8_212) && element == Architecture.arm ||
+            versionRange.equals(JAVA8_212) && element == HeapSize.large ||
+            versionRange.equals(JAVA8_212) && element == ImageType.testimage ||
 
-                versionRange.equals(RANGE_8_METADATA) && element == Architecture.aarch64 ||
-                versionRange.equals(RANGE_8_METADATA) && element == Architecture.arm ||
-                versionRange.equals(RANGE_8_METADATA) && element == ImageType.testimage ||
+            versionRange.equals(RANGE_8_METADATA) && element == Architecture.aarch64 ||
+            versionRange.equals(RANGE_8_METADATA) && element == Architecture.arm ||
+            versionRange.equals(RANGE_8_METADATA) && element == ImageType.testimage ||
 
-                versionRange.equals(RANGE_11_12) && element == OperatingSystem.solaris ||
-                versionRange.equals(RANGE_11_12) && element == Architecture.sparcv9 ||
+            versionRange.equals(RANGE_11_12) && element == OperatingSystem.solaris ||
+            versionRange.equals(RANGE_11_12) && element == Architecture.sparcv9 ||
 
-                versionRange.equals(JAVA11) && element == Architecture.x32 ||
-                versionRange.equals(JAVA11) && element == OperatingSystem.solaris ||
-                versionRange.equals(JAVA11) && element == Architecture.sparcv9 ||
-                versionRange.equals(JAVA11) && element == ImageType.testimage ||
-                versionRange.equals(BELOW_11) && element == ImageType.testimage ||
+            versionRange.equals(JAVA11) && element == Architecture.x32 ||
+            versionRange.equals(JAVA11) && element == OperatingSystem.solaris ||
+            versionRange.equals(JAVA11) && element == Architecture.sparcv9 ||
+            versionRange.equals(JAVA11) && element == ImageType.testimage ||
+            versionRange.equals(BELOW_11) && element == ImageType.testimage ||
 
-                element == Architecture.riscv64 || // Temporary until riscv ga
+            element == Architecture.riscv64 || // Temporary until riscv ga
 
-                element == ImageType.debugimage ||
-                element == ImageType.staticlibs
+            element == ImageType.debugimage ||
+            element == ImageType.staticlibs
     }
 }
