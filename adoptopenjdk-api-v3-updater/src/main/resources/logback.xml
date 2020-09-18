@@ -1,5 +1,6 @@
 <configuration>
     <logger name="org.apache.http.client.protocol.ResponseProcessCookies" level="ERROR"/>
+    <logger name="net.adoptopenjdk.api.v3.dataSources.APIDataStore" level="WARN"/>
     <logger name="org.mongodb" level="INFO"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">

@@ -134,9 +134,9 @@ object AdoptReleaseMapper : ReleaseMapper() {
         version: VersionData,
         fullGhAssetList: List<GHAsset>
     ): Release {
-        LOGGER.info("Getting binaries $releaseName")
+        LOGGER.debug("Getting binaries $releaseName")
         val binaries = AdoptBinaryMapper().toBinaryList(ghAssets, fullGhAssetList, ghAssetWithMetadata)
-        LOGGER.info("Done Getting binaries $releaseName")
+        LOGGER.debug("Done Getting binaries $releaseName")
 
         val downloadCount = ghAssets
             .filter { asset ->
