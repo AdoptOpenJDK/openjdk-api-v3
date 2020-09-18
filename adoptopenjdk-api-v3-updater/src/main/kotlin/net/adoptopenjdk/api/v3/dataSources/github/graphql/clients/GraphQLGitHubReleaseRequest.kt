@@ -17,7 +17,7 @@ open class GraphQLGitHubReleaseRequest : GraphQLGitHubInterface() {
     protected suspend fun getNextPage(release: GHRelease): GHRelease {
 
         val getMore = getMoreReleasesQuery(release.id)
-        LOGGER.info("Getting release assets ${release.id}")
+        LOGGER.debug("Getting release assets ${release.id}")
         val moreAssets = getAll(
             getMore,
             { asset ->

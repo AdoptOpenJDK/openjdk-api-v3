@@ -30,3 +30,4 @@ rm -rf /tmp/jboss || true
 rm -rf /tmp/hsperfdata_* || true
 rm -rf /tmp/vert* || true
 rm /tmp/updater.log || true
+rm /tmp/frontend.log || true
