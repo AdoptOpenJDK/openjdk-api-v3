@@ -7,14 +7,14 @@ import net.adoptopenjdk.api.v3.models.Variants
 import java.io.File
 import java.util.zip.GZIPOutputStream
 
-class TestResourceGenerator {
+class TestResourceGenerator : MongoTest() {
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             runBlocking {
                 // val mock = BaseTest.mockkHttpClient()
                 // HttpClientFactory.client = mock
-                BaseTest.startFongo()
+                MongoTest.startFongo()
 
                 val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
                 val variants = UpdaterJsonMapper.mapper.readValue(variantData, Variants::class.java)

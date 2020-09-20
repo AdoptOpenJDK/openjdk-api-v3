@@ -23,7 +23,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
 
     @TestFactory
     fun noFilter(): Stream<DynamicTest> {
-        return (8..12)
+        return TestResourceDouble.TEST_VERSIONS
             .flatMap { version ->
                 ReleaseType.values()
                     .map { "/v3/assets/feature_releases/$version/$it" }
@@ -130,8 +130,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                 .get("${getPath()}/8/ga?sort_order=${sortOrder.name}")
                 .body
 
-            val releasesStr = body.prettyPrint()
-            return parseReleases(releasesStr)
+            return parseReleases(body.asString())
         }
 
         fun getReleasesWithSortMethod(sortOrder: SortOrder, sortMethod: SortMethod): List<Release> {
@@ -140,8 +139,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                 .get("${getPath()}/8/ga?sort_order=${sortOrder.name}&sort_method=${sortMethod.name}")
                 .body
 
-            val releasesStr = body.prettyPrint()
-            return parseReleases(releasesStr)
+            return parseReleases(body.asString())
         }
 
         fun parseReleases(json: String?): List<Release> =
@@ -164,8 +162,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
             .get("${getPath()}/11/ea?page_size=5")
             .body
 
-        val releasesStr = body.prettyPrint()
-        val releases = parseReleases(releasesStr)
+        val releases = parseReleases(body.asString())
 
         assertTrue { releases.size == 5 }
     }

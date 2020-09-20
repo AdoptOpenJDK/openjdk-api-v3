@@ -16,12 +16,15 @@ import java.util.stream.Stream
 class AssetsResourceVersionPathTest : AssetsPathTest() {
 
     fun getPath() = "/v3/assets/version"
-    val JAVA8_212 = "8.0.212+4"
-    val RANGE_11_12 = "[11.0.0,12.0.0]"
-    val RANGE_8_METADATA = "[8.0.212+3,8.0.212+5]"
-    val JAVA11 = "11.0.0+28"
-    val ABOVE_8 = "[8.0.0,)"
-    val BELOW_11 = "(,11.0.0]"
+
+    companion object {
+        val JAVA8_212 = "8.0.200+2.1"
+        val RANGE_11_12 = "[11.0.0,12.0.0]"
+        val RANGE_8_METADATA = "[8.0.100+3,8.0.212+5]"
+        val JAVA11 = "11.0.200+2.1"
+        val ABOVE_8 = "[8.0.0,)"
+        val BELOW_11 = "(,11.0.0]"
+    }
 
     @TestFactory
     fun filtersLts(): Stream<DynamicTest> {

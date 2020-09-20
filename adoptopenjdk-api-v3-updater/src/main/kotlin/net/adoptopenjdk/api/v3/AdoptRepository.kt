@@ -9,7 +9,7 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRelea
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepo
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
-import net.adoptopenjdk.api.v3.dataSources.models.GithubId
+import net.adoptopenjdk.api.v3.dataSources.models.GitHubId
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import net.adoptopenjdk.api.v3.mapping.adopt.AdoptReleaseMapper
 import net.adoptopenjdk.api.v3.mapping.upstream.UpstreamReleaseMapper
@@ -34,7 +34,7 @@ object AdoptRepositoryFactory {
 interface AdoptRepository {
     suspend fun getRelease(version: Int): FeatureRelease?
     suspend fun getSummary(version: Int): GHRepositorySummary
-    suspend fun getReleaseById(id: GithubId): ReleaseResult
+    suspend fun getReleaseById(id: GitHubId): ReleaseResult
 }
 
 class ReleaseResult(val result: List<Release>? = null, val error: String? = null) {
@@ -55,8 +55,8 @@ object AdoptRepositoryImpl : AdoptRepository {
         }
     }
 
-    override suspend fun getReleaseById(githubId: GithubId): ReleaseResult {
-        val release = client.getReleaseById(githubId)
+    override suspend fun getReleaseById(gitHubId: GitHubId): ReleaseResult {
+        val release = client.getReleaseById(gitHubId)
         return getMapperForRepo(release.url)
             .toAdoptRelease(release)
     }

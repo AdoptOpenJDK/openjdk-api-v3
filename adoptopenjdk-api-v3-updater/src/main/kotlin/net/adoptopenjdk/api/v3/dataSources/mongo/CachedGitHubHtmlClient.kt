@@ -13,11 +13,11 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
 
-interface GithubHtmlClient {
+interface GitHubHtmlClient {
     suspend fun getUrl(url: String): String?
 }
 
-object CachedGithubHtmlClient : GithubHtmlClient {
+object CachedGitHubHtmlClient : GitHubHtmlClient {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 

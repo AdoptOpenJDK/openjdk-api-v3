@@ -18,8 +18,6 @@ class AvailableReleasesPathTest : BaseTest() {
     @BeforeEach
     fun initDB() {
         runBlocking {
-            // Reset connection
-            ApiPersistenceFactory.set(null)
             ApiPersistenceFactory.get().setReleaseInfo(
                 ReleaseInfo(
                     arrayOf(8, 9, 10, 11, 12),

@@ -5,10 +5,10 @@ import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DbStatsEntry
 import net.adoptopenjdk.api.v3.models.DownloadDiff
-import net.adoptopenjdk.api.v3.models.MonthlyDownloadDiff
 import net.adoptopenjdk.api.v3.models.DownloadStats
-import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.GitHubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.JvmImpl
+import net.adoptopenjdk.api.v3.models.MonthlyDownloadDiff
 import net.adoptopenjdk.api.v3.models.StatsSource
 import net.adoptopenjdk.api.v3.models.TotalStats
 import java.time.ZonedDateTime
@@ -197,10 +197,10 @@ class DownloadStatsInterface(
             .map { grouped -> StatEntry(getLastDate(grouped.value), formTotalDownloads(grouped.value)) }
     }
 
-    private fun sumDailyStats(githubStats: List<GithubDownloadStatsDbEntry>, jvmImpl: JvmImpl?): List<StatEntry> {
-        jvmImpl ?: return sumDailyStats(githubStats)
+    private fun sumDailyStats(gitHubStats: List<GitHubDownloadStatsDbEntry>, jvmImpl: JvmImpl?): List<StatEntry> {
+        jvmImpl ?: return sumDailyStats(gitHubStats)
 
-        return githubStats
+        return gitHubStats
             .groupBy { it.date.toLocalDate() }
             .map { grouped -> StatEntry(getLastDate(grouped.value), formTotalDownloads(grouped.value, jvmImpl)) }
     }
@@ -219,7 +219,7 @@ class DownloadStatsInterface(
             .sum()
     }
 
-    private fun formTotalDownloads(stats: List<GithubDownloadStatsDbEntry>, jvmImpl: JvmImpl): Long {
+    private fun formTotalDownloads(stats: List<GitHubDownloadStatsDbEntry>, jvmImpl: JvmImpl): Long {
         return stats
             .groupBy { it.getId() }
             .map { grouped -> grouped.value.maxBy { it.date } }
@@ -252,7 +252,7 @@ class DownloadStatsInterface(
         return DownloadStats(TimeSource.now(), totalStats, githubBreakdown, dockerBreakdown)
     }
 
-    private suspend fun getGithubStats(): List<GithubDownloadStatsDbEntry> {
+    private suspend fun getGithubStats(): List<GitHubDownloadStatsDbEntry> {
         return APIDataStore.variants.versions
             .mapNotNull { featureVersion ->
                 dataStore.getLatestGithubStatsForFeatureVersion(featureVersion)

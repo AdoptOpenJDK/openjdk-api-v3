@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class APIDataStoreTest : BaseTest() {
+class APIDataStoreTest : MongoTest() {
 
     companion object {
         @JvmStatic

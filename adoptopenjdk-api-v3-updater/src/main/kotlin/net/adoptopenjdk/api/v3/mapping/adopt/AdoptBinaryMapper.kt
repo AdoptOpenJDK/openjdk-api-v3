@@ -5,14 +5,14 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
-import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGithubHtmlClient
-import net.adoptopenjdk.api.v3.dataSources.mongo.GithubHtmlClient
+import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGitHubHtmlClient
+import net.adoptopenjdk.api.v3.dataSources.mongo.GitHubHtmlClient
 import net.adoptopenjdk.api.v3.mapping.BinaryMapper
 import net.adoptopenjdk.api.v3.models.*
 import org.slf4j.LoggerFactory
 import java.time.ZonedDateTime
 
-class AdoptBinaryMapper(private val githubHtmlClient: GithubHtmlClient = CachedGithubHtmlClient) : BinaryMapper() {
+class AdoptBinaryMapper(private val gitHubHtmlClient: GitHubHtmlClient = CachedGitHubHtmlClient) : BinaryMapper() {
 
     companion object {
         @JvmStatic
@@ -235,7 +235,7 @@ class AdoptBinaryMapper(private val githubHtmlClient: GithubHtmlClient = CachedG
         try {
             if (!(binary_checksum_link == null || binary_checksum_link.isEmpty())) {
                 LOGGER.debug("Pulling checksum for $binary_checksum_link")
-                val checksum = githubHtmlClient.getUrl(binary_checksum_link)
+                val checksum = gitHubHtmlClient.getUrl(binary_checksum_link)
                 if (checksum != null) {
                     val tokens = checksum.split(" ")
                     if (tokens.size > 1) {

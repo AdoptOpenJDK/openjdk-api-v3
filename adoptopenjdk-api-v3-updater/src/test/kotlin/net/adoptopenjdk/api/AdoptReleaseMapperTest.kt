@@ -10,7 +10,7 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAssets
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
-import net.adoptopenjdk.api.v3.dataSources.models.GithubId
+import net.adoptopenjdk.api.v3.dataSources.models.GitHubId
 import net.adoptopenjdk.api.v3.mapping.adopt.AdoptReleaseMapper
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import org.apache.http.HttpEntity
@@ -49,7 +49,7 @@ class AdoptReleaseMapperTest : BaseTest() {
             val source = GHAssets(listOf(jdk), PageInfo(false, ""))
 
             val ghRelease = GHRelease(
-                id = GithubId("1"),
+                id = GitHubId("1"),
                 name = "OpenJDK 123244354325",
                 isPrerelease = true,
                 prerelease = true,
@@ -74,7 +74,7 @@ class AdoptReleaseMapperTest : BaseTest() {
             val source = GHAssets(listOf(jdk, checksum), PageInfo(false, ""))
 
             val ghRelease = GHRelease(
-                id = GithubId("1"),
+                id = GitHubId("1"),
                 name = "jdk9u-2018-09-27-08-50",
                 isPrerelease = true,
                 prerelease = true,
@@ -98,7 +98,7 @@ class AdoptReleaseMapperTest : BaseTest() {
             val source = GHAssets(listOf(jdk), PageInfo(false, ""))
 
             val ghRelease = GHRelease(
-                id = GithubId("1"),
+                id = GitHubId("1"),
                 name = "jdk9u-2018-09-27-08-50",
                 isPrerelease = true,
                 prerelease = true,
@@ -215,7 +215,7 @@ class AdoptReleaseMapperTest : BaseTest() {
             }
 
             val ghRelease = GHRelease(
-                id = GithubId("1"),
+                id = GitHubId("1"),
                 name = "jdk9u-2018-09-27-08-50",
                 isPrerelease = true,
                 prerelease = true,
@@ -258,7 +258,7 @@ class AdoptReleaseMapperTest : BaseTest() {
             val source = GHAssets(listOf(jdk), PageInfo(false, ""))
 
             val ghRelease = GHRelease(
-                id = GithubId("1"),
+                id = GitHubId("1"),
                 name = "jdk9u-2018-09-27-08-50",
                 isPrerelease = true,
                 prerelease = true,
