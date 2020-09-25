@@ -18,6 +18,8 @@ The `production` branch represents the current live state of the production Open
 
 All contributions should be made by forking the project and raising a pull request (PR) against the `master` branch.
 
+For more details related to deployment of the API, see [the deployment section](#deployment--continuous-deployment-cd) of this guide.
+
 ## Build
 
 ### Pre-Requisites
