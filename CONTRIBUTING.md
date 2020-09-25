@@ -13,11 +13,11 @@ There are two main branches in the project:
 - `master`
 - `production`
 
+All contributions should be made by forking the project and raising a pull request (PR) against the `master` branch.
+
 The `master` branch represents the current live state of the [Staging environment](https://staging-api.adoptopenjdk.net/).
 
 The `production` branch represents the current live state of the [Production environment](https://api.adoptopenjdk.net/).
-
-All contributions should be made by forking the project and raising a pull request (PR) against the `master` branch.
 
 For more details related to deployment of the API, see [the deployment section](#deployment--continuous-deployment-cd) of this guide.
 
