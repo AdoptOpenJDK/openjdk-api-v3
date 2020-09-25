@@ -7,13 +7,22 @@ calls via the GitHub API in order to retrieve AdoptOpenJDK binaries and metadata
 
 Since the GitHub API is rate limited we use MongoDB as a caching mechanism.
 
-## Source code management and branching
+## Source code management & branching
 
-We treat the AdoptOpenJDK org repository as the canonical repository for deploying the API from. 
-We use the `staging` branch to trial any changes in a Production like environment and then 
-eventually merge into `master` for a real Production deployment.
+There are two main branches in the project:
+- `master`
+- `production`
 
-**NOTE** Please ensure for any significant change that you Pull Request to the `staging` branch 
+The `master` branch represents the current live state of the staging OpenShift environment.
+The `production` branch represents the current live state of the production OpenShift environment.
+
+All contributions should be made by forking the project and raising a pull request (PR) against the `master` branch.
+
+### Production releases & deployment
+
+The `production` branch is synchronised with `master` to perform a release of the latest API changes to the production OpenShift environment.  
+
+This is done via a PR that applies all outstanding commits from `master` to `production`. 
 
 ## Build
 
@@ -115,10 +124,10 @@ You can choose to deploy this API where you wish, for AdoptOpenJDK we use Contin
 
 ### AdoptOpenJDK
 
-For AdoptOpenJDK, this API deploys to Red Hat OpenShift and is front ended by Cloud Flare as a CDN
+For AdoptOpenJDK, this API deploys to Red Hat OpenShift and is front ended by [Cloudflare](https://www.cloudflare.com) as a CDN
 
 The Jenkins [AdoptOpenJDK CI Server](https://ci.adoptopenjdk.net) will automatically 
-deploy Pull Requests to OpenShift to Staging (the `staging` branch) or Production (the `master` branch.)
+deploy Pull Requests to the OpenShift Staging (the `master` branch) or Production (the `production` branch.) environments.
 
 ## Code Architecture and Code
 
