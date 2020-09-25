@@ -18,12 +18,6 @@ The `production` branch represents the current live state of the production Open
 
 All contributions should be made by forking the project and raising a pull request (PR) against the `master` branch.
 
-### Production releases & deployment
-
-The `production` branch is synchronised with `master` to perform a release of the latest API changes to the production OpenShift environment.  
-
-This is done via a PR that applies all outstanding commits from `master` to `production`. 
-
 ## Build
 
 ### Pre-Requisites
@@ -124,10 +118,14 @@ You can choose to deploy this API where you wish, for AdoptOpenJDK we use Contin
 
 ### AdoptOpenJDK
 
-For AdoptOpenJDK, this API deploys to Red Hat OpenShift and is front ended by [Cloudflare](https://www.cloudflare.com) as a CDN
+For AdoptOpenJDK, this API deploys to Red Hat OpenShift and is front ended by [Cloudflare](https://www.cloudflare.com) as a CDN.
+
+The `production` branch is synchronised with `master` to perform a release of the latest API changes to the Production OpenShift environment.  
+
+This is done via a pull request that applies all outstanding commits from `master` to `production`.
 
 The Jenkins [AdoptOpenJDK CI Server](https://ci.adoptopenjdk.net) will automatically 
-deploy Pull Requests to the OpenShift Staging (the `master` branch) or Production (the `production` branch.) environments.
+deploy pull requests to the OpenShift Staging (the `master` branch) or Production (the `production` branch) environments.
 
 ## Code Architecture and Code
 
