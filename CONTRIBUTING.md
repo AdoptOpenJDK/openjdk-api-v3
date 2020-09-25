@@ -13,8 +13,9 @@ There are two main branches in the project:
 - `master`
 - `production`
 
-The `master` branch represents the current live state of the staging OpenShift environment.
-The `production` branch represents the current live state of the production OpenShift environment.
+The `master` branch represents the current live state of the [Staging environment](https://staging-api.adoptopenjdk.net/).
+
+The `production` branch represents the current live state of the [Production environment](https://api.adoptopenjdk.net/).
 
 All contributions should be made by forking the project and raising a pull request (PR) against the `master` branch.
 
