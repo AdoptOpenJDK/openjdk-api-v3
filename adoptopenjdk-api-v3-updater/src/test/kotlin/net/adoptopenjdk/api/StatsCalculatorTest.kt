@@ -6,7 +6,7 @@ import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Binary
-import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.GitHubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.HeapSize
 import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.Installer
@@ -18,7 +18,7 @@ import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.models.VersionData
-import net.adoptopenjdk.api.v3.stats.GithubDownloadStatsCalculator
+import net.adoptopenjdk.api.v3.stats.GitHubDownloadStatsCalculator
 import net.adoptopenjdk.api.v3.stats.DockerStatsInterface
 import org.junit.jupiter.api.Test
 
@@ -27,7 +27,7 @@ class StatsCalculatorTest : BaseTest() {
     @Test
     fun testGithubStatsCalculator() {
         val adoptRepos = AdoptRepos(listOf(generateFeatureRelease()))
-        val result: List<GithubDownloadStatsDbEntry> = GithubDownloadStatsCalculator().getStats(adoptRepos)
+        val result: List<GitHubDownloadStatsDbEntry> = GitHubDownloadStatsCalculator().getStats(adoptRepos)
 
         assert(result[0].feature_version == 8)
         assert(result[0].downloads == 895L)

@@ -54,7 +54,7 @@ class ReleaseVersionResolverTest : BaseTest() {
     @Test
     fun availableVersionsIsCorrect() {
         check { releaseInfo ->
-            releaseInfo.available_releases.contentEquals(arrayOf(8, 9, 10, 11, 12))
+            releaseInfo.available_releases.contentEquals(TestResourceDouble.TEST_VERSIONS.toTypedArray())
         }
     }
 
@@ -82,7 +82,7 @@ class ReleaseVersionResolverTest : BaseTest() {
     @Test
     fun mostRecentFeatureVersionIsCorrect() {
         check { releaseInfo ->
-            releaseInfo.most_recent_feature_version == 13
+            releaseInfo.most_recent_feature_version == 12
         }
     }
 

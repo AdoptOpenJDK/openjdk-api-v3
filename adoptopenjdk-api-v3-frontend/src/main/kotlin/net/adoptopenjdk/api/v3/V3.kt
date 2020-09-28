@@ -45,6 +45,10 @@ problems as an issue in the <a href=\"https://github.com/AdoptOpenJDK/openjdk-ap
 @ApplicationPath("/")
 class V3 : Application() {
 
+    companion object {
+        val ENABLE_PERIODIC_UPDATES: String = "enablePeriodicUpdates"
+    }
+
     private val resourceClasses: Set<Class<out Any>>
     private val cors: Set<Any>
 
@@ -55,9 +59,7 @@ class V3 : Application() {
             }
         })
 
-        // Eagerly fetch repo from db on app startup
-        APIDataStore.getAdoptRepos()
-        APIDataStore.schedulePeriodicUpdates()
+        schedulePeriodicUpdates()
 
         resourceClasses = setOf(
             V1Route::class.java,
@@ -71,6 +73,16 @@ class V3 : Application() {
             DownloadStatsResource::class.java,
             InstallerResource::class.java
         )
+    }
+
+    private fun schedulePeriodicUpdates() {
+        // Eagerly fetch repo from db on app startup
+        val enabled = System.getProperty(ENABLE_PERIODIC_UPDATES, "true")!!.toBoolean()
+
+        if (enabled) {
+            APIDataStore.getAdoptRepos()
+            APIDataStore.schedulePeriodicUpdates()
+        }
     }
 
     override fun getSingletons(): Set<Any> {

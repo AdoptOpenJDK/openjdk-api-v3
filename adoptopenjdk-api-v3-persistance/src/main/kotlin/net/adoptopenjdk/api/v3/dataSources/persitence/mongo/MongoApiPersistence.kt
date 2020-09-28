@@ -8,7 +8,7 @@ import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
-import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.GitHubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import org.bson.BsonArray
@@ -22,7 +22,7 @@ import java.time.ZonedDateTime
 
 class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient), ApiPersistence {
     private val releasesCollection: CoroutineCollection<Release> = createCollection(database, RELEASE_DB)
-    private val githubStatsCollection: CoroutineCollection<GithubDownloadStatsDbEntry> = createCollection(database, GITHUB_STATS_DB)
+    private val gitHubStatsCollection: CoroutineCollection<GitHubDownloadStatsDbEntry> = createCollection(database, GITHUB_STATS_DB)
     private val dockerStatsCollection: CoroutineCollection<DockerDownloadStatsDbEntry> = createCollection(database, DOCKER_STATS_DB)
     private val releaseInfoCollection: CoroutineCollection<ReleaseInfo> = createCollection(database, RELEASE_INFO_DB)
     private val updateTimeCollection: CoroutineCollection<UpdatedInfo> = createCollection(database, UPDATE_TIME_DB)
@@ -66,25 +66,25 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
         return FeatureRelease(featureVersion, Releases(releases))
     }
 
-    override suspend fun addGithubDownloadStatsEntries(stats: List<GithubDownloadStatsDbEntry>) {
-        githubStatsCollection.insertMany(stats)
+    override suspend fun addGithubDownloadStatsEntries(stats: List<GitHubDownloadStatsDbEntry>) {
+        gitHubStatsCollection.insertMany(stats)
     }
 
-    override suspend fun getStatsForFeatureVersion(featureVersion: Int): List<GithubDownloadStatsDbEntry> {
-        return githubStatsCollection.find(Document("version.major", featureVersion))
+    override suspend fun getStatsForFeatureVersion(featureVersion: Int): List<GitHubDownloadStatsDbEntry> {
+        return gitHubStatsCollection.find(Document("version.major", featureVersion))
             .toList()
     }
 
-    override suspend fun getLatestGithubStatsForFeatureVersion(featureVersion: Int): GithubDownloadStatsDbEntry? {
-        return githubStatsCollection
+    override suspend fun getLatestGithubStatsForFeatureVersion(featureVersion: Int): GitHubDownloadStatsDbEntry? {
+        return gitHubStatsCollection
             .find(Document("feature_version", featureVersion))
             .sort(Document("date", -1))
             .limit(1)
             .first()
     }
 
-    override suspend fun getGithubStats(start: ZonedDateTime, end: ZonedDateTime): List<GithubDownloadStatsDbEntry> {
-        return githubStatsCollection
+    override suspend fun getGithubStats(start: ZonedDateTime, end: ZonedDateTime): List<GitHubDownloadStatsDbEntry> {
+        return gitHubStatsCollection
             .find(betweenDates(start, end))
             .sort(Document("date", 1))
             .toList()
@@ -119,7 +119,7 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
     override suspend fun removeStatsBetween(start: ZonedDateTime, end: ZonedDateTime) {
         val deleteQuery = betweenDates(start, end)
         dockerStatsCollection.deleteMany(deleteQuery)
-        githubStatsCollection.deleteMany(deleteQuery)
+        gitHubStatsCollection.deleteMany(deleteQuery)
     }
 
     override suspend fun setReleaseInfo(version: ReleaseInfo) {

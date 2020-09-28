@@ -4,17 +4,13 @@ import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import kotlin.test.assertTrue
 
+@ExtendWith(value = [DbExtension::class])
 @QuarkusTest
-class JsonSerializationTest : BaseTest() {
-
-    @BeforeEach
-    fun beforeEach() {
-        populateDb()
-    }
+class JsonSerializationTest : FrontendTest() {
 
     class PrettyPrintMatcher : TypeSafeMatcher<String>() {
 

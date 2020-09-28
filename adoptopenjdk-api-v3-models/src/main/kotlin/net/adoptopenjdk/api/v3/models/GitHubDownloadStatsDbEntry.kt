@@ -2,7 +2,7 @@ package net.adoptopenjdk.api.v3.models
 
 import java.time.ZonedDateTime
 
-class GithubDownloadStatsDbEntry(
+class GitHubDownloadStatsDbEntry(
     date: ZonedDateTime,
     val downloads: Long,
     val jvmImplDownloads: Map<JvmImpl, Long>?,

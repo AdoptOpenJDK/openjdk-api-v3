@@ -530,9 +530,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire-plugin.version}</version>
-                <configuration>
-                    <reuseForks>false</reuseForks>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -619,12 +616,13 @@
                 <version>1.8</version>
                 <executions>
                     <execution>
-                        <id>ktlint</id>
+                        <id>ktlint-format</id>
                         <phase>validate</phase>
                         <configuration>
                             <target name="ktlint">
                                 <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
                                       classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
+                                    <arg value="-F"/>
                                     <arg value="src/**/*.kt"/>
                                 </java>
                             </target>
@@ -632,12 +630,12 @@
                         <goals><goal>run</goal></goals>
                     </execution>
                     <execution>
-                        <id>ktlint-format</id>
+                        <id>ktlint</id>
+                        <phase>validate</phase>
                         <configuration>
                             <target name="ktlint">
                                 <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
                                       classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
-                                    <arg value="-F"/>
                                     <arg value="src/**/*.kt"/>
                                 </java>
                             </target>

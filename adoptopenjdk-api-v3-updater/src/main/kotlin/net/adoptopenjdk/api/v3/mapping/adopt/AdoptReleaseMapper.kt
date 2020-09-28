@@ -8,8 +8,8 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAssets
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
-import net.adoptopenjdk.api.v3.dataSources.models.GithubId
-import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGithubHtmlClient
+import net.adoptopenjdk.api.v3.dataSources.models.GitHubId
+import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGitHubHtmlClient
 import net.adoptopenjdk.api.v3.mapping.BinaryMapper
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import net.adoptopenjdk.api.v3.models.Release
@@ -27,7 +27,7 @@ import java.util.regex.Pattern
 object AdoptReleaseMapper : ReleaseMapper() {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
-    private val excludedReleases: MutableSet<GithubId> = mutableSetOf()
+    private val excludedReleases: MutableSet<GitHubId> = mutableSetOf()
 
     override suspend fun toAdoptRelease(ghRelease: GHRelease): ReleaseResult {
         if (excludedReleases.contains(ghRelease.id)) {
@@ -199,7 +199,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
                 metadataAsset.name.startsWith(it.name)
             }
 
-        val metadataString = CachedGithubHtmlClient.getUrl(metadataAsset.downloadUrl)
+        val metadataString = CachedGitHubHtmlClient.getUrl(metadataAsset.downloadUrl)
         if (binaryAsset != null && metadataString != null) {
             try {
                 return withContext(Dispatchers.IO) {

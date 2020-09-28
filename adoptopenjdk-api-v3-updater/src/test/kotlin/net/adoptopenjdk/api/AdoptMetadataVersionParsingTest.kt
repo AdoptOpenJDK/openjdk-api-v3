@@ -2,7 +2,6 @@ package net.adoptopenjdk.api
 
 import io.mockk.every
 import io.mockk.mockk
-import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
@@ -16,14 +15,13 @@ import org.apache.http.ProtocolVersion
 import org.apache.http.message.BasicHeader
 import org.apache.http.message.BasicStatusLine
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 
-class AdoptMetadataVersionParsingTest {
+class AdoptMetadataVersionParsingTest : BaseTest() {
 
     @Test
     fun usesMetadataForVersion() {
         runBlocking {
-            BaseTest.startFongo()
-
             UpdaterHtmlClientFactory.client = object : UpdaterHtmlClient {
                 override suspend fun get(url: String): String? {
                     return """

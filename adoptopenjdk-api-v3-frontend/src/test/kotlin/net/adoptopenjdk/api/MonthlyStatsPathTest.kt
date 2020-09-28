@@ -7,137 +7,132 @@ import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
-import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.GitHubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.JvmImpl
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
-import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
+@ExtendWith(value = [DbExtension::class])
 @QuarkusTest
-class MonthlyStatsPathTest : BaseTest() {
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun before() {
-            populateDb()
-            mockStats()
-        }
+class MonthlyStatsPathTest : FrontendTest() {
 
-        fun mockStats() {
-            runBlocking {
-                val persistance = ApiPersistenceFactory.get()
+    @BeforeEach
+    fun mockStats() {
+        runBlocking {
+            val persistance = ApiPersistenceFactory.get()
 
-                persistance.addDockerDownloadStatsEntries(
-                    createDockerStatsWithRepoName()
-                )
+            persistance.addDockerDownloadStatsEntries(
+                createDockerStatsWithRepoName()
+            )
 
-                persistance.addGithubDownloadStatsEntries(
-                    createGithubData()
-                )
-            }
-        }
-
-        private fun createGithubData(): List<GithubDownloadStatsDbEntry> {
-            return listOf(
-                GithubDownloadStatsDbEntry(
-                    TimeSource.now(),
-                    800,
-                    mapOf(JvmImpl.hotspot to 600L, JvmImpl.openj9 to 200L),
-                    11
-                ),
-                GithubDownloadStatsDbEntry(
-                    TimeSource.now().minusMonths(1).withDayOfMonth(26),
-                    600,
-                    mapOf(JvmImpl.hotspot to 450L, JvmImpl.openj9 to 150L),
-                    8
-                ),
-                GithubDownloadStatsDbEntry(
-                    TimeSource.now().minusMonths(1).withDayOfMonth(4),
-                    400,
-                    mapOf(JvmImpl.hotspot to 300L, JvmImpl.openj9 to 100L),
-                    11
-                ),
-                GithubDownloadStatsDbEntry(
-                    TimeSource.now().minusMonths(2).withDayOfMonth(23),
-                    350,
-                    mapOf(JvmImpl.hotspot to 275L, JvmImpl.openj9 to 75L),
-                    11
-                ),
-                GithubDownloadStatsDbEntry(
-                    TimeSource.now().minusMonths(3).withDayOfMonth(24),
-                    200,
-                    mapOf(JvmImpl.hotspot to 150L, JvmImpl.openj9 to 50L),
-                    8
-                ),
-                GithubDownloadStatsDbEntry(
-                    TimeSource.now().minusMonths(4).withDayOfMonth(19),
-                    100,
-                    null,
-                    8
-                ),
-                GithubDownloadStatsDbEntry(
-                    TimeSource.now().minusMonths(4).withDayOfMonth(19),
-                    100,
-                    null,
-                    11
-                )
+            persistance.addGithubDownloadStatsEntries(
+                createGithubData()
             )
         }
+    }
 
-        private fun createDockerStatsWithRepoName(): List<DockerDownloadStatsDbEntry> {
-            return listOf(
-                DockerDownloadStatsDbEntry(
-                    TimeSource.now(),
-                    600,
-                    "a-repo-name",
-                    8,
-                    JvmImpl.hotspot
-                ),
-                DockerDownloadStatsDbEntry(
-                    TimeSource.now().minusMonths(1).withDayOfMonth(26),
-                    500,
-                    "b-repo-name",
-                    8,
-                    JvmImpl.openj9
-                ),
-                DockerDownloadStatsDbEntry(
-                    TimeSource.now().minusMonths(1).withDayOfMonth(4),
-                    310,
-                    "a-repo-name",
-                    11,
-                    JvmImpl.openj9
-                ),
-                DockerDownloadStatsDbEntry(
-                    TimeSource.now().minusMonths(2).withDayOfMonth(23),
-                    230,
-                    "a-repo-name",
-                    11,
-                    JvmImpl.hotspot
-                ),
-                DockerDownloadStatsDbEntry(
-                    TimeSource.now().minusMonths(3).withDayOfMonth(24),
-                    150,
-                    "b-repo-name",
-                    8,
-                    JvmImpl.hotspot
-                ),
-                DockerDownloadStatsDbEntry(
-                    TimeSource.now().minusMonths(4).withDayOfMonth(19),
-                    50,
-                    "a-repo-name",
-                    null,
-                    null
-                ),
-                DockerDownloadStatsDbEntry(
-                    TimeSource.now().minusMonths(4).withDayOfMonth(19),
-                    50,
-                    "b-repo-name",
-                    null,
-                    null
-                )
+    private fun createGithubData(): List<GitHubDownloadStatsDbEntry> {
+        return listOf(
+            GitHubDownloadStatsDbEntry(
+                TimeSource.now(),
+                800,
+                mapOf(JvmImpl.hotspot to 600L, JvmImpl.openj9 to 200L),
+                11
+            ),
+            GitHubDownloadStatsDbEntry(
+                TimeSource.now().minusMonths(1).withDayOfMonth(26),
+                600,
+                mapOf(JvmImpl.hotspot to 450L, JvmImpl.openj9 to 150L),
+                8
+            ),
+            GitHubDownloadStatsDbEntry(
+                TimeSource.now().minusMonths(1).withDayOfMonth(4),
+                400,
+                mapOf(JvmImpl.hotspot to 300L, JvmImpl.openj9 to 100L),
+                11
+            ),
+            GitHubDownloadStatsDbEntry(
+                TimeSource.now().minusMonths(2).withDayOfMonth(23),
+                350,
+                mapOf(JvmImpl.hotspot to 275L, JvmImpl.openj9 to 75L),
+                11
+            ),
+            GitHubDownloadStatsDbEntry(
+                TimeSource.now().minusMonths(3).withDayOfMonth(24),
+                200,
+                mapOf(JvmImpl.hotspot to 150L, JvmImpl.openj9 to 50L),
+                8
+            ),
+            GitHubDownloadStatsDbEntry(
+                TimeSource.now().minusMonths(4).withDayOfMonth(19),
+                100,
+                null,
+                8
+            ),
+            GitHubDownloadStatsDbEntry(
+                TimeSource.now().minusMonths(4).withDayOfMonth(19),
+                100,
+                null,
+                11
             )
-        }
+        )
+    }
+
+    private fun createDockerStatsWithRepoName(): List<DockerDownloadStatsDbEntry> {
+        return listOf(
+            DockerDownloadStatsDbEntry(
+                TimeSource.now(),
+                600,
+                "a-repo-name",
+                8,
+                JvmImpl.hotspot
+            ),
+            DockerDownloadStatsDbEntry(
+                TimeSource.now().minusMonths(1).withDayOfMonth(26),
+                500,
+                "b-repo-name",
+                8,
+                JvmImpl.openj9
+            ),
+            DockerDownloadStatsDbEntry(
+                TimeSource.now().minusMonths(1).withDayOfMonth(4),
+                310,
+                "a-repo-name",
+                11,
+                JvmImpl.openj9
+            ),
+            DockerDownloadStatsDbEntry(
+                TimeSource.now().minusMonths(2).withDayOfMonth(23),
+                230,
+                "a-repo-name",
+                11,
+                JvmImpl.hotspot
+            ),
+            DockerDownloadStatsDbEntry(
+                TimeSource.now().minusMonths(3).withDayOfMonth(24),
+                150,
+                "b-repo-name",
+                8,
+                JvmImpl.hotspot
+            ),
+            DockerDownloadStatsDbEntry(
+                TimeSource.now().minusMonths(4).withDayOfMonth(19),
+                50,
+                "a-repo-name",
+                null,
+                null
+            ),
+            DockerDownloadStatsDbEntry(
+                TimeSource.now().minusMonths(4).withDayOfMonth(19),
+                50,
+                "b-repo-name",
+                null,
+                null
+            )
+        )
     }
 
     @Test

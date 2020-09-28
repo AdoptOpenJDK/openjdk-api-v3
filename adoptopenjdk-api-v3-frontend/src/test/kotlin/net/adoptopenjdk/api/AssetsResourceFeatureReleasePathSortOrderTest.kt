@@ -23,11 +23,13 @@ import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.models.VersionData
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.ZonedDateTime
 import kotlin.test.assertEquals
 
+@ExtendWith(value = [DbExtension::class])
 @QuarkusTest
-class AssetsResourceFeatureReleasePathSortOrderTest : BaseTest() {
+class AssetsResourceFeatureReleasePathSortOrderTest : FrontendTest() {
 
     @Test
     fun doesSortObaySortMethod() {

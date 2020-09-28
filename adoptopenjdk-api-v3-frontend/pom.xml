@@ -171,7 +171,6 @@
                     <systemProperties>
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                     </systemProperties>
-                    <reuseForks>false</reuseForks>
                     <excludes>
                         <exclude>TestRunner</exclude>
                     </excludes>

@@ -74,7 +74,7 @@ class VersionData : Comparable<VersionData> {
         result = 31 * result + security
         result = 31 * result + (pre?.hashCode() ?: 0)
         result = 31 * result + (adopt_build_number ?: 0)
-        result = 31 * result + (semver?.hashCode() ?: 0)
+        result = 31 * result + semver.hashCode()
         result = 31 * result + openjdk_version.hashCode()
         result = 31 * result + build
         result = 31 * result + (optional?.hashCode() ?: 0)
