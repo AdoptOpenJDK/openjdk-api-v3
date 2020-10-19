@@ -66,6 +66,10 @@ class V3Updater {
                     return@runBlocking updatedRepo
                 } catch (e: Exception) {
                     LOGGER.error("Failed to perform incremental update", e)
+                } catch (e: Throwable) {
+                    // Log and rethrow
+                    LOGGER.error("Error during incremental update", e)
+                    throw e
                 }
                 repo
             }
@@ -133,6 +137,10 @@ class V3Updater {
             }
         } catch (e: Exception) {
             LOGGER.error("Failed to perform full update", e)
+        } catch (e: Throwable) {
+            // Log and rethrow
+            LOGGER.error("Error during full update", e)
+            throw e
         }
     }
 }
