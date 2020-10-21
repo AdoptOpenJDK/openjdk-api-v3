@@ -2,12 +2,16 @@ package net.adoptopenjdk.api
 
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
+import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortMethod
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.filters.ReleaseFilter
+import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
+import org.hamcrest.Description
+import org.hamcrest.TypeSafeMatcher
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
@@ -38,6 +42,17 @@ class AssetsResourceReleaseNamePathTest : FrontendTest() {
                                         .get(it)
                                         .then()
                                         .statusCode(200)
+                                        .and()
+                                        .body(object : TypeSafeMatcher<String>() {
+                                            override fun describeTo(description: Description?) {
+                                                description!!.appendText("json")
+                                            }
+
+                                            override fun matchesSafely(p0: String?): Boolean {
+                                                val returnedRelease = JsonMapper.mapper.readValue(p0, Release::class.java)
+                                                return returnedRelease.id == release.id
+                                            }
+                                        })
                                 }
                             }
                             .asSequence()

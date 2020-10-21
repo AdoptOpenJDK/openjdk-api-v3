@@ -30,9 +30,9 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.time.temporal.TemporalQuery
-import java.util.function.Predicate
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response
 
 @Tag(name = "Assets")
 @Path("/v3/assets/")
@@ -91,14 +91,7 @@ class AssetsResource {
         @QueryParam("vendor")
         vendor: Vendor?,
 
-        @Parameter(
-            name = "project", description = "Project",
-            schema = Schema(
-                defaultValue = "jdk",
-                enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false
-            ),
-            required = false
-        )
+        @Parameter(name = "project", description = "Project", required = false)
         @QueryParam("project")
         project: Project?,
 
@@ -168,7 +161,7 @@ class AssetsResource {
             ),
             APIResponse(responseCode = "400", description = "bad input parameter"),
             APIResponse(responseCode = "404", description = "no releases match the request"),
-            APIResponse(responseCode = "404", description = "multiple releases match the request")
+            APIResponse(responseCode = "500", description = "multiple releases match the request")
         ]
     )
     fun get(
@@ -200,14 +193,7 @@ class AssetsResource {
         @QueryParam("heap_size")
         heap_size: HeapSize?,
 
-        @Parameter(
-            name = "project", description = "Project",
-            schema = Schema(
-                defaultValue = "jdk",
-                enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false
-            ),
-            required = false
-        )
+        @Parameter(name = "project", description = "Project", required = false)
         @QueryParam("project")
         project: Project?
     ): Release {
@@ -237,7 +223,7 @@ class AssetsResource {
                 throw NotFoundException("No releases found")
             }
             releases.size > 1 -> {
-                throw NotFoundException("Multiple releases match request")
+                throw ServerErrorException("Multiple releases match request", Response.Status.INTERNAL_SERVER_ERROR)
             }
             else -> {
                 releases[0]
@@ -327,14 +313,7 @@ class AssetsResource {
         @QueryParam("vendor")
         vendor: Vendor?,
 
-        @Parameter(
-            name = "project", description = "Project",
-            schema = Schema(
-                defaultValue = "jdk",
-                enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false
-            ),
-            required = false
-        )
+        @Parameter(name = "project", description = "Project", required = false)
         @QueryParam("project")
         project: Project?,
 
