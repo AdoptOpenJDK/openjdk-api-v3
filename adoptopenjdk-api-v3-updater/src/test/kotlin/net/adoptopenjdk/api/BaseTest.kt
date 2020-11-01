@@ -4,15 +4,8 @@ import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import net.adoptopenjdk.api.v3.AdoptReposBuilder
-import net.adoptopenjdk.api.v3.AdoptRepository
-import net.adoptopenjdk.api.v3.AdoptRepositoryFactory
-import net.adoptopenjdk.api.v3.ReleaseResult
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
-import net.adoptopenjdk.api.v3.dataSources.UrlRequest
+import net.adoptopenjdk.api.v3.*
+import net.adoptopenjdk.api.v3.dataSources.*
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleasesSummary
@@ -26,11 +19,13 @@ import org.apache.http.HttpResponse
 import org.apache.http.ProtocolVersion
 import org.apache.http.message.BasicHeader
 import org.apache.http.message.BasicStatusLine
+import org.jboss.weld.environment.se.Weld
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.LoggerFactory
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
 @ExtendWith(MockKExtension::class)
 abstract class BaseTest {
@@ -41,6 +36,9 @@ abstract class BaseTest {
 
         @JvmStatic
         public val adoptRepos = TestResourceDouble.generate()
+
+        @Inject
+        lateinit var apiDataStore: APIDataStore
 
         private var mockHtmlClient: UpdaterHtmlClient? = null
 
@@ -79,18 +77,26 @@ abstract class BaseTest {
 
         @JvmStatic
         @BeforeAll
-        fun mockRepo() {
-            val repo = mockRepository(adoptRepos!!)
+        fun buildApiDataStore() {
+            mockRepo()
+            val context = Weld().initialize()
+            apiDataStore = context.select(APIDataStore::class.java).get()
+            (apiDataStore as APIDataStoreImpl).loadDataFromDb(true)
+        }
+
+        public fun mockRepo(): AdoptRepos {
+            val repo = mockRepository(adoptRepos)
             val persistance = InMemoryApiPersistence()
 
             runBlocking {
-                persistance.updateAllRepos(adoptRepos!!, "")
+                persistance.updateAllRepos(adoptRepos, "")
             }
 
             ApiPersistenceFactory.set(persistance)
             AdoptRepositoryFactory.setAdoptRepository(repo)
             InternalDbStoreFactory.set(InMemoryInternalDbStore())
-            APIDataStore.loadDataFromDb(true)
+
+            return adoptRepos
         }
 
         fun mockRepository(adoptRepos: AdoptRepos): AdoptRepository {
@@ -135,6 +141,6 @@ abstract class BaseTest {
     }
 
     protected suspend fun getInitialRepo(): AdoptRepos {
-        return AdoptReposBuilder.incrementalUpdate(AdoptReposBuilder.build(APIDataStore.variants.versions))
+        return AdoptReposBuilder.incrementalUpdate(AdoptReposBuilder.build(VariantStore.variants.versions))
     }
 }

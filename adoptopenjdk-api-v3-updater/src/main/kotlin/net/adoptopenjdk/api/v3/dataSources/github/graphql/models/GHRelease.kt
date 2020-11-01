@@ -21,7 +21,6 @@ data class GHRelease @JsonCreator constructor(
     val id: GitHubId,
     @JsonProperty("name") val name: String,
     @JsonProperty("isPrerelease") val isPrerelease: Boolean,
-    @JsonProperty("prerelease") val prerelease: Boolean?,
     @JsonProperty("publishedAt") val publishedAt: String,
     @JsonProperty("updatedAt") val updatedAt: String,
     @JsonProperty("releaseAssets") val releaseAssets: GHAssets,

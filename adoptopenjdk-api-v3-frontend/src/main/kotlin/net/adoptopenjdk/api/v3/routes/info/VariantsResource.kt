@@ -1,6 +1,6 @@
 package net.adoptopenjdk.api.v3.routes.info
 
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
+import net.adoptopenjdk.api.v3.dataSources.VariantStore
 import net.adoptopenjdk.api.v3.models.Variants
 import org.eclipse.microprofile.metrics.annotation.Timed
 import org.eclipse.microprofile.openapi.annotations.Operation
@@ -21,6 +21,6 @@ class VariantsResource {
     // Hide this path as it is only used internally by the website
     @Operation(summary = "Returns information about available variants", hidden = true)
     fun get(): Variants {
-        return APIDataStore.variants
+        return VariantStore.variants
     }
 }

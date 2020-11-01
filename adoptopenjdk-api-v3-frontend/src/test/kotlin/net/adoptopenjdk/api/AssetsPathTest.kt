@@ -1,6 +1,5 @@
 package net.adoptopenjdk.api
 
-import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.HeapSize
@@ -10,11 +9,8 @@ import net.adoptopenjdk.api.v3.models.OperatingSystem
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
-import org.junit.jupiter.api.extension.ExtendWith
 import java.util.stream.Stream
 
-@ExtendWith(value = [DbExtension::class])
-@QuarkusTest
 abstract class AssetsPathTest : FrontendTest() {
 
     abstract fun <T> runFilterTest(filterParamName: String, values: Array<T>): Stream<DynamicTest>

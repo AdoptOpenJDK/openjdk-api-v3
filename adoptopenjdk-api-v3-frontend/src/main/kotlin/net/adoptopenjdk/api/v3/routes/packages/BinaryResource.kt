@@ -1,17 +1,7 @@
 package net.adoptopenjdk.api.v3.routes.packages
 
 import net.adoptopenjdk.api.v3.OpenApiDocs
-import net.adoptopenjdk.api.v3.models.Architecture
-import net.adoptopenjdk.api.v3.models.Binary
-import net.adoptopenjdk.api.v3.models.HeapSize
-import net.adoptopenjdk.api.v3.models.ImageType
-import net.adoptopenjdk.api.v3.models.JvmImpl
-import net.adoptopenjdk.api.v3.models.OperatingSystem
-import net.adoptopenjdk.api.v3.models.Package
-import net.adoptopenjdk.api.v3.models.Project
-import net.adoptopenjdk.api.v3.models.Release
-import net.adoptopenjdk.api.v3.models.ReleaseType
-import net.adoptopenjdk.api.v3.models.Vendor
+import net.adoptopenjdk.api.v3.models.*
 import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
@@ -21,11 +11,9 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
-import javax.ws.rs.GET
-import javax.ws.rs.HEAD
-import javax.ws.rs.HeaderParam
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
+import javax.enterprise.context.ApplicationScoped
+import javax.inject.Inject
+import javax.ws.rs.*
 import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Request
@@ -34,7 +22,8 @@ import javax.ws.rs.core.Response
 @Tag(name = "Binary")
 @Path("/v3/binary/")
 @Produces(MediaType.APPLICATION_JSON)
-class BinaryResource : PackageEndpoint() {
+@ApplicationScoped
+class BinaryResource @Inject constructor(private val packageEndpoint: PackageEndpoint) {
 
     @GET
     @HEAD
@@ -91,7 +80,7 @@ class BinaryResource : PackageEndpoint() {
         @HeaderParam("User-Agent")
         userAgent: String
     ): Response {
-        val releases = getReleases(release_name, vendor, os, arch, image_type, jvm_impl, heap_size, project)
+        val releases = packageEndpoint.getReleases(release_name, vendor, os, arch, image_type, jvm_impl, heap_size, project)
         return when (request.method) {
             "HEAD" -> versionHead(userAgent, releases)
             else -> formResponse(releases)
@@ -165,7 +154,7 @@ class BinaryResource : PackageEndpoint() {
         @QueryParam("project")
         project: Project?
     ): Response {
-        val releaseList = getRelease(release_type, version, vendor, os, arch, image_type, jvm_impl, heap_size, project)
+        val releaseList = packageEndpoint.getRelease(release_type, version, vendor, os, arch, image_type, jvm_impl, heap_size, project)
 
         val release = releaseList.lastOrNull()
 
@@ -174,9 +163,9 @@ class BinaryResource : PackageEndpoint() {
 
     protected fun formResponse(
         releases: List<Release>,
-        createResponse: (Package) -> Response = redirectToAsset()
+        createResponse: (Package) -> Response = packageEndpoint.redirectToAsset()
     ): Response {
-        return formResponse(releases, extractPackage(), createResponse)
+        return packageEndpoint.formResponse(releases, extractPackage(), createResponse)
     }
 
     private fun extractPackage(): (binary: Binary) -> Package {

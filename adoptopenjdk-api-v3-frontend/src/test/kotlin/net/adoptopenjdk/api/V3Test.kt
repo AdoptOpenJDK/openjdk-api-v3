@@ -9,12 +9,12 @@ import kotlin.test.assertNotNull
 
 @ExtendWith(value = [DbExtension::class])
 @QuarkusTest
-class V3Test() : FrontendTest() {
+class V3Test : FrontendTest() {
 
     @Test
-    fun `update is scheduled`() {
+    fun `update is scheduled`(apiDataStore: APIDataStore) {
         System.setProperty(V3.ENABLE_PERIODIC_UPDATES, "true")
-        V3()
-        assertNotNull(APIDataStore.schedule)
+        V3(apiDataStore)
+        assertNotNull((apiDataStore as ApiDataStoreTestDouble).scheduled)
     }
 }

@@ -10,28 +10,40 @@ import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.Variants
 import net.adoptopenjdk.api.v3.stats.StatsInterface
+import org.jboss.weld.environment.se.Weld
 import org.slf4j.LoggerFactory
 import java.io.OutputStream
 import java.security.MessageDigest
-import java.util.Base64
+import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 import kotlin.concurrent.timerTask
 
 class V3Updater {
-    private var database: ApiPersistence
+    private val database: ApiPersistence
     private val variants: Variants
     private var repo: AdoptRepos
     private val statsInterface: StatsInterface
 
+    @Inject
+    private val apiDataStore: APIDataStore
+
     init {
+
         AppInsightsTelemetry.start()
 
         val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
         variants = UpdaterJsonMapper.mapper.readValue(variantData, Variants::class.java)
         database = ApiPersistenceFactory.get()
+
+        val weld = Weld()
+        val container = weld.initialize()
+
+        apiDataStore = container.select(APIDataStore::class.java).get()
+
         repo = try {
-            APIDataStore.loadDataFromDb(true)
+            apiDataStore.loadDataFromDb(true)
         } catch (e: java.lang.Exception) {
             LOGGER.error("Failed to load db", e)
             AdoptRepos(emptyList())

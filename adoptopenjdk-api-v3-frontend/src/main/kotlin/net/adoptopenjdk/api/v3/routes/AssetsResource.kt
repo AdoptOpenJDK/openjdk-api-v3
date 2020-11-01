@@ -39,6 +39,8 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.time.temporal.TemporalQuery
+import javax.enterprise.context.ApplicationScoped
+import javax.inject.Inject
 import javax.ws.rs.BadRequestException
 import javax.ws.rs.GET
 import javax.ws.rs.NotFoundException
@@ -50,7 +52,12 @@ import javax.ws.rs.core.MediaType
 @Path("/v3/assets/")
 @Produces(MediaType.APPLICATION_JSON)
 @Timed
-class AssetsResource {
+@ApplicationScoped
+class AssetsResource
+@Inject
+constructor(
+    private val apiDataStore: APIDataStore
+) {
 
     @GET
     @Path("/feature_releases/{feature_version}/{release_type}")
@@ -154,13 +161,13 @@ class AssetsResource {
 
         val releaseFilter = ReleaseFilter(releaseType = release_type, featureVersion = version, vendor = vendor)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project, beforeParsed)
-        val repos = APIDataStore.getAdoptRepos().getFeatureRelease(version!!)
+        val repos = apiDataStore.getAdoptRepos().getFeatureRelease(version!!)
 
         if (repos == null) {
             throw NotFoundException()
         }
 
-        val releases = APIDataStore
+        val releases = apiDataStore
             .getAdoptRepos()
             .getFilteredReleases(version, releaseFilter, binaryFilter, order, sortMethod)
 
@@ -298,7 +305,7 @@ class AssetsResource {
         val releaseFilter = ReleaseFilter(releaseType = release_type, vendor = vendor, versionRange = range, lts = lts)
         val binaryFilter = BinaryFilter(os = os, arch = arch, imageType = image_type, jvmImpl = jvm_impl, heapSize = heap_size, project = project)
 
-        val releases = APIDataStore
+        val releases = apiDataStore
             .getAdoptRepos()
             .getFilteredReleases(releaseFilter, binaryFilter, order, sortMethod)
 
@@ -331,7 +338,7 @@ class AssetsResource {
     ): List<BinaryAssetView> {
         val releaseFilter = ReleaseFilter(ReleaseType.ga, featureVersion = version, vendor = Vendor.adoptopenjdk)
         val binaryFilter = BinaryFilter(null, null, null, jvm_impl, null, null)
-        val releases = APIDataStore
+        val releases = apiDataStore
             .getAdoptRepos()
             .getFilteredReleases(version, releaseFilter, binaryFilter, SortOrder.ASC, SortMethod.DEFAULT)
 

@@ -24,7 +24,7 @@ import java.util.Random
 object TestResourceDouble {
 
     val rand: Random = Random(1)
-    val TEST_VERSIONS = listOf(8, 10, 11, 12)
+    val TEST_VERSIONS = listOf(8, 9, 10, 11, 12)
     private val TEST_RESOURCES = listOf(
         PermittedValues(
             ReleaseType.values().asList(),

@@ -1,22 +1,10 @@
 package net.adoptopenjdk.api.packages
 
-import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
 import io.restassured.response.Response
-import net.adoptopenjdk.api.DbExtension
 import net.adoptopenjdk.api.FrontendTest
-import net.adoptopenjdk.api.v3.models.Architecture
-import net.adoptopenjdk.api.v3.models.HeapSize
-import net.adoptopenjdk.api.v3.models.ImageType
-import net.adoptopenjdk.api.v3.models.JvmImpl
-import net.adoptopenjdk.api.v3.models.OperatingSystem
-import net.adoptopenjdk.api.v3.models.Project
-import net.adoptopenjdk.api.v3.models.ReleaseType
-import net.adoptopenjdk.api.v3.models.Vendor
-import org.junit.jupiter.api.extension.ExtendWith
+import net.adoptopenjdk.api.v3.models.*
 
-@ExtendWith(value = [DbExtension::class])
-@QuarkusTest
 abstract class PackageEndpointTest : FrontendTest() {
 
     abstract fun getPath(): String

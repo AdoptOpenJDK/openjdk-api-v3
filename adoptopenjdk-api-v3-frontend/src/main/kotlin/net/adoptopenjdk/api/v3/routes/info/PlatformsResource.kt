@@ -1,6 +1,6 @@
 package net.adoptopenjdk.api.v3.routes.info
 
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
+import net.adoptopenjdk.api.v3.dataSources.VariantStore
 import net.adoptopenjdk.api.v3.models.Platforms
 import org.eclipse.microprofile.metrics.annotation.Timed
 import org.eclipse.microprofile.openapi.annotations.Operation
@@ -21,6 +21,6 @@ class PlatformsResource {
     // Hide this path as it is only used internally by the website
     @Operation(summary = "Returns information about available platforms", hidden = true)
     fun get(): Platforms {
-        return APIDataStore.platforms
+        return VariantStore.platforms
     }
 }

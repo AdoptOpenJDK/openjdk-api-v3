@@ -1,18 +1,12 @@
 package net.adoptopenjdk.api.v3
 
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+import net.adoptopenjdk.api.v3.dataSources.VariantStore
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
-import net.adoptopenjdk.api.v3.models.DbStatsEntry
-import net.adoptopenjdk.api.v3.models.DownloadDiff
-import net.adoptopenjdk.api.v3.models.DownloadStats
-import net.adoptopenjdk.api.v3.models.GitHubDownloadStatsDbEntry
-import net.adoptopenjdk.api.v3.models.JvmImpl
-import net.adoptopenjdk.api.v3.models.MonthlyDownloadDiff
-import net.adoptopenjdk.api.v3.models.StatsSource
-import net.adoptopenjdk.api.v3.models.TotalStats
+import net.adoptopenjdk.api.v3.models.*
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
+import javax.inject.Singleton
 import kotlin.math.max
 import kotlin.math.min
 
@@ -21,9 +15,17 @@ class StatEntry(
     val count: Long
 )
 
-class DownloadStatsInterface(
-    private val dataStore: ApiPersistence = ApiPersistenceFactory.get()
-) {
+@Singleton
+class DownloadStatsInterface {
+    private val dataStore: ApiPersistence
+
+    constructor() {
+        dataStore = ApiPersistenceFactory.get()
+    }
+
+    constructor(dataStore: ApiPersistence) {
+        this.dataStore = dataStore
+    }
 
     suspend fun getTrackingStats(
         days: Int? = null,
@@ -253,7 +255,7 @@ class DownloadStatsInterface(
     }
 
     private suspend fun getGithubStats(): List<GitHubDownloadStatsDbEntry> {
-        return APIDataStore.variants.versions
+        return VariantStore.variants.versions
             .mapNotNull { featureVersion ->
                 dataStore.getLatestGithubStatsForFeatureVersion(featureVersion)
             }

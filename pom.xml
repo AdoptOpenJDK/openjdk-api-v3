@@ -32,8 +32,9 @@
         <maven.compiler.testTarget>11</maven.compiler.testTarget>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <quarkus.version>1.6.1.Final</quarkus.version>
+        <quarkus.version>1.9.1.Final</quarkus.version>
         <surefire-plugin.version>3.0.0-M3</surefire-plugin.version>
+        <jackson.version>2.11.3</jackson.version>
     </properties>
 
     <dependencyManagement>
@@ -41,17 +42,17 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.module</groupId>
                 <artifactId>jackson-module-kotlin</artifactId>
-                <version>2.11.2</version>
+                <version>${jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jsr310</artifactId>
-                <version>2.11.2</version>
+                <version>${jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jsr353</artifactId>
-                <version>2.11.2</version>
+                <version>${jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>
@@ -217,6 +218,27 @@
                 <groupId>com.microsoft.azure</groupId>
                 <artifactId>applicationinsights-logging-logback</artifactId>
                 <version>2.6.2-BETA.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.weld</groupId>
+                <artifactId>weld-junit5</artifactId>
+                <version>2.0.1.Final</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.weld.se</groupId>
+                <artifactId>weld-se-core</artifactId>
+                <version>3.1.5.Final</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.inject</groupId>
+                <artifactId>javax.inject</artifactId>
+                <version>1</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.enterprise</groupId>
+                <artifactId>cdi-api</artifactId>
+                <version>2.0.SP1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

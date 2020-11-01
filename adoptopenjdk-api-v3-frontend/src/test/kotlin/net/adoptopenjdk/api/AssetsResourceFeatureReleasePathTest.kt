@@ -7,18 +7,19 @@ import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.SortMethod
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
-import net.adoptopenjdk.api.v3.models.Architecture
-import net.adoptopenjdk.api.v3.models.ImageType
-import net.adoptopenjdk.api.v3.models.OperatingSystem
-import net.adoptopenjdk.api.v3.models.Release
-import net.adoptopenjdk.api.v3.models.ReleaseType
+import net.adoptopenjdk.api.v3.models.*
+import org.hamcrest.Matchers
+import org.jboss.weld.junit5.EnableWeld
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import org.junit.jupiter.api.extension.ExtendWith
 import java.util.stream.Stream
 import kotlin.test.assertTrue
 
+@ExtendWith(value = [DbExtension::class])
 @QuarkusTest
+@EnableWeld
 class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
 
     @TestFactory
@@ -33,6 +34,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                                 .`when`()
                                 .get(it)
                                 .then()
+                                .body("binaries.size()", Matchers.greaterThan(0))
                                 .statusCode(200)
                         }
                     }

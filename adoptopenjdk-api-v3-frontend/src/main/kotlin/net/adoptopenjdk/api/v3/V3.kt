@@ -14,6 +14,8 @@ import net.adoptopenjdk.api.v3.routes.stats.DownloadStatsResource
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition
 import org.eclipse.microprofile.openapi.annotations.info.Info
 import org.eclipse.microprofile.openapi.annotations.servers.Server
+import javax.enterprise.context.ApplicationScoped
+import javax.inject.Inject
 import javax.ws.rs.ApplicationPath
 import javax.ws.rs.container.ContainerRequestContext
 import javax.ws.rs.container.ContainerResponseContext
@@ -42,17 +44,21 @@ problems as an issue in the <a href=\"https://github.com/AdoptOpenJDK/openjdk-ap
     ],
     info = Info(title = "v3", version = "3.0.0", description = DESCRIPTION)
 )
+@ApplicationScoped
 @ApplicationPath("/")
-class V3 : Application() {
+class V3 : Application {
 
     companion object {
         val ENABLE_PERIODIC_UPDATES: String = "enablePeriodicUpdates"
     }
 
+    private val apiDataStore: APIDataStore
     private val resourceClasses: Set<Class<out Any>>
     private val cors: Set<Any>
 
-    init {
+    @Inject
+    constructor(apiDataStore: APIDataStore) {
+        this.apiDataStore = apiDataStore
         cors = setOf(object : ContainerResponseFilter {
             override fun filter(requestContext: ContainerRequestContext?, responseContext: ContainerResponseContext) {
                 responseContext.headers.add("Access-Control-Allow-Origin", "*")
@@ -80,8 +86,8 @@ class V3 : Application() {
         val enabled = System.getProperty(ENABLE_PERIODIC_UPDATES, "true")!!.toBoolean()
 
         if (enabled) {
-            APIDataStore.getAdoptRepos()
-            APIDataStore.schedulePeriodicUpdates()
+            apiDataStore.getAdoptRepos()
+            apiDataStore.schedulePeriodicUpdates()
         }
     }
 

@@ -10,17 +10,16 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.AdoptRepositoryFactory
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
-import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
+import net.adoptopenjdk.api.v3.dataSources.*
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoClientFactory
+import org.jboss.weld.environment.se.Weld
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.LoggerFactory
 import java.util.zip.GZIPInputStream
+import javax.inject.Inject
 import kotlin.random.Random
 
 @ExtendWith(MockKExtension::class)
@@ -32,6 +31,9 @@ abstract class MongoTest {
 
         private var mongodExecutable: MongodExecutable? = null
 
+        @Inject
+        lateinit var apiDataStore: APIDataStore
+
         @JvmStatic
         @BeforeAll
         fun startDb() {
@@ -39,6 +41,8 @@ abstract class MongoTest {
             UpdaterHtmlClientFactory.client = BaseTest.mockkHttpClient()
             startFongo()
             mockRepo()
+            val context = Weld().initialize()
+            apiDataStore = context.select(APIDataStore::class.java).get()
         }
 
         @JvmStatic
@@ -74,11 +78,11 @@ abstract class MongoTest {
         @JvmStatic
         fun populateDb() {
             runBlocking {
-                val repo = AdoptReposBuilder.build(APIDataStore.variants.versions)
+                val repo = AdoptReposBuilder.build(VariantStore.variants.versions)
                 // Reset connection
                 ApiPersistenceFactory.set(null)
                 ApiPersistenceFactory.get().updateAllRepos(repo, "")
-                APIDataStore.loadDataFromDb(true)
+                apiDataStore.loadDataFromDb(true)
             }
         }
 
@@ -92,6 +96,6 @@ abstract class MongoTest {
     }
 
     protected suspend fun getInitialRepo(): AdoptRepos {
-        return AdoptReposBuilder.incrementalUpdate(AdoptReposBuilder.build(APIDataStore.variants.versions))
+        return AdoptReposBuilder.incrementalUpdate(AdoptReposBuilder.build(VariantStore.variants.versions))
     }
 }
