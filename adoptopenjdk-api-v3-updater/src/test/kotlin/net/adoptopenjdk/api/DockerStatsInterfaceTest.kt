@@ -4,6 +4,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.DownloadStatsInterface
+import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.DefaultUpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
@@ -44,7 +45,7 @@ class DockerStatsInterfaceTest : BaseTest() {
         runBlocking {
             val apiPersistanceMock = mockk<ApiPersistence>()
 
-            val baseTime = ZonedDateTime.now().minusMinutes(10)
+            val baseTime = TimeSource.date().minusDays(1).atStartOfDay().plusHours(12).atZone(TimeSource.ZONE)
 
             coEvery { apiPersistanceMock.getGithubStats(any<ZonedDateTime>(), any<ZonedDateTime>()) } returns listOf(
                 GitHubDownloadStatsDbEntry(baseTime.minusDays(11).plusMinutes(10), 46, mapOf(JvmImpl.hotspot to 28L, JvmImpl.openj9 to 30L), 8),
