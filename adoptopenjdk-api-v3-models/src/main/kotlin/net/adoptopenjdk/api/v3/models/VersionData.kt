@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api.v3.models
 
+import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 
 class VersionData : Comparable<VersionData> {
@@ -108,7 +109,7 @@ class VersionData : Comparable<VersionData> {
         val COMPARATOR = compareBy<VersionData> { it.major }
             .thenBy { it.minor }
             .thenBy { it.security }
-            .thenBy { it.pre }
+            .then(Releases.PRE_SORTER)
             .thenBy { it.build }
             .thenBy { it.adopt_build_number }
             .thenBy { it.optional }

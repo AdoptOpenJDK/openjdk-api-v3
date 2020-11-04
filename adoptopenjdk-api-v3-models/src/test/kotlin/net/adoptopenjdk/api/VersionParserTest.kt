@@ -1,18 +1,20 @@
 package net.adoptopenjdk.api
 
-import java.net.URLDecoder
-import java.nio.charset.Charset
 /* ktlint-disable no-wildcard-imports */
-import java.util.*
 /* ktlint-enable no-wildcard-imports */
-import java.util.stream.Stream
+import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.models.VersionData
 import net.adoptopenjdk.api.v3.parser.VersionParser
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import java.net.URLDecoder
+import java.nio.charset.Charset
+import java.util.*
+import java.util.stream.Stream
 
 class VersionParserTest {
 
@@ -119,6 +121,20 @@ class VersionParserTest {
             )
         )
     )
+
+    @Test
+    fun `null pre comes after non null`() {
+        val sorted = listOf(
+            VersionData(11, 0, 7, "2", null, 9, null, "11.0.7-ea+9"),
+            VersionData(11, 0, 7, "1", null, 9, null, "11.0.7-ea+9"),
+            VersionData(11, 0, 7, null, null, 9, null, "11.0.7-ea+9")
+        )
+            .sortedWith(Releases.VERSION_COMPARATOR)
+
+        assertEquals("1", sorted.get(0).pre)
+        assertEquals("2", sorted.get(1).pre)
+        assertNull(sorted.get(2).pre)
+    }
 
     @TestFactory
     fun parsesVersionsCorrectly(): Stream<DynamicTest> {
