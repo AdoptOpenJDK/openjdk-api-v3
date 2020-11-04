@@ -18,6 +18,33 @@ class MongoClientTest {
     }
 
     @Test
+    fun `null arguments default`() {
+        assertEquals("mongodb://a:b@c:1/d",
+            MongoClient.createConnectionString("d", "a", "b", "c", "1", "e")
+        )
+
+        assertEquals("mongodb://c:1/?serverSelectionTimeoutMS=e",
+            MongoClient.createConnectionString("d", null, "b", "c", "1", "e")
+        )
+
+        assertEquals("mongodb://c:1/?serverSelectionTimeoutMS=e",
+            MongoClient.createConnectionString("d", "a", null, "c", "1", "e")
+        )
+
+        assertEquals("mongodb://a:b@localhost:1/d",
+            MongoClient.createConnectionString("d", "a", "b", null, "1", "e")
+        )
+
+        assertEquals("mongodb://a:b@c:27017/d",
+            MongoClient.createConnectionString("d", "a", "b", "c", null, "e")
+        )
+
+        assertEquals("mongodb://a:b@c:1/d",
+            MongoClient.createConnectionString("d", "a", "b", "c", "1", null)
+        )
+    }
+
+    @Test
     fun `override with test connection string`() {
         System.setProperty("MONGODB_TEST_CONNECTION_STRING", "mongodb://some-host:99999")
         val connectionString = MongoClient.createConnectionString("api-data")
