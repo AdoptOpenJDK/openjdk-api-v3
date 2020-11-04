@@ -10,13 +10,16 @@ import net.adoptopenjdk.api.v3.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
+import net.adoptopenjdk.api.v3.routes.AssetsResource
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.stream.Stream
+import javax.ws.rs.BadRequestException
 
 @ExtendWith(value = [DbExtension::class])
 @QuarkusTest
@@ -87,5 +90,37 @@ class AssetsResourceReleaseNamePathTest : FrontendTest() {
             .statusCode(404)
     }
 
+    @Test
+    fun `missing release_name 400s`() {
+        assertThrows<BadRequestException> {
+            AssetsResource()
+                .get(
+                    Vendor.adoptopenjdk,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+                )
+        }
+    }
 
+    @Test
+    fun `missing vendor 400s`() {
+        assertThrows<BadRequestException> {
+            AssetsResource()
+                .get(
+                    null,
+                    "foo",
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+                )
+        }
+    }
 }
