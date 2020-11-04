@@ -44,12 +44,24 @@ class MongoClient {
             port: String? = DEFAULT_PORT,
             serverSelectionTimeoutMills: String? = DEFAULT_SERVER_SELECTION_TIMEOUT_MILLIS
         ): String {
+            val hostNonNull = host ?: DEFAULT_HOST
+            val portNonNull = port ?: DEFAULT_PORT
+            val serverSelectionTimeoutMillsNonNull = serverSelectionTimeoutMills ?: DEFAULT_SERVER_SELECTION_TIMEOUT_MILLIS
+
+            val usernamePassword = if (username != null && password != null) {
+                "$username:$password@"
+            } else {
+                ""
+            }
+
+            val server = "$hostNonNull:$portNonNull"
+
             return System.getProperty("MONGODB_TEST_CONNECTION_STRING")
                 ?: if (username != null && password != null) {
-                    LOGGER.info("Connecting to mongodb://$username:a-password@$host:$port/$dbName")
-                    "mongodb://$username:$password@$host:$port/$dbName"
+                    LOGGER.info("Connecting to mongodb://$username:a-password@$server/$dbName")
+                    "mongodb://$usernamePassword$server/$dbName"
                 } else {
-                    val developmentConnectionString = "mongodb://$host:$port/?serverSelectionTimeoutMS=$serverSelectionTimeoutMills"
+                    val developmentConnectionString = "mongodb://$usernamePassword$server/?serverSelectionTimeoutMS=$serverSelectionTimeoutMillsNonNull"
                     LOGGER.info("Using development connection string - $developmentConnectionString")
                     developmentConnectionString
                 }
