@@ -26,4 +26,5 @@ There are various consumers of the AdoptOpenJDK API, from individuals to organis
 The following list highlights the key consumers and their use-cases:
 
 - <https://adoptopenjdk.net/> - the API drives the release listings on the AdoptOpenJDK website allowing individuals to download the JDK distribution of their choice
-- [Gradle](https://docs.gradle.org/) - the Gradle project defaults to use the API for its [toolchains](https://docs.gradle.org/current/userguide/toolchains.html#sec:provisioning) feature   
+- [Gradle](https://docs.gradle.org/) - the Gradle project defaults to use the API for its [toolchains](https://docs.gradle.org/current/userguide/toolchains.html#sec:provisioning) feature
+- [Update Watcher for AdoptOpenJDK](https://github.com/tushev/aojdk-updatewatcher) - uses the API to automatically manage the JDK installations on an individual's machine   
