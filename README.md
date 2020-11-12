@@ -14,7 +14,16 @@ The AdoptOpenJDK API provides a way to consume JSON information about the AdoptO
 
 ## Usage
 
-The api is documented via swagger.  The swagger documentation can be viewed at: [swagger-ui](https://api.adoptopenjdk.net/swagger-ui). 
+The API is documented via swagger.  The swagger documentation can be viewed at: [swagger-ui](https://api.adoptopenjdk.net/swagger-ui). 
 The open api definition for this can be viewed at [openapi](https://api.adoptopenjdk.net/openapi).
 
 For more information, including example queries, please look at [STRUCTURE.md](https://github.com/AdoptOpenJDK/openjdk-api-v3/blob/master/docs/STRUCTURE.md)
+
+## Who's using the AdoptOpenJDK API?
+
+There are various consumers of the AdoptOpenJDK API, from individuals to organisations. 
+
+The following list highlights the key consumers and their use-cases:
+
+- <https://adoptopenjdk.net/> - the API drives the release listings on the AdoptOpenJDK website allowing individuals to download the JDK distribution of their choice
+- [Gradle](https://docs.gradle.org/) - the Gradle project defaults to use the API for its [toolchains](https://docs.gradle.org/current/userguide/toolchains.html#sec:provisioning) feature   
