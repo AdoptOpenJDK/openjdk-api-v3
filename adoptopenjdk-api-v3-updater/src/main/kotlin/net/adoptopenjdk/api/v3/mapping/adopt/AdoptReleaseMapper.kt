@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api.v3.mapping.adopt
 
+import com.fasterxml.jackson.core.util.VersionUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.adoptopenjdk.api.v3.ReleaseResult
@@ -18,6 +19,7 @@ import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.models.VersionData
 import net.adoptopenjdk.api.v3.parser.FailedToParse
 import net.adoptopenjdk.api.v3.parser.VersionParser
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion
 import org.slf4j.LoggerFactory
 import java.security.MessageDigest
 import java.time.ZonedDateTime
@@ -52,9 +54,37 @@ object AdoptReleaseMapper : ReleaseMapper() {
             val releases = ghAssetsGroupedByVersion
                 .entries
                 .map { ghAssetsForVersion: Map.Entry<String, List<Map.Entry<GHAsset, GHMetaData>>> ->
-                    val version = ghAssetsForVersion.value
+                    var version = ghAssetsForVersion.value
                         .sortedBy { ghAssetWithMetadata -> ghAssetWithMetadata.value.version.toApiVersion() }
                         .last().value.version.toApiVersion()
+
+                    version = if (version.semver != version.formSemver()) {
+                        LOGGER.warn("SemVer incompatibility, parsed data does not match semver in file ${version.semver} ${version.formSemver()}")
+
+                        //Using semver in metadata as source of truth
+                        val parsed = SemVerParser.parse(version.semver)
+
+                        val build = if (parsed.preSegments.size > 0) parsed.preSegments[0].toInt() else 0
+                        val adoptBuildNum = if (parsed.preSegments.size > 1) parsed.preSegments[1].toInt() else null
+
+                        val reparsed = VersionData(
+                            parsed.major,
+                            parsed.minor,
+                            parsed.patch,
+                            parsed.pre,
+                            adoptBuildNum,
+                            build,
+                            parsed.buildMetadata,
+                            version.openjdk_version,
+                            version.semver
+                        )
+
+                        LOGGER.warn("Reparsed to ${reparsed.formSemver()}")
+
+                        reparsed
+                    } else {
+                        version
+                    }
 
                     val ghAssets: List<GHAsset> = ghAssetsForVersion.value.map { ghAssetWithMetadata -> ghAssetWithMetadata.key }
                     val id = generateIdForSplitRelease(version, ghRelease)
