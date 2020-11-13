@@ -126,8 +126,8 @@ class Releases {
                 .then(RELEASE_NAME_AND_ID_COMPARATOR)
 
         val TIME_THEN_VERSION_SORTER: Comparator<Release> =
-            RELEASE_COMPARATOR
-                .thenBy(VERSION_COMPARATOR) { it.version_data }
+            TIME_COMPARATOR
+                .then(RELEASE_COMPARATOR)
                 .then(RELEASE_NAME_AND_ID_COMPARATOR)
     }
 }
