@@ -123,7 +123,7 @@ class VersionParserTest {
     )
 
     @Test
-    fun `adopt semver works with java patch verstion`() {
+    fun `adopt semver works with java patch version`() {
         val parsed = VersionParser.parse("11.0.9.1+1")
         assertEquals(
             VersionData(11, 0, 9, null, null, 1, null, "11.0.9.1+1", "11.0.9+101", 1),
