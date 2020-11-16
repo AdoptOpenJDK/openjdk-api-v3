@@ -14,9 +14,18 @@ object VersionParser {
 
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
-    private val REGEXES: List<Pattern> = getRegexes()
+    private val REGEXES: List<Pattern> = getRegexes(false)
+    private val EXACT_REGEXES: List<Pattern> = getRegexes(true)
     private val DATE_TIME_MATCHER: Regex = Regex("^[0-9]{4}(-[0-9]{1,2}){4}$")
     private val PRE_223_REGEX: Pattern = Pattern.compile(""".*?(?<version>1\.(?<major>[0-8])\.0(_(?<update>[0-9]+))?(-?(?<additional>.*))?).*?""")
+
+    // Regexes based on those in http://openjdk.java.net/jeps/223
+    // Technically the standard supports an arbitrary number of numbers, we will support 3 for now
+    private const val VNUM_REGEX =
+        """(?<major>[0-9]+)(\.(?<minor>[0-9]+))?(\.(?<security>[0-9]+))?(\.(?<patch>[0-9]+))?"""
+    private const val OPT_REGEX = "(?<opt>[-a-zA-Z0-9\\.]+)"
+    private const val PRE_REGEX = "(?<pre>[a-zA-Z0-9]+)"
+    private const val BUILD_REGEX = "(?<build>[0-9]+)"
 
     private fun pre223(): String {
         val majorMatcher = "(?<major>[0-8]+)"
@@ -32,44 +41,28 @@ object VersionParser {
     private fun adoptSemver(): String {
         val vnumRegex =
             """(?<major>[0-9]+)\.(?<minor>[0-9]+)\.(?<security>[0-9]+)"""
-        val preRegex = "(?<pre>[a-zA-Z0-9]+)"
         val buildRegex = "(?<build>[0-9]+)(\\.(?<adoptBuild>[0-9]+))?"
-        val optRegex = "(?<opt>[-a-zA-Z0-9\\.]+)"
 
-        return "(?:jdk\\-)?(?<version>$vnumRegex(\\-$preRegex)?\\+$buildRegex(\\-$optRegex)?)"
+        return "(?:jdk\\-)?(?<version>$vnumRegex(\\-$PRE_REGEX)?\\+$buildRegex(\\-$OPT_REGEX)?)"
     }
 
     // Identical to java version but with adoptbuild number
     // i.e allow . in the build number
     private fun jep223WithAdoptBuildNum(): List<String> {
-        // Regexes based on those in http://openjdk.java.net/jeps/223
-        // Technically the standard supports an arbitrary number of numbers, we will support 3 for now
-        val vnumRegex =
-            """(?<major>[0-9]+)(\.(?<minor>[0-9]+))?(\.(?<security>[0-9]+))?"""
-        val preRegex = "(?<pre>[a-zA-Z0-9]+)"
         val buildRegex = "(?<build>[0-9]+)(\\.(?<adoptBuild>[0-9]+))?"
-        val optRegex = "(?<opt>[-a-zA-Z0-9\\.]+)"
 
         return Arrays.asList(
-            "(?:jdk\\-)?(?<version>$vnumRegex(\\-$preRegex)?\\+$buildRegex(\\-$optRegex)?)",
-            "(?:jdk\\-)?(?<version>$vnumRegex\\-$preRegex(\\-$optRegex)?)",
-            "(?:jdk\\-)?(?<version>$vnumRegex(\\+\\-$optRegex)?)"
+            "(?:jdk\\-)?(?<version>$VNUM_REGEX(\\-$PRE_REGEX)?\\+$buildRegex(\\-$OPT_REGEX)?)",
+            "(?:jdk\\-)?(?<version>$VNUM_REGEX\\-$PRE_REGEX(\\-$OPT_REGEX)?)",
+            "(?:jdk\\-)?(?<version>$VNUM_REGEX(\\+\\-$OPT_REGEX)?)"
         )
     }
 
     private fun jep223(): List<String> {
-        // Regexes based on those in http://openjdk.java.net/jeps/223
-        // Technically the standard supports an arbitrary number of numbers, we will support 3 for now
-        val vnumRegex =
-            """(?<major>[0-9]+)(\.(?<minor>[0-9]+))?(\.(?<security>[0-9]+))?"""
-        val preRegex = "(?<pre>[a-zA-Z0-9]+)"
-        val buildRegex = "(?<build>[0-9]+)"
-        val optRegex = "(?<opt>[-a-zA-Z0-9\\.]+)"
-
         return Arrays.asList(
-            "(?:jdk\\-)?(?<version>$vnumRegex(\\-$preRegex)?\\+$buildRegex(\\-$optRegex)?)",
-            "(?:jdk\\-)?(?<version>$vnumRegex\\-$preRegex(\\-$optRegex)?)",
-            "(?:jdk\\-)?(?<version>$vnumRegex(\\+\\-$optRegex)?)"
+            "(?:jdk\\-)?(?<version>$VNUM_REGEX(\\-$PRE_REGEX)?\\+$BUILD_REGEX(\\-$OPT_REGEX)?)",
+            "(?:jdk\\-)?(?<version>$VNUM_REGEX\\-$PRE_REGEX(\\-$OPT_REGEX)?)",
+            "(?:jdk\\-)?(?<version>$VNUM_REGEX(\\+\\-$OPT_REGEX)?)"
         )
     }
 
@@ -77,32 +70,36 @@ object VersionParser {
         return """jdk(?<version>(?<major>[0-9]+)[-u]+(?<opt>[-0-9]+))"""
     }
 
-    private fun getRegexes(): List<Pattern> {
+    private fun getRegexes(exactMatch: Boolean): List<Pattern> {
         val regexes = mutableListOf(adoptSemver())
         regexes.addAll(jep223WithAdoptBuildNum())
         regexes.addAll(jep223())
         regexes.add(pre223())
         regexes.add(adoptNightly())
 
-        return regexes.map { regex -> Pattern.compile(".*?$regex.*?") }
+        return if (exactMatch) {
+            regexes.map { regex -> Pattern.compile("^$regex$") }
+        } else {
+            regexes.map { regex -> Pattern.compile(".*?$regex.*?") }
+        }
     }
 
-    fun parse(publishName: String?): VersionData {
+    fun parse(publishName: String?, sanityCheck: Boolean = true, exactMatch: Boolean = false): VersionData {
         if (publishName == null) {
             throw FailedToParse("null name")
         }
         try {
-            var version = matchVersion(publishName)
+            var version = matchVersion(publishName, sanityCheck, exactMatch)
             if (version != null) {
                 return version
             }
 
-            version = parseWithJavaClass(publishName)
+            version = parseWithJavaClass(publishName, sanityCheck)
             if (version != null) {
                 return version
             }
 
-            version = matchAltPre223(publishName)
+            version = matchAltPre223(publishName, sanityCheck)
             if (version != null) {
                 return version
             }
@@ -111,20 +108,21 @@ object VersionParser {
         throw FailedToParse("Failed to parse $publishName")
     }
 
-    private fun parseWithJavaClass(publishName: String): VersionData? {
+    private fun parseWithJavaClass(publishName: String, sanityCheck: Boolean): VersionData? {
 
         try {
             val parsedVersion = Runtime.Version.parse(publishName.removePrefix("jdk"))
             val major = parsedVersion.feature()
             val minor = parsedVersion.interim()
             val security = parsedVersion.update()
+            val patch = parsedVersion.patch()
             val build = parsedVersion.build().orElse(null)
             val opt = parsedVersion.optional().orElse(null)
             val version = parsedVersion.toString()
             val pre = parsedVersion.pre().orElse(null)
 
-            val parsed = VersionData(major, minor, security, pre, 1, build!!, opt, version)
-            if (sanityCheck(parsed)) {
+            val parsed = VersionData(major, minor, security, pre, 1, build!!, opt, version, null, patch)
+            if (!sanityCheck || sanityCheck(parsed)) {
                 return parsed
             }
         } catch (e: Exception) {
@@ -149,7 +147,7 @@ object VersionParser {
         }
     }
 
-    private fun matchAltPre223(versionString: String): VersionData? {
+    private fun matchAltPre223(versionString: String, sanityCheck: Boolean): VersionData? {
         // 1.8.0_202-internal-201903130451-b08
         val matched = PRE_223_REGEX.matcher(versionString)
 
@@ -175,8 +173,8 @@ object VersionParser {
 
             val version = matched.group("version")
 
-            val parsed = VersionData(major, minor, security, null, 1, build, opt, version)
-            if (sanityCheck(parsed)) {
+            val parsed = VersionData(major, minor, security, null, 1, build, opt, version, null, null)
+            if (!sanityCheck || sanityCheck(parsed)) {
                 return parsed
             }
         }
@@ -201,14 +199,21 @@ object VersionParser {
         return false
     }
 
-    private fun matchVersion(versionString: String): VersionData? {
-        REGEXES
+    private fun matchVersion(versionString: String, sanityCheck: Boolean, exactMatch: Boolean): VersionData? {
+        (if (exactMatch) EXACT_REGEXES else REGEXES)
             .forEach { regex ->
                 val matched = regex.matcher(versionString)
                 if (matched.matches()) {
                     val major = matched.group("major").toInt()
                     val minor = getOrDefaultNumber(matched, "minor")
                     val security = getOrDefaultNumber(matched, "security")
+
+                    val patch: Int? = if (regex.pattern().contains("patch") && matched.group("patch") != null) {
+                        matched.group("patch").toInt()
+                    } else {
+                        null
+                    }
+
                     var pre: String? = null
                     if (regex.pattern().contains("pre") && matched.group("pre") != null) {
                         pre = matched.group("pre")
@@ -221,8 +226,8 @@ object VersionParser {
                     }
                     val version = matched.group("version")
 
-                    val parsed = VersionData(major, minor, security, pre, adopt_build_number, build, opt, version)
-                    if (sanityCheck(parsed)) {
+                    val parsed = VersionData(major, minor, security, pre, adopt_build_number, build, opt, version, null, patch)
+                    if (!sanityCheck || sanityCheck(parsed)) {
                         return parsed
                     }
                 }

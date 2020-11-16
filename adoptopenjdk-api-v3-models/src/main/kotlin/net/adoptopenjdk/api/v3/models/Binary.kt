@@ -90,7 +90,7 @@ class Binary {
         result = 31 * result + architecture.hashCode()
         result = 31 * result + image_type.hashCode()
         result = 31 * result + jvm_impl.hashCode()
-        result = 31 * result + (`package`?.hashCode() ?: 0)
+        result = 31 * result + `package`.hashCode()
         result = 31 * result + (installer?.hashCode() ?: 0)
         result = 31 * result + heap_size.hashCode()
         result = 31 * result + download_count.hashCode()

@@ -93,7 +93,7 @@ class AdoptBinaryMapperTest {
                 os = OperatingSystem.mac,
                 arch = Architecture.x64,
                 variant = "hotspot",
-                version = GHVersion(0, 1, 2, "", 4, "", 6, "", ""),
+                version = GHVersion(0, 1, 2, "", 4, "", 6, "", "", null),
                 scmRef = "scm-ref",
                 version_data = "",
                 binary_type = ImageType.jdk,
@@ -129,7 +129,7 @@ class AdoptBinaryMapperTest {
                 os = OperatingSystem.mac,
                 arch = Architecture.x64,
                 variant = "hotspot",
-                version = GHVersion(0, 1, 2, "", 4, "", 6, "", ""),
+                version = GHVersion(0, 1, 2, "", 4, "", 6, "", "", null),
                 scmRef = "",
                 version_data = "",
                 binary_type = ImageType.jdk,
@@ -260,7 +260,7 @@ class AdoptBinaryMapperTest {
         runBlocking {
             val metadata = GHMetaData(
                 "", OperatingSystem.linux, Architecture.x64, "hotspot-jfr",
-                GHVersion(0, 1, 2, "", 4, "", 6, "", ""),
+                GHVersion(0, 1, 2, "", 4, "", 6, "", "", null),
                 "",
                 "",
                 ImageType.jdk,

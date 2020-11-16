@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import net.adoptopenjdk.api.v3.dataSources.SortMethod
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.models.Release
+import net.adoptopenjdk.api.v3.models.VersionData
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 /* ktlint-enable no-wildcard-imports */
@@ -102,27 +103,32 @@ class Releases {
     }
 
     companion object {
+        val PRE_SORTER = compareBy<VersionData, String?>(nullsLast()) { it.pre }
+
         // Cant use the default sort as we want to ignore optional
-        val VERSION_COMPARATOR = compareBy<Release> { it.version_data.major }
-            .thenBy { it.version_data.minor }
-            .thenBy { it.version_data.security }
-            .thenBy { it.version_data.pre }
-            .thenBy { it.version_data.build }
-            .thenBy { it.version_data.adopt_build_number }
+        val VERSION_COMPARATOR = compareBy<VersionData> { it.major }
+            .thenBy { it.minor }
+            .thenBy { it.security }
+            .thenBy { it.patch }
+            .then(PRE_SORTER)
+            .thenBy { it.build }
+            .thenBy { it.adopt_build_number }
 
         private val TIME_COMPARATOR = compareBy { release: Release -> release.timestamp }
+
+        val RELEASE_COMPARATOR = compareBy<Release, VersionData>(VERSION_COMPARATOR, { it.version_data })
 
         private val RELEASE_NAME_AND_ID_COMPARATOR = compareBy { release: Release -> release.release_name }
             .thenComparing { release: Release -> release.id }
 
         val VERSION_THEN_TIME_SORTER: Comparator<Release> =
-            VERSION_COMPARATOR
+            RELEASE_COMPARATOR
                 .then(TIME_COMPARATOR)
                 .then(RELEASE_NAME_AND_ID_COMPARATOR)
 
         val TIME_THEN_VERSION_SORTER: Comparator<Release> =
             TIME_COMPARATOR
-                .then(VERSION_COMPARATOR)
+                .then(RELEASE_COMPARATOR)
                 .then(RELEASE_NAME_AND_ID_COMPARATOR)
     }
 }
