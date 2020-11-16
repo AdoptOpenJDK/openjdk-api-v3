@@ -3,10 +3,12 @@ package net.adoptopenjdk.api.v3.dataSources
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import net.adoptopenjdk.api.v3.models.ReleaseType
+import net.adoptopenjdk.api.v3.models.Variants
+
 
 object ReleaseVersionResolver {
 
-    private val VERSION_FILE_URL = "https://raw.githubusercontent.com/openjdk/jdk/master/make/autoconf/version-numbers"
+    private const val VERSION_FILE_URL = "https://raw.githubusercontent.com/openjdk/jdk/master/make/autoconf/version-numbers"
 
     private suspend fun getTipVersion(): Int? {
         val versionFile = UpdaterHtmlClientFactory.client.get(VERSION_FILE_URL)
@@ -17,6 +19,29 @@ object ReleaseVersionResolver {
         } else {
             null
         }
+    }
+
+    private fun getObsoleteReleases(): Array<Int>? {
+        val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
+        val variants: Variants = UpdaterJsonMapper.mapper.readValue(variantData, Variants::class.java)
+
+        val obsoleteVersions: MutableList<Int> = mutableListOf()
+
+        variants.variants.forEach { variant ->
+            if (variant.obsoleteRelease) {
+                obsoleteVersions.add(variant.version)
+            }
+        }
+
+        return if (obsoleteVersions.isNotEmpty()) {
+            obsoleteVersions
+                .distinct()
+                .sorted()
+                .toTypedArray()
+        } else {
+            return null
+        }
+
     }
 
     suspend fun updateDbVersion(repo: AdoptRepos) {
@@ -36,6 +61,9 @@ object ReleaseVersionResolver {
             .sorted()
             .toList()
             .toTypedArray()
+
+        val obsoleteReleases: Array<Int> = getObsoleteReleases() ?: arrayOf(9, 10)
+
         val mostRecentFeatureRelease: Int = availableReleases.last()
 
         val availableLtsReleases: Array<Int> = gaReleases
@@ -60,6 +88,7 @@ object ReleaseVersionResolver {
 
         return ReleaseInfo(
             availableReleases,
+            obsoleteReleases,
             availableLtsReleases,
             mostRecentLts,
             mostRecentFeatureRelease,

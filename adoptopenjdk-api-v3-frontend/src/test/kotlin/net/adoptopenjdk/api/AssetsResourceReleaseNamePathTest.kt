@@ -85,7 +85,7 @@ class AssetsResourceReleaseNamePathTest : FrontendTest() {
 
         RestAssured.given()
             .`when`()
-            .get("/v3/assets/release_name/adoptopenjdk/${releaseName}")
+            .get("/v3/assets/release_name/adoptopenjdk/$releaseName")
             .then()
             .statusCode(404)
     }

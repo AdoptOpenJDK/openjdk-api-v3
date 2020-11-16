@@ -59,6 +59,13 @@ class ReleaseVersionResolverTest : BaseTest() {
     }
 
     @Test
+    fun obsoleteVersionsIsCorrect() {
+        check { releaseInfo ->
+            releaseInfo.obsolete_releases.contentEquals(arrayOf(9, 10, 12, 13, 14, 15))
+        }
+    }
+
+    @Test
     fun availableLtsIsCorrect() {
         check { releaseInfo ->
             releaseInfo.available_lts_releases.contentEquals(arrayOf(8, 11))
@@ -102,11 +109,24 @@ class ReleaseVersionResolverTest : BaseTest() {
 
     private fun setHttpClient() {
         UpdaterHtmlClientFactory.client = object : UpdaterHtmlClient {
+
             override suspend fun get(url: String): String? {
-                return getMetadata(url)
+                return if (url.contains("obsolete")) {
+                    getObsoleteMetadata(url)
+                } else {
+                    getTipMetadata(url)
+                }
             }
 
-            fun getMetadata(url: String): String {
+            fun getObsoleteMetadata(url: String): String {
+                return """
+                    {
+                      "obsolete_versions" : [9, 10, 12, 13, 14, 15]
+                    }
+                """.trimIndent()
+            }
+
+            fun getTipMetadata(url: String): String {
                 return """
                         DEFAULT_VERSION_FEATURE=15
                         DEFAULT_VERSION_INTERIM=0

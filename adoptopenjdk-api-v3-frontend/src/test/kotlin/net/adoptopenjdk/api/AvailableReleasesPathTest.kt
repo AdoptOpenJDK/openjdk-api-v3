@@ -21,6 +21,7 @@ class AvailableReleasesPathTest : BaseTest() {
             ApiPersistenceFactory.get().setReleaseInfo(
                 ReleaseInfo(
                     arrayOf(8, 9, 10, 11, 12),
+                    arrayOf(9, 10, 12, 13, 14, 15),
                     arrayOf(8, 11),
                     11,
                     12,
@@ -52,6 +53,13 @@ class AvailableReleasesPathTest : BaseTest() {
     fun availableLtsIsCorrect() {
         check { releaseInfo ->
             releaseInfo.available_lts_releases.contentEquals(arrayOf(8, 11))
+        }
+    }
+
+    @Test
+    fun obsoleteVersionsIsCorrect() {
+        check { releaseInfo ->
+            releaseInfo.obsolete_releases.contentEquals(arrayOf(9, 10, 12, 13, 14, 15))
         }
     }
 
