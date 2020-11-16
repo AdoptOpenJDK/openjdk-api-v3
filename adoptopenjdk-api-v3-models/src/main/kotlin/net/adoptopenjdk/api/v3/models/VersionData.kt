@@ -53,6 +53,8 @@ class VersionData : Comparable<VersionData> {
         }
 
         var metadata = listOf<String>()
+
+        // 100 to match the same change made in the build repo
         val buildOffset = if (patch != null && patch != 0) patch * 100 else 0
 
         if (build != 0) {

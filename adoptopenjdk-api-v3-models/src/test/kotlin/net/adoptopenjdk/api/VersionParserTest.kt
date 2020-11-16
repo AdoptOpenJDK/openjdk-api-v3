@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import java.net.URLDecoder
 import java.nio.charset.Charset
-import java.util.*
+import java.util.TreeSet
 import java.util.stream.Stream
 
 class VersionParserTest {
