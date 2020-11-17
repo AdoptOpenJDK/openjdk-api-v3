@@ -37,3 +37,4 @@ jobs:
       with:
         name: javascript-client
         path: javascript-client.zip
+      if: github.ref == 'refs/heads/master' && startsWith(github.repository, 'AdoptOpenJDK/')
