@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api.v3.models
 
+import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 
 class VersionData : Comparable<VersionData> {
@@ -7,6 +8,7 @@ class VersionData : Comparable<VersionData> {
     val major: Int
     val minor: Int
     val security: Int
+    val patch: Int?
     val pre: String?
     val adopt_build_number: Int?
 
@@ -27,11 +29,13 @@ class VersionData : Comparable<VersionData> {
         build: Int,
         optional: String?,
         openjdk_version: String,
-        semver: String? = null
+        semver: String? = null,
+        patch: Int? = null
     ) {
         this.major = major
         this.minor = minor
         this.security = security
+        this.patch = patch
         this.pre = if (pre?.isNotEmpty() == true) pre else null
         this.adopt_build_number = if (adopt_build_number != null && adopt_build_number != 0) adopt_build_number else null
         this.build = build
@@ -45,12 +49,16 @@ class VersionData : Comparable<VersionData> {
         var semver = major.toString() + "." + minor + "." + security
 
         if (pre?.isNotEmpty() == true) {
-            semver += "-" + pre
+            semver += "-$pre"
         }
 
         var metadata = listOf<String>()
+
+        // 100 to match the same change made in the build repo
+        val buildOffset = if (patch != null && patch != 0) patch * 100 else 0
+
         if (build != 0) {
-            metadata = metadata.plus(build.toString())
+            metadata = metadata.plus((buildOffset + build).toString())
         }
 
         if (adopt_build_number != null && adopt_build_number != 0) {
@@ -72,9 +80,9 @@ class VersionData : Comparable<VersionData> {
         var result = major
         result = 31 * result + minor
         result = 31 * result + security
+        result = 31 * result + (patch?.hashCode() ?: 0)
         result = 31 * result + (pre?.hashCode() ?: 0)
         result = 31 * result + (adopt_build_number ?: 0)
-        result = 31 * result + (semver?.hashCode() ?: 0)
         result = 31 * result + openjdk_version.hashCode()
         result = 31 * result + build
         result = 31 * result + (optional?.hashCode() ?: 0)
@@ -87,16 +95,25 @@ class VersionData : Comparable<VersionData> {
 
         other as VersionData
 
+        if (openjdk_version != other.openjdk_version) return false
+
+        return compareVersionNumber(other)
+    }
+
+    fun compareVersionNumber(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as VersionData
+
         if (major != other.major) return false
         if (minor != other.minor) return false
         if (security != other.security) return false
+        if (patch != other.patch) return false
         if (pre != other.pre) return false
-        if (adopt_build_number != other.adopt_build_number) return false
-        if (semver != other.semver) return false
-        if (openjdk_version != other.openjdk_version) return false
         if (build != other.build) return false
         if (optional != other.optional) return false
-
+        if (adopt_build_number != other.adopt_build_number) return false
         return true
     }
 
@@ -108,7 +125,8 @@ class VersionData : Comparable<VersionData> {
         val COMPARATOR = compareBy<VersionData> { it.major }
             .thenBy { it.minor }
             .thenBy { it.security }
-            .thenBy { it.pre }
+            .thenBy { it.patch }
+            .then(Releases.PRE_SORTER)
             .thenBy { it.build }
             .thenBy { it.adopt_build_number }
             .thenBy { it.optional }

@@ -4,7 +4,7 @@ import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortMethod
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
-import net.adoptopenjdk.api.v3.dataSources.models.Releases.Companion.VERSION_COMPARATOR
+import net.adoptopenjdk.api.v3.dataSources.models.Releases.Companion.RELEASE_COMPARATOR
 import net.adoptopenjdk.api.v3.filters.BinaryFilter
 import net.adoptopenjdk.api.v3.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.models.APIError
@@ -86,7 +86,7 @@ open class PackageEndpoint {
         val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC, SortMethod.DEFAULT).toList()
 
         // We use updated_at and timestamp as well JIC we've made a mistake and respun the same version number twice, in which case newest wins.
-        val comparator = VERSION_COMPARATOR.thenBy { it.version_data.optional }
+        val comparator = RELEASE_COMPARATOR.thenBy { it.version_data.optional }
             .thenBy { it.updated_at }
             .thenBy { it.timestamp }
 

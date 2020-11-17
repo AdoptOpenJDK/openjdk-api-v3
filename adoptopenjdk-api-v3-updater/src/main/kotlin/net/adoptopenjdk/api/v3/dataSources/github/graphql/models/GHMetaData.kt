@@ -18,10 +18,11 @@ data class GHVersion @JsonCreator constructor(
     @JsonProperty("version") val version: String,
     @JsonProperty("build") val build: Int,
     @JsonProperty("opt") val opt: String?,
-    @JsonProperty("semver") val semver: String?
+    @JsonProperty("semver") val semver: String?,
+    @JsonProperty("patch") val patch: Int? = null
 ) {
     fun toApiVersion(): VersionData {
-        return VersionData(major, minor, security, pre, adopt_build_number, build, opt, version, semver)
+        return VersionData(major, minor, security, pre, adopt_build_number, build, opt, version, semver, patch)
     }
 }
 
