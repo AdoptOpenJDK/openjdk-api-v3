@@ -28,5 +28,6 @@ Check the [Download Statistics Dashboard](https://dash-v2.adoptopenjdk.net/) for
 The following list highlights a small subset of consumers and their use-cases:
 
 - [AdoptOpenJDK Website](https://adoptopenjdk.net/) - the API drives the release listings on the AdoptOpenJDK website allowing individuals to download the JDK distribution of their choice
+- [AdoptOpenJDK Docker Images](https://github.com/AdoptOpenJDK/openjdk-docker) - the API is used during the creation of the various official & unofficial Docker images
 - [Gradle](https://docs.gradle.org/) - the Gradle project defaults to use the API for its [toolchains](https://docs.gradle.org/current/userguide/toolchains.html#sec:provisioning) feature
 - [Update Watcher for AdoptOpenJDK](https://github.com/tushev/aojdk-updatewatcher) - uses the API to automatically manage the JDK installations on an individual's machine   
