@@ -10,7 +10,10 @@ If you are using v2 please move to the latest version (documented below) as soon
 
 ## Overview
 
-The AdoptOpenJDK API provides a way to consume JSON information about the AdoptOpenJDK releases and nightly builds.  Sign up to the [mailing list](https://mail.openjdk.java.net/mailman/listinfo/adoption-discuss) where major API updates will be announced, and visit [adoptopenjdk.net](https://adoptopenjdk.net) to find out more about the community.
+The AdoptOpenJDK API provides a way to consume JSON information about the AdoptOpenJDK releases and nightly builds.  
+Sign up to the [mailing list](https://mail.openjdk.java.net/mailman/listinfo/adoption-discuss) where major API updates will be announced, and visit [adoptopenjdk.net](https://adoptopenjdk.net) to find out more about the community.
+
+To learn more about how we build & run the API, check out [CONTRIBUTING.md](CONTRIBUTING.md) and the [FAQs](FAQ.md).
 
 ## Usage
 
