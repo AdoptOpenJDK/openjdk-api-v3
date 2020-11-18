@@ -31,4 +31,10 @@ jobs:
                 -Dopenapi.generator.maven.plugin.inputSpec=META-INF/quarkus-generated-openapi-doc.YAML
 
     - name: Zip Javascript client
-      run: zip javascript-client.zip adoptopenjdk-api-v3-frontend/target/generated-sources/openapi
+      run: zip -r javascript-client.zip adoptopenjdk-api-v3-frontend/target/generated-sources/openapi
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: javascript-client
+        path: javascript-client.zip
+      if: github.ref == 'refs/heads/master' && startsWith(github.repository, 'AdoptOpenJDK/')
