@@ -20,6 +20,6 @@ enum class ImageType : FileNameMatcher {
     }
 
     override fun fileNameMatcher(name: String): Regex {
-        return Regex("[\\-_]${name}[\\-_]")
+        return Regex("[\\-_]$name[\\-_]")
     }
 }
