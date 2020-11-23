@@ -1,6 +1,7 @@
 package net.adoptopenjdk.api.v3
 
 import kotlinx.coroutines.runBlocking
+import net.adoptopenjdk.api.v3.ai.AppInsightsTelemetry
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.ReleaseVersionResolver
@@ -24,6 +25,8 @@ class V3Updater {
     private val statsInterface: StatsInterface
 
     init {
+        AppInsightsTelemetry.start()
+
         val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
         variants = UpdaterJsonMapper.mapper.readValue(variantData, Variants::class.java)
         database = ApiPersistenceFactory.get()
@@ -63,6 +66,10 @@ class V3Updater {
                     return@runBlocking updatedRepo
                 } catch (e: Exception) {
                     LOGGER.error("Failed to perform incremental update", e)
+                } catch (e: Throwable) {
+                    // Log and rethrow
+                    LOGGER.error("Error during incremental update", e)
+                    throw e
                 }
                 repo
             }
@@ -130,6 +137,10 @@ class V3Updater {
             }
         } catch (e: Exception) {
             LOGGER.error("Failed to perform full update", e)
+        } catch (e: Throwable) {
+            // Log and rethrow
+            LOGGER.error("Error during full update", e)
+            throw e
         }
     }
 }

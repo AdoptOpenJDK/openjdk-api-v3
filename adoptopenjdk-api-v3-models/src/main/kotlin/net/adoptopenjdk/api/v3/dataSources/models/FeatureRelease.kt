@@ -25,7 +25,7 @@ class FeatureRelease {
         this.releases = releases
     }
 
-    fun retain(ids: List<GithubId>): FeatureRelease {
+    fun retain(ids: List<GitHubId>): FeatureRelease {
         return FeatureRelease(featureVersion, releases.retain(ids))
     }
 

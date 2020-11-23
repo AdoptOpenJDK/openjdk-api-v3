@@ -41,6 +41,7 @@ object VersionParser {
     private fun adoptSemver(): String {
         val vnumRegex =
             """(?<major>[0-9]+)\.(?<minor>[0-9]+)\.(?<security>[0-9]+)"""
+
         val buildRegex = "(?<build>[0-9]+)(\\.(?<adoptBuild>[0-9]+))?"
 
         return "(?:jdk\\-)?(?<version>$vnumRegex(\\-$PRE_REGEX)?\\+$buildRegex(\\-$OPT_REGEX)?)"

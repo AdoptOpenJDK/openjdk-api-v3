@@ -107,13 +107,13 @@ open class GraphQLGitHubInterface() {
             var quota = getRemainingQuota()
             do {
                 val delayTime = max(10, quota.second)
-                LOGGER.info("Remaining data getting low $quota ${rateLimitData.cost} $delayTime")
+                LOGGER.debug("Remaining data getting low $quota ${rateLimitData.cost} $delayTime")
                 delay(1000 * delayTime)
 
                 quota = getRemainingQuota()
             } while (quota.first < THRESHOLD_START)
         }
-        LOGGER.info("RateLimit ${rateLimitData.remaining} ${rateLimitData.cost}")
+        LOGGER.debug("RateLimit ${rateLimitData.remaining} ${rateLimitData.cost}")
     }
 
     private suspend fun getRemainingQuota(): Pair<Int, Long> {

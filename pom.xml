@@ -1,17 +1,24 @@
 <?xml version="1.0"?>
-<project
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-    xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>net.adoptopenjdk.api</groupId>
     <artifactId>adoptopenjdk-api-v3</artifactId>
     <version>3.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <!-- This throws a warning, but the versions plugin does actually require it if you're checking plugin versions -->
     <prerequisites>
         <maven>3.6.3</maven>
     </prerequisites>
+
+    <modules>
+        <module>adoptopenjdk-api-v3-telemetry</module>
+        <module>adoptopenjdk-api-v3-models</module>
+        <module>adoptopenjdk-api-v3-persistance</module>
+        <module>adoptopenjdk-api-v3-frontend</module>
+        <module>adoptopenjdk-api-v3-updater</module>
+    </modules>
 
     <properties>
         <jacoco.version>0.8.5</jacoco.version>
@@ -29,32 +36,22 @@
         <surefire-plugin.version>3.0.0-M3</surefire-plugin.version>
     </properties>
 
-    <packaging>pom</packaging>
-
-    <modules>
-        <module>adoptopenjdk-api-v3-models</module>
-        <module>adoptopenjdk-api-v3-persistance</module>
-        <module>adoptopenjdk-api-v3-frontend</module>
-        <module>adoptopenjdk-api-v3-updater</module>
-        <!-- <module>adoptopenjdk-api-v3-frontend-tests</module> -->
-    </modules>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.fasterxml.jackson.module</groupId>
                 <artifactId>jackson-module-kotlin</artifactId>
-                <version>2.11.0</version>
+                <version>2.11.2</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jsr310</artifactId>
-                <version>2.11.0</version>
+                <version>2.11.2</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jsr353</artifactId>
-                <version>2.11.0</version>
+                <version>2.11.2</version>
             </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>
@@ -92,13 +89,13 @@
             <dependency>
                 <groupId>io.rest-assured</groupId>
                 <artifactId>rest-assured</artifactId>
-                <version>4.3.0</version>
+                <version>4.3.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>io.rest-assured</groupId>
                 <artifactId>json-path</artifactId>
-                <version>4.3.0</version>
+                <version>4.3.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -110,6 +107,21 @@
                 <groupId>net.adoptopenjdk.api</groupId>
                 <artifactId>adoptopenjdk-api-v3-persistance</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.adoptopenjdk.api</groupId>
+                <artifactId>adoptopenjdk-api-v3-telemetry</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.adoptopenjdk.api</groupId>
+                <artifactId>adoptopenjdk-api-v3-updater</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-artifact</artifactId>
+                <version>3.6.3</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.microprofile.openapi</groupId>
@@ -138,8 +150,8 @@
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
-                        <artifactId>slf4j-simple</artifactId>
                         <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-simple</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -156,34 +168,34 @@
             <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
-                <version>3.15.0</version>
+                <version>3.17.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.awaitility</groupId>
                 <artifactId>awaitility</artifactId>
-                <version>4.0.2</version>
+                <version>4.0.3</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.groovy</groupId>
                 <artifactId>groovy-xml</artifactId>
-                <version>3.0.3</version>
+                <version>3.0.5</version>
             </dependency>
             <dependency>
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq</artifactId>
-                <version>3.13.1</version>
+                <version>3.13.4</version>
             </dependency>
             <dependency>
                 <groupId>org.mongodb</groupId>
                 <artifactId>mongodb-driver-core</artifactId>
-                <version>4.0.2</version>
+                <version>4.1.0</version>
             </dependency>
             <dependency>
                 <groupId>org.mongodb</groupId>
                 <artifactId>mongodb-driver-reactivestreams</artifactId>
-                <version>4.0.2</version>
+                <version>4.1.0</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -196,9 +208,18 @@
                 <version>1.5.0</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>com.microsoft.azure</groupId>
+                <artifactId>applicationinsights-core</artifactId>
+                <version>2.6.2-BETA.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.microsoft.azure</groupId>
+                <artifactId>applicationinsights-logging-logback</artifactId>
+                <version>2.6.2-BETA.2</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -213,6 +234,7 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
     </dependencies>
+
     <repositories>
         <repository>
             <id>bintray-americanexpress-maven</id>
@@ -503,15 +525,11 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire-plugin.version}</version>
-                <configuration>
-                    <reuseForks>false</reuseForks>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -598,12 +616,13 @@
                 <version>1.8</version>
                 <executions>
                     <execution>
-                        <id>ktlint</id>
+                        <id>ktlint-format</id>
                         <phase>validate</phase>
                         <configuration>
                             <target name="ktlint">
                                 <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
                                       classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
+                                    <arg value="-F"/>
                                     <arg value="src/**/*.kt"/>
                                 </java>
                             </target>
@@ -611,12 +630,12 @@
                         <goals><goal>run</goal></goals>
                     </execution>
                     <execution>
-                        <id>ktlint-format</id>
+                        <id>ktlint</id>
+                        <phase>validate</phase>
                         <configuration>
                             <target name="ktlint">
                                 <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
                                       classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
-                                    <arg value="-F"/>
                                     <arg value="src/**/*.kt"/>
                                 </java>
                             </target>
@@ -634,7 +653,6 @@
                 </dependencies>
             </plugin>
         </plugins>
-
     </build>
 
     <reporting>

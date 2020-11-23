@@ -11,7 +11,7 @@ import java.time.ZonedDateTime
 
 class StatsInterface {
 
-    private val githubDownloadStatsCalculator: GithubDownloadStatsCalculator = GithubDownloadStatsCalculator()
+    private val gitHubDownloadStatsCalculator: GitHubDownloadStatsCalculator = GitHubDownloadStatsCalculator()
     private val dockerStatsInterface: DockerStatsInterface = DockerStatsInterface()
     private var database: ApiPersistence = ApiPersistenceFactory.get()
 
@@ -23,7 +23,7 @@ class StatsInterface {
     }
 
     suspend fun update(repos: AdoptRepos) {
-        githubDownloadStatsCalculator.saveStats(repos)
+        gitHubDownloadStatsCalculator.saveStats(repos)
         dockerStatsInterface.updateDb()
 
         // TODO bring back if we need it and once we understand stats trajectory

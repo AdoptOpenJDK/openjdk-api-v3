@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class V3UpdaterTest : BaseTest() {
+class V3UpdaterTest : MongoTest() {
 
     companion object {
         @JvmStatic

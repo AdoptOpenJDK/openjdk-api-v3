@@ -11,16 +11,7 @@ import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.filters.BinaryFilter
 import net.adoptopenjdk.api.v3.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.filters.VersionRangeFilter
-import net.adoptopenjdk.api.v3.models.Architecture
-import net.adoptopenjdk.api.v3.models.BinaryAssetView
-import net.adoptopenjdk.api.v3.models.HeapSize
-import net.adoptopenjdk.api.v3.models.ImageType
-import net.adoptopenjdk.api.v3.models.JvmImpl
-import net.adoptopenjdk.api.v3.models.OperatingSystem
-import net.adoptopenjdk.api.v3.models.Project
-import net.adoptopenjdk.api.v3.models.Release
-import net.adoptopenjdk.api.v3.models.ReleaseType
-import net.adoptopenjdk.api.v3.models.Vendor
+import net.adoptopenjdk.api.v3.models.*
 import org.eclipse.microprofile.metrics.annotation.Timed
 import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
@@ -39,12 +30,9 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.time.temporal.TemporalQuery
-import javax.ws.rs.BadRequestException
-import javax.ws.rs.GET
-import javax.ws.rs.NotFoundException
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
+import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response
 
 @Tag(name = "Assets")
 @Path("/v3/assets/")
@@ -158,6 +146,89 @@ class AssetsResource {
             .getFilteredReleases(version, releaseFilter, binaryFilter, order, sortMethod)
 
         return getPage(pageSize, page, releases)
+    }
+
+    @GET
+    @Path("/release_name/{vendor}/{release_name}")
+    @Operation(
+        summary = "Returns release information",
+        description = "List of releases with the given release name"
+    )
+    @APIResponses(
+        value = [
+            APIResponse(
+                responseCode = "200", description = "Release with the given vendor and name"
+            ),
+            APIResponse(responseCode = "400", description = "bad input parameter"),
+            APIResponse(responseCode = "404", description = "no releases match the request"),
+            APIResponse(responseCode = "500", description = "multiple releases match the request")
+        ]
+    )
+    fun get(
+        @Parameter(name = "vendor", description = OpenApiDocs.VENDOR, required = false)
+        @PathParam("vendor")
+        vendor: Vendor?,
+
+        @Parameter(name = "release_name", description = "Name of the release i.e ", required = true)
+        @PathParam("release_name")
+        releaseName: String?,
+
+        @Parameter(name = "os", description = "Operating System", required = false)
+        @QueryParam("os")
+        os: OperatingSystem?,
+
+        @Parameter(name = "architecture", description = "Architecture", required = false)
+        @QueryParam("architecture")
+        arch: Architecture?,
+
+        @Parameter(name = "image_type", description = "Image Type", required = false)
+        @QueryParam("image_type")
+        image_type: ImageType?,
+
+        @Parameter(name = "jvm_impl", description = "JVM Implementation", required = false)
+        @QueryParam("jvm_impl")
+        jvm_impl: JvmImpl?,
+
+        @Parameter(name = "heap_size", description = "Heap Size", required = false)
+        @QueryParam("heap_size")
+        heap_size: HeapSize?,
+
+        @Parameter(name = "project", description = "Project", required = false)
+        @QueryParam("project")
+        project: Project?
+    ): Release {
+        if (releaseName == null || releaseName.trim().isEmpty()) {
+            throw BadRequestException("Must provide a releaseName")
+        }
+
+        if (vendor == null) {
+            throw BadRequestException("Must provide a vendor")
+        }
+
+        val releaseFilter = ReleaseFilter(vendor = vendor, releaseName = releaseName.trim())
+        val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
+
+        val releases = APIDataStore
+            .getAdoptRepos()
+            .getFilteredReleases(
+                releaseFilter,
+                binaryFilter,
+                SortOrder.DESC,
+                SortMethod.DEFAULT
+            )
+            .toList()
+
+        return when {
+            releases.isEmpty() -> {
+                throw NotFoundException("No releases found")
+            }
+            releases.size > 1 -> {
+                throw ServerErrorException("Multiple releases match request", Response.Status.INTERNAL_SERVER_ERROR)
+            }
+            else -> {
+                releases[0]
+            }
+        }
     }
 
     private fun parseDate(before: String?): ZonedDateTime? {

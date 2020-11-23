@@ -4,7 +4,7 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRelea
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
-import net.adoptopenjdk.api.v3.dataSources.models.GithubId
+import net.adoptopenjdk.api.v3.dataSources.models.GitHubId
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import net.adoptopenjdk.api.v3.models.Release
@@ -17,7 +17,7 @@ object AdoptReposBuilder {
     @JvmStatic
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-    private val excluded: MutableSet<GithubId> = HashSet()
+    private val excluded: MutableSet<GitHubId> = HashSet()
 
     suspend fun incrementalUpdate(repo: AdoptRepos): AdoptRepos {
         val updated = repo
@@ -92,10 +92,9 @@ object AdoptReposBuilder {
         // Fetch repos in parallel
         val reposMap = versions
             .reversed()
-            .map { version ->
+            .mapNotNull { version ->
                 AdoptRepositoryFactory.getAdoptRepository().getRelease(version)
             }
-            .filterNotNull()
             .map { Pair(it.featureVersion, it) }
             .toMap()
         LOGGER.info("DONE")

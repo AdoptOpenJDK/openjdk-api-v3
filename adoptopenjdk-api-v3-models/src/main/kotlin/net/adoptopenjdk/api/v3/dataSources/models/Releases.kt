@@ -62,18 +62,18 @@ class Releases {
         return getReleases(SortOrder.ASC, SortMethod.DEFAULT)
     }
 
-    fun retain(githubId: List<GithubId>): Releases {
-        return Releases(nodes.filterKeys { adoptId -> githubId.any { adoptId.startsWith(it.githubId) } })
+    fun retain(gitHubId: List<GitHubId>): Releases {
+        return Releases(nodes.filterKeys { adoptId -> gitHubId.any { adoptId.startsWith(it.githubId) } })
     }
 
-    fun hasReleaseId(githubId: GithubId): Boolean {
+    fun hasReleaseId(gitHubId: GitHubId): Boolean {
         return nodes
-            .any { it.key.startsWith(githubId.githubId) }
+            .any { it.key.startsWith(gitHubId.githubId) }
     }
 
-    fun hasReleaseBeenUpdated(githubId: GithubId, updatedAt: ZonedDateTime): Boolean {
+    fun hasReleaseBeenUpdated(gitHubId: GitHubId, updatedAt: ZonedDateTime): Boolean {
         return nodes
-            .filter { it.key.startsWith(githubId.githubId) }
+            .filter { it.key.startsWith(gitHubId.githubId) }
             .any {
                 ChronoUnit.SECONDS.between(it.value.updated_at, updatedAt) != 0L
             }
