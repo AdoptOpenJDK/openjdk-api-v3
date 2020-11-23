@@ -8,8 +8,10 @@ enum class JvmImpl : FileNameMatcher {
     hotspot, openj9;
 
     override lateinit var names: List<String>
+    override var priority: Int = 0
 
-    constructor(vararg alternativeNames: String) {
+    constructor(priority: Int = 0, vararg alternativeNames: String) {
+        this.priority = priority
         setNames(this.name, alternativeNames.toList())
     }
 }

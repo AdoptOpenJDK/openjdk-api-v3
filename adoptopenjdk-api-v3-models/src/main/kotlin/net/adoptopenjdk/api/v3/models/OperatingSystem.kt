@@ -5,15 +5,17 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema
 
 @Schema(type = SchemaType.STRING, enumeration = ["linux", "windows", "mac", "solaris", "aix"])
 enum class OperatingSystem : FileNameMatcher {
-    linux("LinuxLH"),
-    windows("win"),
+    linux(0, "LinuxLH"),
+    windows(0, "win"),
     mac,
     solaris,
     aix;
 
     override lateinit var names: List<String>
+    override var priority: Int = 0
 
-    constructor(vararg alternativeNames: String) {
+    constructor(priority: Int = 0, vararg alternativeNames: String) {
+        this.priority = priority
         setNames(this.name, alternativeNames.toList())
     }
 }

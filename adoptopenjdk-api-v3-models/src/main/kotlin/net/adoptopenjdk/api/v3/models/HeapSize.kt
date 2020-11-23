@@ -5,11 +5,13 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema
 
 @Schema(type = SchemaType.STRING, enumeration = ["normal", "large"], example = "normal")
 enum class HeapSize : FileNameMatcher {
-    normal, large("XL", "LinuxLH");
+    normal, large(0, "XL", "LinuxLH");
 
     override lateinit var names: List<String>
+    override var priority: Int = 0
 
-    constructor(vararg alternativeNames: String) {
+    constructor(priority:Int = 0, vararg alternativeNames: String) {
+        this.priority = priority
         setNames(this.name, alternativeNames.toList())
     }
 

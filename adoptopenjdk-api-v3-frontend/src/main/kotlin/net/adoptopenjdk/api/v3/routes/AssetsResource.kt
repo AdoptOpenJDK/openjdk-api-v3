@@ -107,7 +107,7 @@ class AssetsResource {
             name = "project", description = "Project",
             schema = Schema(
                 defaultValue = "jdk",
-                enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false
+                enumeration = ["jdk", "valhalla", "metropolis", "jfr", "shenandoah"], required = false
             ),
             required = false
         )
@@ -253,7 +253,7 @@ class AssetsResource {
             name = "project", description = "Project",
             schema = Schema(
                 defaultValue = "jdk",
-                enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false
+                enumeration = ["jdk", "valhalla", "metropolis", "jfr", "shenandoah"], required = false
             ),
             required = false
         )
