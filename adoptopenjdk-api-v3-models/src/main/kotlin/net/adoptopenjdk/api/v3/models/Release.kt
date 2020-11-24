@@ -30,10 +30,8 @@ class Release {
     @Schema(example = "7128")
     val download_count: Long
 
-    @Schema(example = "ga")
     val release_type: ReleaseType
 
-    @Schema(example = "adopt")
     val vendor: Vendor
 
     val version_data: VersionData
