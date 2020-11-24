@@ -5,7 +5,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema
 
 @Schema(type = SchemaType.STRING, enumeration = ["linux", "windows", "mac", "solaris", "aix"])
 enum class OperatingSystem : FileNameMatcher {
-    linux(0, "LinuxLH"),
+    linux(0, "LinuxLH", "alpine-linux"),
     windows(0, "win"),
     mac,
     solaris,
