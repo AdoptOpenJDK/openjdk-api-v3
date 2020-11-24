@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api.v3.models
 
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import java.time.ZonedDateTime
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 
@@ -8,13 +9,10 @@ class Binary {
 
     val os: OperatingSystem
 
-    @Schema(example = "x64")
     val architecture: Architecture
 
-    @Schema(example = "jdk")
     val image_type: ImageType
 
-    @Schema(example = "openj9")
     val jvm_impl: JvmImpl
 
     @Schema(implementation = Package::class)
@@ -23,7 +21,6 @@ class Binary {
     @Schema(implementation = Installer::class)
     val installer: Installer?
 
-    @Schema(example = "normal")
     val heap_size: HeapSize
 
     @Schema(example = "3899")
@@ -35,7 +32,6 @@ class Binary {
     @Schema(example = "dd28d6d2cde2b931caf94ac2422a2ad082ea62f0beee3bf7057317c53093de93")
     val scm_ref: String?
 
-    @Schema(example = "jdk", defaultValue = "jdk")
     val project: Project
 
     constructor(
