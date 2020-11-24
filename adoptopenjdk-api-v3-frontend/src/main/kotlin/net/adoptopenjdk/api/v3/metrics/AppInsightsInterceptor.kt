@@ -63,21 +63,24 @@ class AfterContainerFilter : ContainerResponseFilter {
 @Provider
 class Writer : WriterInterceptor {
     override fun aroundWriteTo(context: WriterInterceptorContext?) {
+        if (AppInsightsTelemetry.enabled) {
+            val startTime = context?.getProperty(START_TIME_KEY)
+            val requestTelemetry = context?.getProperty(TELEMETERY_KEY)
 
-        val startTime = context?.getProperty(START_TIME_KEY)
-        val requestTelemetry = context?.getProperty(TELEMETERY_KEY)
+            if (requestTelemetry != null && requestTelemetry is RequestTelemetry && startTime != null && startTime is Long) {
+                val duration = millisecondsSince(startTime)
+                requestTelemetry.duration = Duration(duration.toLong())
+            }
 
-        if (requestTelemetry != null && requestTelemetry is RequestTelemetry && startTime != null && startTime is Long) {
-            val duration = millisecondsSince(startTime)
-            requestTelemetry.duration = Duration(duration.toLong())
-        }
+            context?.proceed()
 
-        context?.proceed()
-
-        if (requestTelemetry != null && requestTelemetry is RequestTelemetry && startTime != null && startTime is Long) {
-            val duration = millisecondsSince(startTime)
-            requestTelemetry.metrics["writeTime"] = duration
-            AppInsightsTelemetry.telemetryClient.trackRequest(requestTelemetry)
+            if (requestTelemetry != null && requestTelemetry is RequestTelemetry && startTime != null && startTime is Long) {
+                val duration = millisecondsSince(startTime)
+                requestTelemetry.metrics["writeTime"] = duration
+                AppInsightsTelemetry.telemetryClient?.trackRequest(requestTelemetry)
+            }
+        } else {
+            context?.proceed()
         }
     }
 }

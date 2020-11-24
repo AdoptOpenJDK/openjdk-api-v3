@@ -30,13 +30,8 @@ object OpenApiDocs {
 
     const val VERSION_RANGE =
         """
-<<<<<<< HEAD
 <p>Java version range (maven style) of versions to include.</p>
 <p>e.g: <code><ul><li>11.0.4.1+11.1</li><li>[1.0,2.0)</li><li>(,1.0]</li></ul></code></p>
-=======
-<p>Semantic version range (maven style) of versions to include.</p>
-<p>e.g: <code><ul><li>11.0.4+11.1</li><li>[1.0,2.0)</li><li>(,1.0]</li></ul></code></p>
->>>>>>> upstream/staging
 <p>Details of maven version ranges can be found at 
     <a href="https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html">https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html<a>.
 </p>

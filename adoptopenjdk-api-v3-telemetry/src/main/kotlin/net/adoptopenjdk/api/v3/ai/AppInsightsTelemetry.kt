@@ -9,14 +9,25 @@ import java.nio.file.Path
 
 object AppInsightsTelemetry {
 
-    val telemetryClient: TelemetryClient
+    val telemetryClient: TelemetryClient?
+    val enabled: Boolean
 
     init {
-        telemetryClient = loadTelemetryClient()
+        telemetryClient = if (hasKey()) {
+            enabled = true
+            loadTelemetryClient()
+        } else {
+            enabled = false
+            null
+        }
     }
 
+    private fun hasKey() = System.getProperty("APPINSIGHTS_INSTRUMENTATIONKEY") != null
+
     fun start() {
-        LoggerFactory.getLogger(this::class.java).info("Started AppInsightsTelemetry")
+        if (hasKey()) {
+            LoggerFactory.getLogger(this::class.java).info("Started AppInsightsTelemetry")
+        }
     }
 
     private fun loadTelemetryClient(): TelemetryClient {
