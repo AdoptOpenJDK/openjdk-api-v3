@@ -13,6 +13,10 @@ jobs:
         java-version: '11.0.7'
         java-package: jdk
         architecture: x64
+        
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '14'
 
     - uses: actions/checkout@v2
 
