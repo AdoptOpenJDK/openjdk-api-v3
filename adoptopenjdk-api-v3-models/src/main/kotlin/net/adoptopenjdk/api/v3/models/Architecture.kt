@@ -7,19 +7,21 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema
 @Schema(type = SchemaType.STRING, enumeration = ["x64", "x32", "ppc64", "ppc64le", "s390x", "aarch64", "arm", "sparcv9", "riscv64"])
 enum class Architecture : FileNameMatcher {
     x64,
-    x32("x86-32"),
+    x32(0, "x86-32"),
     ppc64,
     ppc64le,
     s390x,
     aarch64,
-    arm("arm32"),
+    arm(0, "arm32"),
     sparcv9,
     riscv64
     ;
 
     override lateinit var names: List<String>
+    override var priority: Int = 0
 
-    constructor(vararg alternativeNames: String) {
+    constructor(priority: Int = 0, vararg alternativeNames: String) {
+        this.priority = priority
         setNames(this.name, alternativeNames.toList())
     }
 
