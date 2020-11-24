@@ -33,6 +33,7 @@ jobs:
     - name: Parse openapi doc
       run: |
         npm i -g speccy
+        # default values cannot be strings even though ours are
         sed -E 's/"([0-9]+)"/\1/g' adoptopenjdk-api-v3-frontend/META-INF/quarkus-generated-openapi-doc.YAML > openapi.yml
         speccy lint openapi.yml
 
