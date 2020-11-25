@@ -338,6 +338,24 @@ class AdoptBinaryMapperTest {
         }
     }
 
+    @Test
+    fun `identifies alpine-linux`() {
+        runBlocking {
+            val assets = listOf(
+                GHAsset(
+                    "OpenJDK-jdk_x64_alpine-linux_hotspot_2020-11-23-03-35.tar.gz",
+                    1L,
+                    "",
+                    1L,
+                    "2013-02-27T19:35:32Z"
+                )
+            )
+            val binaryList = adoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
+
+            assertEquals(OperatingSystem.`alpine-linux`, binaryList[0].os)
+        }
+    }
+
     private fun assertParsedHotspotJfr(binaryList: List<Binary>) {
         assertEquals(JvmImpl.hotspot, binaryList[0].jvm_impl)
         assertEquals(Project.jfr, binaryList[0].project)
