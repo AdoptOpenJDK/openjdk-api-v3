@@ -43,7 +43,7 @@
         </dependency>
         <dependency>
             <groupId>net.adoptopenjdk.api</groupId>
-            <artifactId>adoptopenjdk-api-v3-persistance</artifactId>
+            <artifactId>adoptopenjdk-api-v3-persistence</artifactId>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
