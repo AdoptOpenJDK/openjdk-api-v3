@@ -85,6 +85,7 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
             element == Architecture.riscv64 || // Temporary until riscv ga
 
             element == ImageType.debugimage ||
-            element == ImageType.staticlibs
+            element == ImageType.staticlibs ||
+            element == OperatingSystem.`alpine-linux`
     }
 }
