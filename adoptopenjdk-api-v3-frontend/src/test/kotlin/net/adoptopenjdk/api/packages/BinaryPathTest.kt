@@ -108,4 +108,16 @@ class BinaryPathTest : PackageEndpointTest() {
             .then()
             .statusCode(404)
     }
+
+    @Test
+    fun versionPathWithoutProjectDefaultsToJdk() {
+        RestAssured.given()
+            .`when`()
+            .header("user-agent", "Gradle")
+            .head(
+                getVersionPathWithoutProject("jdk8u212-b04", OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk)
+            )
+            .then()
+            .header("content-disposition", Matchers.not(Matchers.contains("jfr")))
+    }
 }

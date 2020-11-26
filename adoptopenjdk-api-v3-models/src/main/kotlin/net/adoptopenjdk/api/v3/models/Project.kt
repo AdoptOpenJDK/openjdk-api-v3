@@ -3,18 +3,26 @@ package net.adoptopenjdk.api.v3.models
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 
-// If you are adding to this class, due to limitiations on annotations the enumeration arg on this annotation is duplicated
-// in a number of locations, unfortunately you must go update them all
-@Schema(type = SchemaType.STRING, defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], example = "jdk")
+@Schema(
+    type = SchemaType.STRING,
+    name = "project",
+    description = "Project",
+    defaultValue = "jdk",
+    enumeration = ["jdk", "valhalla", "metropolis", "jfr", "shenandoah"],
+    required = false
+)
 enum class Project : FileNameMatcher {
     jdk,
     valhalla,
     metropolis,
-    jfr("-jfr_");
+    jfr(1),
+    shenandoah(1);
 
     override lateinit var names: List<String>
+    override var priority: Int = 0
 
-    constructor(vararg alternativeNames: String) {
+    constructor(priority: Int = 0, vararg alternativeNames: String) {
+        this.priority = priority
         setNames(this.name, alternativeNames.toList())
     }
 }

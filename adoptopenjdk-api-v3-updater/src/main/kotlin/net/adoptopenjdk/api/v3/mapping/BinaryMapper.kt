@@ -19,16 +19,18 @@ abstract class BinaryMapper {
 
         val matched = values
             .filter { it.matchesFile(fileName) }
+            .sortedBy { it.priority }
             .toList()
 
-        if (matched.size != 1) {
+        if (matched.isEmpty()) {
             if (default != null) {
                 return default
             }
 
             throw IllegalArgumentException("cannot determine ${values.get(0).javaClass.name} of asset $fileName")
         } else {
-            return matched.get(0)
+            // Select match with highest priority
+            return matched.last()
         }
     }
 
