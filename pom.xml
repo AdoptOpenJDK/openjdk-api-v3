@@ -12,14 +12,6 @@
         <maven>3.6.3</maven>
     </prerequisites>
 
-    <modules>
-        <module>adoptopenjdk-api-v3-telemetry</module>
-        <module>adoptopenjdk-api-v3-models</module>
-        <module>adoptopenjdk-api-v3-persistance</module>
-        <module>adoptopenjdk-api-v3-frontend</module>
-        <module>adoptopenjdk-api-v3-updater</module>
-    </modules>
-
     <properties>
         <jacoco.version>0.8.5</jacoco.version>
         <jdk.version>11</jdk.version>
@@ -35,6 +27,14 @@
         <quarkus.version>1.10.0.Final</quarkus.version>
         <surefire-plugin.version>3.0.0-M3</surefire-plugin.version>
     </properties>
+
+    <modules>
+        <module>adoptopenjdk-api-v3-models</module>
+        <module>adoptopenjdk-api-v3-persistence</module>
+        <module>adoptopenjdk-api-v3-frontend</module>
+        <module>adoptopenjdk-api-v3-updater</module>
+        <module>adoptopenjdk-api-v3-telemetry</module>
+    </modules>
 
     <dependencyManagement>
         <dependencies>
@@ -105,7 +105,7 @@
             </dependency>
             <dependency>
                 <groupId>net.adoptopenjdk.api</groupId>
-                <artifactId>adoptopenjdk-api-v3-persistance</artifactId>
+                <artifactId>adoptopenjdk-api-v3-persistence</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
