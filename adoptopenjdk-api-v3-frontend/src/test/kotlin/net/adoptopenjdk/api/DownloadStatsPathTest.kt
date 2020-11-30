@@ -5,7 +5,12 @@ import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.DownloadStatsInterface
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
-import net.adoptopenjdk.api.v3.models.*
+import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.DownloadDiff
+import net.adoptopenjdk.api.v3.models.DownloadStats
+import net.adoptopenjdk.api.v3.models.GitHubDownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.JvmImpl
+import net.adoptopenjdk.api.v3.models.StatsSource
 import net.adoptopenjdk.api.v3.routes.stats.DownloadStatsResource
 import org.jboss.weld.junit5.EnableWeld
 import org.junit.jupiter.api.BeforeAll

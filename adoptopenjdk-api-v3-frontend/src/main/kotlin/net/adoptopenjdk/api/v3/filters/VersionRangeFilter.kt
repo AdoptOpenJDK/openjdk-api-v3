@@ -11,9 +11,6 @@ class VersionRangeFilter(range: String?) : Predicate<VersionData> {
     private val exactMatcher: VersionData?
 
     init {
-        // default range behaviour of a solid version is stupid:
-        // https://cwiki.apache.org/confluence/display/MAVENOLD/Dependency+Mediation+and+Conflict+Resolution#DependencyMediationandConflictResolution-DependencyVersionRanges
-        // so if it is not a range treat ias an exact match
         if (range == null) {
             rangeMatcher = null
             exactMatcher = null
