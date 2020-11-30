@@ -26,13 +26,13 @@ class MonthlyStatsPathTest : BaseTest() {
 
         fun mockStats() {
             runBlocking {
-                val persistance = ApiPersistenceFactory.get()
+                val persistence = ApiPersistenceFactory.get()
 
-                persistance.addDockerDownloadStatsEntries(
+                persistence.addDockerDownloadStatsEntries(
                     createDockerStatsWithRepoName()
                 )
 
-                persistance.addGithubDownloadStatsEntries(
+                persistence.addGithubDownloadStatsEntries(
                     createGithubData()
                 )
             }
