@@ -15,7 +15,7 @@
     <modules>
         <module>adoptopenjdk-api-v3-telemetry</module>
         <module>adoptopenjdk-api-v3-models</module>
-        <module>adoptopenjdk-api-v3-persistance</module>
+        <module>adoptopenjdk-api-v3-persistence</module>
         <module>adoptopenjdk-api-v3-frontend</module>
         <module>adoptopenjdk-api-v3-updater</module>
     </modules>
@@ -106,7 +106,7 @@
             </dependency>
             <dependency>
                 <groupId>net.adoptopenjdk.api</groupId>
-                <artifactId>adoptopenjdk-api-v3-persistance</artifactId>
+                <artifactId>adoptopenjdk-api-v3-persistence</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

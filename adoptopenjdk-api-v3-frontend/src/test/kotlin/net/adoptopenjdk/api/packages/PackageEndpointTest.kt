@@ -33,7 +33,19 @@ abstract class PackageEndpointTest : FrontendTest() {
         vendor: Vendor,
         project: Project
     ): String {
-        return "${getPath()}/version/$releaseName/$os/$arch/$imageType/$jvmImpl/$heapSize/$vendor?project=$project"
+        return getVersionPathWithoutProject(releaseName, os, arch, imageType, jvmImpl, heapSize, vendor) + "?project=$project"
+    }
+
+    fun getVersionPathWithoutProject(
+        releaseName: String,
+        os: OperatingSystem,
+        arch: Architecture,
+        imageType: ImageType,
+        jvmImpl: JvmImpl,
+        heapSize: HeapSize,
+        vendor: Vendor
+    ): String {
+        return "${getPath()}/version/$releaseName/$os/$arch/$imageType/$jvmImpl/$heapSize/$vendor"
     }
 
     protected fun performRequest(path: String): Response {

@@ -67,7 +67,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                 null,
                 { previous: Release?, next: Release ->
                     if (previous != null) {
-                        if (Releases.VERSION_COMPARATOR.compare(previous, next) > 0) {
+                        if (Releases.VERSION_COMPARATOR.compare(previous.version_data, next.version_data) > 0) {
                             fail("${previous.version_data} is before ${next.version_data}")
                         }
                     }
@@ -83,7 +83,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                 null,
                 { previous: Release?, next: Release ->
                     if (previous != null) {
-                        if (Releases.VERSION_COMPARATOR.compare(previous, next) < 0) {
+                        if (Releases.VERSION_COMPARATOR.compare(previous.version_data, next.version_data) < 0) {
                             fail("${previous.version_data} is before ${next.version_data}")
                         }
                     }
@@ -121,7 +121,8 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
             element == Architecture.riscv64 || // Temporary until riscv ga
 
             element == ImageType.debugimage ||
-            element == ImageType.staticlibs
+            element == ImageType.staticlibs ||
+            element == OperatingSystem.`alpine-linux`
     }
 
     companion object {

@@ -1,14 +1,14 @@
 package net.adoptopenjdk.api.v3.filters
 
 import net.adoptopenjdk.api.v3.models.VersionData
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion
-import org.apache.maven.artifact.versioning.VersionRange
+import net.adoptopenjdk.api.v3.parser.VersionParser
+import net.adoptopenjdk.api.v3.parser.maven.VersionRange
 import java.util.function.Predicate
 
 class VersionRangeFilter(range: String?) : Predicate<VersionData> {
 
-    val rangeMatcher: VersionRange?
-    val exactMatcher: DefaultArtifactVersion?
+    private val rangeMatcher: VersionRange?
+    private val exactMatcher: VersionData?
 
     init {
         // default range behaviour of a solid version is stupid:
@@ -19,7 +19,7 @@ class VersionRangeFilter(range: String?) : Predicate<VersionData> {
             exactMatcher = null
         } else if (!range.startsWith("(") && !range.startsWith("[")) {
             rangeMatcher = null
-            exactMatcher = DefaultArtifactVersion(range)
+            exactMatcher = VersionParser.parse(range)
         } else {
             rangeMatcher = VersionRange.createFromVersionSpec(range)
             exactMatcher = null
@@ -27,12 +27,16 @@ class VersionRangeFilter(range: String?) : Predicate<VersionData> {
     }
 
     override fun test(version: VersionData): Boolean {
-        if (exactMatcher != null) {
-            return exactMatcher.equals(DefaultArtifactVersion(version.semver))
-        } else if (rangeMatcher != null) {
-            return rangeMatcher.containsVersion(DefaultArtifactVersion(version.semver))
-        } else {
-            return true
+        return when {
+            exactMatcher != null -> {
+                exactMatcher.compareVersionNumber(version)
+            }
+            rangeMatcher != null -> {
+                rangeMatcher.containsVersion(version)
+            }
+            else -> {
+                true
+            }
         }
     }
 }

@@ -78,7 +78,7 @@ class InstallerResource @Inject constructor(private val packageEndpoint: Package
         @PathParam("vendor")
         vendor: Vendor?,
 
-        @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
+        @Parameter(name = "project", description = "Project", required = false)
         @QueryParam("project")
         project: Project?
     ): Response {
@@ -133,7 +133,7 @@ class InstallerResource @Inject constructor(private val packageEndpoint: Package
         @PathParam("vendor")
         vendor: Vendor?,
 
-        @Parameter(name = "project", description = "Project", schema = Schema(defaultValue = "jdk", enumeration = ["jdk", "valhalla", "metropolis", "jfr"], required = false), required = false)
+        @Parameter(name = "project", description = "Project", required = false)
         @QueryParam("project")
         project: Project?
     ): Response {

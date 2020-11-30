@@ -93,7 +93,7 @@ class AdoptBinaryMapperTest {
                 os = OperatingSystem.mac,
                 arch = Architecture.x64,
                 variant = "hotspot",
-                version = GHVersion(0, 1, 2, "", 4, "", 6, "", ""),
+                version = GHVersion(0, 1, 2, "", 4, "", 6, "", "", null),
                 scmRef = "scm-ref",
                 version_data = "",
                 binary_type = ImageType.jdk,
@@ -129,7 +129,7 @@ class AdoptBinaryMapperTest {
                 os = OperatingSystem.mac,
                 arch = Architecture.x64,
                 variant = "hotspot",
-                version = GHVersion(0, 1, 2, "", 4, "", 6, "", ""),
+                version = GHVersion(0, 1, 2, "", 4, "", 6, "", "", null),
                 scmRef = "",
                 version_data = "",
                 binary_type = ImageType.jdk,
@@ -260,7 +260,7 @@ class AdoptBinaryMapperTest {
         runBlocking {
             val metadata = GHMetaData(
                 "", OperatingSystem.linux, Architecture.x64, "hotspot-jfr",
-                GHVersion(0, 1, 2, "", 4, "", 6, "", ""),
+                GHVersion(0, 1, 2, "", 4, "", 6, "", "", null),
                 "",
                 "",
                 ImageType.jdk,
@@ -335,6 +335,24 @@ class AdoptBinaryMapperTest {
             val binaryList = adoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
 
             assertEquals("a-download-link", binaryList[0].`package`.metadata_link)
+        }
+    }
+
+    @Test
+    fun `identifies alpine-linux`() {
+        runBlocking {
+            val assets = listOf(
+                GHAsset(
+                    "OpenJDK-jdk_x64_alpine-linux_hotspot_2020-11-23-03-35.tar.gz",
+                    1L,
+                    "",
+                    1L,
+                    "2013-02-27T19:35:32Z"
+                )
+            )
+            val binaryList = adoptBinaryMapper.toBinaryList(assets, assets, emptyMap())
+
+            assertEquals(OperatingSystem.`alpine-linux`, binaryList[0].os)
         }
     }
 
