@@ -66,7 +66,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
                         // if we have no metadata resort to parsing release names
                         val version = parseVersionInfo(ghRelease, releaseName)
                         val ghAssets = ghRelease.releaseAssets.assets
-                        val id = ghRelease.id.githubId
+                        val id = ghRelease.id.id
 
                         return@ifEmpty listOf(toRelease(releaseName, ghAssets, ghAssetsWithMetadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version, ghAssets))
                     } catch (e: Exception) {
@@ -118,7 +118,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
                     .copyOfRange(0, 10)
             )
 
-        return release.id.githubId + "." + suffix
+        return release.id.id + "." + suffix
     }
 
     private suspend fun toRelease(

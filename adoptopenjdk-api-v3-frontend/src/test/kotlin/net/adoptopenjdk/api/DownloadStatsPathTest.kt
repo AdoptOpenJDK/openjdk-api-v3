@@ -33,7 +33,7 @@ class DownloadStatsPathTest : FrontendTest() {
     lateinit var downloadStatsResource: DownloadStatsResource
 
     @BeforeAll
-    fun setup(apiDataStore: ApiDataStoreTestDouble) {
+    fun setup(apiDataStore: ApiDataStoreStub) {
         runBlocking {
             downloadStatsResource = createDownloadStatsResource(apiDataStore)
         }

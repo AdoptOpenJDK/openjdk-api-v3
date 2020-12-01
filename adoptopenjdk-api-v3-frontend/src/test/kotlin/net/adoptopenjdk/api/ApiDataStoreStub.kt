@@ -10,7 +10,7 @@ import javax.inject.Singleton
 @Priority(1)
 @Alternative
 @Singleton
-open class ApiDataStoreTestDouble : APIDataStore {
+open class ApiDataStoreStub : APIDataStore {
 
     open var scheduled: Boolean = false
     private lateinit var adoptRepo: AdoptRepos

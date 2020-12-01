@@ -32,7 +32,7 @@ open class GraphQLGitHubReleaseClient : GraphQLGitHubReleaseRequest() {
     private fun getReleaseByIdQuery(releaseId: GitHubId): GraphQLRequestEntity.RequestBuilder {
         return request(
             """query { 
-                              node(id:"${releaseId.githubId}") {
+                              node(id:"${releaseId.id}") {
                                 ... on Release {
                                         id,
                                         url,

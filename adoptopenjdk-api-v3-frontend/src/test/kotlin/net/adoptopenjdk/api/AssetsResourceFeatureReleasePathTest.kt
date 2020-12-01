@@ -24,7 +24,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
 
     @TestFactory
     fun noFilter(): Stream<DynamicTest> {
-        return TestResourceDouble.TEST_VERSIONS
+        return AdoptReposTestDataGenerator.TEST_VERSIONS
             .flatMap { version ->
                 ReleaseType.values()
                     .map { "/v3/assets/feature_releases/$version/$it" }

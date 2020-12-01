@@ -33,7 +33,7 @@ class AssetsResourceReleaseNamePathTest : FrontendTest() {
     lateinit var apiDataStore: APIDataStore
 
     @BeforeAll
-    fun setup(apiDataStore: ApiDataStoreTestDouble) {
+    fun setup(apiDataStore: ApiDataStoreStub) {
         this.apiDataStore = apiDataStore
     }
 

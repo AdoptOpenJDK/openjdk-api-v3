@@ -21,7 +21,7 @@ import net.adoptopenjdk.api.v3.models.VersionData
 import java.time.ZonedDateTime
 import java.util.Random
 
-object TestResourceDouble {
+object AdoptReposTestDataGenerator {
 
     val rand: Random = Random(1)
     val TEST_VERSIONS = listOf(8, 9, 10, 11, 12)

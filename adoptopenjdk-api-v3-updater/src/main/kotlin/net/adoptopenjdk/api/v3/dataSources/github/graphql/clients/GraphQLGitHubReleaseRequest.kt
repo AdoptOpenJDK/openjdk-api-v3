@@ -38,7 +38,7 @@ open class GraphQLGitHubReleaseRequest : GraphQLGitHubInterface() {
     private fun getMoreReleasesQuery(releaseId: GitHubId): GraphQLRequestEntity.RequestBuilder {
         return request(
             """query(${'$'}cursorPointer:String) { 
-                              node(id:"${releaseId.githubId}") {
+                              node(id:"${releaseId.id}") {
                                 ... on Release {
                                     releaseAssets(first:50, after:${'$'}cursorPointer) {
                                         nodes {

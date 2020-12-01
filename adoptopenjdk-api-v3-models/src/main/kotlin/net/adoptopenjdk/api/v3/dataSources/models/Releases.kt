@@ -63,17 +63,17 @@ class Releases {
     }
 
     fun retain(gitHubId: List<GitHubId>): Releases {
-        return Releases(nodes.filterKeys { adoptId -> gitHubId.any { adoptId.startsWith(it.githubId) } })
+        return Releases(nodes.filterKeys { adoptId -> gitHubId.any { adoptId.startsWith(it.id) } })
     }
 
     fun hasReleaseId(gitHubId: GitHubId): Boolean {
         return nodes
-            .any { it.key.startsWith(gitHubId.githubId) }
+            .any { it.key.startsWith(gitHubId.id) }
     }
 
     fun hasReleaseBeenUpdated(gitHubId: GitHubId, updatedAt: ZonedDateTime): Boolean {
         return nodes
-            .filter { it.key.startsWith(gitHubId.githubId) }
+            .filter { it.key.startsWith(gitHubId.id) }
             .any {
                 ChronoUnit.SECONDS.between(it.value.updated_at, updatedAt) != 0L
             }

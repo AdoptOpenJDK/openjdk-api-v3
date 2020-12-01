@@ -35,7 +35,7 @@ abstract class BaseTest {
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
         @JvmStatic
-        public val adoptRepos = TestResourceDouble.generate()
+        public val adoptRepos = AdoptReposTestDataGenerator.generate()
 
         @Inject
         lateinit var apiDataStore: APIDataStore
@@ -104,7 +104,7 @@ abstract class BaseTest {
                 override suspend fun getReleaseById(id: GitHubId): ReleaseResult {
                     return ReleaseResult(
                         result = adoptRepos.allReleases.getReleases().filter {
-                            it.id.startsWith(id.githubId)
+                            it.id.startsWith(id.id)
                         }.toList()
                     )
                 }

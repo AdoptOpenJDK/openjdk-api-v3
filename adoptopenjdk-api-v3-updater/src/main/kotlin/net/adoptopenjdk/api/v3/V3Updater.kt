@@ -150,7 +150,7 @@ class V3Updater {
         } catch (e: Exception) {
             LOGGER.error("Failed to perform full update", e)
         } catch (e: Throwable) {
-            // Log and rethrow
+            // Log and rethrow, may be unrecoverable error such as OutOfMemoryError
             LOGGER.error("Error during full update", e)
             throw e
         }

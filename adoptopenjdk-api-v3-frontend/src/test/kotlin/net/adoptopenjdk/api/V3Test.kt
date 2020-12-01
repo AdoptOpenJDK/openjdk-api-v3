@@ -15,6 +15,6 @@ class V3Test : FrontendTest() {
     fun `update is scheduled`(apiDataStore: APIDataStore) {
         System.setProperty(V3.ENABLE_PERIODIC_UPDATES, "true")
         V3(apiDataStore)
-        assertNotNull((apiDataStore as ApiDataStoreTestDouble).scheduled)
+        assertNotNull((apiDataStore as ApiDataStoreStub).scheduled)
     }
 }
