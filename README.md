@@ -26,7 +26,7 @@ For more information, including example queries, please look at [STRUCTURE.md](h
 
 The AdoptOpenJDK API has served over 200 million downloads by a wide variety consumers, from individuals to organisations.
 
-Check the [Download Statistics Dashboard](https://dash-v2.adoptopenjdk.net/) for the latest numbers.  
+Check the [Download Statistics Dashboard](https://dash.adoptopenjdk.net/) for the latest numbers.  
 
 The following list highlights a small subset of consumers and their use-cases:
 
