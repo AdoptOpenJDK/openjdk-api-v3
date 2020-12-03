@@ -2,6 +2,7 @@ package net.adoptopenjdk.api.v3.metrics
 
 import com.microsoft.applicationinsights.telemetry.Duration
 import com.microsoft.applicationinsights.telemetry.RequestTelemetry
+import net.adoptopenjdk.api.v3.ai.AppInsightsTelemetry
 import java.util.*
 import javax.ws.rs.container.ContainerRequestContext
 import javax.ws.rs.container.ContainerRequestFilter
@@ -62,21 +63,24 @@ class AfterContainerFilter : ContainerResponseFilter {
 @Provider
 class Writer : WriterInterceptor {
     override fun aroundWriteTo(context: WriterInterceptorContext?) {
+        if (AppInsightsTelemetry.enabled) {
+            val startTime = context?.getProperty(START_TIME_KEY)
+            val requestTelemetry = context?.getProperty(TELEMETERY_KEY)
 
-        val startTime = context?.getProperty(START_TIME_KEY)
-        val requestTelemetry = context?.getProperty(TELEMETERY_KEY)
+            if (requestTelemetry != null && requestTelemetry is RequestTelemetry && startTime != null && startTime is Long) {
+                val duration = millisecondsSince(startTime)
+                requestTelemetry.duration = Duration(duration.toLong())
+            }
 
-        if (requestTelemetry != null && requestTelemetry is RequestTelemetry && startTime != null && startTime is Long) {
-            val duration = millisecondsSince(startTime)
-            requestTelemetry.duration = Duration(duration.toLong())
-        }
+            context?.proceed()
 
-        context?.proceed()
-
-        if (requestTelemetry != null && requestTelemetry is RequestTelemetry && startTime != null && startTime is Long) {
-            val duration = millisecondsSince(startTime)
-            requestTelemetry.metrics["writeTime"] = duration
-            AppInsightsTelemetery.telemetryClient.trackRequest(requestTelemetry)
+            if (requestTelemetry != null && requestTelemetry is RequestTelemetry && startTime != null && startTime is Long) {
+                val duration = millisecondsSince(startTime)
+                requestTelemetry.metrics["writeTime"] = duration
+                AppInsightsTelemetry.telemetryClient?.trackRequest(requestTelemetry)
+            }
+        } else {
+            context?.proceed()
         }
     }
 }

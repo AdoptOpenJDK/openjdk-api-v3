@@ -8,7 +8,7 @@ import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHVersion
-import net.adoptopenjdk.api.v3.dataSources.mongo.GithubHtmlClient
+import net.adoptopenjdk.api.v3.dataSources.mongo.GitHubHtmlClient
 import net.adoptopenjdk.api.v3.mapping.adopt.AdoptBinaryMapper
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Binary
@@ -30,7 +30,7 @@ import kotlin.test.assertEquals
 @TestInstance(Lifecycle.PER_CLASS)
 class AdoptBinaryMapperTest {
 
-    private val fakeGithubHtmlClient = mockk<GithubHtmlClient>()
+    private val fakeGithubHtmlClient = mockk<GitHubHtmlClient>()
     private val adoptBinaryMapper = AdoptBinaryMapper(fakeGithubHtmlClient)
 
     @BeforeEach

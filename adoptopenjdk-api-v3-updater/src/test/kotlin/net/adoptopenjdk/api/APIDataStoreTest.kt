@@ -3,7 +3,7 @@ package net.adoptopenjdk.api
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.TimeSource
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
+import net.adoptopenjdk.api.v3.dataSources.APIDataStoreImpl
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import org.junit.jupiter.api.Test
@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class APIDataStoreTest : BaseTest() {
+class APIDataStoreTest : MongoTest() {
 
     companion object {
         @JvmStatic
@@ -33,7 +33,7 @@ class APIDataStoreTest : BaseTest() {
         runBlocking {
             val repo = getInitialRepo()
             ApiPersistenceFactory.get().updateAllRepos(repo, "")
-            val dbData = APIDataStore.loadDataFromDb(false)
+            val dbData = apiDataStore.loadDataFromDb(false)
 
             JSONAssert.assertEquals(
                 UpdaterJsonMapper.mapper.writeValueAsString(dbData),
@@ -61,6 +61,6 @@ class APIDataStoreTest : BaseTest() {
 
     @Test
     fun `update is not scheduled by default`() {
-        assertNull(APIDataStore.schedule)
+        assertNull((apiDataStore as APIDataStoreImpl).schedule)
     }
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-         xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>net.adoptopenjdk.api</groupId>
@@ -9,7 +9,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <modelVersion>4.0.0</modelVersion>
     <artifactId>adoptopenjdk-api-v3-updater</artifactId>
 
     <properties>
@@ -60,8 +59,8 @@
             <scope>test</scope>
             <exclusions>
                 <exclusion>
-                    <artifactId>slf4j-simple</artifactId>
                     <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -109,6 +108,10 @@
             <artifactId>adoptopenjdk-api-v3-persistence</artifactId>
         </dependency>
         <dependency>
+            <groupId>net.adoptopenjdk.api</groupId>
+            <artifactId>adoptopenjdk-api-v3-telemetry</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <scope>test</scope>
@@ -122,11 +125,23 @@
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>applicationinsights-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>applicationinsights-logging-logback</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.weld.se</groupId>
+            <artifactId>weld-se-core</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
-        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

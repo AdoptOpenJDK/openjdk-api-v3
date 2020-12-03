@@ -40,7 +40,7 @@ object ReleaseVersionResolver {
 
         val availableLtsReleases: Array<Int> = gaReleases
             .asSequence()
-            .filter { APIDataStore.variants.ltsVersions.contains(it.version_data.major) }
+            .filter { VariantStore.variants.ltsVersions.contains(it.version_data.major) }
             .map { it.version_data.major }
             .distinct()
             .sorted()

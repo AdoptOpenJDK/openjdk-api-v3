@@ -5,20 +5,10 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.mapping.upstream.UpstreamBinaryMapper
 import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.Project
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-class UpstreamBinaryMapperTest {
-
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun setup() {
-            BaseTest.startFongo()
-            BaseTest.mockRepo()
-        }
-    }
+class UpstreamBinaryMapperTest : BaseTest() {
 
     private fun getAssetList(names: List<String>): List<GHAsset> {
         return names.flatMap { name ->

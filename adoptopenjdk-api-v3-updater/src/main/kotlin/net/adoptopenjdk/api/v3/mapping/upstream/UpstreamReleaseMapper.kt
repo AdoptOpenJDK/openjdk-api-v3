@@ -51,7 +51,7 @@ object UpstreamReleaseMapper : ReleaseMapper() {
 
             val sourcePackage = getSourcePackage(ghRelease)
 
-            return ReleaseResult(result = listOf(Release(ghRelease.id.githubId, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, versionData, sourcePackage)))
+            return ReleaseResult(result = listOf(Release(ghRelease.id.id, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, versionData, sourcePackage)))
         } catch (e: FailedToParse) {
             LOGGER.error("Failed to parse $releaseName")
             return ReleaseResult(error = "Failed to parse")

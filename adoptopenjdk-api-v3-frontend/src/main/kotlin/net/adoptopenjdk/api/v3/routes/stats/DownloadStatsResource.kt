@@ -2,6 +2,7 @@ package net.adoptopenjdk.api.v3.routes.stats
 
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import net.adoptopenjdk.api.v3.DownloadStatsInterface
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
@@ -19,6 +20,8 @@ import org.jboss.resteasy.annotations.jaxrs.PathParam
 import java.time.LocalDate
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
+import javax.enterprise.context.ApplicationScoped
+import javax.inject.Inject
 import javax.ws.rs.BadRequestException
 import javax.ws.rs.GET
 import javax.ws.rs.Path
@@ -31,8 +34,13 @@ import javax.ws.rs.core.Response
 @Produces(MediaType.APPLICATION_JSON)
 @Schema(hidden = true)
 @Timed
-class DownloadStatsResource {
-    private val statsInterface = net.adoptopenjdk.api.v3.DownloadStatsInterface()
+@ApplicationScoped
+class DownloadStatsResource
+@Inject
+constructor(
+    private val apiDataStore: APIDataStore,
+    private val downloadStatsInterface: DownloadStatsInterface
+) {
 
     @GET
     @Path("/total")
@@ -40,7 +48,7 @@ class DownloadStatsResource {
     @Schema(hidden = true)
     fun getTotalDownloadStats(): CompletionStage<Response> {
         return runAsync {
-            return@runAsync statsInterface.getTotalDownloadStats()
+            return@runAsync downloadStatsInterface.getTotalDownloadStats()
         }
     }
 
@@ -53,7 +61,7 @@ class DownloadStatsResource {
         @PathParam("feature_version")
         featureVersion: Int
     ): Map<String, Long> {
-        val release = APIDataStore.getAdoptRepos().getFeatureRelease(featureVersion)
+        val release = apiDataStore.getAdoptRepos().getFeatureRelease(featureVersion)
             ?: throw BadRequestException("Unable to find version $featureVersion")
 
         return getAdoptReleases(release)
@@ -82,7 +90,7 @@ class DownloadStatsResource {
         @PathParam("release_name")
         releaseName: String
     ): Map<String, Long> {
-        val release = APIDataStore.getAdoptRepos().getFeatureRelease(featureVersion)
+        val release = apiDataStore.getAdoptRepos().getFeatureRelease(featureVersion)
             ?: throw BadRequestException("Unable to find version $featureVersion")
 
         return getAdoptReleases(release)
@@ -142,7 +150,7 @@ class DownloadStatsResource {
             val fromDate = parseDate(from)?.atStartOfDay()?.atZone(TimeSource.ZONE)
             val toDate = parseDate(to)?.plusDays(1)?.atStartOfDay()?.atZone(TimeSource.ZONE)
 
-            return@runAsync statsInterface.getTrackingStats(days, fromDate, toDate, source, featureVersion, dockerRepo, jvmImpl)
+            return@runAsync downloadStatsInterface.getTrackingStats(days, fromDate, toDate, source, featureVersion, dockerRepo, jvmImpl)
         }
     }
 
@@ -175,7 +183,7 @@ class DownloadStatsResource {
             val jvmImpl = parseJvmImpl(jvmImplStr)
             val toDate = parseDate(to)?.withDayOfMonth(1)?.plusMonths(1)?.atStartOfDay()?.atZone(TimeSource.ZONE)
 
-            return@runAsync statsInterface.getMonthlyTrackingStats(toDate, source, featureVersion, dockerRepo, jvmImpl)
+            return@runAsync downloadStatsInterface.getMonthlyTrackingStats(toDate, source, featureVersion, dockerRepo, jvmImpl)
         }
     }
 

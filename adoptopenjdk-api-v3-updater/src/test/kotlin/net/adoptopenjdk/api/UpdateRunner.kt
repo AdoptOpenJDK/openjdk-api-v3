@@ -5,7 +5,6 @@ import net.adoptopenjdk.api.v3.AdoptRepositoryFactory
 import net.adoptopenjdk.api.v3.AdoptRepositoryImpl
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.V3Updater
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.models.Release
 import org.awaitility.Awaitility
@@ -31,7 +30,7 @@ class UpdateRunner : BaseTest() {
             repo = repo.addRelease(8, r)
 
             ApiPersistenceFactory.get().updateAllRepos(repo, "")
-            APIDataStore.loadDataFromDb(true)
+            apiDataStore.loadDataFromDb(true)
         }
         AdoptRepositoryFactory.setAdoptRepository(AdoptRepositoryImpl)
         V3Updater().run(false)

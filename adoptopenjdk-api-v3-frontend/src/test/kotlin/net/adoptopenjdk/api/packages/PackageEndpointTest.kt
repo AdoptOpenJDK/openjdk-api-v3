@@ -1,39 +1,11 @@
 package net.adoptopenjdk.api.packages
 
-import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
 import io.restassured.response.Response
-import kotlinx.coroutines.runBlocking
-import net.adoptopenjdk.api.BaseTest
-import net.adoptopenjdk.api.v3.AdoptReposBuilder
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
-import net.adoptopenjdk.api.v3.models.Architecture
-import net.adoptopenjdk.api.v3.models.HeapSize
-import net.adoptopenjdk.api.v3.models.ImageType
-import net.adoptopenjdk.api.v3.models.JvmImpl
-import net.adoptopenjdk.api.v3.models.OperatingSystem
-import net.adoptopenjdk.api.v3.models.Project
-import net.adoptopenjdk.api.v3.models.ReleaseType
-import net.adoptopenjdk.api.v3.models.Vendor
-import org.junit.jupiter.api.BeforeAll
+import net.adoptopenjdk.api.FrontendTest
+import net.adoptopenjdk.api.v3.models.*
 
-@QuarkusTest
-abstract class PackageEndpointTest : BaseTest() {
-
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun populateDb() {
-            runBlocking {
-                val repo = AdoptReposBuilder.build(APIDataStore.variants.versions)
-                // Reset connection
-                ApiPersistenceFactory.set(null)
-                ApiPersistenceFactory.get().updateAllRepos(repo, "")
-                APIDataStore.loadDataFromDb(true)
-            }
-        }
-    }
+abstract class PackageEndpointTest : FrontendTest() {
 
     abstract fun getPath(): String
 

@@ -3,12 +3,7 @@ package net.adoptopenjdk.api
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.JsonMapper
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
-import net.adoptopenjdk.api.v3.dataSources.ReleaseVersionResolver
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
-import net.adoptopenjdk.api.v3.dataSources.UrlRequest
+import net.adoptopenjdk.api.v3.dataSources.*
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
@@ -29,7 +24,7 @@ class ReleaseVersionResolverTest : BaseTest() {
 
     fun getRepos(): AdoptRepos {
         return runBlocking {
-            val repo = AdoptReposBuilder.build(APIDataStore.variants.versions)
+            val repo = AdoptReposBuilder.build(VariantStore.variants.versions)
 
             val releases = repo.allReleases.getReleases()
                 .filter { it.version_data.major < 13 || it.version_data.major == 13 && it.release_type == ReleaseType.ea }
@@ -54,7 +49,7 @@ class ReleaseVersionResolverTest : BaseTest() {
     @Test
     fun availableVersionsIsCorrect() {
         check { releaseInfo ->
-            releaseInfo.available_releases.contentEquals(arrayOf(8, 9, 10, 11, 12))
+            releaseInfo.available_releases.contentEquals(AdoptReposTestDataGenerator.TEST_VERSIONS.toTypedArray())
         }
     }
 
@@ -82,7 +77,7 @@ class ReleaseVersionResolverTest : BaseTest() {
     @Test
     fun mostRecentFeatureVersionIsCorrect() {
         check { releaseInfo ->
-            releaseInfo.most_recent_feature_version == 13
+            releaseInfo.most_recent_feature_version == 12
         }
     }
 

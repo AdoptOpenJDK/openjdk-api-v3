@@ -1,6 +1,5 @@
 package net.adoptopenjdk.api
 
-import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.HeapSize
@@ -8,21 +7,11 @@ import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.OperatingSystem
 import org.hamcrest.Matchers
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 import java.util.stream.Stream
 
-@QuarkusTest
-abstract class AssetsPathTest : BaseTest() {
-
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun before() {
-            populateDb()
-        }
-    }
+abstract class AssetsPathTest : FrontendTest() {
 
     abstract fun <T> runFilterTest(filterParamName: String, values: Array<T>): Stream<DynamicTest>
 

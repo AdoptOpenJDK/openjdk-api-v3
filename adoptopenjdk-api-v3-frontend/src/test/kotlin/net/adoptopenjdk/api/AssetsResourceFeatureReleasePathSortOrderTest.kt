@@ -3,117 +3,121 @@ package net.adoptopenjdk.api
 import io.quarkus.test.junit.QuarkusTest
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.TimeSource
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
+import net.adoptopenjdk.api.v3.dataSources.APIDataStoreImpl
 import net.adoptopenjdk.api.v3.dataSources.SortMethod
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
-import net.adoptopenjdk.api.v3.models.Architecture
-import net.adoptopenjdk.api.v3.models.Binary
-import net.adoptopenjdk.api.v3.models.HeapSize
-import net.adoptopenjdk.api.v3.models.ImageType
-import net.adoptopenjdk.api.v3.models.Installer
-import net.adoptopenjdk.api.v3.models.JvmImpl
-import net.adoptopenjdk.api.v3.models.OperatingSystem
-import net.adoptopenjdk.api.v3.models.Package
-import net.adoptopenjdk.api.v3.models.Project
-import net.adoptopenjdk.api.v3.models.Release
-import net.adoptopenjdk.api.v3.models.ReleaseType
-import net.adoptopenjdk.api.v3.models.Vendor
-import net.adoptopenjdk.api.v3.models.VersionData
+import net.adoptopenjdk.api.v3.models.*
+import net.adoptopenjdk.api.v3.routes.AssetsResource
+import org.jboss.weld.junit5.EnableWeld
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.ZonedDateTime
 import kotlin.test.assertEquals
 
+@ExtendWith(value = [DbExtension::class])
 @QuarkusTest
-class AssetsResourceFeatureReleasePathSortOrderTest : BaseTest() {
+@EnableWeld
+class AssetsResourceFeatureReleasePathSortOrderTest : FrontendTest() {
 
-    @Test
-    fun doesSortObaySortMethod() {
-        runBlocking {
-            val repo = createRepo()
+    companion object {
+        private lateinit var assetResource: AssetsResource
+        private lateinit var apiDatastore: APIDataStoreImpl
 
-            APIDataStore.setAdoptRepos(repo)
-
-            assertEquals("bar", AssetsResourceFeatureReleasePathTest.getReleasesWithSortMethod(SortOrder.DESC, SortMethod.DATE).get(0).id)
-            assertEquals("foo", AssetsResourceFeatureReleasePathTest.getReleasesWithSortMethod(SortOrder.DESC, SortMethod.DEFAULT).get(0).id)
-            assertEquals("foo", AssetsResourceFeatureReleasePathTest.getReleases(SortOrder.DESC).get(0).id)
+        @BeforeAll
+        @JvmStatic
+        fun setup() {
+            apiDatastore = APIDataStoreImpl(createRepo())
+            assetResource = AssetsResource(apiDatastore)
         }
-    }
 
-    @Test
-    fun isDoesSortOrderIgnoreOpt() {
-        runBlocking {
-            val repo = createRepo()
-
-            APIDataStore.setAdoptRepos(repo)
-
-            val releases = AssetsResourceFeatureReleasePathTest.getReleases(SortOrder.DESC)
-
-            assertEquals("bar", releases.get(1).id)
-        }
-    }
-
-    private fun createRepo(): AdoptRepos {
-        val binary = Binary(
-            Package(
-                "a",
-                "b",
-                1L,
-                "v",
-                "c",
-                3,
+        private fun createRepo(): AdoptRepos {
+            val binary = Binary(
+                Package(
+                    "a",
+                    "b",
+                    1L,
+                    "v",
+                    "c",
+                    3,
+                    "d",
+                    "e"
+                ),
+                2L,
+                TimeSource.now(),
                 "d",
-                "e"
-            ),
-            2L,
-            TimeSource.now(),
-            "d",
-            Installer(
-                "a",
-                "b",
-                1L,
-                "v",
-                "c",
-                4,
-                "d,",
-                "e"
-            ),
-            HeapSize.normal,
-            OperatingSystem.linux,
-            Architecture.x64,
-            ImageType.jdk,
-            JvmImpl.hotspot,
-            Project.jdk
-        )
+                Installer(
+                    "a",
+                    "b",
+                    1L,
+                    "v",
+                    "c",
+                    4,
+                    "d,",
+                    "e"
+                ),
+                HeapSize.normal,
+                OperatingSystem.linux,
+                Architecture.x64,
+                ImageType.jdk,
+                JvmImpl.hotspot,
+                Project.jdk
+            )
 
-        val repo = AdoptRepos(
-            listOf(
-                FeatureRelease(
-                    8,
-                    Releases(
-                        listOf(
-                            Release(
-                                "foo", ReleaseType.ga, "a", "foo",
-                                ZonedDateTime.of(2010, 1, 1, 1, 1, 0, 0, TimeSource.ZONE),
-                                ZonedDateTime.of(2010, 1, 1, 1, 1, 0, 0, TimeSource.ZONE),
-                                arrayOf(binary), 2, Vendor.adoptopenjdk,
-                                VersionData(8, 0, 242, "b", null, 4, "b", "8u242-b04_openj9-0.18.0-m1")
-                            ),
+            val repo = AdoptRepos(
+                listOf(
+                    FeatureRelease(
+                        8,
+                        Releases(
+                            listOf(
+                                Release(
+                                    "foo", ReleaseType.ga, "a", "foo",
+                                    ZonedDateTime.of(2010, 1, 1, 1, 1, 0, 0, TimeSource.ZONE),
+                                    ZonedDateTime.of(2010, 1, 1, 1, 1, 0, 0, TimeSource.ZONE),
+                                    arrayOf(binary), 2, Vendor.adoptopenjdk,
+                                    VersionData(8, 0, 242, "b", null, 4, "b", "8u242-b04_openj9-0.18.0-m1")
+                                ),
 
-                            Release(
-                                "bar", ReleaseType.ga, "a", "bar",
-                                ZonedDateTime.of(2010, 1, 2, 1, 1, 0, 0, TimeSource.ZONE),
-                                ZonedDateTime.of(2010, 1, 2, 1, 1, 0, 0, TimeSource.ZONE),
-                                arrayOf(binary), 2, Vendor.adoptopenjdk,
-                                VersionData(8, 0, 242, "a", null, 4, "a", "8u242-b04_openj9-0.18.0-m1")
+                                Release(
+                                    "bar", ReleaseType.ga, "a", "bar",
+                                    ZonedDateTime.of(2010, 1, 2, 1, 1, 0, 0, TimeSource.ZONE),
+                                    ZonedDateTime.of(2010, 1, 2, 1, 1, 0, 0, TimeSource.ZONE),
+                                    arrayOf(binary), 2, Vendor.adoptopenjdk,
+                                    VersionData(8, 0, 242, "a", null, 4, "a", "8u242-b04_openj9-0.18.0-m1")
+                                )
                             )
                         )
                     )
                 )
             )
+            return repo
+        }
+    }
+
+    @Test
+    fun doesSortObaySortMethod() {
+        runBlocking {
+            assertEquals("bar", getRelease(assetResource, SortOrder.DESC, SortMethod.DATE)[0].id)
+            assertEquals("foo", getRelease(assetResource, SortOrder.DESC, SortMethod.DEFAULT)[0].id)
+            assertEquals("foo", getRelease(assetResource, SortOrder.DESC, null)[0].id)
+        }
+    }
+
+    private fun getRelease(assetResource: AssetsResource, sortOrder: SortOrder, sortMethod: SortMethod?): List<Release> {
+        return assetResource.get(
+            version = 8, release_type = ReleaseType.ga, sortOrder = sortOrder, sortMethod = sortMethod,
+            arch = null, heap_size = null, jvm_impl = null, image_type = null, os = null, page = null, pageSize = null, project = null, vendor = null, before = null
         )
-        return repo
+    }
+
+    @Test
+    fun doesSortOrderIgnoreOpt() {
+        runBlocking {
+            val releases = getRelease(assetResource, SortOrder.DESC, null)
+            assertEquals("bar", releases.get(1).id)
+        }
     }
 }

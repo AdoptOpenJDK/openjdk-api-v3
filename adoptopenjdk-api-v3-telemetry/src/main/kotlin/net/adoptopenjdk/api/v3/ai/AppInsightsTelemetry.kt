@@ -1,17 +1,33 @@
-package net.adoptopenjdk.api.v3.metrics
+package net.adoptopenjdk.api.v3.ai
 
 import com.microsoft.applicationinsights.TelemetryClient
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 
-internal object AppInsightsTelemetery {
+object AppInsightsTelemetry {
 
-    internal val telemetryClient: TelemetryClient
+    val telemetryClient: TelemetryClient?
+    val enabled: Boolean
 
     init {
-        telemetryClient = loadTelemetryClient()
+        telemetryClient = if (hasKey()) {
+            enabled = true
+            loadTelemetryClient()
+        } else {
+            enabled = false
+            null
+        }
+    }
+
+    private fun hasKey() = System.getProperty("APPINSIGHTS_INSTRUMENTATIONKEY") != null
+
+    fun start() {
+        if (hasKey()) {
+            LoggerFactory.getLogger(this::class.java).info("Started AppInsightsTelemetry")
+        }
     }
 
     private fun loadTelemetryClient(): TelemetryClient {
@@ -30,7 +46,7 @@ internal object AppInsightsTelemetery {
     // Unfortunate hack to get around that we seem unable to load ApplicationInsights.xml from the classpath
     // from inside the module
     private fun saveConfigToFile(): Path? {
-        val inputStream = AppInsightsTelemetery::class.java.classLoader.getResourceAsStream("ApplicationInsights.xml")
+        val inputStream = AppInsightsTelemetry::class.java.classLoader.getResourceAsStream("ApplicationInsights.xml")
 
         inputStream?.use {
             val configPath = Files.createTempDirectory("appInsightsConfig").toAbsolutePath()

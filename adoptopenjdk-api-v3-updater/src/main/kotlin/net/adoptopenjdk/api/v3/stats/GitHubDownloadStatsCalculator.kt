@@ -4,13 +4,13 @@ import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
-import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.GitHubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.Vendor
 import org.slf4j.LoggerFactory
 import java.time.ZonedDateTime
 
-class GithubDownloadStatsCalculator {
+class GitHubDownloadStatsCalculator {
     private val database: ApiPersistence = ApiPersistenceFactory.get()
 
     companion object {
@@ -51,7 +51,7 @@ class GithubDownloadStatsCalculator {
         LOGGER.info("Stats total $stats")
     }
 
-    public fun getStats(repos: AdoptRepos): List<GithubDownloadStatsDbEntry> {
+    public fun getStats(repos: AdoptRepos): List<GitHubDownloadStatsDbEntry> {
         val date: ZonedDateTime = TimeSource.now()
         val stats = repos
             .repos
@@ -82,7 +82,7 @@ class GithubDownloadStatsCalculator {
                             .toLong()
                 }.toMap()
 
-                GithubDownloadStatsDbEntry(
+                GitHubDownloadStatsDbEntry(
                     date,
                     total.toLong(),
                     jvmImplMap,

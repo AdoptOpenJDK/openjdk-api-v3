@@ -2,14 +2,13 @@ package net.adoptopenjdk.api.v3.dataSources.persitence.mongo
 
 import com.mongodb.client.model.InsertManyOptions
 import com.mongodb.client.model.UpdateOptions
-import com.mongodb.reactivestreams.client.ClientSession
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
-import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.GitHubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import org.bson.BsonArray
@@ -23,7 +22,7 @@ import java.time.ZonedDateTime
 
 class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient), ApiPersistence {
     private val releasesCollection: CoroutineCollection<Release> = createCollection(database, RELEASE_DB)
-    private val githubStatsCollection: CoroutineCollection<GithubDownloadStatsDbEntry> = createCollection(database, GITHUB_STATS_DB)
+    private val gitHubStatsCollection: CoroutineCollection<GitHubDownloadStatsDbEntry> = createCollection(database, GITHUB_STATS_DB)
     private val dockerStatsCollection: CoroutineCollection<DockerDownloadStatsDbEntry> = createCollection(database, DOCKER_STATS_DB)
     private val releaseInfoCollection: CoroutineCollection<ReleaseInfo> = createCollection(database, RELEASE_INFO_DB)
     private val updateTimeCollection: CoroutineCollection<UpdatedInfo> = createCollection(database, UPDATE_TIME_DB)
@@ -40,37 +39,22 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
 
     override suspend fun updateAllRepos(repos: AdoptRepos, checksum: String) {
 
-        var session: ClientSession? = null
-
         try {
-            session = client.startSession()
-        } catch (e: Exception) {
-            LOGGER.warn("DB does not support transactions")
-        }
-        try {
-            session?.startTransaction()
             repos
                 .repos
                 .forEach { repo ->
-                    writeReleases(session, repo.key, repo.value)
+                    writeReleases(repo.key, repo.value)
                 }
         } finally {
-            session?.commitTransaction()
-            session?.close()
             updateUpdatedTime(TimeSource.now(), checksum)
         }
     }
 
-    private suspend fun writeReleases(session: ClientSession?, featureVersion: Int, value: FeatureRelease) {
+    private suspend fun writeReleases(featureVersion: Int, value: FeatureRelease) {
         val toAdd = value.releases.getReleases().toList()
         if (toAdd.isNotEmpty()) {
-            if (session == null) {
-                releasesCollection.deleteMany(majorVersionMatcher(featureVersion))
-                releasesCollection.insertMany(toAdd, InsertManyOptions())
-            } else {
-                releasesCollection.deleteMany(session, majorVersionMatcher(featureVersion))
-                releasesCollection.insertMany(session, toAdd, InsertManyOptions())
-            }
+            releasesCollection.deleteMany(majorVersionMatcher(featureVersion))
+            releasesCollection.insertMany(toAdd, InsertManyOptions())
         }
     }
 
@@ -82,25 +66,25 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
         return FeatureRelease(featureVersion, Releases(releases))
     }
 
-    override suspend fun addGithubDownloadStatsEntries(stats: List<GithubDownloadStatsDbEntry>) {
-        githubStatsCollection.insertMany(stats)
+    override suspend fun addGithubDownloadStatsEntries(stats: List<GitHubDownloadStatsDbEntry>) {
+        gitHubStatsCollection.insertMany(stats)
     }
 
-    override suspend fun getStatsForFeatureVersion(featureVersion: Int): List<GithubDownloadStatsDbEntry> {
-        return githubStatsCollection.find(Document("version.major", featureVersion))
+    override suspend fun getStatsForFeatureVersion(featureVersion: Int): List<GitHubDownloadStatsDbEntry> {
+        return gitHubStatsCollection.find(Document("version.major", featureVersion))
             .toList()
     }
 
-    override suspend fun getLatestGithubStatsForFeatureVersion(featureVersion: Int): GithubDownloadStatsDbEntry? {
-        return githubStatsCollection
+    override suspend fun getLatestGithubStatsForFeatureVersion(featureVersion: Int): GitHubDownloadStatsDbEntry? {
+        return gitHubStatsCollection
             .find(Document("feature_version", featureVersion))
             .sort(Document("date", -1))
             .limit(1)
             .first()
     }
 
-    override suspend fun getGithubStats(start: ZonedDateTime, end: ZonedDateTime): List<GithubDownloadStatsDbEntry> {
-        return githubStatsCollection
+    override suspend fun getGithubStats(start: ZonedDateTime, end: ZonedDateTime): List<GitHubDownloadStatsDbEntry> {
+        return gitHubStatsCollection
             .find(betweenDates(start, end))
             .sort(Document("date", 1))
             .toList()
@@ -135,7 +119,7 @@ class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient
     override suspend fun removeStatsBetween(start: ZonedDateTime, end: ZonedDateTime) {
         val deleteQuery = betweenDates(start, end)
         dockerStatsCollection.deleteMany(deleteQuery)
-        githubStatsCollection.deleteMany(deleteQuery)
+        gitHubStatsCollection.deleteMany(deleteQuery)
     }
 
     override suspend fun setReleaseInfo(version: ReleaseInfo) {

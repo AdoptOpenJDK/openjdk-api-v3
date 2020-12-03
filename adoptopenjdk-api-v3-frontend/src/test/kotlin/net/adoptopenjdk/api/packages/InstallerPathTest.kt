@@ -1,18 +1,16 @@
 package net.adoptopenjdk.api.packages
 
 import io.quarkus.test.junit.QuarkusTest
-import net.adoptopenjdk.api.v3.models.Architecture
-import net.adoptopenjdk.api.v3.models.HeapSize
-import net.adoptopenjdk.api.v3.models.ImageType
-import net.adoptopenjdk.api.v3.models.JvmImpl
-import net.adoptopenjdk.api.v3.models.OperatingSystem
-import net.adoptopenjdk.api.v3.models.Project
-import net.adoptopenjdk.api.v3.models.ReleaseType
-import net.adoptopenjdk.api.v3.models.Vendor
+import net.adoptopenjdk.api.DbExtension
+import net.adoptopenjdk.api.v3.models.*
 import org.hamcrest.Matchers
+import org.jboss.weld.junit5.EnableWeld
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
+@ExtendWith(value = [DbExtension::class])
 @QuarkusTest
+@EnableWeld
 class InstallerPathTest : PackageEndpointTest() {
 
     override fun getPath(): String {
@@ -55,11 +53,15 @@ class InstallerPathTest : PackageEndpointTest() {
 
     @Test
     fun versionRequestRedirects() {
-        val path = getVersionPath("jdk8u212-b04", OperatingSystem.windows, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.jdk)
+
+        val (release, binary) = getRandomBinary()
+
+        val path = getVersionPath(release.release_name, binary.os, binary.architecture, binary.image_type, binary.jvm_impl, binary.heap_size, release.vendor, binary.project)
+
         performRequest(path)
             .then()
             .statusCode(307)
-            .header("Location", Matchers.startsWith("https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u212-b04"))
+            .header("Location", Matchers.equalTo(binary.installer?.link))
     }
 
     @Test

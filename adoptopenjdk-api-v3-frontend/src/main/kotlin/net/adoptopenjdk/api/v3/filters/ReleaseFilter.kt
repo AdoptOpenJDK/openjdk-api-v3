@@ -1,6 +1,6 @@
 package net.adoptopenjdk.api.v3.filters
 
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
+import net.adoptopenjdk.api.v3.dataSources.VariantStore
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
@@ -17,7 +17,7 @@ class ReleaseFilter(
     override fun test(release: Release): Boolean {
 
         val ltsFilter = if (lts != null) {
-            val isLts = APIDataStore.variants.ltsVersions.contains(release.version_data.major)
+            val isLts = VariantStore.variants.ltsVersions.contains(release.version_data.major)
             lts == isLts
         } else {
             true

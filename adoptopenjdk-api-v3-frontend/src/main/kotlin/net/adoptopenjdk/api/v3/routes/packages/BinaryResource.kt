@@ -21,6 +21,8 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
+import javax.enterprise.context.ApplicationScoped
+import javax.inject.Inject
 import javax.ws.rs.GET
 import javax.ws.rs.HEAD
 import javax.ws.rs.HeaderParam
@@ -34,7 +36,8 @@ import javax.ws.rs.core.Response
 @Tag(name = "Binary")
 @Path("/v3/binary/")
 @Produces(MediaType.APPLICATION_JSON)
-class BinaryResource : PackageEndpoint() {
+@ApplicationScoped
+class BinaryResource @Inject constructor(private val packageEndpoint: PackageEndpoint) {
 
     @GET
     @HEAD
@@ -91,7 +94,7 @@ class BinaryResource : PackageEndpoint() {
         @HeaderParam("User-Agent")
         userAgent: String
     ): Response {
-        val releases = getReleases(release_name, vendor, os, arch, image_type, jvm_impl, heap_size, project)
+        val releases = packageEndpoint.getReleases(release_name, vendor, os, arch, image_type, jvm_impl, heap_size, project)
         return when (request.method) {
             "HEAD" -> versionHead(userAgent, releases)
             else -> formResponse(releases)
@@ -165,7 +168,7 @@ class BinaryResource : PackageEndpoint() {
         @QueryParam("project")
         project: Project?
     ): Response {
-        val releaseList = getRelease(release_type, version, vendor, os, arch, image_type, jvm_impl, heap_size, project)
+        val releaseList = packageEndpoint.getRelease(release_type, version, vendor, os, arch, image_type, jvm_impl, heap_size, project)
 
         val release = releaseList.lastOrNull()
 
@@ -174,9 +177,9 @@ class BinaryResource : PackageEndpoint() {
 
     protected fun formResponse(
         releases: List<Release>,
-        createResponse: (Package) -> Response = redirectToAsset()
+        createResponse: (Package) -> Response = packageEndpoint.redirectToAsset()
     ): Response {
-        return formResponse(releases, extractPackage(), createResponse)
+        return packageEndpoint.formResponse(releases, extractPackage(), createResponse)
     }
 
     private fun extractPackage(): (binary: Binary) -> Package {
