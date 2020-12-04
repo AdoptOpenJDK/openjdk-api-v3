@@ -7,13 +7,19 @@ calls via the GitHub API in order to retrieve AdoptOpenJDK binaries and metadata
 
 Since the GitHub API is rate limited we use MongoDB as a caching mechanism.
 
-## Source code management and branching
+## Source code management & branching
 
-We treat the AdoptOpenJDK org repository as the canonical repository for deploying the API from. 
-We use the `staging` branch to trial any changes in a Production like environment and then 
-eventually merge into `master` for a real Production deployment.
+There are two main branches in the project:
+- `master`
+- `production`
 
-**NOTE** Please ensure for any significant change that you Pull Request to the `staging` branch 
+All contributions should be made by forking the project and raising a pull request (PR) against the `master` branch.
+
+The `master` branch represents the current live state of the [Staging environment](https://staging-api.adoptopenjdk.net/).
+
+The `production` branch represents the current live state of the [Production environment](https://api.adoptopenjdk.net/).
+
+For more details related to deployment of the API, see [the deployment section](#deployment--continuous-deployment-cd) of this guide.
 
 ## Build
 
@@ -115,10 +121,14 @@ You can choose to deploy this API where you wish, for AdoptOpenJDK we use Contin
 
 ### AdoptOpenJDK
 
-For AdoptOpenJDK, this API deploys to Red Hat OpenShift and is front ended by Cloud Flare as a CDN
+For AdoptOpenJDK, this API deploys to Red Hat OpenShift and is front ended by [Cloudflare](https://www.cloudflare.com) as a CDN.
+
+The `production` branch is synchronised with `master` to perform a release of the latest API changes to the Production OpenShift environment.  
+
+This is done via a pull request that applies all outstanding commits from `master` to `production`.
 
 The Jenkins [AdoptOpenJDK CI Server](https://ci.adoptopenjdk.net) will automatically 
-deploy Pull Requests to OpenShift to Staging (the `staging` branch) or Production (the `master` branch.)
+deploy pull requests to the OpenShift Staging (the `master` branch) or Production (the `production` branch) environments.
 
 ## Code Architecture and Code
 
