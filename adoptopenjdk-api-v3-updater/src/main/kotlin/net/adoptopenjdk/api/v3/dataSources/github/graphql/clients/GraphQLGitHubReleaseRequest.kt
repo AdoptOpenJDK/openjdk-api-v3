@@ -8,14 +8,15 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.ReleaseQueryDat
 import net.adoptopenjdk.api.v3.dataSources.models.GitHubId
 import org.slf4j.LoggerFactory
 
-open class GraphQLGitHubReleaseRequest : GraphQLGitHubInterface() {
+abstract class GraphQLGitHubReleaseRequest(
+    graphQLRequest: GraphQLRequest
+) : GraphQLGitHubInterface(graphQLRequest) {
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
     }
 
     protected suspend fun getNextPage(release: GHRelease): GHRelease {
-
         val getMore = getMoreReleasesQuery(release.id)
         LOGGER.debug("Getting release assets ${release.id}")
         val moreAssets = getAll(

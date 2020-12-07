@@ -10,7 +10,6 @@ import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.Variants
 import net.adoptopenjdk.api.v3.stats.StatsInterface
-import org.jboss.weld.environment.se.Weld
 import org.slf4j.LoggerFactory
 import java.io.OutputStream
 import java.security.MessageDigest
@@ -18,29 +17,31 @@ import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.concurrent.timerTask
 
+@Singleton
 class V3Updater {
+    private var apiDataStore: APIDataStore
+    private var adoptReposBuilder: AdoptReposBuilder
     private val database: ApiPersistence
     private val variants: Variants
     private var repo: AdoptRepos
     private val statsInterface: StatsInterface
 
     @Inject
-    private val apiDataStore: APIDataStore
-
-    init {
+    constructor(
+        adoptReposBuilder: AdoptReposBuilder,
+        apiDataStore: APIDataStore
+    ) {
+        this.adoptReposBuilder = adoptReposBuilder
+        this.apiDataStore = apiDataStore
 
         AppInsightsTelemetry.start()
 
         val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
         variants = UpdaterJsonMapper.mapper.readValue(variantData, Variants::class.java)
         database = ApiPersistenceFactory.get()
-
-        val weld = Weld()
-        val container = weld.initialize()
-
-        apiDataStore = container.select(APIDataStore::class.java).get()
 
         repo = try {
             apiDataStore.loadDataFromDb(true)
@@ -55,38 +56,6 @@ class V3Updater {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-        @JvmStatic
-        fun main(args: Array<String>) {
-            V3Updater().run(true)
-        }
-
-        fun incrementalUpdate(repo: AdoptRepos, database: ApiPersistence): AdoptRepos {
-            return runBlocking {
-                // Must catch errors or may kill the scheduler
-                try {
-                    LOGGER.info("Starting Incremental update")
-                    val updatedRepo = AdoptReposBuilder.incrementalUpdate(repo)
-
-                    if (updatedRepo != repo) {
-                        val checksum = calculateChecksum(updatedRepo)
-
-                        database.updateAllRepos(repo, checksum)
-                        ReleaseVersionResolver.updateDbVersion(repo)
-                        LOGGER.info("Incremental update done")
-                        LOGGER.info("Saved version: $checksum")
-                    }
-                    return@runBlocking updatedRepo
-                } catch (e: Exception) {
-                    LOGGER.error("Failed to perform incremental update", e)
-                } catch (e: Throwable) {
-                    // Log and rethrow
-                    LOGGER.error("Error during incremental update", e)
-                    throw e
-                }
-                repo
-            }
-        }
-
         fun calculateChecksum(repo: AdoptRepos): String {
             val md = MessageDigest.getInstance("MD5")
             val outputStream = object : OutputStream() {
@@ -97,6 +66,33 @@ class V3Updater {
             UpdaterJsonMapper.mapper.writeValue(outputStream, repo)
 
             return String(Base64.getEncoder().encode(md.digest()))
+        }
+    }
+
+    fun incrementalUpdate(repo: AdoptRepos, database: ApiPersistence): AdoptRepos {
+        return runBlocking {
+            // Must catch errors or may kill the scheduler
+            try {
+                LOGGER.info("Starting Incremental update")
+                val updatedRepo = adoptReposBuilder.incrementalUpdate(repo)
+
+                if (updatedRepo != repo) {
+                    val checksum = calculateChecksum(updatedRepo)
+
+                    database.updateAllRepos(repo, checksum)
+                    ReleaseVersionResolver.updateDbVersion(repo)
+                    LOGGER.info("Incremental update done")
+                    LOGGER.info("Saved version: $checksum")
+                }
+                return@runBlocking updatedRepo
+            } catch (e: Exception) {
+                LOGGER.error("Failed to perform incremental update", e)
+            } catch (e: Throwable) {
+                // Log and rethrow
+                LOGGER.error("Error during incremental update", e)
+                throw e
+            }
+            repo
         }
     }
 
@@ -138,7 +134,7 @@ class V3Updater {
         try {
             runBlocking {
                 LOGGER.info("Starting Full update")
-                repo = AdoptReposBuilder.build(variants.versions)
+                repo = adoptReposBuilder.build(variants.versions)
 
                 val checksum = calculateChecksum(repo)
 

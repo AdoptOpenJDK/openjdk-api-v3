@@ -7,8 +7,13 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRelea
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleasesSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 import org.slf4j.LoggerFactory
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class GraphQLGitHubSummaryClient : GraphQLGitHubInterface() {
+@Singleton
+class GraphQLGitHubSummaryClient @Inject constructor(
+    graphQLRequest: GraphQLRequest
+) : GraphQLGitHubInterface(graphQLRequest) {
 
     companion object {
         @JvmStatic

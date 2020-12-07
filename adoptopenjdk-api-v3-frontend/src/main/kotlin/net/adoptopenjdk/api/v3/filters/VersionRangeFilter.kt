@@ -16,7 +16,7 @@ class VersionRangeFilter(range: String?) : Predicate<VersionData> {
             exactMatcher = null
         } else if (!range.startsWith("(") && !range.startsWith("[")) {
             rangeMatcher = null
-            exactMatcher = VersionParser.parse(range)
+            exactMatcher = VersionParser.parse(range, sanityCheck = false, exactMatch = true)
         } else {
             rangeMatcher = VersionRange.createFromVersionSpec(range)
             exactMatcher = null

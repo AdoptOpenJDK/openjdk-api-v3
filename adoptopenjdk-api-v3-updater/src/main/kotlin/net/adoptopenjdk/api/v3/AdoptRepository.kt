@@ -3,7 +3,7 @@ package net.adoptopenjdk.api.v3
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
-import net.adoptopenjdk.api.v3.dataSources.github.graphql.GraphQLGitHubClient
+import net.adoptopenjdk.api.v3.dataSources.github.GitHubApi
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleasesSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
@@ -15,37 +15,28 @@ import net.adoptopenjdk.api.v3.mapping.adopt.AdoptReleaseMapper
 import net.adoptopenjdk.api.v3.mapping.upstream.UpstreamReleaseMapper
 import net.adoptopenjdk.api.v3.models.Release
 import org.slf4j.LoggerFactory
-
-object AdoptRepositoryFactory {
-    private var adoptRepository: AdoptRepository? = null
-
-    fun getAdoptRepository(): AdoptRepository {
-        if (adoptRepository == null) {
-            adoptRepository = AdoptRepositoryImpl
-        }
-        return adoptRepository!!
-    }
-
-    fun setAdoptRepository(repo: AdoptRepository) {
-        this.adoptRepository = repo
-    }
-}
+import javax.inject.Inject
+import javax.inject.Singleton
 
 interface AdoptRepository {
     suspend fun getRelease(version: Int): FeatureRelease?
     suspend fun getSummary(version: Int): GHRepositorySummary
-    suspend fun getReleaseById(id: GitHubId): ReleaseResult
+    suspend fun getReleaseById(id: GitHubId): ReleaseResult?
 }
 
 class ReleaseResult(val result: List<Release>? = null, val error: String? = null) {
     fun succeeded() = error == null && result != null
 }
 
-object AdoptRepositoryImpl : AdoptRepository {
-    @JvmStatic
-    private val LOGGER = LoggerFactory.getLogger(this::class.java)
+@Singleton
+class AdoptRepositoryImpl @Inject constructor(
+    val client: GitHubApi
+) : AdoptRepository {
 
-    val client = GraphQLGitHubClient()
+    companion object {
+        @JvmStatic
+        private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    }
 
     fun getMapperForRepo(url: String): ReleaseMapper {
         if (url.matches(".*/openjdk\\d+-upstream-binaries/.*".toRegex())) {
@@ -55,8 +46,11 @@ object AdoptRepositoryImpl : AdoptRepository {
         }
     }
 
-    override suspend fun getReleaseById(gitHubId: GitHubId): ReleaseResult {
+    override suspend fun getReleaseById(gitHubId: GitHubId): ReleaseResult? {
         val release = client.getReleaseById(gitHubId)
+        if (release == null) {
+            return null
+        }
         return getMapperForRepo(release.url)
             .toAdoptRelease(release)
     }

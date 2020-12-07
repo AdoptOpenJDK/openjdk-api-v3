@@ -68,7 +68,8 @@ class Releases {
 
     fun hasReleaseId(gitHubId: GitHubId): Boolean {
         return nodes
-            .any { it.key.startsWith(gitHubId.id) }
+            .keys
+            .any { release -> release.startsWith(gitHubId.id) }
     }
 
     fun hasReleaseBeenUpdated(gitHubId: GitHubId, updatedAt: ZonedDateTime): Boolean {

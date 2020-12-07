@@ -134,6 +134,16 @@ class VersionParserTest {
     }
 
     @Test
+    fun `parses single number`() {
+        val parsed = VersionParser.parse("8", false)
+        assertEquals(
+            VersionData(8, 0, 0, "", null, 0, null, "8"),
+            parsed
+        )
+        assertEquals("8.0.0", parsed.formSemver())
+    }
+
+    @Test
     fun `patch versions sort correctly`() {
         val sorted = listOf(
             VersionData(11, 0, 7, null, null, 9, null, "11.0.7.2+9", "11.0.7+209", 2),

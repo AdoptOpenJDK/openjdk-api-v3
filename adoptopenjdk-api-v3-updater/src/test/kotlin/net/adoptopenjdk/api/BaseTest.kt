@@ -4,41 +4,33 @@ import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import net.adoptopenjdk.api.v3.*
-import net.adoptopenjdk.api.v3.dataSources.*
-import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
-import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
-import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleasesSummary
-import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
+import net.adoptopenjdk.api.v3.AdoptReposBuilder
+import net.adoptopenjdk.api.v3.dataSources.APIDataStore
+import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
+import net.adoptopenjdk.api.v3.dataSources.UrlRequest
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
-import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
-import net.adoptopenjdk.api.v3.dataSources.models.GitHubId
 import net.adoptopenjdk.api.v3.dataSources.mongo.InternalDbStoreFactory
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.ProtocolVersion
 import org.apache.http.message.BasicHeader
 import org.apache.http.message.BasicStatusLine
-import org.jboss.weld.environment.se.Weld
+import org.jboss.weld.junit5.auto.AddPackages
+import org.jboss.weld.junit5.auto.EnableAutoWeld
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
-import org.slf4j.LoggerFactory
-import java.time.format.DateTimeFormatter
-import javax.inject.Inject
 
+@EnableAutoWeld
 @ExtendWith(MockKExtension::class)
+@AddPackages(value = [AdoptReposBuilder::class, APIDataStore::class])
 abstract class BaseTest {
 
     companion object {
         @JvmStatic
-        private val LOGGER = LoggerFactory.getLogger(this::class.java)
-
-        @JvmStatic
-        public val adoptRepos = AdoptReposTestDataGenerator.generate()
-
-        @Inject
-        lateinit var apiDataStore: APIDataStore
+        val adoptRepos = AdoptReposTestDataGenerator.generate()
 
         private var mockHtmlClient: UpdaterHtmlClient? = null
 
@@ -79,13 +71,9 @@ abstract class BaseTest {
         @BeforeAll
         fun buildApiDataStore() {
             mockRepo()
-            val context = Weld().initialize()
-            apiDataStore = context.select(APIDataStore::class.java).get()
-            (apiDataStore as APIDataStoreImpl).loadDataFromDb(true)
         }
 
         public fun mockRepo(): AdoptRepos {
-            val repo = mockRepository(adoptRepos)
             val persistance = InMemoryApiPersistence()
 
             runBlocking {
@@ -93,54 +81,16 @@ abstract class BaseTest {
             }
 
             ApiPersistenceFactory.set(persistance)
-            AdoptRepositoryFactory.setAdoptRepository(repo)
+
             InternalDbStoreFactory.set(InMemoryInternalDbStore())
 
             return adoptRepos
         }
-
-        fun mockRepository(adoptRepos: AdoptRepos): AdoptRepository {
-            return object : AdoptRepository {
-                override suspend fun getReleaseById(id: GitHubId): ReleaseResult {
-                    return ReleaseResult(
-                        result = adoptRepos.allReleases.getReleases().filter {
-                            it.id.startsWith(id.id)
-                        }.toList()
-                    )
-                }
-
-                override suspend fun getRelease(version: Int): FeatureRelease? {
-                    return adoptRepos.repos.get(version)
-                }
-
-                override suspend fun getSummary(version: Int): GHRepositorySummary {
-                    return repoToSummary(adoptRepos.repos.get(version)!!)
-                }
-
-                protected fun repoToSummary(featureRelease: FeatureRelease): GHRepositorySummary {
-
-                    val gHReleaseSummarys = featureRelease.releases.getReleases()
-                        .map {
-                            GHReleaseSummary(
-                                GitHubId(it.id),
-                                DateTimeFormatter.ISO_INSTANT.format(it.timestamp),
-                                DateTimeFormatter.ISO_INSTANT.format(it.updated_at)
-                            )
-                        }
-                        .toList()
-
-                    return GHRepositorySummary(GHReleasesSummary(gHReleaseSummarys, PageInfo(false, "")))
-                }
-            }
-        }
     }
 
     @BeforeEach
-    fun restartRepo() {
+    fun restartRepo(apiDataStore: APIDataStore) {
         mockRepo()
-    }
-
-    protected suspend fun getInitialRepo(): AdoptRepos {
-        return AdoptReposBuilder.incrementalUpdate(AdoptReposBuilder.build(VariantStore.variants.versions))
+        apiDataStore.loadDataFromDb(true)
     }
 }
