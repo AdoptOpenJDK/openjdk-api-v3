@@ -5,8 +5,13 @@ import io.aexp.nodes.graphql.GraphQLRequestEntity
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.*
 /* ktlint-enable no-wildcard-imports */
 import org.slf4j.LoggerFactory
+import javax.inject.Inject
+import javax.inject.Singleton
 
-open class GraphQLGitHubRepositoryClient : GraphQLGitHubReleaseRequest() {
+@Singleton
+class GraphQLGitHubRepositoryClient @Inject constructor(
+    graphQLRequest: GraphQLRequest
+) : GraphQLGitHubReleaseRequest(graphQLRequest) {
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)

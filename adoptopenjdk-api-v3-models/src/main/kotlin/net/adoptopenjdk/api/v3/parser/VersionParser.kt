@@ -117,12 +117,12 @@ object VersionParser {
             val minor = parsedVersion.interim()
             val security = parsedVersion.update()
             val patch = parsedVersion.patch()
-            val build = parsedVersion.build().orElse(null)
+            val build = parsedVersion.build().orElse(0)
             val opt = parsedVersion.optional().orElse(null)
             val version = parsedVersion.toString()
             val pre = parsedVersion.pre().orElse(null)
 
-            val parsed = VersionData(major, minor, security, pre, 1, build!!, opt, version, null, patch)
+            val parsed = VersionData(major, minor, security, pre, null, build, opt, version, null, patch)
             if (!sanityCheck || sanityCheck(parsed)) {
                 return parsed
             }

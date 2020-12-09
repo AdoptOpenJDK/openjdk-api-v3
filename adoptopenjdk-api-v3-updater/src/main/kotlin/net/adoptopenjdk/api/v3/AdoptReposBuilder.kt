@@ -10,14 +10,25 @@ import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import net.adoptopenjdk.api.v3.models.Release
 import org.slf4j.LoggerFactory
 import java.time.temporal.ChronoUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.absoluteValue
 
-object AdoptReposBuilder {
+@Singleton
+class AdoptReposBuilder {
 
-    @JvmStatic
-    private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    companion object {
+        @JvmStatic
+        private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    }
 
+    private var adoptRepository: AdoptRepository
     private val excluded: MutableSet<GitHubId> = HashSet()
+
+    @Inject
+    constructor(adoptRepository: AdoptRepository) {
+        this.adoptRepository = adoptRepository
+    }
 
     suspend fun incrementalUpdate(repo: AdoptRepos): AdoptRepos {
         val updated = repo
@@ -29,7 +40,7 @@ object AdoptReposBuilder {
     }
 
     private suspend fun getUpdatedFeatureRelease(entry: Map.Entry<Int, FeatureRelease>, repo: AdoptRepos): FeatureRelease? {
-        val summary = AdoptRepositoryFactory.getAdoptRepository().getSummary(entry.key)
+        val summary = adoptRepository.getSummary(entry.key)
 
         // Update cycle
         // 1) remove missing ones
@@ -77,8 +88,8 @@ object AdoptReposBuilder {
     }
 
     private suspend fun getReleaseById(it: GHReleaseSummary): List<Release> {
-        val result = AdoptRepositoryFactory.getAdoptRepository().getReleaseById(it.id)
-        return if (result.succeeded()) {
+        val result = adoptRepository.getReleaseById(it.id)
+        return if (result != null && result.succeeded()) {
             result.result!!
         } else {
             LOGGER.info("Excluding ${it.id} from update")
@@ -93,7 +104,7 @@ object AdoptReposBuilder {
         val reposMap = versions
             .reversed()
             .mapNotNull { version ->
-                AdoptRepositoryFactory.getAdoptRepository().getRelease(version)
+                adoptRepository.getRelease(version)
             }
             .map { Pair(it.featureVersion, it) }
             .toMap()

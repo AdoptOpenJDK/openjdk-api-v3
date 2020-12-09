@@ -37,7 +37,7 @@ class VersionResource {
         version: String?
     ): VersionData {
         try {
-            return VersionParser.parse(version)
+            return VersionParser.parse(version, sanityCheck = false, exactMatch = true)
         } catch (e: FailedToParse) {
             throw BadRequestException("Unable to parse version")
         }

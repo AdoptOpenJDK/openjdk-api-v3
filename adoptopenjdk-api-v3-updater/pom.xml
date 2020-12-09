@@ -12,7 +12,7 @@
     <artifactId>adoptopenjdk-api-v3-updater</artifactId>
 
     <properties>
-        <main.class>net.adoptopenjdk.api.v3.V3Updater</main.class>
+        <main.class>net.adoptopenjdk.api.v3.Main</main.class>
     </properties>
 
     <dependencies>
@@ -136,6 +136,11 @@
         <dependency>
             <groupId>org.jboss.weld.se</groupId>
             <artifactId>weld-se-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.weld</groupId>
+            <artifactId>weld-junit5</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

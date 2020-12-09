@@ -23,7 +23,7 @@ import java.util.Random
 
 object AdoptReposTestDataGenerator {
 
-    val rand: Random = Random(1)
+    var rand: Random = Random(1)
     val TEST_VERSIONS = listOf(8, 9, 10, 11, 12)
     private val TEST_RESOURCES = listOf(
         PermittedValues(
@@ -59,6 +59,7 @@ object AdoptReposTestDataGenerator {
     )
 
     fun generate(): AdoptRepos {
+        rand = Random(1)
         return AdoptRepos(
             TEST_VERSIONS.associateWith { version ->
                 FeatureRelease(version, createRepos(version))

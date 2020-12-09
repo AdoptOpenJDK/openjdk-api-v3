@@ -1,14 +1,13 @@
 package net.adoptopenjdk.api
 
 import kotlinx.coroutines.runBlocking
-import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.JsonMapper
-import net.adoptopenjdk.api.v3.dataSources.*
-import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
-import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
-import net.adoptopenjdk.api.v3.dataSources.models.Releases
+import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+import net.adoptopenjdk.api.v3.dataSources.ReleaseVersionResolver
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
+import net.adoptopenjdk.api.v3.dataSources.UrlRequest
 import net.adoptopenjdk.api.v3.models.ReleaseInfo
-import net.adoptopenjdk.api.v3.models.ReleaseType
 import org.apache.http.HttpResponse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,25 +21,11 @@ class ReleaseVersionResolverTest : BaseTest() {
         setHttpClient()
     }
 
-    fun getRepos(): AdoptRepos {
-        return runBlocking {
-            val repo = AdoptReposBuilder.build(VariantStore.variants.versions)
-
-            val releases = repo.allReleases.getReleases()
-                .filter { it.version_data.major < 13 || it.version_data.major == 13 && it.release_type == ReleaseType.ea }
-                .groupBy { it.version_data.major }
-                .toMap()
-                .map { FeatureRelease(it.key, Releases(it.value)) }
-
-            AdoptRepos(releases)
-        }
-    }
-
     @Test
     fun isStoredToDb() {
         runBlocking {
-            val info = ReleaseVersionResolver.formReleaseInfo(getRepos())
-            ReleaseVersionResolver.updateDbVersion(getRepos())
+            val info = ReleaseVersionResolver.formReleaseInfo(adoptRepos)
+            ReleaseVersionResolver.updateDbVersion(adoptRepos)
             val version = ApiPersistenceFactory.get().getReleaseInfo()
             assertEquals(JsonMapper.mapper.writeValueAsString(info), JsonMapper.mapper.writeValueAsString(version!!))
         }
@@ -83,7 +68,7 @@ class ReleaseVersionResolverTest : BaseTest() {
 
     private fun check(matcher: (ReleaseInfo) -> Boolean) {
         runBlocking {
-            val info = ReleaseVersionResolver.formReleaseInfo(getRepos())
+            val info = ReleaseVersionResolver.formReleaseInfo(adoptRepos)
             assertTrue(matcher(info))
         }
     }

@@ -9,22 +9,26 @@ import java.time.ZonedDateTime
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.concurrent.timerTask
 
 @Singleton
 class APIDataStoreImpl : APIDataStore {
-    private var updatedAt: UpdatedInfo = UpdatedInfo(ZonedDateTime.now().minusYears(10), "111")
+    private var updatedAt: UpdatedInfo
     private var binaryRepos: AdoptRepos
     private var releaseInfo: ReleaseInfo
-    var schedule: ScheduledFuture<*>? = null
+    var schedule: ScheduledFuture<*>?
 
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
     }
 
+    @Inject
     constructor() {
+        updatedAt = UpdatedInfo(ZonedDateTime.now().minusYears(10), "111")
+        schedule = null
         binaryRepos = try {
             loadDataFromDb(true)
         } catch (e: Exception) {
@@ -36,6 +40,8 @@ class APIDataStoreImpl : APIDataStore {
     }
 
     constructor(binaryRepos: AdoptRepos) {
+        updatedAt = UpdatedInfo(ZonedDateTime.now().minusYears(10), "111")
+        schedule = null
         this.binaryRepos = binaryRepos
         this.releaseInfo = loadReleaseInfo()
     }

@@ -8,17 +8,21 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRepository
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 import net.adoptopenjdk.api.v3.dataSources.models.GitHubId
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class GraphQLGitHubClient : GitHubApi {
-    private val summaryClient = GraphQLGitHubSummaryClient()
-    private val releaseClient = GraphQLGitHubReleaseClient()
-    private val repositoryClientClient = GraphQLGitHubRepositoryClient()
+@Singleton
+open class GraphQLGitHubClient @Inject constructor(
+    private val summaryClient: GraphQLGitHubSummaryClient,
+    private val releaseClient: GraphQLGitHubReleaseClient,
+    private val repositoryClientClient: GraphQLGitHubRepositoryClient
+) : GitHubApi {
 
     override suspend fun getRepositorySummary(repoName: String): GHRepositorySummary {
         return summaryClient.getRepositorySummary(repoName)
     }
 
-    override suspend fun getReleaseById(id: GitHubId): GHRelease {
+    override suspend fun getReleaseById(id: GitHubId): GHRelease? {
         return releaseClient.getReleaseById(id)
     }
 
