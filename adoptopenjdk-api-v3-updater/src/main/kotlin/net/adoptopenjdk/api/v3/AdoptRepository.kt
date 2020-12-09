@@ -30,7 +30,8 @@ class ReleaseResult(val result: List<Release>? = null, val error: String? = null
 
 @Singleton
 class AdoptRepositoryImpl @Inject constructor(
-    val client: GitHubApi
+    val client: GitHubApi,
+    val adoptReleaseMapper: AdoptReleaseMapper
 ) : AdoptRepository {
 
     companion object {
@@ -42,7 +43,7 @@ class AdoptRepositoryImpl @Inject constructor(
         if (url.matches(".*/openjdk\\d+-upstream-binaries/.*".toRegex())) {
             return UpstreamReleaseMapper
         } else {
-            return AdoptReleaseMapper
+            return adoptReleaseMapper
         }
     }
 

@@ -2,15 +2,20 @@ package net.adoptopenjdk.api.packages
 
 import io.quarkus.test.junit.QuarkusTest
 import net.adoptopenjdk.api.DbExtension
-import net.adoptopenjdk.api.v3.models.*
+import net.adoptopenjdk.api.v3.models.Architecture
+import net.adoptopenjdk.api.v3.models.HeapSize
+import net.adoptopenjdk.api.v3.models.ImageType
+import net.adoptopenjdk.api.v3.models.JvmImpl
+import net.adoptopenjdk.api.v3.models.OperatingSystem
+import net.adoptopenjdk.api.v3.models.Project
+import net.adoptopenjdk.api.v3.models.ReleaseType
+import net.adoptopenjdk.api.v3.models.Vendor
 import org.hamcrest.Matchers
-import org.jboss.weld.junit5.EnableWeld
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(value = [DbExtension::class])
 @QuarkusTest
-@EnableWeld
+@ExtendWith(value = [DbExtension::class])
 class InstallerPathTest : PackageEndpointTest() {
 
     override fun getPath(): String {

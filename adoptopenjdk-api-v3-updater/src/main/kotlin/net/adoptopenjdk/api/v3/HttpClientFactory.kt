@@ -22,7 +22,6 @@ object HttpClientFactory {
         .build()!!
 
     init {
-
         val client = HttpAsyncClients.custom()
             .setConnectionReuseStrategy(NoConnectionReuseStrategy())
             .disableCookieManagement()

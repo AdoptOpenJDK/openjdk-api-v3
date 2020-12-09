@@ -1,6 +1,5 @@
 package net.adoptopenjdk.api
 
-import io.quarkus.test.junit.QuarkusTest
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.APIDataStoreImpl
@@ -9,32 +8,30 @@ import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
-import net.adoptopenjdk.api.v3.models.*
+import net.adoptopenjdk.api.v3.models.Architecture
+import net.adoptopenjdk.api.v3.models.Binary
+import net.adoptopenjdk.api.v3.models.HeapSize
+import net.adoptopenjdk.api.v3.models.ImageType
+import net.adoptopenjdk.api.v3.models.Installer
+import net.adoptopenjdk.api.v3.models.JvmImpl
+import net.adoptopenjdk.api.v3.models.OperatingSystem
+import net.adoptopenjdk.api.v3.models.Package
+import net.adoptopenjdk.api.v3.models.Project
+import net.adoptopenjdk.api.v3.models.Release
+import net.adoptopenjdk.api.v3.models.ReleaseType
+import net.adoptopenjdk.api.v3.models.Vendor
+import net.adoptopenjdk.api.v3.models.VersionData
 import net.adoptopenjdk.api.v3.routes.AssetsResource
-import org.jboss.weld.junit5.EnableWeld
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import java.time.ZonedDateTime
 import kotlin.test.assertEquals
 
-@ExtendWith(value = [DbExtension::class])
-@QuarkusTest
-@EnableWeld
 class AssetsResourceFeatureReleasePathSortOrderTest : FrontendTest() {
 
+    var assetResource: AssetsResource = AssetsResource(ApiDataStoreStub(createRepo()))
+
     companion object {
-        private lateinit var assetResource: AssetsResource
-        private lateinit var apiDatastore: APIDataStoreImpl
-
-        @BeforeAll
-        @JvmStatic
-        fun setup() {
-            apiDatastore = APIDataStoreImpl(createRepo())
-            assetResource = AssetsResource(apiDatastore)
-        }
-
-        private fun createRepo(): AdoptRepos {
+        fun createRepo(): AdoptRepos {
             val binary = Binary(
                 Package(
                     "a",
@@ -98,15 +95,15 @@ class AssetsResourceFeatureReleasePathSortOrderTest : FrontendTest() {
     }
 
     @Test
-    fun doesSortObaySortMethod() {
+    fun doesSortObaySortMethod(apiDatastore: APIDataStoreImpl) {
         runBlocking {
-            assertEquals("bar", getRelease(assetResource, SortOrder.DESC, SortMethod.DATE)[0].id)
-            assertEquals("foo", getRelease(assetResource, SortOrder.DESC, SortMethod.DEFAULT)[0].id)
-            assertEquals("foo", getRelease(assetResource, SortOrder.DESC, null)[0].id)
+            assertEquals("bar", getRelease(SortOrder.DESC, SortMethod.DATE)[0].id)
+            assertEquals("foo", getRelease(SortOrder.DESC, SortMethod.DEFAULT)[0].id)
+            assertEquals("foo", getRelease(SortOrder.DESC, null)[0].id)
         }
     }
 
-    private fun getRelease(assetResource: AssetsResource, sortOrder: SortOrder, sortMethod: SortMethod?): List<Release> {
+    private fun getRelease(sortOrder: SortOrder, sortMethod: SortMethod?): List<Release> {
         return assetResource.get(
             version = 8, release_type = ReleaseType.ga, sortOrder = sortOrder, sortMethod = sortMethod,
             arch = null, heap_size = null, jvm_impl = null, image_type = null, os = null, page = null, pageSize = null, project = null, vendor = null, before = null
@@ -116,7 +113,7 @@ class AssetsResourceFeatureReleasePathSortOrderTest : FrontendTest() {
     @Test
     fun doesSortOrderIgnoreOpt() {
         runBlocking {
-            val releases = getRelease(assetResource, SortOrder.DESC, null)
+            val releases = getRelease(SortOrder.DESC, null)
             assertEquals("bar", releases.get(1).id)
         }
     }

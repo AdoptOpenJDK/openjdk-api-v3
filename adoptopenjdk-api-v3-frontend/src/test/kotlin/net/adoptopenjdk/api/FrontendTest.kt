@@ -1,5 +1,8 @@
 package net.adoptopenjdk.api
 
+import net.adoptopenjdk.api.testDoubles.InMemoryApiPersistence
+import net.adoptopenjdk.api.testDoubles.InMemoryInternalDbStore
+import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortMethod
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.filters.BinaryFilter
@@ -7,7 +10,17 @@ import net.adoptopenjdk.api.v3.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.models.Binary
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.Vendor
+import org.jboss.weld.junit5.auto.AddPackages
+import org.jboss.weld.junit5.auto.EnableAutoWeld
 
+@EnableAutoWeld
+@AddPackages(
+    value = [
+        InMemoryApiPersistence::class,
+        InMemoryInternalDbStore::class,
+        APIDataStore::class,
+    ]
+)
 open class FrontendTest {
 
     protected fun getRandomBinary(): Pair<Release, Binary> {

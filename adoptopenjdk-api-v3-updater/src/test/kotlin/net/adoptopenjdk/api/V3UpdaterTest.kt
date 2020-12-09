@@ -4,17 +4,17 @@ import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
 import net.adoptopenjdk.api.v3.V3Updater
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+import net.adoptopenjdk.api.v3.dataSources.ReleaseVersionResolver
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
+import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
+import net.adoptopenjdk.api.v3.stats.StatsInterface
 import org.jboss.weld.junit5.auto.AddPackages
-import org.jboss.weld.junit5.auto.EnableAutoWeld
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-@EnableAutoWeld
-@AddPackages(value = [AdoptReposBuilder::class, APIDataStore::class])
+@AddPackages(value = [AdoptReposBuilder::class])
 class V3UpdaterTest : MongoTest() {
 
     companion object {
@@ -25,18 +25,22 @@ class V3UpdaterTest : MongoTest() {
     @Test
     fun `updated at check sum is set`(
         adoptReposBuilder: AdoptReposBuilder,
-        apiDataStore: APIDataStore
+        apiDataStore: APIDataStore,
+        apiPersistence: ApiPersistence,
+        database: ApiPersistence,
+        releaseVersionResolver: ReleaseVersionResolver,
+        statsInterface: StatsInterface
     ) {
         runBlocking {
             val repo = BaseTest.adoptRepos
-            ApiPersistenceFactory.get().updateAllRepos(repo, "a-checksum")
+            apiPersistence.updateAllRepos(repo, "a-checksum")
 
             val without8 = AdoptRepos(repo.repos.filterNot { it.key == 8 })
-            ApiPersistenceFactory.get().updateAllRepos(without8, "a-different-checksum")
+            apiPersistence.updateAllRepos(without8, "a-different-checksum")
 
-            V3Updater(adoptReposBuilder, apiDataStore).incrementalUpdate(repo, ApiPersistenceFactory.get())
+            V3Updater(adoptReposBuilder, apiDataStore, database, releaseVersionResolver, statsInterface).incrementalUpdate(repo, apiPersistence)
 
-            val updatedTime = ApiPersistenceFactory.get().getUpdatedAt()
+            val updatedTime = apiPersistence.getUpdatedAt()
 
             assertEquals("a-different-checksum", updatedTime.checksum)
         }

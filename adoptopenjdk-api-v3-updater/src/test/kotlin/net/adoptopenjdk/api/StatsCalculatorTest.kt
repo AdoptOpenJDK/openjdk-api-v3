@@ -18,16 +18,18 @@ import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.models.VersionData
-import net.adoptopenjdk.api.v3.stats.GitHubDownloadStatsCalculator
 import net.adoptopenjdk.api.v3.stats.DockerStatsInterface
+import net.adoptopenjdk.api.v3.stats.GitHubDownloadStatsCalculator
+import org.jboss.weld.junit5.auto.AddPackages
 import org.junit.jupiter.api.Test
 
+@AddPackages(value = [GitHubDownloadStatsCalculator::class])
 class StatsCalculatorTest : BaseTest() {
 
     @Test
-    fun testGithubStatsCalculator() {
+    fun testGithubStatsCalculator(gitHubDownloadStatsCalculator: GitHubDownloadStatsCalculator) {
         val adoptRepos = AdoptRepos(listOf(generateFeatureRelease()))
-        val result: List<GitHubDownloadStatsDbEntry> = GitHubDownloadStatsCalculator().getStats(adoptRepos)
+        val result: List<GitHubDownloadStatsDbEntry> = gitHubDownloadStatsCalculator.getStats(adoptRepos)
 
         assert(result[0].feature_version == 8)
         assert(result[0].downloads == 895L)
@@ -36,8 +38,7 @@ class StatsCalculatorTest : BaseTest() {
     }
 
     @Test
-    fun testDockerVersionNumber() {
-        val dsi = DockerStatsInterface()
+    fun testDockerVersionNumber(dsi: DockerStatsInterface) {
         assert(dsi.getOpenjdkVersionFromString("openjdk11") == 11)
         assert(dsi.getOpenjdkVersionFromString("openjdk7") == 7)
         assert(dsi.getOpenjdkVersionFromString("openjdk") == null)

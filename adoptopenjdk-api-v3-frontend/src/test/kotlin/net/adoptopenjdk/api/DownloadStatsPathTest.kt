@@ -1,10 +1,11 @@
 package net.adoptopenjdk.api
 
-import io.quarkus.test.junit.QuarkusTest
 import kotlinx.coroutines.runBlocking
+import net.adoptopenjdk.api.testDoubles.InMemoryApiPersistence
 import net.adoptopenjdk.api.v3.DownloadStatsInterface
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
+import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.DownloadDiff
 import net.adoptopenjdk.api.v3.models.DownloadStats
@@ -12,8 +13,6 @@ import net.adoptopenjdk.api.v3.models.GitHubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.StatsSource
 import net.adoptopenjdk.api.v3.routes.stats.DownloadStatsResource
-import org.jboss.weld.junit5.EnableWeld
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
@@ -25,33 +24,32 @@ import kotlin.test.assertFails
 import kotlin.test.assertTrue
 
 @ExtendWith(value = [DbExtension::class])
-@QuarkusTest
-@EnableWeld
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DownloadStatsPathTest : FrontendTest() {
 
-    lateinit var downloadStatsResource: DownloadStatsResource
+    private val apiDataStore: APIDataStore = ApiDataStoreStub()
 
-    @BeforeAll
-    fun setup(apiDataStore: ApiDataStoreStub) {
-        runBlocking {
-            downloadStatsResource = createDownloadStatsResource(apiDataStore)
+    private val apiPersistence: ApiPersistence = InMemoryApiPersistence(
+        AdoptReposTestDataGenerator.generate()
+    )
+
+    private val downloadStatsResource: DownloadStatsResource = createDownloadStatsResource(apiDataStore, apiPersistence)
+
+    private fun createDownloadStatsResource(apiDataStore: APIDataStore, apiPersistence: ApiPersistence): DownloadStatsResource {
+        return runBlocking {
+            val persistance = apiPersistence
+
+            persistance.addDockerDownloadStatsEntries(
+                createDockerStatsWithRepoName()
+            )
+
+            persistance.addGithubDownloadStatsEntries(
+                createGithubData()
+            )
+
+            val downloadStatsResource = DownloadStatsResource(apiDataStore, DownloadStatsInterface(persistance))
+            downloadStatsResource
         }
-    }
-
-    private suspend fun createDownloadStatsResource(apiDataStore: APIDataStore): DownloadStatsResource {
-        val persistance = InMemoryApiPersistence()
-
-        persistance.addDockerDownloadStatsEntries(
-            createDockerStatsWithRepoName()
-        )
-
-        persistance.addGithubDownloadStatsEntries(
-            createGithubData()
-        )
-
-        val downloadStatsResource = DownloadStatsResource(apiDataStore, DownloadStatsInterface(persistance))
-        return downloadStatsResource
     }
 
     private fun createGithubData(): List<GitHubDownloadStatsDbEntry> {

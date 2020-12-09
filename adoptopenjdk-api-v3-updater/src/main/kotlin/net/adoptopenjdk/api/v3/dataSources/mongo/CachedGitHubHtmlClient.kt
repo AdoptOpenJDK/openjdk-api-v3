@@ -12,19 +12,23 @@ import net.adoptopenjdk.api.v3.dataSources.UrlRequest
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
+import javax.inject.Inject
+import javax.inject.Singleton
 
 interface GitHubHtmlClient {
     suspend fun getUrl(url: String): String?
 }
 
-object CachedGitHubHtmlClient : GitHubHtmlClient {
-    @JvmStatic
-    private val LOGGER = LoggerFactory.getLogger(this::class.java)
+@Singleton
+class CachedGitHubHtmlClient @Inject constructor(val internalDbStore: InternalDbStore) : GitHubHtmlClient {
 
-    @JvmStatic
-    private val backgroundHtmlDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    companion object {
+        @JvmStatic
+        private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-    private val internalDbStore = InternalDbStoreFactory.get()
+        @JvmStatic
+        private val backgroundHtmlDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    }
 
     // List of urls to be refreshed in the background
     private val workList = LinkedBlockingQueue<UrlRequest>()

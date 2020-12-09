@@ -9,27 +9,16 @@ import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoClientFactory
 import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoInterface
 import org.bson.Document
 import org.litote.kmongo.coroutine.CoroutineCollection
-
-object InternalDbStoreFactory {
-    private var impl: InternalDbStore? = null
-
-    fun get(): InternalDbStore {
-        if (impl == null) {
-            impl = InternalDbStoreImpl()
-        }
-        return impl!!
-    }
-
-    fun set(impl: InternalDbStore?) {
-        InternalDbStoreFactory.impl = impl
-    }
-}
+import javax.enterprise.inject.Default
+import javax.inject.Singleton
 
 interface InternalDbStore {
     suspend fun putCachedWebpage(url: String, lastModified: String?, data: String?)
     suspend fun getCachedWebpage(url: String): CacheDbEntry?
 }
 
+@Singleton
+@Default
 class InternalDbStoreImpl : MongoInterface(MongoClientFactory.get()), InternalDbStore {
     private val webCache: CoroutineCollection<CacheDbEntry> = createCollection(database, "web-cache")
 

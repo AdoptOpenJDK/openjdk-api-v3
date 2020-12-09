@@ -6,17 +6,18 @@ import de.flapdoodle.embed.mongo.config.MongodConfigBuilder
 import de.flapdoodle.embed.mongo.config.Net
 import de.flapdoodle.embed.mongo.distribution.Version
 import de.flapdoodle.embed.process.runtime.Network
-import io.mockk.junit5.MockKExtension
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+import net.adoptopenjdk.api.v3.dataSources.APIDataStoreImpl
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoClientFactory
+import org.jboss.weld.junit5.auto.AddPackages
+import org.jboss.weld.junit5.auto.EnableAutoWeld
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.LoggerFactory
 import kotlin.random.Random
 
-@ExtendWith(value = [MockKExtension::class])
+@EnableAutoWeld
+@AddPackages(value = [APIDataStoreImpl::class])
 abstract class MongoTest {
 
     companion object {
@@ -51,7 +52,6 @@ abstract class MongoTest {
             mongodExecutable = starter.prepare(mongodConfig)
             mongodExecutable!!.start()
 
-            ApiPersistenceFactory.set(null)
             MongoClientFactory.set(null)
             LOGGER.info("FMongo started")
         }
@@ -60,7 +60,6 @@ abstract class MongoTest {
         @AfterAll
         fun closeMongo() {
             mongodExecutable!!.stop()
-            ApiPersistenceFactory.set(null)
             MongoClientFactory.set(null)
         }
     }

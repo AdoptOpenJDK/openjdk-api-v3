@@ -5,8 +5,8 @@ import io.restassured.RestAssured
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(value = [DbExtension::class])
 @QuarkusTest
+@ExtendWith(value = [DbExtension::class])
 class VariantsPathTest : FrontendTest() {
     @Test
     fun variants() {

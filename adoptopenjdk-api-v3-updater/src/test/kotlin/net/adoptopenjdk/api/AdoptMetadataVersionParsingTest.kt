@@ -8,19 +8,22 @@ import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UrlRequest
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
+import net.adoptopenjdk.api.v3.dataSources.mongo.GitHubHtmlClient
 import net.adoptopenjdk.api.v3.mapping.adopt.AdoptReleaseMapper
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.ProtocolVersion
 import org.apache.http.message.BasicHeader
 import org.apache.http.message.BasicStatusLine
+import org.jboss.weld.junit5.auto.AddPackages
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
+@AddPackages(value = [AdoptReleaseMapper::class, GitHubHtmlClient::class])
 class AdoptMetadataVersionParsingTest : BaseTest() {
 
     @Test
-    fun usesMetadataForVersion() {
+    fun usesMetadataForVersion(adoptReleaseMapper: AdoptReleaseMapper) {
         runBlocking {
             UpdaterHtmlClientFactory.client = object : UpdaterHtmlClient {
                 override suspend fun get(url: String): String? {
@@ -62,7 +65,7 @@ class AdoptMetadataVersionParsingTest : BaseTest() {
 
             val json = String(this.javaClass.classLoader.getResourceAsStream("example-release.json").readAllBytes())
             val release = JsonMapper.mapper.readValue(json, GHRelease::class.java)
-            val adoptRelease = AdoptReleaseMapper.toAdoptRelease(release)
+            val adoptRelease = adoptReleaseMapper.toAdoptRelease(release)
 
             assertEquals(242, adoptRelease.result!!.first().version_data.security)
         }

@@ -3,7 +3,6 @@ package net.adoptopenjdk.api.v3
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.ai.AppInsightsTelemetry
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.ReleaseVersionResolver
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
@@ -17,11 +16,10 @@ import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.concurrent.timerTask
 
-@Singleton
 class V3Updater {
+    private var releaseVersionResolver: ReleaseVersionResolver
     private var apiDataStore: APIDataStore
     private var adoptReposBuilder: AdoptReposBuilder
     private val database: ApiPersistence
@@ -32,16 +30,20 @@ class V3Updater {
     @Inject
     constructor(
         adoptReposBuilder: AdoptReposBuilder,
-        apiDataStore: APIDataStore
+        apiDataStore: APIDataStore,
+        database: ApiPersistence,
+        releaseVersionResolver: ReleaseVersionResolver,
+        statsInterface: StatsInterface
     ) {
         this.adoptReposBuilder = adoptReposBuilder
         this.apiDataStore = apiDataStore
+        this.releaseVersionResolver = releaseVersionResolver
 
         AppInsightsTelemetry.start()
 
         val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
         variants = UpdaterJsonMapper.mapper.readValue(variantData, Variants::class.java)
-        database = ApiPersistenceFactory.get()
+        this.database = database
 
         repo = try {
             apiDataStore.loadDataFromDb(true)
@@ -49,7 +51,7 @@ class V3Updater {
             LOGGER.error("Failed to load db", e)
             AdoptRepos(emptyList())
         }
-        statsInterface = StatsInterface()
+        this.statsInterface = statsInterface
     }
 
     companion object {
@@ -80,7 +82,7 @@ class V3Updater {
                     val checksum = calculateChecksum(updatedRepo)
 
                     database.updateAllRepos(repo, checksum)
-                    ReleaseVersionResolver.updateDbVersion(repo)
+                    releaseVersionResolver.updateDbVersion(repo)
                     LOGGER.info("Incremental update done")
                     LOGGER.info("Saved version: $checksum")
                 }
@@ -140,7 +142,7 @@ class V3Updater {
 
                 database.updateAllRepos(repo, checksum)
                 statsInterface.update(repo)
-                ReleaseVersionResolver.updateDbVersion(repo)
+                releaseVersionResolver.updateDbVersion(repo)
                 LOGGER.info("Full update done")
             }
         } catch (e: Exception) {

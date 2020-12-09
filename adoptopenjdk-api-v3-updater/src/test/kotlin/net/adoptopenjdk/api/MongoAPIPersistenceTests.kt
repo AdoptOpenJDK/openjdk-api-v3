@@ -2,16 +2,16 @@ package net.adoptopenjdk.api
 
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.TimeSource
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import org.junit.Assert
 import org.junit.jupiter.api.Test
 
-class MongoAPIPersistenceTests : BaseTest() {
+class MongoAPIPersistenceTests : MongoTest() {
 
     @Test
-    fun `update time is set`() {
+    fun `update time is set`(apiPersistence: ApiPersistence) {
         runBlocking {
-            val api = ApiPersistenceFactory.get()
+            val api = apiPersistence
             api.updateUpdatedTime(TimeSource.now(), "")
             api.updateUpdatedTime(TimeSource.now(), "")
             api.updateUpdatedTime(TimeSource.now(), "")

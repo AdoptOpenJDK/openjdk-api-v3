@@ -21,12 +21,13 @@ import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import java.net.URI
 import javax.enterprise.context.ApplicationScoped
+import javax.inject.Inject
 import javax.ws.rs.core.Response
 
 @ApplicationScoped
-class PackageEndpoint(private val apiDataStore: APIDataStore) {
+open class PackageEndpoint @Inject constructor(private val apiDataStore: APIDataStore) {
 
-    fun getReleases(
+    open fun getReleases(
         release_name: String?,
         vendor: Vendor?,
         os: OperatingSystem?,
@@ -41,7 +42,7 @@ class PackageEndpoint(private val apiDataStore: APIDataStore) {
         return apiDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC, SortMethod.DEFAULT).toList()
     }
 
-    fun <T : Asset> formResponse(
+    open fun <T : Asset> formResponse(
         releases: List<Release>,
         extractAsset: (Binary) -> T?,
         createResponse: (T) -> Response
@@ -82,7 +83,7 @@ class PackageEndpoint(private val apiDataStore: APIDataStore) {
             .build()
     }
 
-    fun getRelease(release_type: ReleaseType?, version: Int?, vendor: Vendor?, os: OperatingSystem?, arch: Architecture?, image_type: ImageType?, jvm_impl: JvmImpl?, heap_size: HeapSize?, project: Project?): List<Release> {
+    open fun getRelease(release_type: ReleaseType?, version: Int?, vendor: Vendor?, os: OperatingSystem?, arch: Architecture?, image_type: ImageType?, jvm_impl: JvmImpl?, heap_size: HeapSize?, project: Project?): List<Release> {
         val releaseFilter = ReleaseFilter(releaseType = release_type, featureVersion = version, vendor = vendor)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
         val releases = apiDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC, SortMethod.DEFAULT).toList()
@@ -95,7 +96,7 @@ class PackageEndpoint(private val apiDataStore: APIDataStore) {
         return releases.sortedWith(comparator)
     }
 
-    fun redirectToAsset(): (Asset) -> Response {
+    open fun redirectToAsset(): (Asset) -> Response {
         return { asset ->
             Response.temporaryRedirect(URI.create(asset.link)).build()
         }

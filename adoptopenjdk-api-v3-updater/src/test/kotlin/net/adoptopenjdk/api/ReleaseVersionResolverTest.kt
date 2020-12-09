@@ -2,31 +2,36 @@ package net.adoptopenjdk.api
 
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.JsonMapper
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.ReleaseVersionResolver
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UrlRequest
+import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import org.apache.http.HttpResponse
+import org.jboss.weld.junit5.auto.AddPackages
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@AddPackages(value = [ReleaseVersionResolver::class])
 class ReleaseVersionResolverTest : BaseTest() {
 
+    private var releaseVersionResolver: ReleaseVersionResolver? = null
+
     @BeforeEach
-    fun init() {
+    fun init(releaseVersionResolver: ReleaseVersionResolver) {
         setHttpClient()
+        this.releaseVersionResolver = releaseVersionResolver
     }
 
     @Test
-    fun isStoredToDb() {
+    fun isStoredToDb(apiPersistence: ApiPersistence) {
         runBlocking {
-            val info = ReleaseVersionResolver.formReleaseInfo(adoptRepos)
-            ReleaseVersionResolver.updateDbVersion(adoptRepos)
-            val version = ApiPersistenceFactory.get().getReleaseInfo()
+            val info = releaseVersionResolver!!.formReleaseInfo(adoptRepos)
+            releaseVersionResolver!!.updateDbVersion(adoptRepos)
+            val version = apiPersistence.getReleaseInfo()
             assertEquals(JsonMapper.mapper.writeValueAsString(info), JsonMapper.mapper.writeValueAsString(version!!))
         }
     }
@@ -68,7 +73,7 @@ class ReleaseVersionResolverTest : BaseTest() {
 
     private fun check(matcher: (ReleaseInfo) -> Boolean) {
         runBlocking {
-            val info = ReleaseVersionResolver.formReleaseInfo(adoptRepos)
+            val info = releaseVersionResolver!!.formReleaseInfo(adoptRepos)
             assertTrue(matcher(info))
         }
     }

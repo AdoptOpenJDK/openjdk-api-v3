@@ -13,29 +13,21 @@ import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.routes.AssetsResource
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
-import org.jboss.weld.junit5.EnableWeld
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.stream.Stream
+import javax.inject.Inject
 import javax.ws.rs.BadRequestException
 
-@ExtendWith(value = [DbExtension::class])
 @QuarkusTest
-@EnableWeld
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(value = [DbExtension::class])
 class AssetsResourceReleaseNamePathTest : FrontendTest() {
 
+    @Inject
     lateinit var apiDataStore: APIDataStore
-
-    @BeforeAll
-    fun setup(apiDataStore: ApiDataStoreStub) {
-        this.apiDataStore = apiDataStore
-    }
 
     @TestFactory
     fun filtersByReleaseNameCorrectly(): Stream<DynamicTest> {

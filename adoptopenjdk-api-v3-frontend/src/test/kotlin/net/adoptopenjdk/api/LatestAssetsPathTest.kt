@@ -6,14 +6,16 @@ import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
 import io.vertx.core.json.JsonArray
 import net.adoptopenjdk.api.v3.JsonMapper
-import net.adoptopenjdk.api.v3.models.*
-import org.jboss.weld.junit5.EnableWeld
+import net.adoptopenjdk.api.v3.models.Architecture
+import net.adoptopenjdk.api.v3.models.BinaryAssetView
+import net.adoptopenjdk.api.v3.models.ImageType
+import net.adoptopenjdk.api.v3.models.JvmImpl
+import net.adoptopenjdk.api.v3.models.OperatingSystem
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(value = [DbExtension::class])
 @QuarkusTest
-@EnableWeld
+@ExtendWith(value = [DbExtension::class])
 class LatestAssetsPathTest : FrontendTest() {
 
     fun getPath() = "/v3/assets/latest"

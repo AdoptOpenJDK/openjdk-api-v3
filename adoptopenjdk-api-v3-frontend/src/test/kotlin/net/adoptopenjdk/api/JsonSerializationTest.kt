@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import kotlin.test.assertTrue
 
-@ExtendWith(value = [DbExtension::class])
 @QuarkusTest
+@ExtendWith(value = [DbExtension::class])
 class JsonSerializationTest : FrontendTest() {
 
     class PrettyPrintMatcher : TypeSafeMatcher<String>() {
