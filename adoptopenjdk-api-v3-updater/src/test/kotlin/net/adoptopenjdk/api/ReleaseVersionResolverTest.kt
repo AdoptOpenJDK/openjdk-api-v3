@@ -2,7 +2,11 @@ package net.adoptopenjdk.api
 
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.JsonMapper
-import net.adoptopenjdk.api.v3.dataSources.*
+import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+import net.adoptopenjdk.api.v3.dataSources.ReleaseVersionResolver
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
+import net.adoptopenjdk.api.v3.dataSources.UrlRequest
 import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import org.apache.http.HttpResponse
 import org.junit.jupiter.api.BeforeEach

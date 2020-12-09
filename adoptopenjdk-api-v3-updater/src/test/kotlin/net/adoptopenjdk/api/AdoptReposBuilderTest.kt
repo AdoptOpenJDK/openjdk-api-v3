@@ -145,12 +145,19 @@ class AdoptReposBuilderTest : BaseTest() {
         }
     }
 
-    /*
     @Test
     fun updatedReleaseIsNotUpdatedWhenThingsDontChange(repo: AdoptRepos, adoptReposBuilder: AdoptReposBuilder) {
         runBlocking {
-            assertTrue { updated == repo }
+
+            val updated2 = runBlocking {
+                adoptReposBuilder.incrementalUpdate(repo)
+            }
+            val updated3 = runBlocking {
+                adoptReposBuilder.incrementalUpdate(repo)
+            }
+
+            assertTrue { updated == updated2 }
+            assertTrue { updated2 == updated3 }
         }
     }
-     */
 }
