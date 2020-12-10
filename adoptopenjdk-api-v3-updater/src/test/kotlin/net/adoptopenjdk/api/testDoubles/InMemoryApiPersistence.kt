@@ -1,4 +1,4 @@
-package net.adoptopenjdk.api
+package net.adoptopenjdk.api.testDoubles
 
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
@@ -9,11 +9,18 @@ import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.GitHubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import java.time.ZonedDateTime
+import javax.annotation.Priority
+import javax.enterprise.inject.Alternative
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class InMemoryApiPersistence : ApiPersistence {
+@Priority(1)
+@Alternative
+@Singleton
+open class InMemoryApiPersistence @Inject constructor(var repos: AdoptRepos) : ApiPersistence {
     private var updatedAtInfo: UpdatedInfo? = null
     private var releaseInfo: ReleaseInfo? = null
-    private var repos: AdoptRepos? = null
+
     private var githubStats = ArrayList<GitHubDownloadStatsDbEntry>()
     private var dockerStats = ArrayList<DockerDownloadStatsDbEntry>()
 

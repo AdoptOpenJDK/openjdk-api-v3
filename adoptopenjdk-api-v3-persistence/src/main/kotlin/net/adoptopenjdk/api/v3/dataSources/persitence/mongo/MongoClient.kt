@@ -7,6 +7,7 @@ import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
 import org.slf4j.LoggerFactory
+import javax.inject.Singleton
 
 object MongoClientFactory {
     // Current default impl is mongo impl
@@ -24,7 +25,8 @@ object MongoClientFactory {
     }
 }
 
-class MongoClient {
+@Singleton
+open class MongoClient {
     val database: CoroutineDatabase
     val client: CoroutineClient
 

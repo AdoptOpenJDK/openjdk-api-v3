@@ -1,7 +1,6 @@
 package net.adoptopenjdk.api.v3.stats
 
 import net.adoptopenjdk.api.v3.TimeSource
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.GitHubDownloadStatsDbEntry
@@ -9,9 +8,11 @@ import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.Vendor
 import org.slf4j.LoggerFactory
 import java.time.ZonedDateTime
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class GitHubDownloadStatsCalculator {
-    private val database: ApiPersistence = ApiPersistenceFactory.get()
+@Singleton
+open class GitHubDownloadStatsCalculator @Inject constructor(private val database: ApiPersistence) {
 
     companion object {
         @JvmStatic
@@ -27,7 +28,7 @@ class GitHubDownloadStatsCalculator {
         printSizeStats(repos)
     }
 
-    fun printSizeStats(repos: AdoptRepos) {
+    private fun printSizeStats(repos: AdoptRepos) {
         val stats = repos
             .repos
             .values
@@ -51,9 +52,9 @@ class GitHubDownloadStatsCalculator {
         LOGGER.info("Stats total $stats")
     }
 
-    public fun getStats(repos: AdoptRepos): List<GitHubDownloadStatsDbEntry> {
+    fun getStats(repos: AdoptRepos): List<GitHubDownloadStatsDbEntry> {
         val date: ZonedDateTime = TimeSource.now()
-        val stats = repos
+        return repos
             .repos
             .values
             .map { featureRelease ->
@@ -74,9 +75,10 @@ class GitHubDownloadStatsCalculator {
                             .filter { it.vendor == Vendor.adoptopenjdk }
                             .sumBy {
                                 it.binaries
-                                    .filter { it.jvm_impl == jvmImpl }
+                                    .filter { binary -> binary.jvm_impl == jvmImpl }
                                     .sumBy {
-                                        it.download_count.toInt()
+                                        binary ->
+                                        binary.download_count.toInt()
                                     }
                             }
                             .toLong()
@@ -90,6 +92,5 @@ class GitHubDownloadStatsCalculator {
                 )
             }
             .toList()
-        return stats
     }
 }

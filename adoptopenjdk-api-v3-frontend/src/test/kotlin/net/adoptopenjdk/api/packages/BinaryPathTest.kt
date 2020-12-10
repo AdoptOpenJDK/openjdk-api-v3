@@ -12,13 +12,11 @@ import net.adoptopenjdk.api.v3.models.Project
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import org.hamcrest.Matchers
-import org.jboss.weld.junit5.EnableWeld
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(value = [DbExtension::class])
 @QuarkusTest
-@EnableWeld
+@ExtendWith(value = [DbExtension::class])
 class BinaryPathTest : PackageEndpointTest() {
 
     override fun getPath(): String {

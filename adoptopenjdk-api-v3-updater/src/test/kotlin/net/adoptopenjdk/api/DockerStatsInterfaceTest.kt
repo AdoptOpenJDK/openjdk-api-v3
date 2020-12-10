@@ -5,7 +5,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.DownloadStatsInterface
 import net.adoptopenjdk.api.v3.TimeSource
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.DefaultUpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
@@ -14,12 +13,14 @@ import net.adoptopenjdk.api.v3.models.GitHubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.StatsSource
 import net.adoptopenjdk.api.v3.stats.DockerStatsInterface
+import org.jboss.weld.junit5.auto.AddPackages
 import org.junit.Assert
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.time.ZonedDateTime
 import kotlin.test.assertEquals
 
+@AddPackages(value = [DockerStatsInterface::class])
 class DockerStatsInterfaceTest : BaseTest() {
     companion object {
         @JvmStatic
@@ -31,11 +32,11 @@ class DockerStatsInterfaceTest : BaseTest() {
     }
 
     @Test
-    fun dbEntryIsCreated() {
+    fun dbEntryIsCreated(dockerStatsInterface: DockerStatsInterface, apiPersistence: ApiPersistence) {
         runBlocking {
-            DockerStatsInterface().updateDb()
+            dockerStatsInterface.updateDb()
 
-            val stats = ApiPersistenceFactory.get().getLatestAllDockerStats()
+            val stats = apiPersistence.getLatestAllDockerStats()
             Assert.assertTrue(stats.size > 0)
         }
     }
@@ -93,10 +94,8 @@ class DockerStatsInterfaceTest : BaseTest() {
     }
 
     @Test
-    fun testGetOpenjdkVersionFromString() {
+    fun testGetOpenjdkVersionFromString(downloadStatsInterface: DockerStatsInterface) {
         runBlocking {
-            val downloadStatsInterface = DockerStatsInterface()
-
             assertEquals(11, downloadStatsInterface.getOpenjdkVersionFromString("openjdk11"))
             assertEquals(8, downloadStatsInterface.getOpenjdkVersionFromString("openjdk8-openj9"))
             assertEquals(12, downloadStatsInterface.getOpenjdkVersionFromString("maven-openjdk12"))

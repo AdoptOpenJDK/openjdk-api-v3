@@ -19,8 +19,11 @@ import org.bson.Document
 import org.litote.kmongo.coroutine.CoroutineCollection
 import org.slf4j.LoggerFactory
 import java.time.ZonedDateTime
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class MongoApiPersistence(mongoClient: MongoClient) : MongoInterface(mongoClient), ApiPersistence {
+@Singleton
+open class MongoApiPersistence @Inject constructor(mongoClient: MongoClient) : MongoInterface(mongoClient), ApiPersistence {
     private val releasesCollection: CoroutineCollection<Release> = createCollection(database, RELEASE_DB)
     private val gitHubStatsCollection: CoroutineCollection<GitHubDownloadStatsDbEntry> = createCollection(database, GITHUB_STATS_DB)
     private val dockerStatsCollection: CoroutineCollection<DockerDownloadStatsDbEntry> = createCollection(database, DOCKER_STATS_DB)

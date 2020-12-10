@@ -1,11 +1,11 @@
 package net.adoptopenjdk.api.v3
 
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
 import net.adoptopenjdk.api.v3.dataSources.VariantStore
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.*
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
+import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.max
 import kotlin.math.min
@@ -16,16 +16,7 @@ class StatEntry(
 )
 
 @Singleton
-class DownloadStatsInterface {
-    private val dataStore: ApiPersistence
-
-    constructor() {
-        dataStore = ApiPersistenceFactory.get()
-    }
-
-    constructor(dataStore: ApiPersistence) {
-        this.dataStore = dataStore
-    }
+class DownloadStatsInterface @Inject constructor(private val dataStore: ApiPersistence) {
 
     suspend fun getTrackingStats(
         days: Int? = null,

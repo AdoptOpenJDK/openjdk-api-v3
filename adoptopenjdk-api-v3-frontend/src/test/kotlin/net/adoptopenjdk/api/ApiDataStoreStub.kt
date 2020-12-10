@@ -19,9 +19,13 @@ open class ApiDataStoreStub : APIDataStore {
         reset()
     }
 
+    constructor(adoptRepo: AdoptRepos) {
+        this.adoptRepo = adoptRepo
+    }
+
     open fun reset() {
         BaseTest.startDb()
-        this.adoptRepo = BaseTest.mockRepo()
+        this.adoptRepo = AdoptReposTestDataGenerator.generate()
     }
 
     override fun schedulePeriodicUpdates() {

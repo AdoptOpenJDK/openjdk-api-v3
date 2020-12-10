@@ -2,6 +2,7 @@ package net.adoptopenjdk.api.v3.dataSources
 
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
+import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.UpdatedInfo
 import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import org.slf4j.LoggerFactory
@@ -14,7 +15,8 @@ import javax.inject.Singleton
 import kotlin.concurrent.timerTask
 
 @Singleton
-class APIDataStoreImpl : APIDataStore {
+open class APIDataStoreImpl : APIDataStore {
+    private var dataStore: ApiPersistence
     private var updatedAt: UpdatedInfo
     private var binaryRepos: AdoptRepos
     private var releaseInfo: ReleaseInfo
@@ -26,7 +28,8 @@ class APIDataStoreImpl : APIDataStore {
     }
 
     @Inject
-    constructor() {
+    constructor(dataStore: ApiPersistence) {
+        this.dataStore = dataStore
         updatedAt = UpdatedInfo(ZonedDateTime.now().minusYears(10), "111")
         schedule = null
         binaryRepos = try {
@@ -39,7 +42,8 @@ class APIDataStoreImpl : APIDataStore {
         releaseInfo = loadReleaseInfo()
     }
 
-    constructor(binaryRepos: AdoptRepos) {
+    constructor(binaryRepos: AdoptRepos, dataStore: ApiPersistence) {
+        this.dataStore = dataStore
         updatedAt = UpdatedInfo(ZonedDateTime.now().minusYears(10), "111")
         schedule = null
         this.binaryRepos = binaryRepos
@@ -62,7 +66,7 @@ class APIDataStoreImpl : APIDataStore {
     private fun loadReleaseInfo(): ReleaseInfo {
         releaseInfo = runBlocking {
             val releaseInfo = try {
-                ApiPersistenceFactory.get().getReleaseInfo()
+                dataStore.getReleaseInfo()
             } catch (e: Exception) {
                 LOGGER.error("Failed to read db", e)
                 null
@@ -85,18 +89,18 @@ class APIDataStoreImpl : APIDataStore {
         val previousRepo: AdoptRepos? = binaryRepos
 
         binaryRepos = runBlocking {
-            val updated = ApiPersistenceFactory.get().getUpdatedAt()
+            val updated = dataStore.getUpdatedAt()
 
             if (forceUpdate || updated != updatedAt) {
                 val data = VariantStore
                     .variants
                     .versions
                     .map { version ->
-                        ApiPersistenceFactory.get().readReleaseData(version)
+                        dataStore.readReleaseData(version)
                     }
                     .filter { it.releases.nodes.isNotEmpty() }
                     .toList()
-                updatedAt = ApiPersistenceFactory.get().getUpdatedAt()
+                updatedAt = dataStore.getUpdatedAt()
 
                 LOGGER.info("Loaded Version: $updatedAt")
 
