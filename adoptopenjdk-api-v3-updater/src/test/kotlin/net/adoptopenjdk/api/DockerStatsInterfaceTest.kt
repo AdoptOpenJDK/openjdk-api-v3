@@ -3,10 +3,11 @@ package net.adoptopenjdk.api
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import net.adoptopenjdk.api.testDoubles.InMemoryApiPersistence
 import net.adoptopenjdk.api.v3.DownloadStatsInterface
+import net.adoptopenjdk.api.v3.HttpClientFactory
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.DefaultUpdaterHtmlClient
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.GitHubDownloadStatsDbEntry
@@ -15,25 +16,18 @@ import net.adoptopenjdk.api.v3.models.StatsSource
 import net.adoptopenjdk.api.v3.stats.DockerStatsInterface
 import org.jboss.weld.junit5.auto.AddPackages
 import org.junit.Assert
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.time.ZonedDateTime
 import kotlin.test.assertEquals
 
-@AddPackages(value = [DockerStatsInterface::class])
+@AddPackages(value = [DockerStatsInterface::class, DefaultUpdaterHtmlClient::class, HttpClientFactory::class])
 class DockerStatsInterfaceTest : BaseTest() {
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        @Override
-        fun setHtmlClient() {
-            UpdaterHtmlClientFactory.client = DefaultUpdaterHtmlClient()
-        }
-    }
-
     @Test
-    fun dbEntryIsCreated(dockerStatsInterface: DockerStatsInterface, apiPersistence: ApiPersistence) {
+    fun dbEntryIsCreated(defaultUpdaterHtmlClient: DefaultUpdaterHtmlClient) {
         runBlocking {
+            val apiPersistence = InMemoryApiPersistence(adoptRepos)
+            val dockerStatsInterface = DockerStatsInterface(apiPersistence, defaultUpdaterHtmlClient)
+
             dockerStatsInterface.updateDb()
 
             val stats = apiPersistence.getLatestAllDockerStats()
@@ -94,14 +88,14 @@ class DockerStatsInterfaceTest : BaseTest() {
     }
 
     @Test
-    fun testGetOpenjdkVersionFromString(downloadStatsInterface: DockerStatsInterface) {
+    fun testGetOpenjdkVersionFromString() {
         runBlocking {
-            assertEquals(11, downloadStatsInterface.getOpenjdkVersionFromString("openjdk11"))
-            assertEquals(8, downloadStatsInterface.getOpenjdkVersionFromString("openjdk8-openj9"))
-            assertEquals(12, downloadStatsInterface.getOpenjdkVersionFromString("maven-openjdk12"))
-            assertEquals(14, downloadStatsInterface.getOpenjdkVersionFromString("maven-openjdk14-openj9"))
+            assertEquals(11, DockerStatsInterface.getOpenjdkVersionFromString("openjdk11"))
+            assertEquals(8, DockerStatsInterface.getOpenjdkVersionFromString("openjdk8-openj9"))
+            assertEquals(12, DockerStatsInterface.getOpenjdkVersionFromString("maven-openjdk12"))
+            assertEquals(14, DockerStatsInterface.getOpenjdkVersionFromString("maven-openjdk14-openj9"))
 
-            assertEquals(null, downloadStatsInterface.getOpenjdkVersionFromString("official"))
+            assertEquals(null, DockerStatsInterface.getOpenjdkVersionFromString("official"))
         }
     }
 }

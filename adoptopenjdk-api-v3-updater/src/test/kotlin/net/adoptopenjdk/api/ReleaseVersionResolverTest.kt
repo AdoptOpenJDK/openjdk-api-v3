@@ -1,36 +1,50 @@
 package net.adoptopenjdk.api
 
 import kotlinx.coroutines.runBlocking
+import net.adoptopenjdk.api.testDoubles.InMemoryApiPersistence
 import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.ReleaseVersionResolver
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UrlRequest
-import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import org.apache.http.HttpResponse
-import org.jboss.weld.junit5.auto.AddPackages
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-@AddPackages(value = [ReleaseVersionResolver::class])
 class ReleaseVersionResolverTest : BaseTest() {
 
-    private var releaseVersionResolver: ReleaseVersionResolver? = null
+    private fun getReleaseVersionResolver(
+        apiPersistence: InMemoryApiPersistence = InMemoryApiPersistence(adoptRepos)
+    ): ReleaseVersionResolver {
+        return ReleaseVersionResolver(
+            apiPersistence,
+            object : UpdaterHtmlClient {
+                override suspend fun get(url: String): String? {
+                    return getMetadata(url)
+                }
 
-    @BeforeEach
-    fun init(releaseVersionResolver: ReleaseVersionResolver) {
-        setHttpClient()
-        this.releaseVersionResolver = releaseVersionResolver
+                fun getMetadata(url: String): String {
+                    return """
+                        DEFAULT_VERSION_FEATURE=15
+                        DEFAULT_VERSION_INTERIM=0
+                    """.trimIndent()
+                }
+
+                override suspend fun getFullResponse(request: UrlRequest): HttpResponse? {
+                    return null
+                }
+            }
+        )
     }
 
     @Test
-    fun isStoredToDb(apiPersistence: ApiPersistence) {
+    fun isStoredToDb() {
         runBlocking {
-            val info = releaseVersionResolver!!.formReleaseInfo(adoptRepos)
-            releaseVersionResolver!!.updateDbVersion(adoptRepos)
+            val apiPersistence = InMemoryApiPersistence(adoptRepos)
+            val releaseVersionResolver = getReleaseVersionResolver(apiPersistence)
+            val info = releaseVersionResolver.formReleaseInfo(adoptRepos)
+            releaseVersionResolver.updateDbVersion(adoptRepos)
             val version = apiPersistence.getReleaseInfo()
             assertEquals(JsonMapper.mapper.writeValueAsString(info), JsonMapper.mapper.writeValueAsString(version!!))
         }
@@ -73,7 +87,8 @@ class ReleaseVersionResolverTest : BaseTest() {
 
     private fun check(matcher: (ReleaseInfo) -> Boolean) {
         runBlocking {
-            val info = releaseVersionResolver!!.formReleaseInfo(adoptRepos)
+            val releaseVersionResolver = getReleaseVersionResolver()
+            val info = releaseVersionResolver.formReleaseInfo(adoptRepos)
             assertTrue(matcher(info))
         }
     }
@@ -82,25 +97,6 @@ class ReleaseVersionResolverTest : BaseTest() {
     fun tipVersionIsCorrect() {
         check { releaseInfo ->
             releaseInfo.tip_version == 15
-        }
-    }
-
-    private fun setHttpClient() {
-        UpdaterHtmlClientFactory.client = object : UpdaterHtmlClient {
-            override suspend fun get(url: String): String? {
-                return getMetadata(url)
-            }
-
-            fun getMetadata(url: String): String {
-                return """
-                        DEFAULT_VERSION_FEATURE=15
-                        DEFAULT_VERSION_INTERIM=0
-                """.trimIndent()
-            }
-
-            override suspend fun getFullResponse(request: UrlRequest): HttpResponse? {
-                return null
-            }
         }
     }
 }

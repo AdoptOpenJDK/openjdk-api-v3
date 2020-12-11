@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.adoptopenjdk.api.v3.TimeSource
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.HasRateLimit
 import org.slf4j.LoggerFactory
@@ -20,7 +20,8 @@ import javax.json.JsonObject
 import kotlin.math.max
 
 abstract class GraphQLGitHubInterface(
-    private val graphQLRequest: GraphQLRequest
+    private val graphQLRequest: GraphQLRequest,
+    private val updaterHtmlClient: UpdaterHtmlClient
 ) {
     companion object {
         @JvmStatic
@@ -102,7 +103,7 @@ abstract class GraphQLGitHubInterface(
 
     private suspend fun getRemainingQuota(): Pair<Int, Long> {
         try {
-            val response = UpdaterHtmlClientFactory.client.get("https://api.github.com/rate_limit")
+            val response = updaterHtmlClient.get("https://api.github.com/rate_limit")
             if (response != null) {
                 return processResponse(response)
             }

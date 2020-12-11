@@ -5,11 +5,12 @@ import com.mongodb.client.model.UpdateOptions
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoClientFactory
+import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoClient
 import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoInterface
 import org.bson.Document
 import org.litote.kmongo.coroutine.CoroutineCollection
 import javax.enterprise.inject.Default
+import javax.inject.Inject
 import javax.inject.Singleton
 
 interface InternalDbStore {
@@ -19,7 +20,7 @@ interface InternalDbStore {
 
 @Singleton
 @Default
-class InternalDbStoreImpl : MongoInterface(MongoClientFactory.get()), InternalDbStore {
+class InternalDbStoreImpl @Inject constructor(mongoClient: MongoClient) : MongoInterface(mongoClient), InternalDbStore {
     private val webCache: CoroutineCollection<CacheDbEntry> = createCollection(database, "web-cache")
 
     init {

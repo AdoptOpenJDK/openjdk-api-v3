@@ -9,22 +9,6 @@ import org.litote.kmongo.reactivestreams.KMongo
 import org.slf4j.LoggerFactory
 import javax.inject.Singleton
 
-object MongoClientFactory {
-    // Current default impl is mongo impl
-    private var impl: MongoClient? = null
-
-    fun get(): MongoClient {
-        if (impl == null) {
-            impl = MongoClient()
-        }
-        return impl!!
-    }
-
-    fun set(impl: MongoClient?) {
-        MongoClientFactory.impl = impl
-    }
-}
-
 @Singleton
 open class MongoClient {
     val database: CoroutineDatabase

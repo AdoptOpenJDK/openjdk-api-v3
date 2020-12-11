@@ -7,8 +7,6 @@ import de.flapdoodle.embed.mongo.config.Net
 import de.flapdoodle.embed.mongo.distribution.Version
 import de.flapdoodle.embed.process.runtime.Network
 import net.adoptopenjdk.api.v3.dataSources.APIDataStoreImpl
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
-import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoClientFactory
 import org.jboss.weld.junit5.auto.AddPackages
 import org.jboss.weld.junit5.auto.EnableAutoWeld
 import org.junit.jupiter.api.AfterAll
@@ -30,7 +28,6 @@ abstract class MongoTest {
         @BeforeAll
         fun startDb() {
             System.setProperty("GITHUB_TOKEN", "stub-token")
-            UpdaterHtmlClientFactory.client = BaseTest.mockkHttpClient()
             startFongo()
         }
 
@@ -52,7 +49,6 @@ abstract class MongoTest {
             mongodExecutable = starter.prepare(mongodConfig)
             mongodExecutable!!.start()
 
-            MongoClientFactory.set(null)
             LOGGER.info("FMongo started")
         }
 
@@ -60,7 +56,6 @@ abstract class MongoTest {
         @AfterAll
         fun closeMongo() {
             mongodExecutable!!.stop()
-            MongoClientFactory.set(null)
         }
     }
 }
