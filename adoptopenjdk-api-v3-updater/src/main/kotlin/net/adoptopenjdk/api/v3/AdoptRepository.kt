@@ -39,7 +39,7 @@ class AdoptRepositoryImpl @Inject constructor(
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
     }
 
-    fun getMapperForRepo(url: String): ReleaseMapper {
+    private fun getMapperForRepo(url: String): ReleaseMapper {
         if (url.matches(".*/openjdk\\d+-upstream-binaries/.*".toRegex())) {
             return UpstreamReleaseMapper
         } else {

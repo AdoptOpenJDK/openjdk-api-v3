@@ -6,12 +6,15 @@ import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import javax.inject.Inject
 
-class ReleaseVersionResolver @Inject constructor(private var database: ApiPersistence) {
+class ReleaseVersionResolver @Inject constructor(
+    private val database: ApiPersistence,
+    private val updaterHtmlClient: UpdaterHtmlClient
+) {
 
     private val VERSION_FILE_URL = "https://raw.githubusercontent.com/openjdk/jdk/master/make/autoconf/version-numbers"
 
     private suspend fun getTipVersion(): Int? {
-        val versionFile = UpdaterHtmlClientFactory.client.get(VERSION_FILE_URL)
+        val versionFile = updaterHtmlClient.get(VERSION_FILE_URL)
 
         return if (versionFile != null) {
             Regex(""".*DEFAULT_VERSION_FEATURE=(?<num>\d+).*""", setOf(RegexOption.MULTILINE, RegexOption.DOT_MATCHES_ALL))

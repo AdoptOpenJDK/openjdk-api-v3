@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api
 
+import net.adoptopenjdk.api.testDoubles.InMemoryApiPersistence
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
@@ -20,16 +21,16 @@ import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.models.VersionData
 import net.adoptopenjdk.api.v3.stats.DockerStatsInterface
 import net.adoptopenjdk.api.v3.stats.GitHubDownloadStatsCalculator
-import org.jboss.weld.junit5.auto.AddPackages
 import org.junit.jupiter.api.Test
 
-@AddPackages(value = [GitHubDownloadStatsCalculator::class])
 class StatsCalculatorTest : BaseTest() {
 
+    private fun gitHubDownloadStatsCalculator() = GitHubDownloadStatsCalculator(InMemoryApiPersistence(adoptRepos))
+
     @Test
-    fun testGithubStatsCalculator(gitHubDownloadStatsCalculator: GitHubDownloadStatsCalculator) {
+    fun testGithubStatsCalculator() {
         val adoptRepos = AdoptRepos(listOf(generateFeatureRelease()))
-        val result: List<GitHubDownloadStatsDbEntry> = gitHubDownloadStatsCalculator.getStats(adoptRepos)
+        val result: List<GitHubDownloadStatsDbEntry> = gitHubDownloadStatsCalculator().getStats(adoptRepos)
 
         assert(result[0].feature_version == 8)
         assert(result[0].downloads == 895L)
@@ -38,11 +39,11 @@ class StatsCalculatorTest : BaseTest() {
     }
 
     @Test
-    fun testDockerVersionNumber(dsi: DockerStatsInterface) {
-        assert(dsi.getOpenjdkVersionFromString("openjdk11") == 11)
-        assert(dsi.getOpenjdkVersionFromString("openjdk7") == 7)
-        assert(dsi.getOpenjdkVersionFromString("openjdk") == null)
-        assert(dsi.getOpenjdkVersionFromString("blah") == null)
+    fun testDockerVersionNumber() {
+        assert(DockerStatsInterface.getOpenjdkVersionFromString("openjdk11") == 11)
+        assert(DockerStatsInterface.getOpenjdkVersionFromString("openjdk7") == 7)
+        assert(DockerStatsInterface.getOpenjdkVersionFromString("openjdk") == null)
+        assert(DockerStatsInterface.getOpenjdkVersionFromString("blah") == null)
     }
 
     private fun generateFeatureRelease(): FeatureRelease {

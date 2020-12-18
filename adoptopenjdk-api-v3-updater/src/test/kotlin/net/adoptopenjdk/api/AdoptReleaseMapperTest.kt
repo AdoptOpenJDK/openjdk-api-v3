@@ -3,16 +3,15 @@ package net.adoptopenjdk.api
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import net.adoptopenjdk.api.v3.HttpClientFactory
+import net.adoptopenjdk.api.v3.dataSources.DefaultUpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UrlRequest
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAssets
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.dataSources.models.GitHubId
-import net.adoptopenjdk.api.v3.dataSources.mongo.GitHubHtmlClient
-import net.adoptopenjdk.api.v3.mapping.adopt.AdoptReleaseMapper
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
@@ -27,7 +26,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
-@AddPackages(value = [AdoptReleaseMapper::class, GitHubHtmlClient::class])
+@AddPackages(value = [DefaultUpdaterHtmlClient::class, HttpClientFactory::class])
 class AdoptReleaseMapperTest : BaseTest() {
 
     val jdk = GHAsset(
@@ -47,7 +46,7 @@ class AdoptReleaseMapperTest : BaseTest() {
     )
 
     @Test
-    fun ignoresUnparsableVersion(adoptReleaseMapper: AdoptReleaseMapper) {
+    fun ignoresUnparsableVersion() {
         runBlocking {
             val source = GHAssets(listOf(jdk), PageInfo(false, ""))
 
@@ -62,7 +61,7 @@ class AdoptReleaseMapperTest : BaseTest() {
                 url = "a-url"
             )
 
-            val result = adoptReleaseMapper.toAdoptRelease(ghRelease)
+            val result = createAdoptReleaseMapper().toAdoptRelease(ghRelease)
             assertFalse(result.succeeded())
             assertNotNull(result.error)
             assertNull(result.result)
@@ -70,9 +69,8 @@ class AdoptReleaseMapperTest : BaseTest() {
     }
 
     @Test
-    fun statsIgnoresNonBinaryAssets(adoptReleaseMapper: AdoptReleaseMapper) {
+    fun statsIgnoresNonBinaryAssets() {
         runBlocking {
-
             val source = GHAssets(listOf(jdk, checksum), PageInfo(false, ""))
 
             val ghRelease = GHRelease(
@@ -86,14 +84,14 @@ class AdoptReleaseMapperTest : BaseTest() {
                 url = "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz"
             )
 
-            val release = adoptReleaseMapper.toAdoptRelease(ghRelease)
+            val release = createAdoptReleaseMapper().toAdoptRelease(ghRelease)
 
             assertEquals(1, release.result!!.first().download_count)
         }
     }
 
     @Test
-    fun obeysReleaseTypeforBinaryRepos(adoptReleaseMapper: AdoptReleaseMapper) {
+    fun obeysReleaseTypeforBinaryRepos() {
         runBlocking {
 
             val source = GHAssets(listOf(jdk), PageInfo(false, ""))
@@ -109,14 +107,14 @@ class AdoptReleaseMapperTest : BaseTest() {
                 url = "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz"
             )
 
-            val release = adoptReleaseMapper.toAdoptRelease(ghRelease)
+            val release = createAdoptReleaseMapper().toAdoptRelease(ghRelease)
 
             assertEquals(ReleaseType.ea, release.result!!.first().release_type)
         }
     }
 
     @Test
-    fun copesWithMultipleVersionsInSingleRelease(adoptReleaseMapper: AdoptReleaseMapper) {
+    fun copesWithMultipleVersionsInSingleRelease() {
         runBlocking {
 
             val source = GHAssets(
@@ -168,7 +166,7 @@ class AdoptReleaseMapperTest : BaseTest() {
                 PageInfo(false, "")
             )
 
-            UpdaterHtmlClientFactory.client = object : UpdaterHtmlClient {
+            val client = object : UpdaterHtmlClient {
                 override suspend fun get(url: String): String? {
                     return getMetadata(url)
                 }
@@ -225,7 +223,7 @@ class AdoptReleaseMapperTest : BaseTest() {
                 url = "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz"
             )
 
-            val release = adoptReleaseMapper.toAdoptRelease(ghRelease)
+            val release = createAdoptReleaseMapper(client).toAdoptRelease(ghRelease)
 
             assertEquals(2, release.result!!.size)
             assertEquals(1, release.result!![0].binaries.size)
@@ -237,10 +235,10 @@ class AdoptReleaseMapperTest : BaseTest() {
     }
 
     @Test
-    fun updaterCopesWithExceptionFromGitHub(adoptReleaseMapper: AdoptReleaseMapper) {
+    fun updaterCopesWithExceptionFromGitHub() {
         runBlocking {
 
-            UpdaterHtmlClientFactory.client = object : UpdaterHtmlClient {
+            val client = object : UpdaterHtmlClient {
                 override suspend fun get(url: String): String? {
                     throw RuntimeException("Failed to get metadata")
                 }
@@ -267,7 +265,7 @@ class AdoptReleaseMapperTest : BaseTest() {
                 url = "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz"
             )
 
-            val release = adoptReleaseMapper.toAdoptRelease(ghRelease)
+            val release = createAdoptReleaseMapper(client).toAdoptRelease(ghRelease)
         }
     }
 }

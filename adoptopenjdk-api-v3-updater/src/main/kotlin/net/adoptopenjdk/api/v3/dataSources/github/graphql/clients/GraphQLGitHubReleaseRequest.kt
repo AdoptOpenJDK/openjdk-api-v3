@@ -1,6 +1,7 @@
 package net.adoptopenjdk.api.v3.dataSources.github.graphql.clients
 
 import io.aexp.nodes.graphql.GraphQLRequestEntity
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAssets
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
@@ -9,8 +10,9 @@ import net.adoptopenjdk.api.v3.dataSources.models.GitHubId
 import org.slf4j.LoggerFactory
 
 abstract class GraphQLGitHubReleaseRequest(
-    graphQLRequest: GraphQLRequest
-) : GraphQLGitHubInterface(graphQLRequest) {
+    graphQLRequest: GraphQLRequest,
+    updaterHtmlClient: UpdaterHtmlClient
+) : GraphQLGitHubInterface(graphQLRequest, updaterHtmlClient) {
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)

@@ -7,7 +7,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.adoptopenjdk.api.v3.dataSources.DefaultUpdaterHtmlClient
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UrlRequest
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
@@ -20,7 +20,10 @@ interface GitHubHtmlClient {
 }
 
 @Singleton
-class CachedGitHubHtmlClient @Inject constructor(val internalDbStore: InternalDbStore) : GitHubHtmlClient {
+class CachedGitHubHtmlClient @Inject constructor(
+    private val internalDbStore: InternalDbStore,
+    private val updaterHtmlClient: UpdaterHtmlClient
+) : GitHubHtmlClient {
 
     companion object {
         @JvmStatic
@@ -66,7 +69,7 @@ class CachedGitHubHtmlClient @Inject constructor(val internalDbStore: InternalDb
         for (retryCount in 1..10) {
             try {
                 LOGGER.debug("Getting  ${request.url} ${request.lastModified}")
-                val response = UpdaterHtmlClientFactory.client.getFullResponse(request)
+                val response = updaterHtmlClient.getFullResponse(request)
 
                 if (response?.statusLine?.statusCode == 304) {
                     // asset has not updated
