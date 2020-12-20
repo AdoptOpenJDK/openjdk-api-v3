@@ -15,31 +15,24 @@ import javax.inject.Singleton
 import kotlin.math.absoluteValue
 
 @Singleton
-class AdoptReposBuilder {
+class AdoptReposBuilder @Inject constructor(private var adoptRepository: AdoptRepository) {
 
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
     }
 
-    private var adoptRepository: AdoptRepository
     private val excluded: MutableSet<GitHubId> = HashSet()
-
-    @Inject
-    constructor(adoptRepository: AdoptRepository) {
-        this.adoptRepository = adoptRepository
-    }
 
     suspend fun incrementalUpdate(repo: AdoptRepos): AdoptRepos {
         val updated = repo
             .repos
             .map { entry -> getUpdatedFeatureRelease(entry, repo) }
-            .filterNotNull()
 
         return AdoptRepos(updated)
     }
 
-    private suspend fun getUpdatedFeatureRelease(entry: Map.Entry<Int, FeatureRelease>, repo: AdoptRepos): FeatureRelease? {
+    private suspend fun getUpdatedFeatureRelease(entry: Map.Entry<Int, FeatureRelease>, repo: AdoptRepos): FeatureRelease {
         val summary = adoptRepository.getSummary(entry.key)
 
         // Update cycle
@@ -56,10 +49,12 @@ class AdoptReposBuilder {
             // Find newly added releases
             val newReleases = getNewReleases(summary, pruned)
             val updatedReleases = getUpdatedReleases(summary, pruned)
+            val youngReleases = getYoungReleases(summary)
 
             pruned
                 .add(newReleases)
                 .add(updatedReleases)
+                .add(youngReleases)
         } else {
             val newReleases = getNewReleases(summary, FeatureRelease(entry.key, emptyList()))
             FeatureRelease(entry.key, Releases(newReleases))
@@ -70,6 +65,18 @@ class AdoptReposBuilder {
         return summary.releases.releases
             .filter { !excluded.contains(it.id) }
             .filter { pruned.releases.hasReleaseBeenUpdated(it.id, it.getUpdatedTime()) }
+            .filter { isReleaseOldEnough(it.publishedAt) } // Ignore artifacts for the first 10 min while they are still uploading
+            .flatMap { getReleaseById(it) }
+    }
+
+    private suspend fun getYoungReleases(summary: GHRepositorySummary): List<Release> {
+        return summary.releases.releases
+            .filter { !excluded.contains(it.id) }
+            .filter {
+                // Re-pull data if the release is less than 24h old
+                ChronoUnit.HOURS.between(it.getPublishedTime(), TimeSource.now()).absoluteValue < 24 ||
+                    ChronoUnit.HOURS.between(it.getUpdatedTime(), TimeSource.now()).absoluteValue < 24
+            }
             .filter { isReleaseOldEnough(it.publishedAt) } // Ignore artifacts for the first 10 min while they are still uploading
             .flatMap { getReleaseById(it) }
     }

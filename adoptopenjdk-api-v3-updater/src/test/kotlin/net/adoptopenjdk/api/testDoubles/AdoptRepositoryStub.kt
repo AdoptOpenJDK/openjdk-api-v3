@@ -31,8 +31,8 @@ open class AdoptRepositoryStub : AdoptRepository {
 
     val toUpdate = Release(
         originaToUpdate.id, ReleaseType.ga, "openjdk-8u", "jdk8u-2018-09-27-08-50",
-        TimeSource.now().minusMinutes(20),
-        TimeSource.now().minusMinutes(20),
+        TimeSource.now().minusDays(2),
+        TimeSource.now().minusDays(2),
         arrayOf(), 2, Vendor.adoptopenjdk,
         VersionData(8, 2, 3, "", 1, 4, "", "")
     )
@@ -43,13 +43,21 @@ open class AdoptRepositoryStub : AdoptRepository {
         .addRelease(8, toAddYoung)
         .removeRelease(8, originaToUpdate)
         .addRelease(8, toUpdate)
+        .addRelease(8, toAddSemiYoungRelease)
 
     companion object {
         val toAdd = Release(
             "foo", ReleaseType.ga, "openjdk-8u", "jdk8u-2018-09-27-08-50",
-            TimeSource.now().minusMinutes(20),
-            TimeSource.now().minusMinutes(20),
+            TimeSource.now().minusDays(2),
+            TimeSource.now().minusDays(2),
             arrayOf(), 2, Vendor.adoptopenjdk,
+            VersionData(8, 2, 3, "", 1, 4, "", "")
+        )
+
+        val toAddSemiYoungRelease = Release(
+            "semi-young", ReleaseType.ga, "openjdk-8u", "jdk8u-2018-09-27-08-50",
+            TimeSource.now().minusMinutes(20),
+            TimeSource.now().minusMinutes(20), arrayOf(), 2, Vendor.adoptopenjdk,
             VersionData(8, 2, 3, "", 1, 4, "", "")
         )
 

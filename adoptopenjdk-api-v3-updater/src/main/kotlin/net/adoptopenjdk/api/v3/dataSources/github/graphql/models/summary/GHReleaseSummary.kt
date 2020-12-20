@@ -29,4 +29,8 @@ data class GHReleaseSummary @JsonCreator constructor(
     fun getUpdatedTime(): ZonedDateTime {
         return ReleaseMapper.parseDate(updatedAt)
     }
+
+    fun getPublishedTime(): ZonedDateTime {
+        return ReleaseMapper.parseDate(publishedAt)
+    }
 }

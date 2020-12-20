@@ -1,13 +1,11 @@
 package net.adoptopenjdk.api.v3.dataSources
 
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
-import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import javax.inject.Inject
 
 class ReleaseVersionResolver @Inject constructor(
-    private val database: ApiPersistence,
     private val updaterHtmlClient: UpdaterHtmlClient
 ) {
 
@@ -22,10 +20,6 @@ class ReleaseVersionResolver @Inject constructor(
         } else {
             null
         }
-    }
-
-    suspend fun updateDbVersion(repo: AdoptRepos) {
-        database.setReleaseInfo(formReleaseInfo(repo))
     }
 
     suspend fun formReleaseInfo(repo: AdoptRepos): ReleaseInfo {

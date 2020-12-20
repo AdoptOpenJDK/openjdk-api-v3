@@ -208,6 +208,10 @@ class AdoptReleaseMapper @Inject constructor(
                 metadataAsset.name.startsWith(it.name)
             }
 
+        if (metadataAsset.downloadUrl == null) {
+            return null
+        }
+
         val metadataString = htmlClient.getUrl(metadataAsset.downloadUrl)
         if (binaryAsset != null && metadataString != null) {
             try {

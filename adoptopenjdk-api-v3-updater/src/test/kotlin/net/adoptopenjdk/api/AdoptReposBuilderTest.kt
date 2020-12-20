@@ -1,8 +1,13 @@
 package net.adoptopenjdk.api
 
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.testDoubles.AdoptRepositoryStub
 import net.adoptopenjdk.api.v3.AdoptReposBuilder
+import net.adoptopenjdk.api.v3.AdoptRepository
+import net.adoptopenjdk.api.v3.ReleaseResult
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.GitHubId
 import org.jboss.weld.junit5.auto.EnableAutoWeld
@@ -25,7 +30,7 @@ class AdoptReposBuilderTest : BaseTest() {
     fun removedReleaseIsRemovedWhenUpdated() {
         runBlocking {
             assertTrue { before.getFeatureRelease(8)!!.releases.hasReleaseId(GitHubId(stub.toRemove.id)) }
-            assertTrue { !updated!!.getFeatureRelease(8)!!.releases.hasReleaseId(GitHubId(stub.toRemove.id)) }
+            assertTrue { !updated.getFeatureRelease(8)!!.releases.hasReleaseId(GitHubId(stub.toRemove.id)) }
             assertTrue { updated != before }
         }
     }
@@ -34,7 +39,7 @@ class AdoptReposBuilderTest : BaseTest() {
     fun addReleaseIsAddWhenUpdated() {
         runBlocking {
             assertTrue { !before.getFeatureRelease(8)!!.releases.hasReleaseId(GitHubId("foo")) }
-            assertTrue { updated!!.getFeatureRelease(8)!!.releases.getReleases().contains(AdoptRepositoryStub.toAdd) }
+            assertTrue { updated.getFeatureRelease(8)!!.releases.getReleases().contains(AdoptRepositoryStub.toAdd) }
             assertTrue { updated != before }
         }
     }
@@ -42,7 +47,7 @@ class AdoptReposBuilderTest : BaseTest() {
     @Test
     fun releaseLessThan10MinOldIsNotUpdated() {
         runBlocking {
-            assertTrue { !updated!!.getFeatureRelease(8)!!.releases.hasReleaseId(GitHubId("young")) }
+            assertTrue { !updated.getFeatureRelease(8)!!.releases.hasReleaseId(GitHubId("young")) }
         }
     }
 
@@ -50,8 +55,8 @@ class AdoptReposBuilderTest : BaseTest() {
     fun updatedReleaseIsUpdatedWhenUpdated() {
         runBlocking {
             assertTrue { before.getFeatureRelease(8)!!.releases.getReleases().contains(stub.originaToUpdate) }
-            assertTrue { !updated!!.getFeatureRelease(8)!!.releases.getReleases().contains(stub.originaToUpdate) }
-            assertTrue { updated!!.getFeatureRelease(8)!!.releases.getReleases().contains(stub.toUpdate) }
+            assertTrue { !updated.getFeatureRelease(8)!!.releases.getReleases().contains(stub.originaToUpdate) }
+            assertTrue { updated.getFeatureRelease(8)!!.releases.getReleases().contains(stub.toUpdate) }
             assertTrue { updated != before }
         }
     }
@@ -69,6 +74,21 @@ class AdoptReposBuilderTest : BaseTest() {
 
             assertTrue { updated == updated2 }
             assertTrue { updated2 == updated3 }
+        }
+    }
+
+    @Test
+    fun `young releases continue to be pulled`(repo: AdoptRepos, adoptRepository: AdoptRepository) {
+        runBlocking {
+            val adoptRepo = spyk(adoptRepository)
+            val adoptReposBuilder = AdoptReposBuilder(adoptRepo)
+
+            coEvery { adoptRepo.getReleaseById(GitHubId(AdoptRepositoryStub.toAddSemiYoungRelease.id)) } returns ReleaseResult(listOf(AdoptRepositoryStub.toAddSemiYoungRelease))
+
+            val updatedRepo = adoptReposBuilder.incrementalUpdate(repo)
+            adoptReposBuilder.incrementalUpdate(updatedRepo)
+
+            coVerify(exactly = 3) { adoptRepo.getReleaseById(GitHubId(AdoptRepositoryStub.toAddSemiYoungRelease.id)) }
         }
     }
 }
