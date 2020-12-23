@@ -38,7 +38,7 @@ class V3UpdaterTest : MongoTest() {
             val without8 = AdoptRepos(repo.repos.filterNot { it.key == 8 })
             apiPersistence.updateAllRepos(without8, "a-different-checksum")
 
-            V3Updater(adoptReposBuilder, apiDataStore, database, releaseVersionResolver, statsInterface).incrementalUpdate(repo, apiPersistence)
+            V3Updater(adoptReposBuilder, apiDataStore, database, statsInterface, releaseVersionResolver).incrementalUpdate(repo)
 
             val updatedTime = apiPersistence.getUpdatedAt()
 
