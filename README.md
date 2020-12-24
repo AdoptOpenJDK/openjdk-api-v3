@@ -2,7 +2,7 @@
 
 # AdoptOpenJDK API
 
-**NOTICE:** [AdoptOpenJDK API v1](https://github.com/AdoptOpenJDK/openjdk-api/blob/master/README.v1.md) has been deprecated and will be removed.
+**NOTICE:** AdoptOpenJDK API v1 has now been removed.
 If you are using v1 please move to the latest version (documented below) as soon as possible.
 
 **NOTICE:** [AdoptOpenJDK API v2](https://github.com/AdoptOpenJDK/openjdk-api/blob/master/README.md) has been deprecated and will be removed.
