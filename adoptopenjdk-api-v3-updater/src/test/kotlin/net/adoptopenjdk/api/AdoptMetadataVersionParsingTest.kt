@@ -56,7 +56,7 @@ class AdoptMetadataVersionParsingTest : BaseTest() {
             every { entity.content } returns get(request.url)?.byteInputStream()
             every { metadataResponse.statusLine } returns BasicStatusLine(ProtocolVersion("", 1, 1), 200, "")
             every { metadataResponse.entity } returns entity
-            every { metadataResponse.getFirstHeader("Last-Modified") } returns BasicHeader("Last-Modified", "")
+            every { metadataResponse.getFirstHeader("Last-Modified") } returns BasicHeader("Last-Modified", "Thu, 01 Jan 1970 00:00:00 GMT")
             return metadataResponse
         }
     }

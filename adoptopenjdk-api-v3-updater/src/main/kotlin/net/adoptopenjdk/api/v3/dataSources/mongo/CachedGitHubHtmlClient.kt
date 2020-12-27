@@ -1,15 +1,20 @@
 package net.adoptopenjdk.api.v3.dataSources.mongo
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.DefaultUpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UrlRequest
 import org.slf4j.LoggerFactory
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
 import javax.inject.Inject
@@ -29,16 +34,18 @@ class CachedGitHubHtmlClient @Inject constructor(
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
-        @JvmStatic
-        private val backgroundHtmlDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+        val LAST_MODIFIED_PARSER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz")!!
     }
+
+    private var backgroundHtmlDispatcher: ExecutorCoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    private var refreshJob: Job
 
     // List of urls to be refreshed in the background
     private val workList = LinkedBlockingQueue<UrlRequest>()
 
     init {
         // Do refresh in the background
-        GlobalScope.launch(backgroundHtmlDispatcher, block = cacheRefreshDaemonThread())
+        refreshJob = GlobalScope.launch(backgroundHtmlDispatcher, block = cacheRefreshDaemonThread())
     }
 
     override suspend fun getUrl(url: String): String? {
@@ -46,20 +53,39 @@ class CachedGitHubHtmlClient @Inject constructor(
         return if (cachedEntry == null) {
             get(UrlRequest(url))
         } else {
-            LOGGER.debug("Scheduling for refresh $url ${cachedEntry.lastModified} ${workList.size}")
-            workList.offer(UrlRequest(url, cachedEntry.lastModified))
+            if (shouldUpdate(cachedEntry)) {
+                LOGGER.debug("Scheduling for refresh $url ${cachedEntry.lastModified} ${workList.size}")
+                workList.offer(UrlRequest(url, cachedEntry.lastModified))
+            }
             cachedEntry.data
         }
+    }
+
+    private fun shouldUpdate(cachedEntry: CacheDbEntry): Boolean {
+        val lastModified = if (cachedEntry.lastModified != null) {
+            ZonedDateTime.parse(cachedEntry.lastModified, LAST_MODIFIED_PARSER)
+        } else {
+            TimeSource.now()
+        }
+
+        val lastChecked = cachedEntry.lastChecked ?: TimeSource.now().minusYears(20)
+
+        val daysSinceModified = ChronoUnit.DAYS.between(lastModified, TimeSource.now())
+        val daysSinceChecked = ChronoUnit.DAYS.between(lastChecked, TimeSource.now())
+
+        // check if:
+        // 1) Assets modified in the last 30 days refresh once a day
+        // 2) Assets modified more than 30 days ago refresh once a week
+        return daysSinceModified > 30 && daysSinceChecked >= 7 ||
+            daysSinceModified <= 30 && daysSinceChecked >= 1
     }
 
     private fun cacheRefreshDaemonThread(): suspend CoroutineScope.() -> Unit {
         return {
             while (true) {
                 val request = workList.take()
-                async {
-                    LOGGER.debug("Enqueuing ${request.url} ${request.lastModified} ${workList.size}")
-                    return@async get(request)
-                }.await()
+                LOGGER.debug("Enqueuing ${request.url} ${request.lastModified} ${workList.size}")
+                get(request)
             }
         }
     }
@@ -80,7 +106,7 @@ class CachedGitHubHtmlClient @Inject constructor(
 
                 val lastModified = response?.getFirstHeader("Last-Modified")?.value
 
-                internalDbStore.putCachedWebpage(request.url, lastModified, body)
+                internalDbStore.putCachedWebpage(request.url, lastModified, TimeSource.now(), body)
                 LOGGER.debug("Got ${request.url}")
                 return body
             } catch (e: Exception) {
@@ -90,5 +116,9 @@ class CachedGitHubHtmlClient @Inject constructor(
         }
 
         return null
+    }
+
+    fun getQueueLength(): Int {
+        return workList.size
     }
 }

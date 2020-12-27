@@ -22,7 +22,7 @@ class AdoptBinaryMapper @Inject constructor(private val gitHubHtmlClient: GitHub
         private const val HOTSPOT_JFR = "hotspot-jfr"
     }
 
-    private val EXCLUDED = listOf<String>()
+    private val EXCLUDED = listOf<String>("corretto", "dragonwell")
 
     suspend fun toBinaryList(ghBinaryAssets: List<GHAsset>, allGhAssets: List<GHAsset>, ghAssetsWithMetadata: Map<GHAsset, GHMetaData>): List<Binary> {
         // probably whitelist rather than black list
