@@ -9,12 +9,13 @@ import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoClient
 import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoInterface
 import org.bson.Document
 import org.litote.kmongo.coroutine.CoroutineCollection
+import java.time.ZonedDateTime
 import javax.enterprise.inject.Default
 import javax.inject.Inject
 import javax.inject.Singleton
 
 interface InternalDbStore {
-    suspend fun putCachedWebpage(url: String, lastModified: String?, data: String?)
+    suspend fun putCachedWebpage(url: String, lastModified: String?, date: ZonedDateTime, data: String?)
     suspend fun getCachedWebpage(url: String): CacheDbEntry?
 }
 
@@ -29,11 +30,11 @@ class InternalDbStoreImpl @Inject constructor(mongoClient: MongoClient) : MongoI
         }
     }
 
-    override suspend fun putCachedWebpage(url: String, lastModified: String?, data: String?) {
+    override suspend fun putCachedWebpage(url: String, lastModified: String?, date: ZonedDateTime, data: String?) {
         GlobalScope.launch {
             webCache.updateOne(
                 Document("url", url),
-                CacheDbEntry(url, lastModified, data),
+                CacheDbEntry(url, lastModified, date, data),
                 UpdateOptions().upsert(true),
                 false
             )
