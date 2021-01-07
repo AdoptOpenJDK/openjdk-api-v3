@@ -43,7 +43,11 @@ class BinaryResource @Inject constructor(private val packageEndpoint: PackageEnd
     @HEAD
     @Path("/version/{release_name}/{os}/{arch}/{image_type}/{jvm_impl}/{heap_size}/{vendor}")
     @Produces("application/octet-stream")
-    @Operation(summary = "Redirects to the binary that matches your current query", description = "Redirects to the binary that matches your current query")
+    @Operation(
+        operationId = "getBinaryByVersion",
+        summary = "Redirects to the binary that matches your current query",
+        description = "Redirects to the binary that matches your current query"
+    )
     @APIResponses(
         value = [
             APIResponse(responseCode = "307", description = "link to binary that matches your current query"),
@@ -120,7 +124,11 @@ class BinaryResource @Inject constructor(private val packageEndpoint: PackageEnd
     @GET
     @Path("/latest/{feature_version}/{release_type}/{os}/{arch}/{image_type}/{jvm_impl}/{heap_size}/{vendor}")
     @Produces("application/octet-stream")
-    @Operation(summary = "Redirects to the binary that matches your current query", description = "Redirects to the binary that matches your current query")
+    @Operation(
+        operationId = "getBinary",
+        summary = "Redirects to the binary that matches your current query",
+        description = "Redirects to the binary that matches your current query"
+    )
     @APIResponses(
         value = [
             APIResponse(responseCode = "307", description = "link to binary that matches your current query"),

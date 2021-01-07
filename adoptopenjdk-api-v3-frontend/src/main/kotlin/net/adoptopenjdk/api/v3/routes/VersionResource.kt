@@ -25,7 +25,11 @@ class VersionResource {
     @GET
     @Path("/{version}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Parses a java version string", description = "Parses a java version string and returns that data in a structured format")
+    @Operation(
+        operationId = "parseVersion",
+        summary = "Parses a java version string",
+        description = "Parses a java version string and returns that data in a structured format"
+    )
     @APIResponses(
         value = [
             APIResponse(responseCode = "400", description = "bad input parameter")

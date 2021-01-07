@@ -38,7 +38,11 @@ class InstallerResource @Inject constructor(private val packageEndpoint: Package
     @GET
     @Path("/version/{release_name}/{os}/{arch}/{image_type}/{jvm_impl}/{heap_size}/{vendor}")
     @Produces("application/octet-stream")
-    @Operation(summary = "Redirects to the installer that matches your current query", description = "Redirects to the installer that matches your current query")
+    @Operation(
+        operationId = "getInstallerByVersion",
+        summary = "Redirects to the installer that matches your current query",
+        description = "Redirects to the installer that matches your current query"
+    )
     @APIResponses(
         value = [
             APIResponse(responseCode = "307", description = "link to installer that matches your current query"),
@@ -89,7 +93,11 @@ class InstallerResource @Inject constructor(private val packageEndpoint: Package
     @GET
     @Path("/latest/{feature_version}/{release_type}/{os}/{arch}/{image_type}/{jvm_impl}/{heap_size}/{vendor}")
     @Produces("application/octet-stream")
-    @Operation(summary = "Redirects to the installer that matches your current query", description = "Redirects to the installer that matches your current query")
+    @Operation(
+        operationId = "getInstaller",
+        summary = "Redirects to the installer that matches your current query",
+        description = "Redirects to the installer that matches your current query"
+    )
     @APIResponses(
         value = [
             APIResponse(responseCode = "307", description = "link to installer that matches your current query"),
