@@ -10,6 +10,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
+import org.slf4j.LoggerFactory
 import javax.ws.rs.BadRequestException
 import javax.ws.rs.GET
 import javax.ws.rs.Path
@@ -21,6 +22,11 @@ import javax.ws.rs.core.MediaType
 @Produces(MediaType.APPLICATION_JSON)
 @Timed
 class VersionResource {
+
+    companion object {
+        @JvmStatic
+        private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    }
 
     @GET
     @Path("/{version}")
@@ -39,6 +45,7 @@ class VersionResource {
         try {
             return VersionParser.parse(version, sanityCheck = false, exactMatch = true)
         } catch (e: FailedToParse) {
+            LOGGER.error("Failed to parse version", e)
             throw BadRequestException("Unable to parse version")
         }
     }
