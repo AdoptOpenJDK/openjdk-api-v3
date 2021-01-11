@@ -143,6 +143,23 @@ class VersionParserTest {
         assertEquals("8.0.0", parsed.formSemver())
     }
 
+    //TODO: remove tactical ignoring "internal" pres
+    @Test
+    fun `internal pre is treated as null wrt sorting`() {
+        val unsorted = listOf(
+            VersionData(8, 0, 282, "internal", 0, 7, "202101061709", "1.8.0_282-internal-202101061709-b07"),
+            VersionData(8, 0, 282, "internal", 0, 6, "202012231721", "1.8.0_282-internal-202012231721-b06"),
+            VersionData(8, 0, 282, null, 0, 7, "202101042134", "1.8.0_282-202101042134-b07"),
+            VersionData(8, 0, 282, null, 0, 4, "202012071203", "1.8.0_282-202012071203-b04"),
+        )
+        val sorted = unsorted.sortedWith(Releases.VERSION_COMPARATOR)
+
+        assertEquals(unsorted.get(3), sorted.get(0))
+        assertEquals(unsorted.get(1), sorted.get(1))
+        assertEquals(unsorted.get(0), sorted.get(2))
+        assertEquals(unsorted.get(2), sorted.get(3))
+    }
+
     @Test
     fun `patch versions sort correctly`() {
         val sorted = listOf(
