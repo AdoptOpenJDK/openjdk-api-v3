@@ -45,7 +45,7 @@ class VersionResource {
         try {
             return VersionParser.parse(version, sanityCheck = false, exactMatch = true)
         } catch (e: FailedToParse) {
-            LOGGER.error("Failed to parse version", e)
+            LOGGER.info("Failed to parse version: $version", e)
             throw BadRequestException("Unable to parse version")
         }
     }
