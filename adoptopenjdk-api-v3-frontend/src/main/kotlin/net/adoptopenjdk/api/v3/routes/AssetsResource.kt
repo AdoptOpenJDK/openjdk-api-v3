@@ -32,6 +32,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
@@ -51,6 +52,11 @@ import javax.ws.rs.core.MediaType
 @Produces(MediaType.APPLICATION_JSON)
 @Timed
 class AssetsResource {
+
+    companion object {
+        @JvmStatic
+        private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    }
 
     @GET
     @Path("/feature_releases/{feature_version}/{release_type}")
@@ -160,27 +166,27 @@ class AssetsResource {
         return getPage(pageSize, page, releases)
     }
 
-    private fun parseDate(before: String?): ZonedDateTime? {
-        return if (before != null) {
+    private fun parseDate(rawDate: String?): ZonedDateTime? {
+        return if (rawDate != null) {
             try {
-                val date = LocalDate.parse(before, DateTimeFormatter.ISO_DATE)
+                val date = LocalDate.parse(rawDate, DateTimeFormatter.ISO_DATE)
                 return date.plusDays(1).atStartOfDay(TimeSource.ZONE)
             } catch (e: DateTimeParseException) {
                 // NOP
             }
 
             try {
-                val date = DateTimeFormatter.ISO_DATE_TIME.parseBest(
-                    before,
+                val parsedDate = DateTimeFormatter.ISO_DATE_TIME.parseBest(
+                    rawDate,
                     TemporalQuery { p0 -> ZonedDateTime.from(p0) },
                     TemporalQuery { p0 -> OffsetDateTime.from(p0) },
                     TemporalQuery { p0 -> LocalDateTime.from(p0) }
                 )
 
-                return when (date) {
-                    is LocalDateTime -> date.atZone(TimeSource.ZONE)
-                    is OffsetDateTime -> date.atZoneSameInstant(TimeSource.ZONE)
-                    is ZonedDateTime -> date
+                return when (parsedDate) {
+                    is LocalDateTime -> parsedDate.atZone(TimeSource.ZONE)
+                    is OffsetDateTime -> parsedDate.atZoneSameInstant(TimeSource.ZONE)
+                    is ZonedDateTime -> parsedDate
                     else -> null
                 }
             } catch (e: DateTimeParseException) {
@@ -188,9 +194,10 @@ class AssetsResource {
             }
 
             try {
-                val date = LocalDate.parse(before, DateTimeFormatter.BASIC_ISO_DATE)
+                val date = LocalDate.parse(rawDate, DateTimeFormatter.BASIC_ISO_DATE)
                 return date.plusDays(1).atStartOfDay(TimeSource.ZONE)
             } catch (e: DateTimeParseException) {
+                LOGGER.info("Failed to parse date: $rawDate", e)
                 throw BadRequestException("Cannot parse date")
             }
         } else {

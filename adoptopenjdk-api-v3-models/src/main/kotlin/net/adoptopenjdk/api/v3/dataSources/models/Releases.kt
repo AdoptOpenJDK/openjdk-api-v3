@@ -103,7 +103,18 @@ class Releases {
     }
 
     companion object {
-        val PRE_SORTER = compareBy<VersionData, String?>(nullsLast()) { it.pre }
+
+        // exclude "internal" pre from sorting as this causes incorrect sorting for openj9 nightlies
+        // TODO: remove tactical ignoring "internal" pre fields
+        private val PRE_IGNORE_LIST = listOf("internal")
+
+        val PRE_SORTER = compareBy<VersionData, String?>(nullsLast()) {
+            return@compareBy if (PRE_IGNORE_LIST.contains(it.pre)) {
+                null
+            } else {
+                it.pre
+            }
+        }
 
         // Cant use the default sort as we want to ignore optional
         val VERSION_COMPARATOR = compareBy<VersionData> { it.major }
