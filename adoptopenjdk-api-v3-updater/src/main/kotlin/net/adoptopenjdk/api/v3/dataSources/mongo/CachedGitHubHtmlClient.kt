@@ -98,6 +98,7 @@ class CachedGitHubHtmlClient @Inject constructor(
                 val response = updaterHtmlClient.getFullResponse(request)
 
                 if (response?.statusLine?.statusCode == 304) {
+                    internalDbStore.updateCheckedTime(request.url, TimeSource.now())
                     // asset has not updated
                     return null
                 }

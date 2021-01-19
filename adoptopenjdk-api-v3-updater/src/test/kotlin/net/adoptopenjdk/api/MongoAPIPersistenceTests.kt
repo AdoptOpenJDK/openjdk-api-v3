@@ -7,7 +7,6 @@ import org.junit.Assert
 import org.junit.jupiter.api.Test
 
 class MongoAPIPersistenceTests : MongoTest() {
-
     @Test
     fun `update time is set`(apiPersistence: ApiPersistence) {
         runBlocking {
