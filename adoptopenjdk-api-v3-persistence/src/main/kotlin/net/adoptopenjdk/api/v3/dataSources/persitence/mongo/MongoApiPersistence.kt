@@ -49,7 +49,7 @@ open class MongoApiPersistence @Inject constructor(mongoClient: MongoClient) : M
                     writeReleases(repo.key, repo.value)
                 }
         } finally {
-            updateUpdatedTime(TimeSource.now(), checksum)
+            updateUpdatedTime(TimeSource.now(), checksum, repos.hashCode())
         }
     }
 
@@ -134,10 +134,11 @@ open class MongoApiPersistence @Inject constructor(mongoClient: MongoClient) : M
         )
     }
 
-    override suspend fun updateUpdatedTime(dateTime: ZonedDateTime, checksum: String) {
+    // visible for testing
+    suspend fun updateUpdatedTime(dateTime: ZonedDateTime, checksum: String, hashCode: Int) {
         updateTimeCollection.updateOne(
             Document(),
-            UpdatedInfo(dateTime, checksum),
+            UpdatedInfo(dateTime, checksum, hashCode),
             UpdateOptions().upsert(true)
         )
         updateTimeCollection.deleteMany(Document("time", BsonDocument("\$lt", BsonDateTime(dateTime.toInstant().toEpochMilli()))))
@@ -146,7 +147,7 @@ open class MongoApiPersistence @Inject constructor(mongoClient: MongoClient) : M
     override suspend fun getUpdatedAt(): UpdatedInfo {
         val info = updateTimeCollection.findOne()
         // if we have no existing time, make it 5 mins ago, should only happen on first time the db is used
-        return info ?: UpdatedInfo(TimeSource.now().minusMinutes(5), "000")
+        return info ?: UpdatedInfo(TimeSource.now().minusMinutes(5), "000", 0)
     }
 
     override suspend fun getReleaseInfo(): ReleaseInfo? {

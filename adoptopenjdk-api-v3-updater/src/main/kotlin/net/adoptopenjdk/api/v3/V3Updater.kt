@@ -77,6 +77,10 @@ class V3Updater @Inject constructor(
         val checksum = calculateChecksum(updatedRepo)
         val oldChecksum = calculateChecksum(oldRepo)
 
+        if (checksum == oldChecksum) {
+            return updatedRepo
+        }
+
         return mutex.withLock {
             // Ensure that the database has not been updated since calculating the incremental update
             if (database.getUpdatedAt().checksum == oldChecksum) {
@@ -84,7 +88,7 @@ class V3Updater @Inject constructor(
                 database.setReleaseInfo(releaseVersionResolver.formReleaseInfo(updatedRepo))
 
                 LOGGER.info("Incremental update done")
-                LOGGER.info("Saved version: $checksum")
+                LOGGER.info("Saved version: $checksum ${updatedRepo.hashCode()}")
                 return@withLock updatedRepo
             } else {
                 LOGGER.info("Incremental update done")

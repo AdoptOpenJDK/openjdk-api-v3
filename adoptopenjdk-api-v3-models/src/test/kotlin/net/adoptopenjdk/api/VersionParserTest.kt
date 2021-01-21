@@ -143,7 +143,7 @@ class VersionParserTest {
         assertEquals("8.0.0", parsed.formSemver())
     }
 
-    //TODO: remove tactical ignoring "internal" pres
+    // TODO: remove tactical ignoring "internal" pres
     @Test
     fun `internal pre is treated as null wrt sorting`() {
         val unsorted = listOf(

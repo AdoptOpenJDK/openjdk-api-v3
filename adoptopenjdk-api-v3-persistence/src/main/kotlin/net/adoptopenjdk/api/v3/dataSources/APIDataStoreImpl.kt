@@ -30,7 +30,7 @@ open class APIDataStoreImpl : APIDataStore {
     @Inject
     constructor(dataStore: ApiPersistence) {
         this.dataStore = dataStore
-        updatedAt = UpdatedInfo(ZonedDateTime.now().minusYears(10), "111")
+        updatedAt = UpdatedInfo(ZonedDateTime.now().minusYears(10), "111", 0)
         schedule = null
         binaryRepos = try {
             loadDataFromDb(true)
@@ -44,7 +44,7 @@ open class APIDataStoreImpl : APIDataStore {
 
     constructor(binaryRepos: AdoptRepos, dataStore: ApiPersistence) {
         this.dataStore = dataStore
-        updatedAt = UpdatedInfo(ZonedDateTime.now().minusYears(10), "111")
+        updatedAt = UpdatedInfo(ZonedDateTime.now().minusYears(10), "111", 0)
         schedule = null
         this.binaryRepos = binaryRepos
         this.releaseInfo = loadReleaseInfo()
