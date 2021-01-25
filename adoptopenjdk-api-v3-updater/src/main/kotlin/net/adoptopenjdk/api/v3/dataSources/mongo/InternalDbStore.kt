@@ -52,7 +52,8 @@ class InternalDbStoreImpl @Inject constructor(mongoClient: MongoClient) : MongoI
     override suspend fun updateCheckedTime(url: String, dateTime: ZonedDateTime) {
         webCache.updateOne(
             Document("url", url),
-            BsonDocument("\$set",
+            BsonDocument(
+                "\$set",
                 BsonDocument("lastChecked", BsonDateTime(dateTime.toInstant().toEpochMilli()))
             )
         )

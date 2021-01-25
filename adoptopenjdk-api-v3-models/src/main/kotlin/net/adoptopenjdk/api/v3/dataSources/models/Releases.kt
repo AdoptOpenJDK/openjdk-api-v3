@@ -20,6 +20,8 @@ class Releases {
 
     @JsonIgnore
     val nodeList: TreeSet<Release> = TreeSet(VERSION_THEN_TIME_SORTER)
+
+    @JsonIgnore
     private val nodeListTimeThenVersion: TreeSet<Release> = TreeSet(TIME_THEN_VERSION_SORTER)
 
     constructor(nodes: List<Release>) {

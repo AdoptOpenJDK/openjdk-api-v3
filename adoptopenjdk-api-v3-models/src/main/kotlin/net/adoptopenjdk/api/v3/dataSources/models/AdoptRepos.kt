@@ -88,14 +88,11 @@ class AdoptRepos {
         other as AdoptRepos
 
         if (repos != other.repos) return false
-        if (allReleases != other.allReleases) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = repos.hashCode()
-        result = 31 * result + allReleases.hashCode()
-        return result
+        return repos.hashCode()
     }
 }

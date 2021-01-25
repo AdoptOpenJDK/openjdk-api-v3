@@ -95,7 +95,6 @@ class Release {
         if (timestamp != other.timestamp) return false
         if (updated_at != other.updated_at) return false
         if (!binaries.contentEquals(other.binaries)) return false
-        if (download_count != other.download_count) return false
         if (release_type != other.release_type) return false
         if (vendor != other.vendor) return false
         if (version_data != other.version_data) return false
@@ -111,7 +110,6 @@ class Release {
         result = 31 * result + timestamp.hashCode()
         result = 31 * result + updated_at.hashCode()
         result = 31 * result + binaries.contentHashCode()
-        result = 31 * result + download_count.hashCode()
         result = 31 * result + release_type.hashCode()
         result = 31 * result + vendor.hashCode()
         result = 31 * result + version_data.hashCode()

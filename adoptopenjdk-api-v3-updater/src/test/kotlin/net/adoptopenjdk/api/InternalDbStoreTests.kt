@@ -4,7 +4,6 @@ import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.mongo.CacheDbEntry
 import net.adoptopenjdk.api.v3.dataSources.mongo.InternalDbStoreImpl
-import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoClient
 import org.junit.Assert
 import org.junit.jupiter.api.Test

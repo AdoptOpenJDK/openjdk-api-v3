@@ -72,7 +72,6 @@ class Binary {
         if (`package` != other.`package`) return false
         if (installer != other.installer) return false
         if (heap_size != other.heap_size) return false
-        if (download_count != other.download_count) return false
         if (updated_at != other.updated_at) return false
         if (scm_ref != other.scm_ref) return false
         if (project != other.project) return false
@@ -88,7 +87,6 @@ class Binary {
         result = 31 * result + `package`.hashCode()
         result = 31 * result + (installer?.hashCode() ?: 0)
         result = 31 * result + heap_size.hashCode()
-        result = 31 * result + download_count.hashCode()
         result = 31 * result + updated_at.hashCode()
         result = 31 * result + (scm_ref?.hashCode() ?: 0)
         result = 31 * result + project.hashCode()

@@ -10,10 +10,16 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>/tmp/updater.log</file>
+        <file>/logs/updater.log</file>
         <encoder>
             <pattern>%date %level [%thread] %logger{10} [%file:%line]%n%msg%n</pattern>
         </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>/logs/updater.%d{yyyy-MM-dd-HH-mm}.%i.log</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>10</maxHistory>
+            <totalSizeCap>500MB</totalSizeCap>
+        </rollingPolicy>
     </appender>
 
     <appender name="AI_APPENDER" class="com.microsoft.applicationinsights.logback.ApplicationInsightsAppender">

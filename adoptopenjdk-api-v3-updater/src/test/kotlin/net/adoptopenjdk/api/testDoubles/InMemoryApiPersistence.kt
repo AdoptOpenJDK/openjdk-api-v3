@@ -26,6 +26,7 @@ open class InMemoryApiPersistence @Inject constructor(var repos: AdoptRepos) : A
 
     override suspend fun updateAllRepos(repos: AdoptRepos, checksum: String) {
         this.repos = repos
+        this.updatedAtInfo = UpdatedInfo(TimeSource.now(), checksum, repos.hashCode())
     }
 
     override suspend fun readReleaseData(featureVersion: Int): FeatureRelease {
@@ -83,11 +84,7 @@ open class InMemoryApiPersistence @Inject constructor(var repos: AdoptRepos) : A
         return releaseInfo
     }
 
-    override suspend fun updateUpdatedTime(dateTime: ZonedDateTime, checksum: String) {
-        this.updatedAtInfo = UpdatedInfo(dateTime, checksum)
-    }
-
     override suspend fun getUpdatedAt(): UpdatedInfo {
-        return updatedAtInfo ?: UpdatedInfo(TimeSource.now().minusMinutes(5), "000")
+        return updatedAtInfo ?: UpdatedInfo(TimeSource.now().minusMinutes(5), "000", 0)
     }
 }

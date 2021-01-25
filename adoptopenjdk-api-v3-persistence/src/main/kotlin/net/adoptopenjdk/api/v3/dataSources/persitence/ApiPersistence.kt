@@ -22,6 +22,5 @@ interface ApiPersistence {
     suspend fun removeStatsBetween(start: ZonedDateTime, end: ZonedDateTime)
     suspend fun setReleaseInfo(version: ReleaseInfo)
     suspend fun getReleaseInfo(): ReleaseInfo?
-    suspend fun updateUpdatedTime(dateTime: ZonedDateTime, checksum: String)
     suspend fun getUpdatedAt(): UpdatedInfo
 }
