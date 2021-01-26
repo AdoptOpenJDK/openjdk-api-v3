@@ -115,7 +115,7 @@ class V3Updater @Inject constructor(
             .forEach { releaseB ->
                 val releaseA = repoA.allReleases.getReleaseById(releaseB.id)
                 if (releaseA == null) {
-                    LOGGER.info("Release Added ${releaseB.id} ${releaseA.version_data.semver}")
+                    LOGGER.info("Release Added ${releaseB.id} ${releaseB.version_data.semver}")
                 }
             }
     }
