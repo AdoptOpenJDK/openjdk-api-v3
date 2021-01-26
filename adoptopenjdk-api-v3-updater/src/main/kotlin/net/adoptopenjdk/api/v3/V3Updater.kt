@@ -66,6 +66,12 @@ class V3Updater @Inject constructor(
 
                     val dbVersion = apiDataStore.loadDataFromDb(true)
                     LOGGER.info("Updated and db version comparison {} {} {} {}", calculateChecksum(updatedRepo), updatedRepo.hashCode(), calculateChecksum(dbVersion), dbVersion.hashCode())
+
+                    LOGGER.info("Compare db and updated")
+                    deepDiffDebugPrint(dbVersion, updatedRepo)
+
+                    LOGGER.info("Compare Old and updated")
+                    deepDiffDebugPrint(oldRepo, updatedRepo)
                     return@runBlocking dbVersion
                 }
 
@@ -74,6 +80,44 @@ class V3Updater @Inject constructor(
             }
             return@runBlocking null
         }
+    }
+
+    private fun deepDiffDebugPrint(repoA: AdoptRepos, repoB: AdoptRepos) {
+        repoA
+            .allReleases
+            .getReleases()
+            .forEach { releaseA ->
+                val releaseB = repoB.allReleases.getReleaseById(releaseA.id)
+                if (releaseB == null) {
+                    LOGGER.info("Release disapeared ${releaseA.id} ${releaseA.version_data.semver}")
+                } else if (releaseA != releaseB) {
+                    LOGGER.info("Release changed ${releaseA.release_name}")
+                    releaseA
+                        .binaries
+                        .forEach { binaryA ->
+                            val binaryB = releaseB
+                                .binaries
+                                .firstOrNull { it.`package`.link == binaryA.`package`.link }
+                            if (binaryB == null) {
+                                LOGGER.info("Binary disapeared ${binaryA.`package`.name}")
+                            } else if (binaryA != binaryB) {
+                                LOGGER.info("Binary updated ${binaryA.`package`.name}")
+                                LOGGER.info(JsonMapper.mapper.writeValueAsString(binaryA))
+                                LOGGER.info(JsonMapper.mapper.writeValueAsString(binaryB))
+                            }
+                        }
+                }
+            }
+
+        repoB
+            .allReleases
+            .getReleases()
+            .forEach { releaseB ->
+                val releaseA = repoA.allReleases.getReleaseById(releaseB.id)
+                if (releaseA == null) {
+                    LOGGER.info("Release Added ${releaseB.id} ${releaseA.version_data.semver}")
+                }
+            }
     }
 
     private suspend fun writeIncrementalUpdate(updatedRepo: AdoptRepos, oldRepo: AdoptRepos): AdoptRepos? {

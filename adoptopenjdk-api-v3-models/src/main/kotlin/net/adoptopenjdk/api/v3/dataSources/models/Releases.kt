@@ -105,6 +105,10 @@ class Releases {
         return nodes.hashCode()
     }
 
+    fun getReleaseById(id: String): Release? {
+        return nodes.get(id)
+    }
+
     companion object {
 
         // exclude "internal" pre from sorting as this causes incorrect sorting for openj9 nightlies
