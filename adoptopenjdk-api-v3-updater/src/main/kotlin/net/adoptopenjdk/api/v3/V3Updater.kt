@@ -65,7 +65,7 @@ class V3Updater @Inject constructor(
                     writeIncrementalUpdate(updatedRepo, oldRepo)
 
                     val dbVersion = apiDataStore.loadDataFromDb(true)
-                    LOGGER.info("Updated and db version comparison {} {} {} {}", calculateChecksum(updatedRepo), updatedRepo.hashCode(), calculateChecksum(dbVersion), dbVersion.hashCode())
+                    LOGGER.info("Updated and db version comparison {} {} {} {} {} {}", calculateChecksum(oldRepo), oldRepo.hashCode(), calculateChecksum(updatedRepo), updatedRepo.hashCode(), calculateChecksum(dbVersion), dbVersion.hashCode())
 
                     LOGGER.info("Compare db and updated")
                     deepDiffDebugPrint(dbVersion, updatedRepo)
@@ -139,7 +139,7 @@ class V3Updater @Inject constructor(
                 return@withLock updatedRepo
             } else {
                 LOGGER.info("Incremental update done")
-                LOGGER.warn("Not applying incremental update due to checksum miss match")
+                LOGGER.warn("Not applying incremental update due to checksum miss $checksum ${updatedRepo.hashCode()} $oldChecksum ${oldRepo.hashCode()} ${database.getUpdatedAt().checksum}")
                 return@withLock null
             }
         }
