@@ -61,11 +61,14 @@ class V3Updater @Inject constructor(
                 LOGGER.info("Starting Incremental update")
                 val updatedRepo = adoptReposBuilder.incrementalUpdate(oldRepo)
 
-                return@runBlocking if (updatedRepo != oldRepo) {
+                if (updatedRepo != oldRepo) {
                     writeIncrementalUpdate(updatedRepo, oldRepo)
-                } else {
-                    null
+
+                    val dbVersion = apiDataStore.loadDataFromDb(true)
+                    LOGGER.info("Updated and db version comparison {} {} {} {}", calculateChecksum(updatedRepo), updatedRepo.hashCode(), calculateChecksum(dbVersion), dbVersion.hashCode())
+                    return@runBlocking dbVersion
                 }
+
             } catch (e: Exception) {
                 LOGGER.error("Failed to perform incremental update", e)
             }

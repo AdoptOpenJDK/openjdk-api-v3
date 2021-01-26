@@ -7,7 +7,7 @@ if [ "$(ls /tmp/artifacts/ 2>/dev/null)" ]; then
 fi
 
 cd /tmp/src
-./mvnw clean package
+./mvnw -B clean package
 
 if [ -v SWAGGERHUB_APIKEY ]; then
   cd adoptopenjdk-api-v3-frontend
