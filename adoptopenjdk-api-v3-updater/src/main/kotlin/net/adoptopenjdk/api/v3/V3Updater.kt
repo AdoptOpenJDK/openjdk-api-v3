@@ -62,23 +62,20 @@ class V3Updater @Inject constructor(
                 val updatedRepo = adoptReposBuilder.incrementalUpdate(oldRepo)
 
                 if (updatedRepo != oldRepo) {
-                    writeIncrementalUpdate(updatedRepo, oldRepo)
+                    val after = writeIncrementalUpdate(updatedRepo, oldRepo)
 
-                    val dbVersion = apiDataStore.loadDataFromDb(true)
-                    LOGGER.info("Updated and db version comparison {} {} {} {} {} {}", calculateChecksum(oldRepo), oldRepo.hashCode(), calculateChecksum(updatedRepo), updatedRepo.hashCode(), calculateChecksum(dbVersion), dbVersion.hashCode())
+                    LOGGER.info("Updated and db version comparison {} {} {} {} {} {}", calculateChecksum(oldRepo), oldRepo.hashCode(), calculateChecksum(updatedRepo), updatedRepo.hashCode(), calculateChecksum(after), after.hashCode())
 
                     LOGGER.info("Compare db and updated")
-                    deepDiffDebugPrint(dbVersion, updatedRepo)
+                    deepDiffDebugPrint(updatedRepo, updatedRepo)
 
                     LOGGER.info("Compare Old and updated")
                     deepDiffDebugPrint(oldRepo, updatedRepo)
 
-
                     LOGGER.info("Compare db and old")
-                    deepDiffDebugPrint(dbVersion, oldRepo)
-                    return@runBlocking dbVersion
+                    deepDiffDebugPrint(updatedRepo, oldRepo)
+                    return@runBlocking updatedRepo
                 }
-
             } catch (e: Exception) {
                 LOGGER.error("Failed to perform incremental update", e)
             }
@@ -125,7 +122,7 @@ class V3Updater @Inject constructor(
             }
     }
 
-    private suspend fun writeIncrementalUpdate(updatedRepo: AdoptRepos, oldRepo: AdoptRepos): AdoptRepos? {
+    private suspend fun writeIncrementalUpdate(updatedRepo: AdoptRepos, oldRepo: AdoptRepos): AdoptRepos {
         val checksum = calculateChecksum(updatedRepo)
         val oldChecksum = calculateChecksum(oldRepo)
 
@@ -145,7 +142,12 @@ class V3Updater @Inject constructor(
             } else {
                 LOGGER.info("Incremental update done")
                 LOGGER.warn("Not applying incremental update due to checksum miss $checksum ${updatedRepo.hashCode()} $oldChecksum ${oldRepo.hashCode()} ${database.getUpdatedAt().checksum}")
-                return@withLock null
+
+                //re-calculate checksum in case of schema change
+                val dbVersion = apiDataStore.loadDataFromDb(true)
+                database.updateAllRepos(dbVersion, calculateChecksum(dbVersion))
+
+                return@withLock dbVersion
             }
         }
     }
