@@ -72,6 +72,10 @@ class V3Updater @Inject constructor(
 
                     LOGGER.info("Compare Old and updated")
                     deepDiffDebugPrint(oldRepo, updatedRepo)
+
+
+                    LOGGER.info("Compare db and old")
+                    deepDiffDebugPrint(dbVersion, oldRepo)
                     return@runBlocking dbVersion
                 }
 
