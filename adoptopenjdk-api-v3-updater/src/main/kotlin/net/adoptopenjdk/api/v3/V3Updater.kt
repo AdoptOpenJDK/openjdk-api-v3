@@ -145,7 +145,10 @@ class V3Updater @Inject constructor(
 
                 //re-calculate checksum in case of schema change
                 val dbVersion = apiDataStore.loadDataFromDb(true)
-                database.updateAllRepos(dbVersion, calculateChecksum(dbVersion))
+                val dbChecksum = calculateChecksum(dbVersion)
+                if (dbChecksum != database.getUpdatedAt().checksum) {
+                    database.updateAllRepos(dbVersion, dbChecksum)
+                }
 
                 return@withLock dbVersion
             }
