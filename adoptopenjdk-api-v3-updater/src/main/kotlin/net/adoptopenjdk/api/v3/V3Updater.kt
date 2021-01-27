@@ -92,6 +92,8 @@ class V3Updater @Inject constructor(
                     LOGGER.info("Release disapeared ${releaseA.id} ${releaseA.version_data.semver}")
                 } else if (releaseA != releaseB) {
                     LOGGER.info("Release changed ${releaseA.release_name}")
+                    LOGGER.info("Release changedA $releaseA")
+                    LOGGER.info("Release changedB $releaseB")
                     releaseA
                         .binaries
                         .forEach { binaryA ->

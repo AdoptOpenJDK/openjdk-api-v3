@@ -116,4 +116,8 @@ class Release {
         result = 31 * result + (source?.hashCode() ?: 0)
         return result
     }
+
+    override fun toString(): String {
+        return "Release(id='$id', release_link='$release_link', release_name='$release_name', timestamp=$timestamp, updated_at=$updated_at, download_count=$download_count, release_type=$release_type, vendor=$vendor, version_data=$version_data, source=$source)"
+    }
 }
