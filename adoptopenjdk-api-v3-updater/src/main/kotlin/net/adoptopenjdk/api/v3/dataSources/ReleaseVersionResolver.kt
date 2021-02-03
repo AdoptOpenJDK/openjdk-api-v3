@@ -21,7 +21,7 @@ object ReleaseVersionResolver {
         }
     }
 
-    private fun getObsoleteReleases(): Array<Int>? {
+    private fun getObsoleteReleases(): Array<Int> {
         val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
         val variants: Variants = UpdaterJsonMapper.mapper.readValue(variantData, Variants::class.java)
 
@@ -33,15 +33,7 @@ object ReleaseVersionResolver {
             }
         }
 
-        return if (obsoleteVersions.isNotEmpty()) {
-            obsoleteVersions
-                .distinct()
-                .sorted()
-                .toTypedArray()
-        } else {
-            return null
-        }
-
+        return obsoleteVersions.distinct().sorted().toTypedArray()
     }
 
     suspend fun updateDbVersion(repo: AdoptRepos) {
@@ -62,7 +54,7 @@ object ReleaseVersionResolver {
             .toList()
             .toTypedArray()
 
-        val obsoleteReleases: Array<Int> = getObsoleteReleases() ?: arrayOf(9, 10)
+        val obsoleteReleases: Array<Int> = getObsoleteReleases()
 
         val mostRecentFeatureRelease: Int = availableReleases.last()
 
