@@ -121,6 +121,10 @@ class VersionData : Comparable<VersionData> {
         return COMPARATOR.compare(this, other)
     }
 
+    override fun toString(): String {
+        return "VersionData(major=$major, minor=$minor, security=$security, patch=$patch, pre=$pre, adopt_build_number=$adopt_build_number, semver='$semver', openjdk_version='$openjdk_version', build=$build, optional=$optional)"
+    }
+
     companion object {
         val COMPARATOR = compareBy<VersionData> { it.major }
             .thenBy { it.minor }

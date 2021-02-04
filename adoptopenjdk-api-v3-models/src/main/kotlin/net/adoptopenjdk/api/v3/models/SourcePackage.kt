@@ -22,4 +22,28 @@ class SourcePackage {
         this.link = link
         this.size = size
     }
+
+    override fun toString(): String {
+        return "SourcePackage(name='$name', link='$link', size=$size)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as SourcePackage
+
+        if (name != other.name) return false
+        if (link != other.link) return false
+        if (size != other.size) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + link.hashCode()
+        result = 31 * result + size.hashCode()
+        return result
+    }
 }

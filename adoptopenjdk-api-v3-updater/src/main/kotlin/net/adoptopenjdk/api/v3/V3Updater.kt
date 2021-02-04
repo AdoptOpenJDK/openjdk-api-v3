@@ -61,10 +61,20 @@ class V3Updater @Inject constructor(
                 LOGGER.info("Starting Incremental update")
                 val updatedRepo = adoptReposBuilder.incrementalUpdate(oldRepo)
 
-                return@runBlocking if (updatedRepo != oldRepo) {
-                    writeIncrementalUpdate(updatedRepo, oldRepo)
-                } else {
-                    null
+                if (updatedRepo != oldRepo) {
+                    val after = writeIncrementalUpdate(updatedRepo, oldRepo)
+
+                    LOGGER.info("Updated and db version comparison {} {} {} {} {} {}", calculateChecksum(oldRepo), oldRepo.hashCode(), calculateChecksum(updatedRepo), updatedRepo.hashCode(), calculateChecksum(after), after.hashCode())
+
+                    LOGGER.info("Compare db and updated")
+                    deepDiffDebugPrint(updatedRepo, updatedRepo)
+
+                    LOGGER.info("Compare Old and updated")
+                    deepDiffDebugPrint(oldRepo, updatedRepo)
+
+                    LOGGER.info("Compare db and old")
+                    deepDiffDebugPrint(updatedRepo, oldRepo)
+                    return@runBlocking updatedRepo
                 }
             } catch (e: Exception) {
                 LOGGER.error("Failed to perform incremental update", e)
@@ -73,7 +83,46 @@ class V3Updater @Inject constructor(
         }
     }
 
-    private suspend fun writeIncrementalUpdate(updatedRepo: AdoptRepos, oldRepo: AdoptRepos): AdoptRepos? {
+    private fun deepDiffDebugPrint(repoA: AdoptRepos, repoB: AdoptRepos) {
+        repoA
+            .allReleases
+            .getReleases()
+            .forEach { releaseA ->
+                val releaseB = repoB.allReleases.getReleaseById(releaseA.id)
+                if (releaseB == null) {
+                    LOGGER.info("Release disapeared ${releaseA.id} ${releaseA.version_data.semver}")
+                } else if (releaseA != releaseB) {
+                    LOGGER.info("Release changedA $releaseA")
+                    LOGGER.info("Release changedB $releaseB")
+                    releaseA
+                        .binaries
+                        .forEach { binaryA ->
+                            val binaryB = releaseB
+                                .binaries
+                                .firstOrNull { it.`package`.link == binaryA.`package`.link }
+                            if (binaryB == null) {
+                                LOGGER.info("Binary disapeared ${binaryA.`package`.name}")
+                            } else if (binaryA != binaryB) {
+                                LOGGER.info("Binary updated ${binaryA.`package`.name}")
+                                LOGGER.info(JsonMapper.mapper.writeValueAsString(binaryA))
+                                LOGGER.info(JsonMapper.mapper.writeValueAsString(binaryB))
+                            }
+                        }
+                }
+            }
+
+        repoB
+            .allReleases
+            .getReleases()
+            .forEach { releaseB ->
+                val releaseA = repoA.allReleases.getReleaseById(releaseB.id)
+                if (releaseA == null) {
+                    LOGGER.info("Release Added ${releaseB.id} ${releaseB.version_data.semver}")
+                }
+            }
+    }
+
+    private suspend fun writeIncrementalUpdate(updatedRepo: AdoptRepos, oldRepo: AdoptRepos): AdoptRepos {
         val checksum = calculateChecksum(updatedRepo)
         val oldChecksum = calculateChecksum(oldRepo)
 
@@ -92,8 +141,16 @@ class V3Updater @Inject constructor(
                 return@withLock updatedRepo
             } else {
                 LOGGER.info("Incremental update done")
-                LOGGER.warn("Not applying incremental update due to checksum miss match")
-                return@withLock null
+                LOGGER.warn("Not applying incremental update due to checksum miss $checksum ${updatedRepo.hashCode()} $oldChecksum ${oldRepo.hashCode()} ${database.getUpdatedAt().checksum}")
+
+                //re-calculate checksum in case of schema change
+                val dbVersion = apiDataStore.loadDataFromDb(true)
+                val dbChecksum = calculateChecksum(dbVersion)
+                if (dbChecksum != database.getUpdatedAt().checksum) {
+                    database.updateAllRepos(dbVersion, dbChecksum)
+                }
+
+                return@withLock dbVersion
             }
         }
     }

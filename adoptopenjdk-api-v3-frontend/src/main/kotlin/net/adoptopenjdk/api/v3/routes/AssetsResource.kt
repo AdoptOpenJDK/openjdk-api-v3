@@ -124,9 +124,8 @@ constructor(
 
         @Parameter(
             name = "before",
-            description = "Return binaries whose updated_at is before the given date/time. When a date is given the match is inclusive of the given day.",
+            description = "<p>Return binaries whose updated_at is before the given date/time. When a date is given the match is inclusive of the given day. <ul> <li>2020-01-21</li> <li>2020-01-21T10:15:30</li> <li>20200121</li> <li>2020-12-21T10:15:30Z</li> <li>2020-12-21+01:00</li> </ul></p> ",
             schema = Schema(type = SchemaType.STRING),
-            example = "2020-01-21, 2020-01-21T10:15:30, 20200121, 2020-12-21T10:15:30Z, 2020-12-21+01:00",
             required = false
         )
         @QueryParam("before")
