@@ -24,7 +24,7 @@ constructor(
 ) {
     @GET
     @Path("/available_releases/")
-    @Operation(summary = "Returns information about available releases")
+    @Operation(summary = "Returns information about available releases", operationId = "getAvailableReleases")
     fun get(): ReleaseInfo {
         return apiDataStore.getReleaseInfo()
     }

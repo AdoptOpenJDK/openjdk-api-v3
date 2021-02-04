@@ -40,7 +40,7 @@ constructor(
 
     @GET
     @Path("/release_names")
-    @Operation(summary = "Returns a list of all release names")
+    @Operation(summary = "Returns a list of all release names", operationId = "getReleaseNames")
     fun get(
         @Parameter(name = "release_type", description = OpenApiDocs.RELEASE_TYPE, required = false)
         @QueryParam("release_type")
@@ -86,7 +86,7 @@ constructor(
 
     @Path("/release_versions")
     @GET
-    @Operation(summary = "Returns a list of all release versions")
+    @Operation(summary = "Returns a list of all release versions", operationId = "getReleaseVersions")
     fun getVersions(
         @Parameter(name = "release_type", description = OpenApiDocs.RELEASE_TYPE, required = false)
         @QueryParam("release_type")

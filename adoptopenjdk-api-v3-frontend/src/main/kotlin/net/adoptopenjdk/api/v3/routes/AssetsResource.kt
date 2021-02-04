@@ -70,6 +70,7 @@ constructor(
     @GET
     @Path("/feature_releases/{feature_version}/{release_type}")
     @Operation(
+        operationId = "searchReleases",
         summary = "Returns release information",
         description = "List of information about builds that match the current query"
     )
@@ -177,6 +178,7 @@ constructor(
     @GET
     @Path("/release_name/{vendor}/{release_name}")
     @Operation(
+        operationId = "getReleaseInfo",
         summary = "Returns release information",
         description = "List of releases with the given release name"
     )
@@ -299,6 +301,7 @@ constructor(
     @GET
     @Path("/version/{version}")
     @Operation(
+        operationId = "searchReleasesByVersion",
         summary = "Returns release information about the specified version.",
         description = "List of information about builds that match the current query "
     )
@@ -398,7 +401,7 @@ constructor(
 
     @GET
     @Path("/latest/{feature_version}/{jvm_impl}")
-    @Operation(summary = "Returns list of latest assets for the given feature version and jvm impl")
+    @Operation(summary = "Returns list of latest assets for the given feature version and jvm impl", operationId = "getLatestAssets")
     fun getLatestAssets(
 
         @Parameter(
