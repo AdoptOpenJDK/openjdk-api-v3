@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.adoptopenjdk.api.v3.ai.AppInsightsTelemetry
+import net.adoptopenjdk.api.v3.config.APIConfig
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.ReleaseVersionResolver
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
@@ -63,23 +64,28 @@ class V3Updater @Inject constructor(
 
                 if (updatedRepo != oldRepo) {
                     val after = writeIncrementalUpdate(updatedRepo, oldRepo)
-
-                    LOGGER.info("Updated and db version comparison {} {} {} {} {} {}", calculateChecksum(oldRepo), oldRepo.hashCode(), calculateChecksum(updatedRepo), updatedRepo.hashCode(), calculateChecksum(after), after.hashCode())
-
-                    LOGGER.info("Compare db and updated")
-                    deepDiffDebugPrint(updatedRepo, updatedRepo)
-
-                    LOGGER.info("Compare Old and updated")
-                    deepDiffDebugPrint(oldRepo, updatedRepo)
-
-                    LOGGER.info("Compare db and old")
-                    deepDiffDebugPrint(updatedRepo, oldRepo)
-                    return@runBlocking updatedRepo
+                    printRepoDebugInfo(oldRepo, updatedRepo, after)
+                    return@runBlocking after
                 }
             } catch (e: Exception) {
                 LOGGER.error("Failed to perform incremental update", e)
             }
             return@runBlocking null
+        }
+    }
+
+    private fun printRepoDebugInfo(oldRepo: AdoptRepos, updatedRepo: AdoptRepos, after: AdoptRepos) {
+        if (APIConfig.DEBUG) {
+            LOGGER.debug("Updated and db version comparison {} {} {} {} {} {}", calculateChecksum(oldRepo), oldRepo.hashCode(), calculateChecksum(updatedRepo), updatedRepo.hashCode(), calculateChecksum(after), after.hashCode())
+
+            LOGGER.debug("Compare db and updated")
+            deepDiffDebugPrint(after, updatedRepo)
+
+            LOGGER.debug("Compare Old and updated")
+            deepDiffDebugPrint(oldRepo, updatedRepo)
+
+            LOGGER.debug("Compare db and old")
+            deepDiffDebugPrint(after, oldRepo)
         }
     }
 
@@ -90,10 +96,10 @@ class V3Updater @Inject constructor(
             .forEach { releaseA ->
                 val releaseB = repoB.allReleases.getReleaseById(releaseA.id)
                 if (releaseB == null) {
-                    LOGGER.info("Release disapeared ${releaseA.id} ${releaseA.version_data.semver}")
+                    LOGGER.debug("Release disapeared ${releaseA.id} ${releaseA.version_data.semver}")
                 } else if (releaseA != releaseB) {
-                    LOGGER.info("Release changedA $releaseA")
-                    LOGGER.info("Release changedB $releaseB")
+                    LOGGER.debug("Release changedA $releaseA")
+                    LOGGER.debug("Release changedB $releaseB")
                     releaseA
                         .binaries
                         .forEach { binaryA ->
@@ -101,11 +107,11 @@ class V3Updater @Inject constructor(
                                 .binaries
                                 .firstOrNull { it.`package`.link == binaryA.`package`.link }
                             if (binaryB == null) {
-                                LOGGER.info("Binary disapeared ${binaryA.`package`.name}")
+                                LOGGER.debug("Binary disapeared ${binaryA.`package`.name}")
                             } else if (binaryA != binaryB) {
-                                LOGGER.info("Binary updated ${binaryA.`package`.name}")
-                                LOGGER.info(JsonMapper.mapper.writeValueAsString(binaryA))
-                                LOGGER.info(JsonMapper.mapper.writeValueAsString(binaryB))
+                                LOGGER.debug("Binary updated ${binaryA.`package`.name}")
+                                LOGGER.debug(JsonMapper.mapper.writeValueAsString(binaryA))
+                                LOGGER.debug(JsonMapper.mapper.writeValueAsString(binaryB))
                             }
                         }
                 }
