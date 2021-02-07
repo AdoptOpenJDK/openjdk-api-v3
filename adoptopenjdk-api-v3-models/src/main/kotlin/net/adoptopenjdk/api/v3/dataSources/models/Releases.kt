@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api.v3.dataSources.models
 
+/* ktlint-enable no-wildcard-imports */
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -9,7 +10,6 @@ import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.VersionData
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
-/* ktlint-enable no-wildcard-imports */
 import java.util.*
 import java.util.function.Predicate
 
@@ -78,7 +78,7 @@ class Releases {
         return nodes
             .filter { it.key.startsWith(gitHubId.id) }
             .any {
-                ChronoUnit.SECONDS.between(it.value.updated_at, updatedAt) != 0L
+                ChronoUnit.SECONDS.between(it.value.updated_at.dateTime, updatedAt) != 0L
             }
     }
 
@@ -132,7 +132,7 @@ class Releases {
             .thenBy { it.build }
             .thenBy { it.adopt_build_number }
 
-        private val TIME_COMPARATOR = compareBy { release: Release -> release.timestamp }
+        private val TIME_COMPARATOR = compareBy { release: Release -> release.timestamp.dateTime }
 
         val RELEASE_COMPARATOR = compareBy<Release, VersionData>(VERSION_COMPARATOR, { it.version_data })
 

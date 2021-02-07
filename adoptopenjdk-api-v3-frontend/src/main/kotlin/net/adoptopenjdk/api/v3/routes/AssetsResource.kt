@@ -4,7 +4,6 @@ import net.adoptopenjdk.api.v3.OpenApiDocs
 import net.adoptopenjdk.api.v3.Pagination.defaultPageSize
 import net.adoptopenjdk.api.v3.Pagination.getPage
 import net.adoptopenjdk.api.v3.Pagination.maxPageSize
-import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortMethod
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
@@ -13,6 +12,7 @@ import net.adoptopenjdk.api.v3.filters.ReleaseFilter
 import net.adoptopenjdk.api.v3.filters.VersionRangeFilter
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.BinaryAssetView
+import net.adoptopenjdk.api.v3.models.DateTime
 import net.adoptopenjdk.api.v3.models.HeapSize
 import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.JvmImpl
@@ -33,13 +33,6 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
-import java.time.temporal.TemporalQuery
 import javax.enterprise.context.ApplicationScoped
 import javax.inject.Inject
 import javax.ws.rs.BadRequestException
@@ -126,11 +119,10 @@ constructor(
         @Parameter(
             name = "before",
             description = "<p>Return binaries whose updated_at is before the given date/time. When a date is given the match is inclusive of the given day. <ul> <li>2020-01-21</li> <li>2020-01-21T10:15:30</li> <li>20200121</li> <li>2020-12-21T10:15:30Z</li> <li>2020-12-21+01:00</li> </ul></p> ",
-            schema = Schema(type = SchemaType.STRING),
             required = false
         )
         @QueryParam("before")
-        before: String?,
+        before: DateTime?,
 
         @Parameter(
             name = "page_size", description = "Pagination page size",
@@ -158,10 +150,8 @@ constructor(
         val order = sortOrder ?: SortOrder.DESC
         val sortMethod = sortMethod ?: SortMethod.DEFAULT
 
-        val beforeParsed = parseDate(before)
-
         val releaseFilter = ReleaseFilter(releaseType = release_type, featureVersion = version, vendor = vendor)
-        val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project, beforeParsed)
+        val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project, before)
         val repos = apiDataStore.getAdoptRepos().getFeatureRelease(version!!)
 
         if (repos == null) {
@@ -256,45 +246,6 @@ constructor(
             else -> {
                 releases[0]
             }
-        }
-    }
-
-    private fun parseDate(rawDate: String?): ZonedDateTime? {
-        return if (rawDate != null) {
-            try {
-                val date = LocalDate.parse(rawDate, DateTimeFormatter.ISO_DATE)
-                return date.plusDays(1).atStartOfDay(TimeSource.ZONE)
-            } catch (e: DateTimeParseException) {
-                // NOP
-            }
-
-            try {
-                val parsedDate = DateTimeFormatter.ISO_DATE_TIME.parseBest(
-                    rawDate,
-                    TemporalQuery { p0 -> ZonedDateTime.from(p0) },
-                    TemporalQuery { p0 -> OffsetDateTime.from(p0) },
-                    TemporalQuery { p0 -> LocalDateTime.from(p0) }
-                )
-
-                return when (parsedDate) {
-                    is LocalDateTime -> parsedDate.atZone(TimeSource.ZONE)
-                    is OffsetDateTime -> parsedDate.atZoneSameInstant(TimeSource.ZONE)
-                    is ZonedDateTime -> parsedDate
-                    else -> null
-                }
-            } catch (e: DateTimeParseException) {
-                // NOP
-            }
-
-            try {
-                val date = LocalDate.parse(rawDate, DateTimeFormatter.BASIC_ISO_DATE)
-                return date.plusDays(1).atStartOfDay(TimeSource.ZONE)
-            } catch (e: DateTimeParseException) {
-                LOGGER.info("Failed to parse date: $rawDate", e)
-                throw BadRequestException("Cannot parse date")
-            }
-        } else {
-            null
         }
     }
 

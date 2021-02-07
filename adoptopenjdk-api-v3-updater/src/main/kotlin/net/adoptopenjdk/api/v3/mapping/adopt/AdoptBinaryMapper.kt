@@ -177,7 +177,7 @@ class AdoptBinaryMapper @Inject constructor(private val gitHubHtmlClient: GitHub
         return Binary(
             pack,
             download_count,
-            updated_at,
+            DateTime(updated_at),
             scmRef,
             installer,
             heap_size,
@@ -205,7 +205,7 @@ class AdoptBinaryMapper @Inject constructor(private val gitHubHtmlClient: GitHub
         return Binary(
             pack,
             download_count,
-            updated_at,
+            DateTime(updated_at),
             binaryMetadata.scmRef,
             installer,
             heap_size,

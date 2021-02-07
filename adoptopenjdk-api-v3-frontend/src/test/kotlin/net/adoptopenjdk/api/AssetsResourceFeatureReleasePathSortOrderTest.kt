@@ -10,6 +10,7 @@ import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Binary
+import net.adoptopenjdk.api.v3.models.DateTime
 import net.adoptopenjdk.api.v3.models.HeapSize
 import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.Installer
@@ -44,7 +45,7 @@ class AssetsResourceFeatureReleasePathSortOrderTest : FrontendTest() {
                     "e"
                 ),
                 2L,
-                TimeSource.now(),
+                DateTime(TimeSource.now()),
                 "d",
                 Installer(
                     "a",
@@ -72,16 +73,16 @@ class AssetsResourceFeatureReleasePathSortOrderTest : FrontendTest() {
                             listOf(
                                 Release(
                                     "foo", ReleaseType.ga, "a", "foo",
-                                    ZonedDateTime.of(2010, 1, 1, 1, 1, 0, 0, TimeSource.ZONE),
-                                    ZonedDateTime.of(2010, 1, 1, 1, 1, 0, 0, TimeSource.ZONE),
+                                    DateTime(ZonedDateTime.of(2010, 1, 1, 1, 1, 0, 0, TimeSource.ZONE)),
+                                    DateTime(ZonedDateTime.of(2010, 1, 1, 1, 1, 0, 0, TimeSource.ZONE)),
                                     arrayOf(binary), 2, Vendor.adoptopenjdk,
                                     VersionData(8, 0, 242, "b", null, 4, "b", "8u242-b04_openj9-0.18.0-m1")
                                 ),
 
                                 Release(
                                     "bar", ReleaseType.ga, "a", "bar",
-                                    ZonedDateTime.of(2010, 1, 2, 1, 1, 0, 0, TimeSource.ZONE),
-                                    ZonedDateTime.of(2010, 1, 2, 1, 1, 0, 0, TimeSource.ZONE),
+                                    DateTime(ZonedDateTime.of(2010, 1, 2, 1, 1, 0, 0, TimeSource.ZONE)),
+                                    DateTime(ZonedDateTime.of(2010, 1, 2, 1, 1, 0, 0, TimeSource.ZONE)),
                                     arrayOf(binary), 2, Vendor.adoptopenjdk,
                                     VersionData(8, 0, 242, "a", null, 4, "a", "8u242-b04_openj9-0.18.0-m1")
                                 )

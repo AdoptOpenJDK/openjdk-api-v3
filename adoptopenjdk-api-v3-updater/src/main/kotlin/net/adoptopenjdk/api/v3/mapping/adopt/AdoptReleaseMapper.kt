@@ -12,6 +12,7 @@ import net.adoptopenjdk.api.v3.dataSources.models.GitHubId
 import net.adoptopenjdk.api.v3.dataSources.mongo.GitHubHtmlClient
 import net.adoptopenjdk.api.v3.mapping.BinaryMapper
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
+import net.adoptopenjdk.api.v3.models.DateTime
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
@@ -153,7 +154,7 @@ class AdoptReleaseMapper @Inject constructor(
             }
             .map { it.downloadCount }.sum()
 
-        return Release(id, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, version)
+        return Release(id, release_type, releaseLink, releaseName, DateTime(timestamp), DateTime(updatedAt), binaries.toTypedArray(), downloadCount, vendor, version)
     }
 
     private fun formReleaseType(release: GHRelease): ReleaseType {

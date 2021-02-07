@@ -187,7 +187,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
             Pair("2000-12-03T10:15:30Z", 404),
             Pair("2000-12-03+01:00", 404),
 
-            Pair("foo", 400)
+            Pair("foo", 404)
         )
             .map {
                 DynamicTest.dynamicTest(it.first) {

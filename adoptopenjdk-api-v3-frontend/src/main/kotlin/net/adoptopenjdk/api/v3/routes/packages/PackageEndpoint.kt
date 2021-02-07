@@ -90,8 +90,8 @@ open class PackageEndpoint @Inject constructor(private val apiDataStore: APIData
 
         // We use updated_at and timestamp as well JIC we've made a mistake and respun the same version number twice, in which case newest wins.
         val comparator = RELEASE_COMPARATOR.thenBy { it.version_data.optional }
-            .thenBy { it.updated_at }
-            .thenBy { it.timestamp }
+            .thenBy { it.updated_at.dateTime }
+            .thenBy { it.timestamp.dateTime }
 
         return releases.sortedWith(comparator)
     }

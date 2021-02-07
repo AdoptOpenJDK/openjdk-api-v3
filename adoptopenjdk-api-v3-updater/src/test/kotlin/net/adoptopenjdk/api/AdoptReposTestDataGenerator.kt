@@ -6,6 +6,7 @@ import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Binary
+import net.adoptopenjdk.api.v3.models.DateTime
 import net.adoptopenjdk.api.v3.models.HeapSize
 import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.Installer
@@ -18,7 +19,6 @@ import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.SourcePackage
 import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.models.VersionData
-import java.time.ZonedDateTime
 import java.util.Random
 
 object AdoptReposTestDataGenerator {
@@ -190,8 +190,8 @@ object AdoptReposTestDataGenerator {
         )
     }
 
-    private fun randomDate(): ZonedDateTime {
-        return TimeSource.now().minusDays(10)
+    private fun randomDate(): DateTime {
+        return DateTime(TimeSource.now().minusDays(10))
     }
 
     fun randomString(prefix: String): String {

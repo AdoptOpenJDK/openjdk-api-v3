@@ -30,8 +30,8 @@ object GHSummaryTestDataGenerator {
                             GitHubId(it.id),
                             it.release_name,
                             it.release_type == ReleaseType.ea,
-                            DateTimeFormatter.ISO_INSTANT.format(it.timestamp),
-                            DateTimeFormatter.ISO_INSTANT.format(it.updated_at),
+                            DateTimeFormatter.ISO_INSTANT.format(it.timestamp.dateTime),
+                            DateTimeFormatter.ISO_INSTANT.format(it.updated_at.dateTime),
                             GHAssets(
                                 it.binaries
                                     .map { asset ->
@@ -40,7 +40,7 @@ object GHSummaryTestDataGenerator {
                                             asset.`package`.size,
                                             asset.`package`.link,
                                             asset.`package`.download_count,
-                                            DateTimeFormatter.ISO_INSTANT.format(asset.updated_at)
+                                            DateTimeFormatter.ISO_INSTANT.format(asset.updated_at.dateTime)
                                         )
                                     },
                                 PageInfo(false, null)
