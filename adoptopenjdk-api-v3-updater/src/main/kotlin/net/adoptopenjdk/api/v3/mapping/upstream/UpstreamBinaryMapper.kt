@@ -7,6 +7,7 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.mapping.BinaryMapper
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Binary
+import net.adoptopenjdk.api.v3.models.DateTime
 import net.adoptopenjdk.api.v3.models.HeapSize
 import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.JvmImpl
@@ -47,7 +48,7 @@ object UpstreamBinaryMapper : BinaryMapper() {
                 Binary(
                     pack,
                     asset.downloadCount,
-                    updatedAt,
+                    DateTime(updatedAt),
                     null,
                     null,
                     HeapSize.normal,

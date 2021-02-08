@@ -12,6 +12,7 @@ import net.adoptopenjdk.api.v3.dataSources.mongo.GitHubHtmlClient
 import net.adoptopenjdk.api.v3.mapping.adopt.AdoptBinaryMapper
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Binary
+import net.adoptopenjdk.api.v3.models.DateTime
 import net.adoptopenjdk.api.v3.models.HeapSize
 import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.Installer
@@ -169,7 +170,7 @@ class AdoptBinaryMapperTest {
                         metadata_link = "http://package-metadata-link"
                     ),
                     download_count = 2,
-                    updated_at = updatedAt,
+                    updated_at = DateTime(updatedAt),
                     scm_ref = "scm-ref",
                     installer = Installer(
                         name = "archive.msi",

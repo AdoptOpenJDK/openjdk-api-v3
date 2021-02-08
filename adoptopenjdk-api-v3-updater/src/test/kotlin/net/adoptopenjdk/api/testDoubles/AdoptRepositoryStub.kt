@@ -9,6 +9,7 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepos
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.GitHubId
+import net.adoptopenjdk.api.v3.models.DateTime
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
@@ -31,8 +32,8 @@ open class AdoptRepositoryStub : AdoptRepository {
 
     val toUpdate = Release(
         originaToUpdate.id, ReleaseType.ga, "openjdk-8u", "jdk8u-2018-09-27-08-50",
-        TimeSource.now().minusDays(2),
-        TimeSource.now().minusDays(2),
+        DateTime(TimeSource.now().minusDays(2)),
+        DateTime(TimeSource.now().minusDays(2)),
         arrayOf(), 2, Vendor.adoptopenjdk,
         VersionData(8, 2, 3, "", 1, 4, "", "")
     )
@@ -48,23 +49,24 @@ open class AdoptRepositoryStub : AdoptRepository {
     companion object {
         val toAdd = Release(
             "foo", ReleaseType.ga, "openjdk-8u", "jdk8u-2018-09-27-08-50",
-            TimeSource.now().minusDays(2),
-            TimeSource.now().minusDays(2),
+            DateTime(TimeSource.now().minusDays(2)),
+            DateTime(TimeSource.now().minusDays(2)),
             arrayOf(), 2, Vendor.adoptopenjdk,
             VersionData(8, 2, 3, "", 1, 4, "", "")
         )
 
         val toAddSemiYoungRelease = Release(
             "semi-young", ReleaseType.ga, "openjdk-8u", "jdk8u-2018-09-27-08-50",
-            TimeSource.now().minusMinutes(20),
-            TimeSource.now().minusMinutes(20), arrayOf(), 2, Vendor.adoptopenjdk,
+            DateTime(TimeSource.now().minusMinutes(20)),
+            DateTime(TimeSource.now().minusMinutes(20)),
+            arrayOf(), 2, Vendor.adoptopenjdk,
             VersionData(8, 2, 3, "", 1, 4, "", "")
         )
 
         val toAddYoung = Release(
             "young", ReleaseType.ga, "openjdk-8u", "jdk8u-2018-09-27-08-50",
-            TimeSource.now(),
-            TimeSource.now(), arrayOf(), 2, Vendor.adoptopenjdk,
+            DateTime(TimeSource.now()),
+            DateTime(TimeSource.now()), arrayOf(), 2, Vendor.adoptopenjdk,
             VersionData(8, 2, 3, "", 1, 4, "", "")
         )
     }

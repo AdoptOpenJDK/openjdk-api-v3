@@ -7,6 +7,7 @@ import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Binary
+import net.adoptopenjdk.api.v3.models.DateTime
 import net.adoptopenjdk.api.v3.models.GitHubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.HeapSize
 import net.adoptopenjdk.api.v3.models.ImageType
@@ -58,13 +59,13 @@ class StatsCalculatorTest : BaseTest() {
                         ReleaseType.ga,
                         "b",
                         "c",
-                        TimeSource.now(),
-                        time,
+                        DateTime(TimeSource.now()),
+                        DateTime(time),
                         arrayOf(
                             Binary(
                                 Package("a", "b", 1L, "v", "c", 12L, "d", "e"),
                                 15L, // Download count
-                                time,
+                                DateTime(time),
                                 "d",
                                 Installer("a", "b", 1L, "v", "c", 3L, "d", "e"),
                                 HeapSize.normal,
@@ -77,7 +78,7 @@ class StatsCalculatorTest : BaseTest() {
                             Binary(
                                 Package("a", "b", 1L, "v", "c", 250L, "d", "e"),
                                 250L,
-                                time,
+                                DateTime(time),
                                 "d",
                                 null,
                                 HeapSize.normal,
@@ -90,7 +91,7 @@ class StatsCalculatorTest : BaseTest() {
                             Binary(
                                 Package("a", "b", 1L, "v", "c", 60L, "d", "e"),
                                 60L,
-                                time,
+                                DateTime(time),
                                 "d",
                                 null,
                                 HeapSize.normal,
@@ -103,7 +104,7 @@ class StatsCalculatorTest : BaseTest() {
                             Binary(
                                 Package("a", "b", 1L, "v", "c", 120L, "d", "e"),
                                 120L,
-                                time,
+                                DateTime(time),
                                 "d",
                                 null,
                                 HeapSize.normal,
@@ -123,13 +124,13 @@ class StatsCalculatorTest : BaseTest() {
                         ReleaseType.ga,
                         "b",
                         "c",
-                        TimeSource.now(),
-                        time,
+                        DateTime(TimeSource.now()),
+                        DateTime(time),
                         arrayOf(
                             Binary(
                                 Package("a", "b", 1L, "v", "c", 300L, "d", "e"),
                                 300L, // Download count
-                                time,
+                                DateTime(time),
                                 "d",
                                 Installer("a", "b", 1L, "v", "c", 3L, "d", "e"),
                                 HeapSize.normal,
@@ -142,7 +143,7 @@ class StatsCalculatorTest : BaseTest() {
                             Binary(
                                 Package("a", "b", 1L, "v", "c", 150L, "d", "e"),
                                 150L,
-                                time,
+                                DateTime(time),
                                 "d",
                                 null,
                                 HeapSize.normal,

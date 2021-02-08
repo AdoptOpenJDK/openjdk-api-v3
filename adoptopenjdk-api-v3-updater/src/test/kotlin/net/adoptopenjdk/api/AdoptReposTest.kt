@@ -6,6 +6,7 @@ import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Binary
+import net.adoptopenjdk.api.v3.models.DateTime
 import net.adoptopenjdk.api.v3.models.HeapSize
 import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.Installer
@@ -99,8 +100,8 @@ class AdoptReposTest : BaseTest() {
                         ReleaseType.ga,
                         "b",
                         "c",
-                        TimeSource.now(),
-                        time,
+                        DateTime(TimeSource.now()),
+                        DateTime(time),
                         arrayOf(
                             Binary(
                                 Package(
@@ -114,7 +115,7 @@ class AdoptReposTest : BaseTest() {
                                     "e"
                                 ),
                                 2L,
-                                time,
+                                DateTime(time),
                                 "d",
                                 Installer(
                                     "a",

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
-import java.time.ZonedDateTime
 import java.util.function.Predicate
 
 class Release {
@@ -18,11 +17,9 @@ class Release {
     @Schema(example = "jdk8u162-b12_openj9-0.8.0")
     val release_name: String
 
-    @Schema(example = "2018-03-15T12:12:35Z")
-    val timestamp: ZonedDateTime
+    val timestamp: DateTime
 
-    @Schema(example = "2018-03-15T12:12:35Z")
-    val updated_at: ZonedDateTime
+    val updated_at: DateTime
 
     @Schema(type = SchemaType.ARRAY, implementation = Binary::class)
     val binaries: Array<Binary>
@@ -44,8 +41,8 @@ class Release {
         @JsonProperty("release_type") release_type: ReleaseType,
         @JsonProperty("release_link") release_link: String,
         @JsonProperty("release_name") release_name: String,
-        @JsonProperty("timestamp") timestamp: ZonedDateTime,
-        @JsonProperty("updated_at") updated_at: ZonedDateTime,
+        @JsonProperty("timestamp") timestamp: DateTime,
+        @JsonProperty("updated_at") updated_at: DateTime,
         @JsonProperty("binaries") binaries: Array<Binary>,
         @JsonProperty("download_count") download_count: Long,
         @JsonProperty("vendor") vendor: Vendor,

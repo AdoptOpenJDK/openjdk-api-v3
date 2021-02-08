@@ -149,7 +149,7 @@ class V3Updater @Inject constructor(
                 LOGGER.info("Incremental update done")
                 LOGGER.warn("Not applying incremental update due to checksum miss $checksum ${updatedRepo.hashCode()} $oldChecksum ${oldRepo.hashCode()} ${database.getUpdatedAt().checksum}")
 
-                //re-calculate checksum in case of schema change
+                // re-calculate checksum in case of schema change
                 val dbVersion = apiDataStore.loadDataFromDb(true)
                 val dbChecksum = calculateChecksum(dbVersion)
                 if (dbChecksum != database.getUpdatedAt().checksum) {
