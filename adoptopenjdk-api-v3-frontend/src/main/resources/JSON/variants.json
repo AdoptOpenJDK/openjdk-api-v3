@@ -6,6 +6,7 @@
       "vendor": "adoptopenjdk",
       "version": 8,
       "lts": true,
+      "obsoleteRelease": false,
       "websiteDefault": true
     },
     {
@@ -14,6 +15,7 @@
       "vendor": "adoptopenjdk",
       "version": 8,
       "lts": true,
+      "obsoleteRelease": false,
       "websiteDescription": "Eclipse OpenJ9",
       "websiteDescriptionLink": "https://www.eclipse.org/openj9"
     },
@@ -21,13 +23,15 @@
       "searchableName": "openjdk9-hotspot",
       "jvm": "hotspot",
       "vendor": "adoptopenjdk",
-      "version": 9
+      "version": 9,
+      "obsoleteRelease": true
     },
     {
       "searchableName": "openjdk9-openj9",
       "jvm": "openj9",
       "vendor": "adoptopenjdk",
       "version": 9,
+      "obsoleteRelease": true,
       "websiteDescription": "Eclipse OpenJ9",
       "websiteDescriptionLink": "https://www.eclipse.org/openj9"
     },
@@ -35,13 +39,15 @@
       "searchableName": "openjdk10-hotspot",
       "jvm": "hotspot",
       "vendor": "adoptopenjdk",
-      "version": 10
+      "version": 10,
+      "obsoleteRelease": true
     },
     {
       "searchableName": "openjdk10-openj9",
       "jvm": "openj9",
       "vendor": "adoptopenjdk",
       "version": 10,
+      "obsoleteRelease": true,
       "websiteDescription": "Eclipse OpenJ9",
       "websiteDescriptionLink": "https://www.eclipse.org/openj9"
     },
@@ -50,7 +56,8 @@
       "jvm": "hotspot",
       "vendor": "adoptopenjdk",
       "version": 11,
-      "lts": true
+      "lts": true,
+      "obsoleteRelease": false
     },
     {
       "searchableName": "openjdk11-openj9",
@@ -58,6 +65,7 @@
       "vendor": "adoptopenjdk",
       "version": 11,
       "lts": true,
+      "obsoleteRelease": false,
       "websiteDescription": "Eclipse OpenJ9",
       "websiteDescriptionLink": "https://www.eclipse.org/openj9"
     },
@@ -65,13 +73,15 @@
       "searchableName": "openjdk12-hotspot",
       "jvm": "hotspot",
       "vendor": "adoptopenjdk",
-      "version": 12
+      "version": 12,
+      "obsoleteRelease": true
     },
     {
       "searchableName": "openjdk12-openj9",
       "jvm": "openj9",
       "vendor": "adoptopenjdk",
       "version": 12,
+      "obsoleteRelease": true,
       "websiteDescription": "Eclipse OpenJ9",
       "websiteDescriptionLink": "https://www.eclipse.org/openj9"
     },
@@ -79,13 +89,15 @@
       "searchableName": "openjdk13-hotspot",
       "jvm": "hotspot",
       "vendor": "adoptopenjdk",
-      "version": 13
+      "version": 13,
+      "obsoleteRelease": true
     },
     {
       "searchableName": "openjdk13-openj9",
       "jvm": "openj9",
       "vendor": "adoptopenjdk",
       "version": 13,
+      "obsoleteRelease": true,
       "websiteDescription": "Eclipse OpenJ9",
       "websiteDescriptionLink": "https://www.eclipse.org/openj9"
     },
@@ -93,13 +105,15 @@
       "searchableName": "openjdk14-hotspot",
       "jvm": "hotspot",
       "vendor": "adoptopenjdk",
-      "version": 14
+      "version": 14,
+      "obsoleteRelease": true
     },
     {
       "searchableName": "openjdk14-openj9",
       "jvm": "openj9",
       "vendor": "adoptopenjdk",
       "version": 14,
+      "obsoleteRelease": true,
       "websiteDescription": "Eclipse OpenJ9",
       "websiteDescriptionLink": "https://www.eclipse.org/openj9"
     },
@@ -107,13 +121,15 @@
       "searchableName": "openjdk15-hotspot",
       "jvm": "hotspot",
       "vendor": "adoptopenjdk",
-      "version": 15
+      "version": 15,
+      "obsoleteRelease": true
     },
     {
       "searchableName": "openjdk15-openj9",
       "jvm": "openj9",
       "vendor": "adoptopenjdk",
       "version": 15,
+      "obsoleteRelease": true,
       "websiteDescription": "Eclipse OpenJ9",
       "websiteDescriptionLink": "https://www.eclipse.org/openj9"
     },
@@ -121,13 +137,15 @@
       "searchableName": "openjdk16-hotspot",
       "jvm": "hotspot",
       "vendor": "adoptopenjdk",
-      "version": 16
+      "version": 16,
+      "obsoleteRelease": false
     },
     {
       "searchableName": "openjdk16-openj9",
       "jvm": "openj9",
       "vendor": "adoptopenjdk",
       "version": 16,
+      "obsoleteRelease": false,
       "websiteDescription": "Eclipse OpenJ9",
       "websiteDescriptionLink": "https://www.eclipse.org/openj9"
     }

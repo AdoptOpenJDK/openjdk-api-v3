@@ -35,6 +35,13 @@ class AvailableReleasesPathTest : FrontendTest() {
     }
 
     @Test
+    fun obsoleteVersionsIsCorrect() {
+        check { releaseInfo ->
+            releaseInfo.obsolete_releases.contentEquals(arrayOf(9, 10, 12, 13, 14, 15))
+        }
+    }
+
+    @Test
     fun mostRecentLtsIsCorrect() {
         check { releaseInfo ->
             releaseInfo.most_recent_lts == 11

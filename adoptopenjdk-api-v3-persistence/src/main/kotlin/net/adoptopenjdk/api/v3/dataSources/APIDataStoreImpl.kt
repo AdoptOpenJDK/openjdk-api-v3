@@ -75,6 +75,7 @@ open class APIDataStoreImpl : APIDataStore {
             // Default for first time when DB is still being populated
             releaseInfo ?: ReleaseInfo(
                 arrayOf(8, 9, 10, 11, 12, 13, 14),
+                arrayOf(9, 10, 12, 13, 14, 15),
                 arrayOf(8, 11),
                 11,
                 14,
