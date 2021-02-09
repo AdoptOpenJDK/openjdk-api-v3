@@ -10,7 +10,7 @@ class ReleaseVersionResolver @Inject constructor(
     private val updaterHtmlClient: UpdaterHtmlClient
 ) {
 
-    private val VERSION_FILE_URL = "https://raw.githubusercontent.com/openjdk/jdk/master/make/autoconf/version-numbers"
+    private val VERSION_FILE_URL = "https://raw.githubusercontent.com/openjdk/jdk/master/make/conf/version-numbers.conf"
 
     private suspend fun getTipVersion(): Int? {
         val versionFile = updaterHtmlClient.get(VERSION_FILE_URL)
