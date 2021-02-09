@@ -83,7 +83,10 @@ class DateTime {
 
             val zoneOffset = ZoneOffset.of("Z")
             try {
-                return LocalDate.parse(rawDate, DateTimeFormatter.ISO_DATE).atStartOfDay(zoneOffset)
+                return LocalDate.parse(rawDate, DateTimeFormatter.ISO_DATE)
+                    .plusDays(1)
+                    .atStartOfDay(zoneOffset)
+                    .minus(1, TimeUnit.MILLISECONDS.toChronoUnit())
             } catch (e: DateTimeParseException) {
                 // NOP
             }
