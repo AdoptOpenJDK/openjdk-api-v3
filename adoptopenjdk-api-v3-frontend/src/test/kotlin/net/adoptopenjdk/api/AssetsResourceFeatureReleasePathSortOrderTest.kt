@@ -72,7 +72,7 @@ class AssetsResourceFeatureReleasePathSortOrderTest : FrontendTest() {
                         Releases(
                             listOf(
                                 Release(
-                                    "foo", ReleaseType.ga, "a", "foo",
+                                    "foo", ReleaseType.ga, "a", "foo", false,
                                     DateTime(ZonedDateTime.of(2010, 1, 1, 1, 1, 0, 0, TimeSource.ZONE)),
                                     DateTime(ZonedDateTime.of(2010, 1, 1, 1, 1, 0, 0, TimeSource.ZONE)),
                                     arrayOf(binary), 2, Vendor.adoptopenjdk,
@@ -80,7 +80,7 @@ class AssetsResourceFeatureReleasePathSortOrderTest : FrontendTest() {
                                 ),
 
                                 Release(
-                                    "bar", ReleaseType.ga, "a", "bar",
+                                    "bar", ReleaseType.ga, "a", "bar", false,
                                     DateTime(ZonedDateTime.of(2010, 1, 2, 1, 1, 0, 0, TimeSource.ZONE)),
                                     DateTime(ZonedDateTime.of(2010, 1, 2, 1, 1, 0, 0, TimeSource.ZONE)),
                                     arrayOf(binary), 2, Vendor.adoptopenjdk,

@@ -17,6 +17,9 @@ class Release {
     @Schema(example = "jdk8u162-b12_openj9-0.8.0")
     val release_name: String
 
+    @Schema(example = "false")
+    val obsolete_release: Boolean
+
     val timestamp: DateTime
 
     val updated_at: DateTime
@@ -41,6 +44,7 @@ class Release {
         @JsonProperty("release_type") release_type: ReleaseType,
         @JsonProperty("release_link") release_link: String,
         @JsonProperty("release_name") release_name: String,
+        @JsonProperty("obsolete_release") obsolete_release: Boolean,
         @JsonProperty("timestamp") timestamp: DateTime,
         @JsonProperty("updated_at") updated_at: DateTime,
         @JsonProperty("binaries") binaries: Array<Binary>,
@@ -53,6 +57,7 @@ class Release {
         this.release_type = release_type
         this.release_link = release_link
         this.release_name = release_name
+        this.obsolete_release = obsolete_release
         this.timestamp = timestamp
         this.updated_at = updated_at
         this.binaries = binaries
@@ -67,6 +72,7 @@ class Release {
         this.release_type = release.release_type
         this.release_link = release.release_link
         this.release_name = release.release_name
+        this.obsolete_release = release.obsolete_release
         this.timestamp = release.timestamp
         this.updated_at = release.updated_at
         this.binaries = binaries
@@ -89,6 +95,7 @@ class Release {
         if (id != other.id) return false
         if (release_link != other.release_link) return false
         if (release_name != other.release_name) return false
+        if (obsolete_release != other.obsolete_release) return false
         if (timestamp != other.timestamp) return false
         if (updated_at != other.updated_at) return false
         if (!binaries.contentEquals(other.binaries)) return false
@@ -104,6 +111,7 @@ class Release {
         var result = id.hashCode()
         result = 31 * result + release_link.hashCode()
         result = 31 * result + release_name.hashCode()
+        result = 31 * result + obsolete_release.hashCode()
         result = 31 * result + timestamp.hashCode()
         result = 31 * result + updated_at.hashCode()
         result = 31 * result + binaries.contentHashCode()
@@ -115,6 +123,6 @@ class Release {
     }
 
     override fun toString(): String {
-        return "Release(id='$id', release_link='$release_link', release_name='$release_name', timestamp=$timestamp, updated_at=$updated_at, download_count=$download_count, release_type=$release_type, vendor=$vendor, version_data=$version_data, source=$source)"
+        return "Release(id='$id', release_link='$release_link', release_name='$release_name', obsolete_release='$obsolete_release' timestamp=$timestamp, updated_at=$updated_at, download_count=$download_count, release_type=$release_type, vendor=$vendor, version_data=$version_data, source=$source)"
     }
 }

@@ -48,6 +48,7 @@ class AdoptReleaseMapper @Inject constructor(
 
         val releaseLink = ghRelease.url
         val releaseName = ghRelease.name
+        val obsoleteRelease = ghRelease.obsoleteRelease
         val timestamp = parseDate(ghRelease.publishedAt)
         val updatedAt = parseDate(ghRelease.updatedAt)
         val vendor = Vendor.adoptopenjdk
@@ -69,7 +70,7 @@ class AdoptReleaseMapper @Inject constructor(
                     val ghAssets: List<GHAsset> = ghAssetsForVersion.value.map { ghAssetWithMetadata -> ghAssetWithMetadata.key }
                     val id = generateIdForSplitRelease(version, ghRelease)
 
-                    toRelease(releaseName, ghAssets, ghAssetsWithMetadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version, ghRelease.releaseAssets.assets)
+                    toRelease(releaseName, ghAssets, ghAssetsWithMetadata, id, releaseType, releaseLink, obsoleteRelease, timestamp, updatedAt, vendor, version, ghRelease.releaseAssets.assets)
                 }
                 .ifEmpty {
                     try {
@@ -78,7 +79,7 @@ class AdoptReleaseMapper @Inject constructor(
                         val ghAssets = ghRelease.releaseAssets.assets
                         val id = ghRelease.id.id
 
-                        return@ifEmpty listOf(toRelease(releaseName, ghAssets, ghAssetsWithMetadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version, ghAssets))
+                        return@ifEmpty listOf(toRelease(releaseName, ghAssets, ghAssetsWithMetadata, id, releaseType, releaseLink, obsoleteRelease, timestamp, updatedAt, vendor, version, ghAssets))
                     } catch (e: Exception) {
                         throw FailedToParse("Failed to parse version $releaseName", e)
                     }
@@ -138,6 +139,7 @@ class AdoptReleaseMapper @Inject constructor(
         id: String,
         release_type: ReleaseType,
         releaseLink: String,
+        obsoleteRelease: Boolean,
         timestamp: ZonedDateTime,
         updatedAt: ZonedDateTime,
         vendor: Vendor,
@@ -154,7 +156,7 @@ class AdoptReleaseMapper @Inject constructor(
             }
             .map { it.downloadCount }.sum()
 
-        return Release(id, release_type, releaseLink, releaseName, DateTime(timestamp), DateTime(updatedAt), binaries.toTypedArray(), downloadCount, vendor, version)
+        return Release(id, release_type, releaseLink, releaseName, obsoleteRelease, DateTime(timestamp), DateTime(updatedAt), binaries.toTypedArray(), downloadCount, vendor, version)
     }
 
     private fun formReleaseType(release: GHRelease): ReleaseType {

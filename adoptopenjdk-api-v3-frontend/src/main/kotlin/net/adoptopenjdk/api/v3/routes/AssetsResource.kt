@@ -373,6 +373,8 @@ constructor(
             .getAdoptRepos()
             .getFilteredReleases(version, releaseFilter, binaryFilter, SortOrder.ASC, SortMethod.DEFAULT)
 
+        println(releases.toList().toString())
+
         return releases
             .flatMap { release ->
                 release.binaries
@@ -383,7 +385,12 @@ constructor(
                 binaryPermutation(it.second.architecture, it.second.heap_size, it.second.image_type, it.second.os)
             }
             .values
-            .map { BinaryAssetView(it.first.release_name, it.second, it.first.version_data) }
+            .map { BinaryAssetView(
+                it.first.release_name,
+                it.first.obsolete_release,
+                it.second,
+                it.first.version_data
+            )}
             .toList()
     }
 }

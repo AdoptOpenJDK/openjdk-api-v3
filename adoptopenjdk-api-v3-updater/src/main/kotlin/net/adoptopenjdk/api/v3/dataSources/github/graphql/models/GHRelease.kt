@@ -22,6 +22,7 @@ data class GHRelease @JsonCreator constructor(
     @JsonProperty("name") val name: String,
     @JsonProperty("isPrerelease") val isPrerelease: Boolean,
     @JsonProperty("publishedAt") val publishedAt: String,
+    @JsonProperty("obsoleteRelease") val obsoleteRelease: Boolean,
     @JsonProperty("updatedAt") val updatedAt: String,
     @JsonProperty("releaseAssets") val releaseAssets: GHAssets,
     @JsonProperty("resourcePath") val resourcePath: String,
