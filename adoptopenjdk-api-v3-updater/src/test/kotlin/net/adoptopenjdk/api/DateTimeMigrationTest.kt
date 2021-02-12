@@ -7,6 +7,7 @@ import net.adoptopenjdk.api.v3.dataSources.persitence.mongo.MongoClient
 import net.adoptopenjdk.api.v3.models.DateTime
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.Instant
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.util.UUID
@@ -51,6 +52,13 @@ class DateTimeMigrationTest : MongoTest() {
                 mongoClient.database.dropCollection(collectionName)
             }
         }
+    }
+
+    @Test
+    fun `writes datetime as string`(mongoClient: MongoClient) {
+        val hzdt = HasDateTime(DateTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(0), ZoneOffset.UTC)))
+        val serialized = JsonMapper.mapper.writeValueAsString(hzdt)
+        assertEquals("{\"zdt\":\"1970-01-01T00:00:00Z\"}", serialized)
     }
 
     @Test
