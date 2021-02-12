@@ -2,11 +2,15 @@ package net.adoptopenjdk.api.v3.models
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.JsonSerializer
+import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
@@ -22,6 +26,7 @@ import java.time.temporal.TemporalQuery
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
+@JsonSerialize(using = DateTimeSerializer::class)
 @JsonDeserialize(using = DateTimeDeSerializer::class)
 @Schema(
     type = SchemaType.STRING,
@@ -135,6 +140,16 @@ class DateTime {
     }
 }
 
+class DateTimeSerializer : JsonSerializer<DateTime>() {
+    override fun serialize(dateTime: DateTime?, jsonGenerator: JsonGenerator, serializerProvider: SerializerProvider?) {
+        if (dateTime != null) {
+            jsonGenerator.writeString(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(dateTime.dateTime))
+        } else {
+            jsonGenerator.writeNull()
+        }
+    }
+}
+
 class DateTimeDeSerializer : JsonDeserializer<DateTime>() {
     override fun deserialize(parser: JsonParser?, context: DeserializationContext?): DateTime {
         if (parser!!.currentToken() == JsonToken.VALUE_NUMBER_FLOAT) {
@@ -160,8 +175,15 @@ class DateTimeDeSerializer : JsonDeserializer<DateTime>() {
             } else {
                 throw RuntimeException("Unknown field")
             }
+        } else if (parser.currentToken() == JsonToken.VALUE_STRING) {
+            val field = parser.text
+            if (field != null) {
+                return DateTime(field)
+            } else {
+                throw RuntimeException("Null DateTime detected")
+            }
         } else {
-            throw RuntimeException("Dont know " + parser.currentToken())
+            throw RuntimeException("Unknown token type " + parser.currentToken())
         }
     }
 }
