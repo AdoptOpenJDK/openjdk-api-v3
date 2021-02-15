@@ -29,7 +29,7 @@ class ReleaseVersionResolverTest : BaseTest() {
                 fun getObsoleteMetadata(url: String): String {
                     return """
                     {
-                      "obsolete_versions" : [9, 10, 12, 14]
+                      "obsolete_versions" : [9, 10, 12, 13, 14]
                     }
                     """.trimIndent()
                 }
@@ -59,7 +59,7 @@ class ReleaseVersionResolverTest : BaseTest() {
     @Test
     fun obsoleteVersionsIsCorrect() {
         check { releaseInfo ->
-            releaseInfo.obsolete_releases.contentEquals(arrayOf(9, 10, 12, 14))
+            releaseInfo.obsolete_releases.contentEquals(arrayOf(9, 10, 12, 13, 14))
         }
     }
 
