@@ -122,14 +122,14 @@
       "jvm": "hotspot",
       "vendor": "adoptopenjdk",
       "version": 15,
-      "obsoleteRelease": true
+      "obsoleteRelease": false
     },
     {
       "searchableName": "openjdk15-openj9",
       "jvm": "openj9",
       "vendor": "adoptopenjdk",
       "version": 15,
-      "obsoleteRelease": true,
+      "obsoleteRelease": false,
       "websiteDescription": "Eclipse OpenJ9",
       "websiteDescriptionLink": "https://www.eclipse.org/openj9"
     },
