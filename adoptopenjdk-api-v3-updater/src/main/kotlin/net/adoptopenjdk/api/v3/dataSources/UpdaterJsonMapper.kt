@@ -9,7 +9,6 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 object UpdaterJsonMapper {
     val mapper: ObjectMapper = ObjectMapper()
         .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-        .findAndRegisterModules()
         .registerModule(KotlinModule())
         .registerModule(JavaTimeModule())
         .registerModule(JSR353Module())
