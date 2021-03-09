@@ -19,19 +19,7 @@ class ReleaseVersionResolverTest : BaseTest() {
 
             object : UpdaterHtmlClient {
                 override suspend fun get(url: String): String? {
-                    return if (url.contains("obsolete")) {
-                        getObsoleteMetadata(url)
-                    } else {
-                        getTipMetadata(url)
-                    }
-                }
-
-                fun getObsoleteMetadata(url: String): String {
-                    return """
-                    {
-                      "obsolete_versions" : [9, 10, 12, 13, 14]
-                    }
-                    """.trimIndent()
+                    return getTipMetadata(url)
                 }
 
                 fun getTipMetadata(url: String): String {
@@ -53,13 +41,6 @@ class ReleaseVersionResolverTest : BaseTest() {
     fun availableVersionsIsCorrect() {
         check { releaseInfo ->
             releaseInfo.available_releases.contentEquals(AdoptReposTestDataGenerator.TEST_VERSIONS.toTypedArray())
-        }
-    }
-
-    @Test
-    fun obsoleteVersionsIsCorrect() {
-        check { releaseInfo ->
-            releaseInfo.obsolete_releases.contentEquals(arrayOf(9, 10, 12, 13, 14))
         }
     }
 

@@ -44,7 +44,6 @@ open class ApiDataStoreStub : APIDataStore {
     override fun getReleaseInfo(): ReleaseInfo {
         return ReleaseInfo(
             arrayOf(8, 9, 10, 11, 12),
-            arrayOf(9, 10, 12, 13, 14, 15),
             arrayOf(8, 11),
             11,
             12,
