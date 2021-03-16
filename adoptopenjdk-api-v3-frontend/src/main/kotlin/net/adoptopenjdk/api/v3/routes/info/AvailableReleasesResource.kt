@@ -5,6 +5,7 @@ import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import org.eclipse.microprofile.metrics.annotation.Timed
 import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
+import org.jboss.resteasy.annotations.GZIP
 import javax.enterprise.context.ApplicationScoped
 import javax.inject.Inject
 import javax.ws.rs.GET
@@ -17,6 +18,7 @@ import javax.ws.rs.core.MediaType
 @Produces(MediaType.APPLICATION_JSON)
 @Timed
 @ApplicationScoped
+@GZIP
 class AvailableReleasesResource
 @Inject
 constructor(

@@ -15,7 +15,7 @@
             <pattern>%date %level [%thread] %logger{10} [%file:%line]%n%msg%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>/logs/updater.%d{yyyy-MM-dd-HH-mm}.%i.log</fileNamePattern>
+            <fileNamePattern>/logs/updater.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>100MB</maxFileSize>
             <maxHistory>10</maxHistory>
             <totalSizeCap>500MB</totalSizeCap>

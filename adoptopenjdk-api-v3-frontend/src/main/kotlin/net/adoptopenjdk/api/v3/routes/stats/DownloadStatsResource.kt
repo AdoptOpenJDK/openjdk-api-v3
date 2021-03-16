@@ -16,7 +16,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
-import org.eclipse.microprofile.openapi.annotations.tags.Tag
+import org.jboss.resteasy.annotations.GZIP
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import java.time.LocalDate
 import java.util.concurrent.CompletableFuture
@@ -31,12 +31,12 @@ import javax.ws.rs.QueryParam
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
 
-@Tag(name = "Stats")
 @Path("/v3/stats/downloads")
-@Produces(MediaType.APPLICATION_JSON)
 @Schema(hidden = true)
+@Produces(MediaType.APPLICATION_JSON)
 @Timed
 @ApplicationScoped
+@GZIP
 class DownloadStatsResource
 @Inject
 constructor(
