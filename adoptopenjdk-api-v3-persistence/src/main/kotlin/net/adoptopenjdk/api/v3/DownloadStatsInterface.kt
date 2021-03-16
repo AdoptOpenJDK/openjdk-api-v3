@@ -18,7 +18,15 @@ class StatEntry(
 
 @Schema(hidden = true)
 @Singleton
-class DownloadStatsInterface @Inject constructor(private val dataStore: ApiPersistence) {
+class DownloadStatsInterface {
+
+    @Schema(hidden = true)
+    private val dataStore: ApiPersistence
+
+    @Inject
+    constructor(dataStore: ApiPersistence) {
+        this.dataStore = dataStore
+    }
 
     suspend fun getTrackingStats(
         days: Int? = null,
