@@ -7,9 +7,6 @@ class ReleaseInfo {
     @Schema(example = "[8,9,10,11,12,13,14]", description = "The versions for which adopt have produced a ga release")
     val available_releases: Array<Int>
 
-    @Schema(example = "[9,10,12,13,14,15]", description = "The versions which have reached their end of life")
-    val obsolete_releases: Array<Int>
-
     @Schema(example = "[8,11]", description = "The LTS versions for which adopt have produced a ga release")
     val available_lts_releases: Array<Int>
 
@@ -27,7 +24,6 @@ class ReleaseInfo {
 
     constructor(
         available_releases: Array<Int>,
-        obsolete_releases: Array<Int>,
         available_lts_releases: Array<Int>,
         most_recent_lts: Int,
         most_recent_feature_release: Int,
@@ -35,7 +31,6 @@ class ReleaseInfo {
         tip_version: Int
     ) {
         this.available_releases = available_releases
-        this.obsolete_releases = obsolete_releases
         this.available_lts_releases = available_lts_releases
         this.most_recent_lts = most_recent_lts
         this.most_recent_feature_release = most_recent_feature_release

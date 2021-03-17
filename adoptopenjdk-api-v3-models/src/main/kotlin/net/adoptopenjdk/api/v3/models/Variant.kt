@@ -9,7 +9,6 @@ class Variant {
     val vendor: Vendor
     val version: Int
     val lts: Boolean
-    val obsoleteRelease: Boolean
     val websiteDescription: String?
     val websiteDescriptionLink: String?
     val websiteDefault: Boolean?
@@ -29,8 +28,6 @@ class Variant {
         version: Int,
         @JsonProperty("lts")
         lts: Boolean?,
-        @JsonProperty("obsoleteRelease")
-        obsoleteRelease: Boolean,
         @JsonProperty("websiteDescription")
         websiteDescription: String?,
         @JsonProperty("websiteDescriptionLink")
@@ -43,7 +40,6 @@ class Variant {
         this.vendor = vendor
         this.version = version
         this.lts = lts ?: false
-        this.obsoleteRelease = obsoleteRelease
         this.websiteDescription = websiteDescription
         this.websiteDescriptionLink = websiteDescriptionLink
         this.websiteDefault = websiteDefault

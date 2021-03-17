@@ -3,7 +3,6 @@ package net.adoptopenjdk.api.v3.dataSources
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import net.adoptopenjdk.api.v3.models.ReleaseType
-import net.adoptopenjdk.api.v3.models.Variants
 import javax.inject.Inject
 
 class ReleaseVersionResolver @Inject constructor(
@@ -21,21 +20,6 @@ class ReleaseVersionResolver @Inject constructor(
         } else {
             null
         }
-    }
-
-    private fun getObsoleteReleases(): Array<Int> {
-        val variantData = this.javaClass.getResource("/JSON/variants.json").readText()
-        val variants: Variants = UpdaterJsonMapper.mapper.readValue(variantData, Variants::class.java)
-
-        val obsoleteVersions: MutableList<Int> = mutableListOf()
-
-        variants.variants.forEach { variant ->
-            if (variant.obsoleteRelease) {
-                obsoleteVersions.add(variant.version)
-            }
-        }
-
-        return obsoleteVersions.distinct().sorted().toTypedArray()
     }
 
     suspend fun formReleaseInfo(repo: AdoptRepos): ReleaseInfo {
@@ -63,8 +47,6 @@ class ReleaseVersionResolver @Inject constructor(
             .toTypedArray()
         val mostRecentLts = availableLtsReleases.last()
 
-        val obsoleteReleases: Array<Int> = getObsoleteReleases()
-
         val mostRecentFeatureVersion: Int = repo
             .allReleases
             .getReleases()
@@ -77,7 +59,6 @@ class ReleaseVersionResolver @Inject constructor(
 
         return ReleaseInfo(
             availableReleases,
-            obsoleteReleases,
             availableLtsReleases,
             mostRecentLts,
             mostRecentFeatureRelease,
