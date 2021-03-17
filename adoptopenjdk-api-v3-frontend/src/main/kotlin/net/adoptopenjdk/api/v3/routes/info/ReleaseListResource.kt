@@ -37,6 +37,9 @@ class ReleaseListResource
 constructor(
     private val apiDataStore: APIDataStore
 ) {
+    companion object {
+        private const val MAX_INFO_PAGE_SIZE = 500;
+    }
 
     @GET
     @Path("/release_names")
@@ -79,7 +82,7 @@ constructor(
         val releases = filteredReleases
             .map { it.release_name }
 
-        val pagedReleases = getPage(pageSize, page, releases)
+        val pagedReleases = getPage(pageSize, page, releases, MAX_INFO_PAGE_SIZE)
 
         return ReleaseList(pagedReleases.toTypedArray())
     }
@@ -126,7 +129,7 @@ constructor(
             .map { it.version_data }
             .distinct()
 
-        val pagedReleases = getPage(pageSize, page, releases)
+        val pagedReleases = getPage(pageSize, page, releases, MAX_INFO_PAGE_SIZE)
 
         return ReleaseVersionList(pagedReleases.toTypedArray())
     }

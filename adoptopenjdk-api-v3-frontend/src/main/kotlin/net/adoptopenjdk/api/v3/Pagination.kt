@@ -5,12 +5,12 @@ import kotlin.math.min
 
 object Pagination {
     private const val defaultPageSizeNum = 10
-    private const val maxPageSizeNum = 20
+    private const val MAX_PAGE_SIZE = 20
     const val defaultPageSize = defaultPageSizeNum.toString()
-    const val maxPageSize = maxPageSizeNum.toString()
+    const val maxPageSize = MAX_PAGE_SIZE.toString()
 
-    fun <T> getPage(pageSize: Int?, page: Int?, releases: Sequence<T>): List<T> {
-        val pageSizeNum = min(maxPageSizeNum, (pageSize ?: defaultPageSizeNum))
+    fun <T> getPage(pageSize: Int?, page: Int?, releases: Sequence<T>, maxPageSize: Int = MAX_PAGE_SIZE): List<T> {
+        val pageSizeNum = min(maxPageSize, (pageSize ?: defaultPageSizeNum))
         val pageNum = page ?: 0
 
         val chunked = releases.chunked(pageSizeNum)
