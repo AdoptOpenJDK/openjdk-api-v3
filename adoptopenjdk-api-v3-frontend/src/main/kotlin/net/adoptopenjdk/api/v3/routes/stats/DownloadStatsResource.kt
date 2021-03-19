@@ -16,7 +16,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
-import org.eclipse.microprofile.openapi.annotations.tags.Tag
+import org.jboss.resteasy.annotations.GZIP
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import java.time.LocalDate
 import java.util.concurrent.CompletableFuture
@@ -31,23 +31,33 @@ import javax.ws.rs.QueryParam
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
 
-@Tag(name = "Stats")
 @Path("/v3/stats/downloads")
-@Produces(MediaType.APPLICATION_JSON)
 @Schema(hidden = true)
+@Produces(MediaType.APPLICATION_JSON)
 @Timed
 @ApplicationScoped
-class DownloadStatsResource
-@Inject
-constructor(
-    private val apiDataStore: APIDataStore,
+@GZIP
+class DownloadStatsResource {
+    @Schema(hidden = true)
+    private val apiDataStore: APIDataStore
+
+    @Schema(hidden = true)
     private val downloadStatsInterface: DownloadStatsInterface
-) {
+
+    //Dont convert to primary constructor, @Schema(hidden = true) is not processed correctly on primary constructor
+    @Inject
+    constructor(
+        apiDataStore: APIDataStore,
+        downloadStatsInterface: DownloadStatsInterface
+    ) {
+        this.apiDataStore = apiDataStore
+        this.downloadStatsInterface = downloadStatsInterface
+    }
 
     @GET
+    @Schema(hidden = true)
     @Path("/total")
     @Operation(summary = "Get download stats", description = "stats", hidden = true)
-    @Schema(hidden = true)
     fun getTotalDownloadStats(): CompletionStage<Response> {
         return runAsync {
             return@runAsync downloadStatsInterface.getTotalDownloadStats()
@@ -55,9 +65,9 @@ constructor(
     }
 
     @GET
+    @Schema(hidden = true)
     @Path("/total/{feature_version}")
     @Operation(summary = "Get download stats for feature verson", description = "stats", hidden = true)
-    @Schema(hidden = true)
     fun getTotalDownloadStats(
         @Parameter(name = "feature_version", description = "Feature version (i.e 8, 9, 10...)", required = true)
         @PathParam("feature_version")
@@ -81,9 +91,9 @@ constructor(
 
     @Throws(BadRequestException::class)
     @GET
+    @Schema(hidden = true)
     @Path("/total/{feature_version}/{release_name}")
     @Operation(summary = "Get download stats for feature verson", description = "stats", hidden = true)
-    @Schema(hidden = true)
     fun getTotalDownloadStatsForTag(
         @Parameter(name = "feature_version", description = "Feature version (i.e 8, 9, 10...)", required = true)
         @PathParam("feature_version")
@@ -117,9 +127,9 @@ constructor(
     }
 
     @GET
+    @Schema(hidden = true)
     @Path("/tracking")
     @Operation(summary = "Get download stats for feature verson", description = "stats", hidden = true)
-    @Schema(hidden = true)
     fun tracking(
         @Parameter(name = "days", description = "Number of days to display, if used in conjunction with from/to then this will limit the request to x days before the end of the given period", schema = Schema(defaultValue = "30", type = SchemaType.INTEGER), required = false)
         @QueryParam("days")
@@ -157,9 +167,9 @@ constructor(
     }
 
     @GET
+    @Schema(hidden = true)
     @Path("/monthly")
     @Operation(summary = "Get download stats for feature verson", description = "stats", hidden = true)
-    @Schema(hidden = true)
     fun tracking(
         @Parameter(name = "source", description = "Stats data source", schema = Schema(defaultValue = "all"), required = false)
         @QueryParam("source")

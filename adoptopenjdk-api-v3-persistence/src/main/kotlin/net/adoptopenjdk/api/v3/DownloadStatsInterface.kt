@@ -3,6 +3,7 @@ package net.adoptopenjdk.api.v3
 import net.adoptopenjdk.api.v3.dataSources.VariantStore
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.*
+import org.eclipse.microprofile.openapi.annotations.media.Schema
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
@@ -15,8 +16,17 @@ class StatEntry(
     val count: Long
 )
 
+@Schema(hidden = true)
 @Singleton
-class DownloadStatsInterface @Inject constructor(private val dataStore: ApiPersistence) {
+class DownloadStatsInterface {
+
+    @Schema(hidden = true)
+    private val dataStore: ApiPersistence
+
+    @Inject
+    constructor(dataStore: ApiPersistence) {
+        this.dataStore = dataStore
+    }
 
     suspend fun getTrackingStats(
         days: Int? = null,

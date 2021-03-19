@@ -19,6 +19,7 @@ import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
+import org.jboss.resteasy.annotations.GZIP
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
 import javax.enterprise.context.ApplicationScoped
 import javax.inject.Inject
@@ -32,6 +33,7 @@ import javax.ws.rs.core.MediaType
 @Produces(MediaType.APPLICATION_JSON)
 @Timed
 @ApplicationScoped
+@GZIP
 class ReleaseListResource
 @Inject
 constructor(

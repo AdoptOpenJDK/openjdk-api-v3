@@ -22,7 +22,7 @@ object AppInsightsTelemetry {
         }
     }
 
-    private fun hasKey() = System.getProperty("APPINSIGHTS_INSTRUMENTATIONKEY") != null
+    private fun hasKey() = System.getProperty("APPINSIGHTS_INSTRUMENTATIONKEY") != null || System.getenv("APPINSIGHTS_INSTRUMENTATIONKEY") != null
 
     fun start() {
         if (hasKey()) {

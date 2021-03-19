@@ -21,6 +21,17 @@ private fun millisecondsSince(startTime: Long): Double {
     return nanoToMilliseconds(System.nanoTime() - startTime)
 }
 
+private fun recordEvent(
+    startTime: Long,
+    requestTelemetry: RequestTelemetry
+) {
+    if (AppInsightsTelemetry.enabled) {
+        val duration = millisecondsSince(startTime)
+        requestTelemetry.metrics["writeTime"] = duration
+        AppInsightsTelemetry.telemetryClient?.trackRequest(requestTelemetry)
+    }
+}
+
 @Provider
 class BeforeContainerRequest : ContainerRequestFilter {
     override fun filter(context: ContainerRequestContext?) {
@@ -56,6 +67,10 @@ class AfterContainerFilter : ContainerResponseFilter {
                 requestTelemetry.properties["User-Agent"] = userAgent
             }
             requestContext.setProperty(TELEMETERY_KEY, requestTelemetry)
+
+            if (responseContext.entity == null && AppInsightsTelemetry.enabled) {
+                recordEvent(startTime, requestTelemetry)
+            }
         }
     }
 }
@@ -75,9 +90,7 @@ class Writer : WriterInterceptor {
             context?.proceed()
 
             if (requestTelemetry != null && requestTelemetry is RequestTelemetry && startTime != null && startTime is Long) {
-                val duration = millisecondsSince(startTime)
-                requestTelemetry.metrics["writeTime"] = duration
-                AppInsightsTelemetry.telemetryClient?.trackRequest(requestTelemetry)
+                recordEvent(startTime, requestTelemetry)
             }
         } else {
             context?.proceed()
