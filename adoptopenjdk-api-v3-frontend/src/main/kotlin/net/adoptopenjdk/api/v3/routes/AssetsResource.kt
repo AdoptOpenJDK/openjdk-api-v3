@@ -9,7 +9,6 @@ import net.adoptopenjdk.api.v3.dataSources.SortMethod
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.filters.BinaryFilter
 import net.adoptopenjdk.api.v3.filters.ReleaseFilter
-import net.adoptopenjdk.api.v3.filters.VersionRangeFilter
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.BinaryAssetView
 import net.adoptopenjdk.api.v3.models.DateTime
@@ -51,10 +50,9 @@ import javax.ws.rs.core.Response
 @Timed
 @ApplicationScoped
 @GZIP
-class AssetsResource
-@Inject
-constructor(
-    private val apiDataStore: APIDataStore
+class AssetsResource @Inject constructor(
+    private val apiDataStore: APIDataStore,
+    private val releaseEndpoint: ReleaseEndpoint
 ) {
 
     companion object {
@@ -331,19 +329,20 @@ constructor(
         @QueryParam("sort_method")
         sortMethod: SortMethod?
     ): List<Release> {
-        val order = sortOrder ?: SortOrder.DESC
-        val sortMethod = sortMethod ?: SortMethod.DEFAULT
-
-        val range = VersionRangeFilter(version)
-        val vendorNonNull = vendor ?: Vendor.adoptopenjdk
-
-        val releaseFilter = ReleaseFilter(releaseType = release_type, vendor = vendorNonNull, versionRange = range, lts = lts)
-        val binaryFilter = BinaryFilter(os = os, arch = arch, imageType = image_type, jvmImpl = jvm_impl, heapSize = heap_size, project = project)
-
-        val releases = apiDataStore
-            .getAdoptRepos()
-            .getFilteredReleases(releaseFilter, binaryFilter, order, sortMethod)
-
+        val releases = releaseEndpoint.getReleases(
+            sortOrder,
+            sortMethod,
+            version,
+            release_type,
+            vendor,
+            lts,
+            os,
+            arch,
+            image_type,
+            jvm_impl,
+            heap_size,
+            project
+        )
         return getPage(pageSize, page, releases)
     }
 

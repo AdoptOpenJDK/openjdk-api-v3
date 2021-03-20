@@ -11,6 +11,7 @@ import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.routes.AssetsResource
+import net.adoptopenjdk.api.v3.routes.ReleaseEndpoint
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
 import org.junit.jupiter.api.DynamicTest
@@ -98,7 +99,7 @@ class AssetsResourceReleaseNamePathTest : FrontendTest() {
     @Test
     fun `missing release_name 400s`() {
         assertThrows<BadRequestException> {
-            AssetsResource(apiDataStore)
+            AssetsResource(apiDataStore, ReleaseEndpoint(apiDataStore))
                 .get(
                     Vendor.adoptopenjdk,
                     null,
@@ -115,7 +116,7 @@ class AssetsResourceReleaseNamePathTest : FrontendTest() {
     @Test
     fun `missing vendor 400s`() {
         assertThrows<BadRequestException> {
-            AssetsResource(apiDataStore)
+            AssetsResource(apiDataStore, ReleaseEndpoint(apiDataStore))
                 .get(
                     null,
                     "foo",

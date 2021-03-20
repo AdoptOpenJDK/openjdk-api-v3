@@ -22,12 +22,12 @@ class JsonSerialiserConfig : ContextResolver<Jsonb> {
                 jsonGenerator.writeNull()
             }
         }
-
     }
 
-    private val jsonb = JsonbBuilder.create(JsonbConfig()
-        .withSerializers(DateTimeSerializer())
-        .withFormatting(true)
+    private val jsonb = JsonbBuilder.create(
+        JsonbConfig()
+            .withSerializers(DateTimeSerializer())
+            .withFormatting(true)
     )
 
     override fun getContext(objectType: Class<*>?): Jsonb {

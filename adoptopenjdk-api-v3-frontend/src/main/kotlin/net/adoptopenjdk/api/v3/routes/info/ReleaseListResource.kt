@@ -3,16 +3,19 @@ package net.adoptopenjdk.api.v3.routes.info
 import net.adoptopenjdk.api.v3.OpenApiDocs
 import net.adoptopenjdk.api.v3.Pagination
 import net.adoptopenjdk.api.v3.Pagination.getPage
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortMethod
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
-import net.adoptopenjdk.api.v3.filters.ReleaseFilter
-import net.adoptopenjdk.api.v3.filters.VersionRangeFilter
-import net.adoptopenjdk.api.v3.models.Release
+import net.adoptopenjdk.api.v3.models.Architecture
+import net.adoptopenjdk.api.v3.models.HeapSize
+import net.adoptopenjdk.api.v3.models.ImageType
+import net.adoptopenjdk.api.v3.models.JvmImpl
+import net.adoptopenjdk.api.v3.models.OperatingSystem
+import net.adoptopenjdk.api.v3.models.Project
 import net.adoptopenjdk.api.v3.models.ReleaseList
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.ReleaseVersionList
 import net.adoptopenjdk.api.v3.models.Vendor
+import net.adoptopenjdk.api.v3.routes.ReleaseEndpoint
 import org.eclipse.microprofile.metrics.annotation.Timed
 import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
@@ -34,10 +37,8 @@ import javax.ws.rs.core.MediaType
 @Timed
 @ApplicationScoped
 @GZIP
-class ReleaseListResource
-@Inject
-constructor(
-    private val apiDataStore: APIDataStore
+class ReleaseListResource @Inject constructor(
+    private val releaseEndpoint: ReleaseEndpoint
 ) {
 
     @GET
@@ -56,6 +57,34 @@ constructor(
         @QueryParam("vendor")
         vendor: Vendor?,
 
+        @Parameter(name = "os", description = "Operating System", required = false)
+        @QueryParam("os")
+        os: OperatingSystem?,
+
+        @Parameter(name = "architecture", description = "Architecture", required = false)
+        @QueryParam("architecture")
+        arch: Architecture?,
+
+        @Parameter(name = "image_type", description = "Image Type", required = false)
+        @QueryParam("image_type")
+        image_type: ImageType?,
+
+        @Parameter(name = "jvm_impl", description = "JVM Implementation", required = false)
+        @QueryParam("jvm_impl")
+        jvm_impl: JvmImpl?,
+
+        @Parameter(name = "heap_size", description = "Heap Size", required = false)
+        @QueryParam("heap_size")
+        heap_size: HeapSize?,
+
+        @Parameter(name = "project", description = "Project", required = false)
+        @QueryParam("project")
+        project: Project?,
+
+        @Parameter(name = "lts", description = "Include only LTS releases", required = false)
+        @QueryParam("lts")
+        lts: Boolean?,
+
         @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = Pagination.defaultPageSize, maximum = Pagination.maxPageSize, type = SchemaType.INTEGER), required = false)
         @QueryParam("page_size")
         pageSize: Int?,
@@ -71,14 +100,21 @@ constructor(
         @Parameter(name = "sort_method", description = "Result sort method", required = false)
         @QueryParam("sort_method")
         sortMethod: SortMethod?
-
     ): ReleaseList {
-        val order = sortOrder ?: SortOrder.DESC
-        val sortMethod = sortMethod ?: SortMethod.DEFAULT
-
-        val filteredReleases = getReleases(release_type, vendor, version, order, sortMethod)
-
-        val releases = filteredReleases
+        val releases = releaseEndpoint.getReleases(
+            sortOrder,
+            sortMethod,
+            version,
+            release_type,
+            vendor,
+            lts,
+            os,
+            arch,
+            image_type,
+            jvm_impl,
+            heap_size,
+            project
+        )
             .map { it.release_name }
 
         val pagedReleases = getPage(pageSize, page, releases)
@@ -102,6 +138,34 @@ constructor(
         @QueryParam("vendor")
         vendor: Vendor?,
 
+        @Parameter(name = "os", description = "Operating System", required = false)
+        @QueryParam("os")
+        os: OperatingSystem?,
+
+        @Parameter(name = "architecture", description = "Architecture", required = false)
+        @QueryParam("architecture")
+        arch: Architecture?,
+
+        @Parameter(name = "image_type", description = "Image Type", required = false)
+        @QueryParam("image_type")
+        image_type: ImageType?,
+
+        @Parameter(name = "jvm_impl", description = "JVM Implementation", required = false)
+        @QueryParam("jvm_impl")
+        jvm_impl: JvmImpl?,
+
+        @Parameter(name = "heap_size", description = "Heap Size", required = false)
+        @QueryParam("heap_size")
+        heap_size: HeapSize?,
+
+        @Parameter(name = "project", description = "Project", required = false)
+        @QueryParam("project")
+        project: Project?,
+
+        @Parameter(name = "lts", description = "Include only LTS releases", required = false)
+        @QueryParam("lts")
+        lts: Boolean?,
+
         @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = Pagination.defaultPageSize, maximum = Pagination.maxPageSize, type = SchemaType.INTEGER), required = false)
         @QueryParam("page_size")
         pageSize: Int?,
@@ -119,26 +183,25 @@ constructor(
         sortMethod: SortMethod?
 
     ): ReleaseVersionList {
-        val order = sortOrder ?: SortOrder.DESC
-        val sortMethod = sortMethod ?: SortMethod.DEFAULT
-
-        val filteredReleases = getReleases(release_type, vendor, version, order, sortMethod)
-
-        val releases = filteredReleases
+        val releases = releaseEndpoint.getReleases(
+            sortOrder,
+            sortMethod,
+            version,
+            release_type,
+            vendor,
+            lts,
+            os,
+            arch,
+            image_type,
+            jvm_impl,
+            heap_size,
+            project
+        )
             .map { it.version_data }
             .distinct()
 
         val pagedReleases = getPage(pageSize, page, releases)
 
         return ReleaseVersionList(pagedReleases.toTypedArray())
-    }
-
-    private fun getReleases(release_type: ReleaseType?, vendor: Vendor?, version: String?, sortOrder: SortOrder, sortMethod: SortMethod): Sequence<Release> {
-        val range = VersionRangeFilter(version)
-        val vendorNonNull = vendor ?: Vendor.adoptopenjdk
-        val releaseFilter = ReleaseFilter(releaseType = release_type, vendor = vendorNonNull, versionRange = range)
-        return apiDataStore
-            .getAdoptRepos()
-            .getReleases(releaseFilter, sortOrder, sortMethod)
     }
 }
