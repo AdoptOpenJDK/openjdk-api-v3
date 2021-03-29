@@ -367,7 +367,7 @@ constructor(
         jvm_impl: JvmImpl
 
     ): List<BinaryAssetView> {
-        val releaseFilter = ReleaseFilter(ReleaseType.ga, featureVersion = version, vendor = Vendor.adoptopenjdk)
+        val releaseFilter = ReleaseFilter(ReleaseType.ga, featureVersion = version)
         val binaryFilter = BinaryFilter(null, null, null, jvm_impl, null, null)
         val releases = apiDataStore
             .getAdoptRepos()
@@ -383,7 +383,7 @@ constructor(
                 binaryPermutation(it.second.architecture, it.second.heap_size, it.second.image_type, it.second.os)
             }
             .values
-            .map { BinaryAssetView(it.first.release_name, it.second, it.first.version_data) }
+            .map { BinaryAssetView(it.first.release_name, it.first.vendor, it.second, it.first.version_data) }
             .toList()
     }
 }
