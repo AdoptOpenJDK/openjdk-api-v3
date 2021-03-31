@@ -19,7 +19,10 @@ import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
+import org.jboss.resteasy.annotations.GZIP
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
+import javax.enterprise.context.ApplicationScoped
+import javax.inject.Inject
 import javax.ws.rs.GET
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
@@ -29,11 +32,17 @@ import javax.ws.rs.core.MediaType
 @Path("/v3/info")
 @Produces(MediaType.APPLICATION_JSON)
 @Timed
-class ReleaseListResource {
+@ApplicationScoped
+@GZIP
+class ReleaseListResource
+@Inject
+constructor(
+    private val apiDataStore: APIDataStore
+) {
 
     @GET
     @Path("/release_names")
-    @Operation(summary = "Returns a list of all release names")
+    @Operation(summary = "Returns a list of all release names", operationId = "getReleaseNames")
     fun get(
         @Parameter(name = "release_type", description = OpenApiDocs.RELEASE_TYPE, required = false)
         @QueryParam("release_type")
@@ -79,7 +88,7 @@ class ReleaseListResource {
 
     @Path("/release_versions")
     @GET
-    @Operation(summary = "Returns a list of all release versions")
+    @Operation(summary = "Returns a list of all release versions", operationId = "getReleaseVersions")
     fun getVersions(
         @Parameter(name = "release_type", description = OpenApiDocs.RELEASE_TYPE, required = false)
         @QueryParam("release_type")
@@ -127,7 +136,7 @@ class ReleaseListResource {
     private fun getReleases(release_type: ReleaseType?, vendor: Vendor?, version: String?, sortOrder: SortOrder, sortMethod: SortMethod): Sequence<Release> {
         val range = VersionRangeFilter(version)
         val releaseFilter = ReleaseFilter(releaseType = release_type, vendor = vendor, versionRange = range)
-        return APIDataStore
+        return apiDataStore
             .getAdoptRepos()
             .getReleases(releaseFilter, sortOrder, sortMethod)
     }

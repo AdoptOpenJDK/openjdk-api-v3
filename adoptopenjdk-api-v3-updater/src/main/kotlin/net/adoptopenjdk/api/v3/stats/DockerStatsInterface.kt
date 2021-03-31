@@ -1,26 +1,32 @@
 package net.adoptopenjdk.api.v3.stats
 
-import javax.json.JsonObject
 import kotlinx.coroutines.runBlocking
 import net.adoptopenjdk.api.v3.TimeSource
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
+
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
 import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.JvmImpl
 import org.slf4j.LoggerFactory
+import javax.inject.Inject
+import javax.json.JsonObject
 
-class DockerStatsInterface {
+class DockerStatsInterface @Inject constructor(
+    private var database: ApiPersistence,
+    private val updaterHtmlClient: UpdaterHtmlClient
+) {
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
+
+        fun getOpenjdkVersionFromString(name: String): Int? {
+            return "openjdk(?<featureNum>[0-9]+)".toRegex().find(name)?.groups?.get("featureNum")?.value?.toInt()
+        }
     }
 
     private val downloadStatsUrl = "https://hub.docker.com/v2/repositories/adoptopenjdk/"
     private val officialStatsUrl = "https://hub.docker.com/v2/repositories/library/adoptopenjdk/"
-
-    private var database: ApiPersistence = ApiPersistenceFactory.get()
 
     suspend fun updateDb() {
         try {
@@ -51,10 +57,6 @@ class DockerStatsInterface {
             }
     }
 
-    public fun getOpenjdkVersionFromString(name: String): Int? {
-        return "openjdk(?<featureNum>[0-9]+)".toRegex().find(name)?.groups?.get("featureNum")?.value?.toInt()
-    }
-
     private fun pullOfficalStats(): DockerDownloadStatsDbEntry {
         val result = getStatsForUrl(officialStatsUrl)
         val now = TimeSource.now()
@@ -76,7 +78,7 @@ class DockerStatsInterface {
 
     private fun getStatsForUrl(url: String): JsonObject {
         return runBlocking {
-            val stats = UpdaterHtmlClientFactory.client.get(url)
+            val stats = updaterHtmlClient.get(url)
             if (stats == null) {
                 throw Exception("Stats not returned")
             }

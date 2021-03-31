@@ -8,10 +8,15 @@ import org.apache.commons.io.IOUtils
 import org.apache.http.HttpResponse
 import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.concurrent.FutureCallback
+import org.apache.http.nio.client.HttpAsyncClient
 import org.slf4j.LoggerFactory
 import java.io.StringWriter
 import java.net.URL
 import java.nio.charset.Charset
+import javax.enterprise.inject.Default
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -27,11 +32,15 @@ interface UpdaterHtmlClient {
     suspend fun getFullResponse(request: UrlRequest): HttpResponse?
 }
 
-object UpdaterHtmlClientFactory {
-    var client: UpdaterHtmlClient = DefaultUpdaterHtmlClient()
-}
+@Default
+@Singleton
+class DefaultUpdaterHtmlClient @Inject constructor(
+    @Named(HttpClientFactory.REDIRECTING)
+    val redirectingHttpClient: HttpAsyncClient,
 
-class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
+    @Named(HttpClientFactory.NON_REDIRECTING)
+    val nonRedirectingHttpClient: HttpAsyncClient
+) : UpdaterHtmlClient {
 
     companion object {
         @JvmStatic
@@ -117,9 +126,9 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
 
             val client =
                 if (url.host.endsWith("github.com")) {
-                    HttpClientFactory.getNonRedirectHttpClient()
+                    nonRedirectingHttpClient
                 } else {
-                    HttpClientFactory.getHttpClient()
+                    redirectingHttpClient
                 }
 
             client.execute(request, ResponseHandler(this, continuation, urlRequest))
@@ -132,13 +141,13 @@ class DefaultUpdaterHtmlClient : UpdaterHtmlClient {
         // Retry up to 10 times
         for (retryCount in 1..10) {
             try {
-                LOGGER.info("Getting ${request.url} ${request.lastModified}")
+                LOGGER.debug("Getting ${request.url} ${request.lastModified}")
                 val response: HttpResponse = withTimeout(REQUEST_TIMEOUT) {
                     suspendCoroutine<HttpResponse> { continuation ->
                         getData(request, continuation)
                     }
                 }
-                LOGGER.info("Got  ${request.url}")
+                LOGGER.debug("Got  ${request.url}")
                 return response
             } catch (e: NotFoundException) {
                 return null

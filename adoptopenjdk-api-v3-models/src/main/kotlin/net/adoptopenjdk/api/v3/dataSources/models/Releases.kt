@@ -1,5 +1,6 @@
 package net.adoptopenjdk.api.v3.dataSources.models
 
+/* ktlint-enable no-wildcard-imports */
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -9,7 +10,6 @@ import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.VersionData
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
-/* ktlint-enable no-wildcard-imports */
 import java.util.*
 import java.util.function.Predicate
 
@@ -20,6 +20,8 @@ class Releases {
 
     @JsonIgnore
     val nodeList: TreeSet<Release> = TreeSet(VERSION_THEN_TIME_SORTER)
+
+    @JsonIgnore
     private val nodeListTimeThenVersion: TreeSet<Release> = TreeSet(TIME_THEN_VERSION_SORTER)
 
     constructor(nodes: List<Release>) {
@@ -62,20 +64,21 @@ class Releases {
         return getReleases(SortOrder.ASC, SortMethod.DEFAULT)
     }
 
-    fun retain(githubId: List<GithubId>): Releases {
-        return Releases(nodes.filterKeys { adoptId -> githubId.any { adoptId.startsWith(it.githubId) } })
+    fun retain(gitHubId: List<GitHubId>): Releases {
+        return Releases(nodes.filterKeys { adoptId -> gitHubId.any { adoptId.startsWith(it.id) } })
     }
 
-    fun hasReleaseId(githubId: GithubId): Boolean {
+    fun hasReleaseId(gitHubId: GitHubId): Boolean {
         return nodes
-            .any { it.key.startsWith(githubId.githubId) }
+            .keys
+            .any { release -> release.startsWith(gitHubId.id) }
     }
 
-    fun hasReleaseBeenUpdated(githubId: GithubId, updatedAt: ZonedDateTime): Boolean {
+    fun hasReleaseBeenUpdated(gitHubId: GitHubId, updatedAt: ZonedDateTime): Boolean {
         return nodes
-            .filter { it.key.startsWith(githubId.githubId) }
+            .filter { it.key.startsWith(gitHubId.id) }
             .any {
-                ChronoUnit.SECONDS.between(it.value.updated_at, updatedAt) != 0L
+                ChronoUnit.SECONDS.between(it.value.updated_at.dateTime, updatedAt) != 0L
             }
     }
 
@@ -102,6 +105,10 @@ class Releases {
         return nodes.hashCode()
     }
 
+    fun getReleaseById(id: String): Release? {
+        return nodes.get(id)
+    }
+
     companion object {
 
         // exclude "internal" pre from sorting as this causes incorrect sorting for openj9 nightlies
@@ -125,7 +132,7 @@ class Releases {
             .thenBy { it.build }
             .thenBy { it.adopt_build_number }
 
-        private val TIME_COMPARATOR = compareBy { release: Release -> release.timestamp }
+        private val TIME_COMPARATOR = compareBy { release: Release -> release.timestamp.dateTime }
 
         val RELEASE_COMPARATOR = compareBy<Release, VersionData>(VERSION_COMPARATOR, { it.version_data })
 

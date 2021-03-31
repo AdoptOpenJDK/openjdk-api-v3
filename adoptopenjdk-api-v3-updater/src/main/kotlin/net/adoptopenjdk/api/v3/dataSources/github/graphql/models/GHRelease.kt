@@ -3,7 +3,7 @@ package net.adoptopenjdk.api.v3.dataSources.github.graphql.models
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import net.adoptopenjdk.api.v3.dataSources.models.GithubId
+import net.adoptopenjdk.api.v3.dataSources.models.GitHubId
 
 data class GHReleases @JsonCreator constructor(
     @JsonProperty("nodes") val releases: List<GHRelease>,
@@ -17,11 +17,10 @@ data class GHReleaseResult @JsonCreator constructor(
 
 data class GHRelease @JsonCreator constructor(
     @JsonProperty("id")
-    @JsonDeserialize(using = GithubIdDeserializer::class)
-    val id: GithubId,
+    @JsonDeserialize(using = GitHubIdDeserializer::class)
+    val id: GitHubId,
     @JsonProperty("name") val name: String,
     @JsonProperty("isPrerelease") val isPrerelease: Boolean,
-    @JsonProperty("prerelease") val prerelease: Boolean?,
     @JsonProperty("publishedAt") val publishedAt: String,
     @JsonProperty("updatedAt") val updatedAt: String,
     @JsonProperty("releaseAssets") val releaseAssets: GHAssets,

@@ -1,325 +1,249 @@
 package net.adoptopenjdk.api
 
-import io.quarkus.test.junit.QuarkusTest
-import io.restassured.RestAssured
-import io.restassured.response.ValidatableResponse
 import kotlinx.coroutines.runBlocking
-import net.adoptopenjdk.api.v3.JsonMapper
+import net.adoptopenjdk.api.testDoubles.InMemoryApiPersistence
+import net.adoptopenjdk.api.v3.DownloadStatsInterface
 import net.adoptopenjdk.api.v3.TimeSource
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+import net.adoptopenjdk.api.v3.dataSources.APIDataStore
+import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import net.adoptopenjdk.api.v3.models.DockerDownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.DownloadDiff
 import net.adoptopenjdk.api.v3.models.DownloadStats
-import net.adoptopenjdk.api.v3.models.GithubDownloadStatsDbEntry
+import net.adoptopenjdk.api.v3.models.GitHubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.JvmImpl
-import org.hamcrest.Description
-import org.hamcrest.TypeSafeMatcher
-import org.junit.jupiter.api.BeforeAll
+import net.adoptopenjdk.api.v3.models.StatsSource
+import net.adoptopenjdk.api.v3.routes.stats.DownloadStatsResource
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.format.DateTimeFormatter
+import javax.ws.rs.BadRequestException
+import kotlin.test.assertEquals
 import kotlin.test.assertFails
+import kotlin.test.assertTrue
 
-@QuarkusTest
-class DownloadStatsPathTest : BaseTest() {
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun before() {
-            populateDb()
-            mockStats()
-        }
+@ExtendWith(value = [DbExtension::class])
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class DownloadStatsPathTest : FrontendTest() {
 
-        fun mockStats() {
-            runBlocking {
-                val persistance = ApiPersistenceFactory.get()
+    private val apiDataStore: APIDataStore = ApiDataStoreStub()
 
-                persistance.addDockerDownloadStatsEntries(
-                    createDockerStatsWithRepoName()
-                )
+    private val apiPersistence: ApiPersistence = InMemoryApiPersistence(
+        AdoptReposTestDataGenerator.generate()
+    )
 
-                persistance.addGithubDownloadStatsEntries(
-                    createGithubData()
-                )
-            }
-        }
+    private val downloadStatsResource: DownloadStatsResource = createDownloadStatsResource(apiDataStore, apiPersistence)
 
-        private fun createGithubData(): List<GithubDownloadStatsDbEntry> {
-            return listOf(
-                GithubDownloadStatsDbEntry(
-                    TimeSource.now().minusDays(15),
-                    0,
-                    null,
-                    11
-                ),
-                GithubDownloadStatsDbEntry(
-                    TimeSource.now().minusDays(10),
-                    10,
-                    mapOf(JvmImpl.hotspot to 10L),
-                    11
-                ),
-                GithubDownloadStatsDbEntry(
-                    TimeSource.now().minusDays(5),
-                    20,
-                    mapOf(JvmImpl.hotspot to 16L, JvmImpl.openj9 to 4L),
-                    8
-                ),
-                GithubDownloadStatsDbEntry(
-                    TimeSource.now().minusDays(1),
-                    40,
-                    mapOf(JvmImpl.hotspot to 30L, JvmImpl.openj9 to 10L),
-                    11
-                ),
-                GithubDownloadStatsDbEntry(
-                    TimeSource.now().minusDays(1).minusMinutes(1),
-                    25,
-                    mapOf(JvmImpl.hotspot to 20L, JvmImpl.openj9 to 5L),
-                    8
-                ),
-                GithubDownloadStatsDbEntry(
-                    TimeSource.now().minusDays(1),
-                    30,
-                    mapOf(JvmImpl.hotspot to 20L, JvmImpl.openj9 to 10L),
-                    8
-                )
+    private fun createDownloadStatsResource(apiDataStore: APIDataStore, apiPersistence: ApiPersistence): DownloadStatsResource {
+        return runBlocking {
+            val persistance = apiPersistence
+
+            persistance.addDockerDownloadStatsEntries(
+                createDockerStatsWithRepoName()
             )
-        }
 
-        private fun createDockerStatsWithRepoName(): List<DockerDownloadStatsDbEntry> {
-            return listOf(
-                DockerDownloadStatsDbEntry(
-                    TimeSource.now().minusDays(15),
-                    0,
-                    "b-repo-name",
-                    null,
-                    null
-                ),
-                DockerDownloadStatsDbEntry(
-                    TimeSource.now().minusDays(10),
-                    20,
-                    "a-repo-name",
-                    11,
-                    JvmImpl.openj9
-                ),
-                DockerDownloadStatsDbEntry(
-                    TimeSource.now().minusDays(5),
-                    30,
-                    "b-repo-name",
-                    8,
-                    JvmImpl.hotspot
-                ),
-                DockerDownloadStatsDbEntry(
-                    TimeSource.now().minusDays(1),
-                    40,
-                    "b-repo-name",
-                    11,
-                    JvmImpl.hotspot
-                ),
-                DockerDownloadStatsDbEntry(
-                    TimeSource.now().minusDays(1).minusMinutes(1),
-                    50,
-                    "a-repo-name",
-                    8,
-                    JvmImpl.openj9
-                ),
-                DockerDownloadStatsDbEntry(
-                    TimeSource.now().minusDays(1),
-                    60,
-                    "a-repo-name",
-                    8,
-                    JvmImpl.openj9
-                )
+            persistance.addGithubDownloadStatsEntries(
+                createGithubData()
             )
+
+            val downloadStatsResource = DownloadStatsResource(apiDataStore, DownloadStatsInterface(persistance))
+            downloadStatsResource
         }
+    }
+
+    private fun createGithubData(): List<GitHubDownloadStatsDbEntry> {
+        return listOf(
+            GitHubDownloadStatsDbEntry(
+                TimeSource.now().minusDays(15),
+                0,
+                null,
+                11
+            ),
+            GitHubDownloadStatsDbEntry(
+                TimeSource.now().minusDays(10),
+                10,
+                mapOf(JvmImpl.hotspot to 10L),
+                11
+            ),
+            GitHubDownloadStatsDbEntry(
+                TimeSource.now().minusDays(5),
+                20,
+                mapOf(JvmImpl.hotspot to 16L, JvmImpl.openj9 to 4L),
+                8
+            ),
+            GitHubDownloadStatsDbEntry(
+                TimeSource.now().minusDays(1),
+                40,
+                mapOf(JvmImpl.hotspot to 30L, JvmImpl.openj9 to 10L),
+                11
+            ),
+            GitHubDownloadStatsDbEntry(
+                TimeSource.now().minusDays(1).minusMinutes(1),
+                25,
+                mapOf(JvmImpl.hotspot to 20L, JvmImpl.openj9 to 5L),
+                8
+            ),
+            GitHubDownloadStatsDbEntry(
+                TimeSource.now().minusDays(1),
+                30,
+                mapOf(JvmImpl.hotspot to 20L, JvmImpl.openj9 to 10L),
+                8
+            )
+        )
+    }
+
+    private fun createDockerStatsWithRepoName(): List<DockerDownloadStatsDbEntry> {
+        return listOf(
+            DockerDownloadStatsDbEntry(
+                TimeSource.now().minusDays(15),
+                0,
+                "b-repo-name",
+                null,
+                null
+            ),
+            DockerDownloadStatsDbEntry(
+                TimeSource.now().minusDays(10),
+                20,
+                "a-repo-name",
+                11,
+                JvmImpl.openj9
+            ),
+            DockerDownloadStatsDbEntry(
+                TimeSource.now().minusDays(5),
+                30,
+                "b-repo-name",
+                8,
+                JvmImpl.hotspot
+            ),
+            DockerDownloadStatsDbEntry(
+                TimeSource.now().minusDays(1),
+                40,
+                "b-repo-name",
+                11,
+                JvmImpl.hotspot
+            ),
+            DockerDownloadStatsDbEntry(
+                TimeSource.now().minusDays(1).minusMinutes(1),
+                50,
+                "a-repo-name",
+                8,
+                JvmImpl.openj9
+            ),
+            DockerDownloadStatsDbEntry(
+                TimeSource.now().minusDays(1),
+                60,
+                "a-repo-name",
+                8,
+                JvmImpl.openj9
+            )
+        )
     }
 
     @Test
     fun totalDownloadReturnsSaneData() {
-        runBlocking {
-            RestAssured.given()
-                .`when`()
-                .get("/v3/stats/downloads/total")
-                .then()
-                .body(object : TypeSafeMatcher<String>() {
+        val stats = downloadStatsResource
+            .getTotalDownloadStats()
+            .toCompletableFuture()
+            .get().entity as DownloadStats
 
-                    override fun describeTo(description: Description?) {
-                        description!!.appendText("json")
-                    }
-
-                    override fun matchesSafely(p0: String?): Boolean {
-                        val stats = JsonMapper.mapper.readValue(p0, DownloadStats::class.java)
-                        return stats.total_downloads.total == 170L &&
-                            stats.total_downloads.docker_pulls == 100L &&
-                            stats.total_downloads.github_downloads == 70L &&
-                            stats.github_downloads[8] == 30L &&
-                            stats.github_downloads[11] == 40L &&
-                            stats.docker_pulls["a-repo-name"] == 60L &&
-                            stats.docker_pulls["b-repo-name"] == 40L
-                    }
-                })
-        }
+        assertEquals(170L, stats.total_downloads.total)
+        assertEquals(100L, stats.total_downloads.docker_pulls)
+        assertEquals(70L, stats.total_downloads.github_downloads)
+        assertEquals(30L, stats.github_downloads[8])
+        assertEquals(40L, stats.github_downloads[11])
+        assertEquals(60L, stats.docker_pulls["a-repo-name"])
+        assertEquals(40L, stats.docker_pulls["b-repo-name"])
     }
 
     @Test
     fun totalVersionReturnsSaneData() {
-        runBlocking {
-            RestAssured.given()
-                .`when`()
-                .get("/v3/stats/downloads/total/8")
-                .then()
-                .body(object : TypeSafeMatcher<String>() {
-
-                    override fun describeTo(description: Description?) {
-                        description!!.appendText("json")
-                    }
-
-                    override fun matchesSafely(p0: String?): Boolean {
-                        val stats = JsonMapper.mapper.readValue(p0, Map::class.java)
-                        return stats.isNotEmpty() && !stats.containsValue(0L)
-                    }
-                })
-        }
+        val stats = downloadStatsResource.getTotalDownloadStats(8)
+        assertTrue { return@assertTrue stats.isNotEmpty() && !stats.containsValue(0L) }
     }
 
     @Test
     fun badTotalVersionReturnsSaneData() {
-        runBlocking {
-            RestAssured.given()
-                .`when`()
-                .get("/v3/stats/downloads/total/101")
-                .then()
-                .statusCode(400)
+        assertThrows<BadRequestException> {
+            downloadStatsResource.getTotalDownloadStats(101)
         }
     }
 
     @Test
     fun totalTagReturnsSaneData() {
         runBlocking {
-            RestAssured.given()
-                .`when`()
-                .get("/v3/stats/downloads/total/8/jdk8u232-b09")
-                .then()
-                .body(object : TypeSafeMatcher<String>() {
+            val (release, binary) = getRandomBinary()
 
-                    override fun describeTo(description: Description?) {
-                        description!!.appendText("json")
-                    }
-
-                    override fun matchesSafely(p0: String?): Boolean {
-                        val stats = JsonMapper.mapper.readValue(p0, Map::class.java)
-                        return stats.isNotEmpty() && !stats.containsValue(0L)
-                    }
-                })
+            val stats = downloadStatsResource.getTotalDownloadStatsForTag(release.version_data.major, release.release_name)
+            assertTrue { return@assertTrue stats.isNotEmpty() && !stats.containsValue(0L) }
         }
     }
 
     @Test
     fun badTotalTagReturnsSaneData() {
-        runBlocking {
-            RestAssured.given()
-                .`when`()
-                .get("/v3/stats/downloads/total/101/fooBar")
-                .then()
-                .statusCode(400)
+        assertThrows<BadRequestException> {
+            downloadStatsResource.getTotalDownloadStatsForTag(101, "fooBar")
         }
     }
 
     @Test
     fun trackingReturnsSaneData() {
-        runBlocking {
-            RestAssured.given()
-                .`when`()
-                .get("/v3/stats/downloads/tracking")
-                .then()
-                .body(object : TypeSafeMatcher<String>() {
+        val stats = downloadStatsResource
+            .tracking(null, null, null, null, null, null, null)
+            .toCompletableFuture()
+            .get()
+            .entity as List<DownloadDiff>
 
-                    override fun describeTo(description: Description?) {
-                        description!!.appendText("json")
-                    }
-
-                    override fun matchesSafely(p0: String?): Boolean {
-                        val stats = JsonMapper.mapper.readValue(p0, List::class.java)
-                        return stats.size == 3 &&
-                            (stats[0] as Map<String, *>).get("total") == 30 &&
-                            (stats[0] as Map<String, *>).get("daily") == 6 &&
-                            (stats[1] as Map<String, *>).get("total") == 50 &&
-                            (stats[1] as Map<String, *>).get("daily") == 4 &&
-                            (stats[2] as Map<String, *>).get("total") == 170 &&
-                            (stats[2] as Map<String, *>).get("daily") == 30
-                    }
-                })
-        }
+        assertTrue { stats.size == 3 }
+        assertTrue { stats[0].total == 30L }
+        assertTrue { stats[0].daily == 6L }
+        assertTrue { stats[1].total == 50L }
+        assertTrue { stats[1].daily == 4L }
+        assertTrue { stats[2].total == 170L }
+        assertTrue { stats[2].daily == 30L }
     }
 
     @Test
     fun trackingFeatureVersionRetrunsSaneData() {
-        runBlocking {
-            RestAssured.given()
-                .`when`()
-                .get("/v3/stats/downloads/tracking?feature_version=11")
-                .then()
-                .body(object : TypeSafeMatcher<String>() {
+        val stats = downloadStatsResource
+            .tracking(null, null, 11, null, null, null, null)
+            .toCompletableFuture()
+            .get()
+            .entity as List<DownloadDiff>
 
-                    override fun describeTo(description: Description?) {
-                        description!!.appendText("json")
-                    }
-
-                    override fun matchesSafely(p0: String?): Boolean {
-                        val stats = JsonMapper.mapper.readValue(p0, List::class.java)
-                        return stats.size == 2 &&
-                            (stats[0] as Map<String, *>).get("total") == 30 &&
-                            (stats[0] as Map<String, *>).get("daily") == 6 &&
-                            (stats[1] as Map<String, *>).get("total") == 80 &&
-                            (stats[1] as Map<String, *>).get("daily") == 5
-                    }
-                })
-        }
+        assertTrue { stats.size == 2 }
+        assertTrue { stats[0].total == 30L }
+        assertTrue { stats[0].daily == 6L }
+        assertTrue { stats[1].total == 80L }
+        assertTrue { stats[1].daily == 5L }
     }
 
     @Test
     fun trackingJvmImplRetrunsSaneData() {
-        runBlocking {
-            RestAssured.given()
-                .`when`()
-                .get("/v3/stats/downloads/tracking?jvm_impl=hotspot")
-                .then()
-                .body(object : TypeSafeMatcher<String>() {
+        val stats = downloadStatsResource
+            .tracking(null, null, null, null, "hotspot", null, null)
+            .toCompletableFuture()
+            .get()
+            .entity as List<DownloadDiff>
 
-                    override fun describeTo(description: Description?) {
-                        description!!.appendText("json")
-                    }
-
-                    override fun matchesSafely(p0: String?): Boolean {
-                        val stats = JsonMapper.mapper.readValue(p0, List::class.java)
-                        return stats.size == 2 &&
-                            (stats[0] as Map<String, *>).get("total") == 46 &&
-                            (stats[0] as Map<String, *>).get("daily") == 7 &&
-                            (stats[1] as Map<String, *>).get("total") == 90 &&
-                            (stats[1] as Map<String, *>).get("daily") == 11
-                    }
-                })
-        }
+        assertTrue { stats.size == 2 }
+        assertTrue { stats[0].total == 46L }
+        assertTrue { stats[0].daily == 7L }
+        assertTrue { stats[1].total == 90L }
+        assertTrue { stats[1].daily == 11L }
     }
 
     @Test
     fun trackingDockerRepoRetrunsSaneData() {
-        runBlocking {
-            RestAssured.given()
-                .`when`()
-                .get("/v3/stats/downloads/tracking?source=dockerhub&docker_repo=a-repo-name")
-                .then()
-                .body(object : TypeSafeMatcher<String>() {
+        val stats = downloadStatsResource
+            .tracking(null, StatsSource.dockerhub, null, "a-repo-name", null, null, null)
+            .toCompletableFuture()
+            .get()
+            .entity as List<DownloadDiff>
 
-                    override fun describeTo(description: Description?) {
-                        description!!.appendText("json")
-                    }
-
-                    override fun matchesSafely(p0: String?): Boolean {
-                        val stats = JsonMapper.mapper.readValue(p0, List::class.java)
-                        return stats.size == 1 &&
-                            (stats[0] as Map<String, *>).get("total") == 60 &&
-                            (stats[0] as Map<String, *>).get("daily") == 4
-                    }
-                })
-        }
+        assertTrue { stats.size == 1 }
+        assertTrue { stats[0].total == 60L }
+        assertTrue { stats[0].daily == 4L }
     }
 
     @Test
@@ -327,13 +251,12 @@ class DownloadStatsPathTest : BaseTest() {
         requestStats(
             TimeSource.date().minusDays(6).format(DateTimeFormatter.ISO_LOCAL_DATE),
             TimeSource.date().minusDays(2).format(DateTimeFormatter.ISO_LOCAL_DATE),
-            null,
-            { stats ->
-                stats.size == 1 &&
-                    (stats[0] as Map<String, *>).get("total") == 50 &&
-                    (stats[0] as Map<String, *>).get("daily") == 4
-            }
-        )
+            null
+        ) { stats ->
+            assertTrue { stats.size == 1 }
+            assertTrue { stats[0].total == 50L }
+            assertTrue { stats[0].daily == 4L }
+        }
     }
 
     @Test
@@ -341,15 +264,14 @@ class DownloadStatsPathTest : BaseTest() {
         requestStats(
             null,
             TimeSource.date().minusDays(2).format(DateTimeFormatter.ISO_DATE),
-            null,
-            { stats ->
-                stats.size == 2 &&
-                    (stats[0] as Map<String, *>).get("total") == 30 &&
-                    (stats[0] as Map<String, *>).get("daily") == 6 &&
-                    (stats[1] as Map<String, *>).get("total") == 50 &&
-                    (stats[1] as Map<String, *>).get("daily") == 4
-            }
-        )
+            null
+        ) { stats ->
+            assertTrue { stats.size == 2 }
+            assertTrue { stats[0].total == 30L }
+            assertTrue { stats[0].daily == 6L }
+            assertTrue { stats[1].total == 50L }
+            assertTrue { stats[1].daily == 4L }
+        }
     }
 
     @Test
@@ -357,59 +279,36 @@ class DownloadStatsPathTest : BaseTest() {
         requestStats(
             null,
             TimeSource.date().format(DateTimeFormatter.ISO_DATE),
-            1,
-            { stats ->
-                stats.size == 1 &&
-                    (stats[0] as Map<String, *>).get("total") == 170 &&
-                    (stats[0] as Map<String, *>).get("daily") == 30
-            }
-        )
+            1
+        ) { stats ->
+            assertTrue { stats.size == 1 }
+            assertTrue { stats[0].total == 170L }
+            assertTrue { stats[0].daily == 30L }
+        }
     }
 
     @Test
     fun throwsOnABadDate() {
-        assertFails({
+        assertFails {
             requestStats(
                 null,
                 "foo",
-                1,
-                { stats ->
-                    stats.size == 1 &&
-                        (stats[0] as Map<String, *>).get("total") == 170 &&
-                        (stats[0] as Map<String, *>).get("daily") == 30
-                }
-            )
-        })
+                1
+            ) { stats ->
+                assertTrue { stats.size == 1 }
+                assertTrue { stats[0].total == 170L }
+                assertTrue { stats[0].daily == 30L }
+            }
+        }
     }
 
-    private fun requestStats(from: String?, to: String?, days: Int?, check: (List<*>) -> Boolean): ValidatableResponse? {
-        return runBlocking {
+    private fun requestStats(from: String?, to: String?, days: Int?, check: (List<DownloadDiff>) -> Unit) {
+        val stats = downloadStatsResource
+            .tracking(days, null, null, null, null, from, to)
+            .toCompletableFuture()
+            .get()
+            .entity as List<DownloadDiff>
 
-            var url = "/v3/stats/downloads/tracking?"
-            if (from != null) {
-                url += "from=$from&"
-            }
-            if (to != null) {
-                url += "to=$to&"
-            }
-            if (days != null) {
-                url += "days=$days&"
-            }
-
-            RestAssured.given()
-                .`when`()
-                .get(url)
-                .then()
-                .body(object : TypeSafeMatcher<String>() {
-
-                    override fun describeTo(description: Description?) {
-                        description!!.appendText("json")
-                    }
-
-                    override fun matchesSafely(p0: String?): Boolean {
-                        return check(JsonMapper.mapper.readValue(p0, List::class.java))
-                    }
-                })
-        }
+        check(stats)
     }
 }

@@ -2,6 +2,7 @@ package net.adoptopenjdk.api.v3.metrics
 
 import com.microsoft.applicationinsights.telemetry.Duration
 import com.microsoft.applicationinsights.telemetry.RequestTelemetry
+import net.adoptopenjdk.api.v3.ai.AppInsightsTelemetry
 import java.util.*
 import javax.ws.rs.container.ContainerRequestContext
 import javax.ws.rs.container.ContainerRequestFilter
@@ -18,6 +19,17 @@ private fun nanoToMilliseconds(time: Long): Double = time / 1000000.0
 
 private fun millisecondsSince(startTime: Long): Double {
     return nanoToMilliseconds(System.nanoTime() - startTime)
+}
+
+private fun recordEvent(
+    startTime: Long,
+    requestTelemetry: RequestTelemetry
+) {
+    if (AppInsightsTelemetry.enabled) {
+        val duration = millisecondsSince(startTime)
+        requestTelemetry.metrics["writeTime"] = duration
+        AppInsightsTelemetry.telemetryClient?.trackRequest(requestTelemetry)
+    }
 }
 
 @Provider
@@ -55,6 +67,10 @@ class AfterContainerFilter : ContainerResponseFilter {
                 requestTelemetry.properties["User-Agent"] = userAgent
             }
             requestContext.setProperty(TELEMETERY_KEY, requestTelemetry)
+
+            if (responseContext.entity == null && AppInsightsTelemetry.enabled) {
+                recordEvent(startTime, requestTelemetry)
+            }
         }
     }
 }
@@ -62,21 +78,22 @@ class AfterContainerFilter : ContainerResponseFilter {
 @Provider
 class Writer : WriterInterceptor {
     override fun aroundWriteTo(context: WriterInterceptorContext?) {
+        if (AppInsightsTelemetry.enabled) {
+            val startTime = context?.getProperty(START_TIME_KEY)
+            val requestTelemetry = context?.getProperty(TELEMETERY_KEY)
 
-        val startTime = context?.getProperty(START_TIME_KEY)
-        val requestTelemetry = context?.getProperty(TELEMETERY_KEY)
+            if (requestTelemetry != null && requestTelemetry is RequestTelemetry && startTime != null && startTime is Long) {
+                val duration = millisecondsSince(startTime)
+                requestTelemetry.duration = Duration(duration.toLong())
+            }
 
-        if (requestTelemetry != null && requestTelemetry is RequestTelemetry && startTime != null && startTime is Long) {
-            val duration = millisecondsSince(startTime)
-            requestTelemetry.duration = Duration(duration.toLong())
-        }
+            context?.proceed()
 
-        context?.proceed()
-
-        if (requestTelemetry != null && requestTelemetry is RequestTelemetry && startTime != null && startTime is Long) {
-            val duration = millisecondsSince(startTime)
-            requestTelemetry.metrics["writeTime"] = duration
-            AppInsightsTelemetery.telemetryClient.trackRequest(requestTelemetry)
+            if (requestTelemetry != null && requestTelemetry is RequestTelemetry && startTime != null && startTime is Long) {
+                recordEvent(startTime, requestTelemetry)
+            }
+        } else {
+            context?.proceed()
         }
     }
 }

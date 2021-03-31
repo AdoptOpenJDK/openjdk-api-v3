@@ -20,11 +20,14 @@ import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import java.net.URI
+import javax.enterprise.context.ApplicationScoped
+import javax.inject.Inject
 import javax.ws.rs.core.Response
 
-open class PackageEndpoint {
+@ApplicationScoped
+open class PackageEndpoint @Inject constructor(private val apiDataStore: APIDataStore) {
 
-    fun getReleases(
+    open fun getReleases(
         release_name: String?,
         vendor: Vendor?,
         os: OperatingSystem?,
@@ -36,10 +39,10 @@ open class PackageEndpoint {
     ): List<Release> {
         val releaseFilter = ReleaseFilter(releaseName = release_name, vendor = vendor)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
-        return APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC, SortMethod.DEFAULT).toList()
+        return apiDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC, SortMethod.DEFAULT).toList()
     }
 
-    protected fun <T : Asset> formResponse(
+    open fun <T : Asset> formResponse(
         releases: List<Release>,
         extractAsset: (Binary) -> T?,
         createResponse: (T) -> Response
@@ -80,20 +83,20 @@ open class PackageEndpoint {
             .build()
     }
 
-    fun getRelease(release_type: ReleaseType?, version: Int?, vendor: Vendor?, os: OperatingSystem?, arch: Architecture?, image_type: ImageType?, jvm_impl: JvmImpl?, heap_size: HeapSize?, project: Project?): List<Release> {
+    open fun getRelease(release_type: ReleaseType?, version: Int?, vendor: Vendor?, os: OperatingSystem?, arch: Architecture?, image_type: ImageType?, jvm_impl: JvmImpl?, heap_size: HeapSize?, project: Project?): List<Release> {
         val releaseFilter = ReleaseFilter(releaseType = release_type, featureVersion = version, vendor = vendor)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project)
-        val releases = APIDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC, SortMethod.DEFAULT).toList()
+        val releases = apiDataStore.getAdoptRepos().getFilteredReleases(releaseFilter, binaryFilter, SortOrder.DESC, SortMethod.DEFAULT).toList()
 
         // We use updated_at and timestamp as well JIC we've made a mistake and respun the same version number twice, in which case newest wins.
         val comparator = RELEASE_COMPARATOR.thenBy { it.version_data.optional }
-            .thenBy { it.updated_at }
-            .thenBy { it.timestamp }
+            .thenBy { it.updated_at.dateTime }
+            .thenBy { it.timestamp.dateTime }
 
         return releases.sortedWith(comparator)
     }
 
-    protected fun redirectToAsset(): (Asset) -> Response {
+    open fun redirectToAsset(): (Asset) -> Response {
         return { asset ->
             Response.temporaryRedirect(URI.create(asset.link)).build()
         }

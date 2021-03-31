@@ -5,14 +5,16 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
-import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGithubHtmlClient
-import net.adoptopenjdk.api.v3.dataSources.mongo.GithubHtmlClient
+import net.adoptopenjdk.api.v3.dataSources.mongo.GitHubHtmlClient
 import net.adoptopenjdk.api.v3.mapping.BinaryMapper
 import net.adoptopenjdk.api.v3.models.*
 import org.slf4j.LoggerFactory
 import java.time.ZonedDateTime
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class AdoptBinaryMapper(private val githubHtmlClient: GithubHtmlClient = CachedGithubHtmlClient) : BinaryMapper() {
+@Singleton
+class AdoptBinaryMapper @Inject constructor(private val gitHubHtmlClient: GitHubHtmlClient) : BinaryMapper() {
 
     companion object {
         @JvmStatic
@@ -20,7 +22,7 @@ class AdoptBinaryMapper(private val githubHtmlClient: GithubHtmlClient = CachedG
         private const val HOTSPOT_JFR = "hotspot-jfr"
     }
 
-    private val EXCLUDED = listOf<String>()
+    private val EXCLUDED = listOf<String>("corretto", "dragonwell")
 
     suspend fun toBinaryList(ghBinaryAssets: List<GHAsset>, allGhAssets: List<GHAsset>, ghAssetsWithMetadata: Map<GHAsset, GHMetaData>): List<Binary> {
         // probably whitelist rather than black list
@@ -175,7 +177,7 @@ class AdoptBinaryMapper(private val githubHtmlClient: GithubHtmlClient = CachedG
         return Binary(
             pack,
             download_count,
-            updated_at,
+            DateTime(updated_at),
             scmRef,
             installer,
             heap_size,
@@ -203,7 +205,7 @@ class AdoptBinaryMapper(private val githubHtmlClient: GithubHtmlClient = CachedG
         return Binary(
             pack,
             download_count,
-            updated_at,
+            DateTime(updated_at),
             binaryMetadata.scmRef,
             installer,
             heap_size,
@@ -235,7 +237,7 @@ class AdoptBinaryMapper(private val githubHtmlClient: GithubHtmlClient = CachedG
         try {
             if (!(binary_checksum_link == null || binary_checksum_link.isEmpty())) {
                 LOGGER.debug("Pulling checksum for $binary_checksum_link")
-                val checksum = githubHtmlClient.getUrl(binary_checksum_link)
+                val checksum = gitHubHtmlClient.getUrl(binary_checksum_link)
                 if (checksum != null) {
                     val tokens = checksum.split(" ")
                     if (tokens.size > 1) {

@@ -2,7 +2,7 @@
 
 # AdoptOpenJDK API
 
-**NOTICE:** [AdoptOpenJDK API v1](https://github.com/AdoptOpenJDK/openjdk-api/blob/master/README.v1.md) has been deprecated and will be removed.
+**NOTICE:** AdoptOpenJDK API v1 has now been removed.
 If you are using v1 please move to the latest version (documented below) as soon as possible.
 
 **NOTICE:** [AdoptOpenJDK API v2](https://github.com/AdoptOpenJDK/openjdk-api/blob/master/README.md) has been deprecated and will be removed.
@@ -26,7 +26,7 @@ For more information, including example queries, please look at [STRUCTURE.md](h
 
 The AdoptOpenJDK API has served over 200 million downloads by a wide variety consumers, from individuals to organisations.
 
-Check the [Download Statistics Dashboard](https://dash-v2.adoptopenjdk.net/) for the latest numbers.  
+Check the [Download Statistics Dashboard](https://dash.adoptopenjdk.net/) for the latest numbers.  
 
 The following list highlights a small subset of consumers and their use-cases:
 

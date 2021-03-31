@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
-import java.time.ZonedDateTime
 import java.util.function.Predicate
 
 class Release {
@@ -18,11 +17,9 @@ class Release {
     @Schema(example = "jdk8u162-b12_openj9-0.8.0")
     val release_name: String
 
-    @Schema(example = "2018-03-15T12:12:35Z")
-    val timestamp: ZonedDateTime
+    val timestamp: DateTime
 
-    @Schema(example = "2018-03-15T12:12:35Z")
-    val updated_at: ZonedDateTime
+    val updated_at: DateTime
 
     @Schema(type = SchemaType.ARRAY, implementation = Binary::class)
     val binaries: Array<Binary>
@@ -44,8 +41,8 @@ class Release {
         @JsonProperty("release_type") release_type: ReleaseType,
         @JsonProperty("release_link") release_link: String,
         @JsonProperty("release_name") release_name: String,
-        @JsonProperty("timestamp") timestamp: ZonedDateTime,
-        @JsonProperty("updated_at") updated_at: ZonedDateTime,
+        @JsonProperty("timestamp") timestamp: DateTime,
+        @JsonProperty("updated_at") updated_at: DateTime,
         @JsonProperty("binaries") binaries: Array<Binary>,
         @JsonProperty("download_count") download_count: Long,
         @JsonProperty("vendor") vendor: Vendor,
@@ -95,7 +92,6 @@ class Release {
         if (timestamp != other.timestamp) return false
         if (updated_at != other.updated_at) return false
         if (!binaries.contentEquals(other.binaries)) return false
-        if (download_count != other.download_count) return false
         if (release_type != other.release_type) return false
         if (vendor != other.vendor) return false
         if (version_data != other.version_data) return false
@@ -111,11 +107,14 @@ class Release {
         result = 31 * result + timestamp.hashCode()
         result = 31 * result + updated_at.hashCode()
         result = 31 * result + binaries.contentHashCode()
-        result = 31 * result + download_count.hashCode()
         result = 31 * result + release_type.hashCode()
         result = 31 * result + vendor.hashCode()
         result = 31 * result + version_data.hashCode()
         result = 31 * result + (source?.hashCode() ?: 0)
         return result
+    }
+
+    override fun toString(): String {
+        return "Release(id='$id', release_link='$release_link', release_name='$release_name', timestamp=$timestamp, updated_at=$updated_at, download_count=$download_count, release_type=$release_type, vendor=$vendor, version_data=$version_data, source=$source)"
     }
 }

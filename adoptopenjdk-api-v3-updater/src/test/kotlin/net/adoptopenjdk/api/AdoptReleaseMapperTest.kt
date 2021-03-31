@@ -3,21 +3,22 @@ package net.adoptopenjdk.api
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import net.adoptopenjdk.api.v3.HttpClientFactory
+import net.adoptopenjdk.api.v3.dataSources.DefaultUpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
 import net.adoptopenjdk.api.v3.dataSources.UrlRequest
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAssets
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
-import net.adoptopenjdk.api.v3.dataSources.models.GithubId
-import net.adoptopenjdk.api.v3.mapping.adopt.AdoptReleaseMapper
+import net.adoptopenjdk.api.v3.dataSources.models.GitHubId
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.ProtocolVersion
 import org.apache.http.message.BasicHeader
 import org.apache.http.message.BasicStatusLine
+import org.jboss.weld.junit5.auto.AddPackages
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
@@ -25,6 +26,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
+@AddPackages(value = [DefaultUpdaterHtmlClient::class, HttpClientFactory::class])
 class AdoptReleaseMapperTest : BaseTest() {
 
     val jdk = GHAsset(
@@ -49,10 +51,9 @@ class AdoptReleaseMapperTest : BaseTest() {
             val source = GHAssets(listOf(jdk), PageInfo(false, ""))
 
             val ghRelease = GHRelease(
-                id = GithubId("1"),
+                id = GitHubId("1"),
                 name = "OpenJDK 123244354325",
                 isPrerelease = true,
-                prerelease = true,
                 publishedAt = "2013-02-27T19:35:32Z",
                 updatedAt = "2013-02-27T19:35:32Z",
                 releaseAssets = source,
@@ -60,7 +61,7 @@ class AdoptReleaseMapperTest : BaseTest() {
                 url = "a-url"
             )
 
-            val result = AdoptReleaseMapper.toAdoptRelease(ghRelease)
+            val result = createAdoptReleaseMapper().toAdoptRelease(ghRelease)
             assertFalse(result.succeeded())
             assertNotNull(result.error)
             assertNull(result.result)
@@ -70,14 +71,12 @@ class AdoptReleaseMapperTest : BaseTest() {
     @Test
     fun statsIgnoresNonBinaryAssets() {
         runBlocking {
-
             val source = GHAssets(listOf(jdk, checksum), PageInfo(false, ""))
 
             val ghRelease = GHRelease(
-                id = GithubId("1"),
+                id = GitHubId("1"),
                 name = "jdk9u-2018-09-27-08-50",
                 isPrerelease = true,
-                prerelease = true,
                 publishedAt = "2013-02-27T19:35:32Z",
                 updatedAt = "2013-02-27T19:35:32Z",
                 releaseAssets = source,
@@ -85,7 +84,7 @@ class AdoptReleaseMapperTest : BaseTest() {
                 url = "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz"
             )
 
-            val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
+            val release = createAdoptReleaseMapper().toAdoptRelease(ghRelease)
 
             assertEquals(1, release.result!!.first().download_count)
         }
@@ -98,10 +97,9 @@ class AdoptReleaseMapperTest : BaseTest() {
             val source = GHAssets(listOf(jdk), PageInfo(false, ""))
 
             val ghRelease = GHRelease(
-                id = GithubId("1"),
+                id = GitHubId("1"),
                 name = "jdk9u-2018-09-27-08-50",
                 isPrerelease = true,
-                prerelease = true,
                 publishedAt = "2013-02-27T19:35:32Z",
                 updatedAt = "2013-02-27T19:35:32Z",
                 releaseAssets = source,
@@ -109,7 +107,7 @@ class AdoptReleaseMapperTest : BaseTest() {
                 url = "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz"
             )
 
-            val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
+            val release = createAdoptReleaseMapper().toAdoptRelease(ghRelease)
 
             assertEquals(ReleaseType.ea, release.result!!.first().release_type)
         }
@@ -168,7 +166,7 @@ class AdoptReleaseMapperTest : BaseTest() {
                 PageInfo(false, "")
             )
 
-            UpdaterHtmlClientFactory.client = object : UpdaterHtmlClient {
+            val client = object : UpdaterHtmlClient {
                 override suspend fun get(url: String): String? {
                     return getMetadata(url)
                 }
@@ -206,19 +204,18 @@ class AdoptReleaseMapperTest : BaseTest() {
                     val metadataResponse = mockk<HttpResponse>()
 
                     val entity = mockk<HttpEntity>()
-                    every { entity.content } returns getMetadata(request.url)?.byteInputStream()
+                    every { entity.content } returns getMetadata(request.url).byteInputStream()
                     every { metadataResponse.statusLine } returns BasicStatusLine(ProtocolVersion("", 1, 1), 200, "")
                     every { metadataResponse.entity } returns entity
-                    every { metadataResponse.getFirstHeader("Last-Modified") } returns BasicHeader("Last-Modified", "")
+                    every { metadataResponse.getFirstHeader("Last-Modified") } returns BasicHeader("Last-Modified", "Thu, 01 Jan 1970 00:00:00 GMT")
                     return metadataResponse
                 }
             }
 
             val ghRelease = GHRelease(
-                id = GithubId("1"),
+                id = GitHubId("1"),
                 name = "jdk9u-2018-09-27-08-50",
                 isPrerelease = true,
-                prerelease = true,
                 publishedAt = "2013-02-27T19:35:32Z",
                 updatedAt = "2013-02-27T19:35:32Z",
                 releaseAssets = source,
@@ -226,7 +223,7 @@ class AdoptReleaseMapperTest : BaseTest() {
                 url = "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz"
             )
 
-            val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
+            val release = createAdoptReleaseMapper(client).toAdoptRelease(ghRelease)
 
             assertEquals(2, release.result!!.size)
             assertEquals(1, release.result!![0].binaries.size)
@@ -241,7 +238,7 @@ class AdoptReleaseMapperTest : BaseTest() {
     fun updaterCopesWithExceptionFromGitHub() {
         runBlocking {
 
-            UpdaterHtmlClientFactory.client = object : UpdaterHtmlClient {
+            val client = object : UpdaterHtmlClient {
                 override suspend fun get(url: String): String? {
                     throw RuntimeException("Failed to get metadata")
                 }
@@ -258,10 +255,9 @@ class AdoptReleaseMapperTest : BaseTest() {
             val source = GHAssets(listOf(jdk), PageInfo(false, ""))
 
             val ghRelease = GHRelease(
-                id = GithubId("1"),
+                id = GitHubId("1"),
                 name = "jdk9u-2018-09-27-08-50",
                 isPrerelease = true,
-                prerelease = true,
                 publishedAt = "2013-02-27T19:35:32Z",
                 updatedAt = "2013-02-27T19:35:32Z",
                 releaseAssets = source,
@@ -269,7 +265,7 @@ class AdoptReleaseMapperTest : BaseTest() {
                 url = "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk9u-2018-09-27-08-50/OpenJDK9U-jre_aarch64_linux_hotspot_2018-09-27-08-50.tar.gz"
             )
 
-            val release = AdoptReleaseMapper.toAdoptRelease(ghRelease)
+            val release = createAdoptReleaseMapper(client).toAdoptRelease(ghRelease)
         }
     }
 }

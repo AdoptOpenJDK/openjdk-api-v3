@@ -1,14 +1,21 @@
 package net.adoptopenjdk.api.v3.dataSources.github.graphql.clients
 
 import io.aexp.nodes.graphql.GraphQLRequestEntity
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.PageInfo
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.QuerySummaryData
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleaseSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHReleasesSummary
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepositorySummary
 import org.slf4j.LoggerFactory
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class GraphQLGitHubSummaryClient : GraphQLGitHubInterface() {
+@Singleton
+class GraphQLGitHubSummaryClient @Inject constructor(
+    graphQLRequest: GraphQLRequest,
+    updaterHtmlClient: UpdaterHtmlClient
+) : GraphQLGitHubInterface(graphQLRequest, updaterHtmlClient) {
 
     companion object {
         @JvmStatic

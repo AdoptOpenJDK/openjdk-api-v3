@@ -2,6 +2,7 @@ package net.adoptopenjdk.api.packages
 
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
+import net.adoptopenjdk.api.DbExtension
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.HeapSize
 import net.adoptopenjdk.api.v3.models.ImageType
@@ -12,8 +13,10 @@ import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
 @QuarkusTest
+@ExtendWith(value = [DbExtension::class])
 class BinaryPathTest : PackageEndpointTest() {
 
     override fun getPath(): String {
@@ -22,11 +25,15 @@ class BinaryPathTest : PackageEndpointTest() {
 
     @Test
     fun latestDoesRedirectToBinary() {
-        val path = getLatestPath(8, ReleaseType.ga, OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.jdk)
+
+        val (release, binary) = getRandomBinary()
+
+        val path = getLatestPath(release.version_data.major, release.release_type, binary.os, binary.architecture, binary.image_type, binary.jvm_impl, binary.heap_size, release.vendor, binary.project)
+
         performRequest(path)
             .then()
             .statusCode(307)
-            .header("Location", Matchers.startsWith("https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/"))
+            .header("Location", Matchers.equalTo(binary.`package`.link))
     }
 
     @Test
@@ -40,7 +47,7 @@ class BinaryPathTest : PackageEndpointTest() {
 
     @Test
     fun latestDoesNotRedirectToBinary() {
-        val path = getLatestPath(8, ReleaseType.ga, OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.valhalla)
+        val path = getLatestPath(1, ReleaseType.ga, OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.valhalla)
         performRequest(path)
             .then()
             .statusCode(404)
@@ -56,11 +63,13 @@ class BinaryPathTest : PackageEndpointTest() {
 
     @Test
     fun versionRequestRedirects() {
-        val path = getVersionPath("jdk8u212-b04", OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.jdk)
+        val (release, binary) = getRandomBinary()
+        val path = getVersionPath(release.release_name, binary.os, binary.architecture, binary.image_type, binary.jvm_impl, binary.heap_size, release.vendor, binary.project)
+
         performRequest(path)
             .then()
             .statusCode(307)
-            .header("Location", Matchers.startsWith("https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u212-b04"))
+            .header("Location", Matchers.startsWith(binary.`package`.link))
     }
 
     @Test
@@ -73,7 +82,9 @@ class BinaryPathTest : PackageEndpointTest() {
 
     @Test
     fun gradleHeadRequestToVersionGives200() {
-        val path = getVersionPath("jdk8u212-b04", OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.jdk)
+        val (release, binary) = getRandomBinary()
+
+        val path = getVersionPath(release.release_name, binary.os, binary.architecture, binary.image_type, binary.jvm_impl, binary.heap_size, release.vendor, binary.project)
 
         RestAssured.given()
             .`when`()
@@ -81,13 +92,15 @@ class BinaryPathTest : PackageEndpointTest() {
             .head(path)
             .then()
             .statusCode(200)
-            .header("size", Matchers.equalTo("104366847"))
-            .header("content-disposition", Matchers.equalTo("""attachment; filename="OpenJDK8U-jdk_x64_linux_hotspot_8u212b04.tar.gz"; filename*=UTF-8''OpenJDK8U-jdk_x64_linux_hotspot_8u212b04.tar.gz"""))
+            .header("size", Matchers.equalTo(binary.`package`.size.toString()))
+            .header("content-disposition", Matchers.equalTo("""attachment; filename="${binary.`package`.name}"; filename*=UTF-8''${binary.`package`.name}"""))
     }
 
     @Test
     fun nonGradleHeadRequestToVersionGives307() {
-        val path = getVersionPath("jdk8u212-b04", OperatingSystem.linux, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.jdk)
+        val (release, binary) = getRandomBinary()
+
+        val path = getVersionPath(release.release_name, binary.os, binary.architecture, binary.image_type, binary.jvm_impl, binary.heap_size, release.vendor, binary.project)
 
         RestAssured.given()
             .`when`()

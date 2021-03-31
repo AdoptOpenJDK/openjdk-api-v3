@@ -9,28 +9,40 @@ import org.apache.http.impl.NoConnectionReuseStrategy
 import org.apache.http.impl.nio.client.HttpAsyncClients
 import org.apache.http.nio.client.HttpAsyncClient
 import org.apache.http.protocol.HttpContext
+import javax.enterprise.inject.Produces
+import javax.inject.Named
+import javax.inject.Singleton
 
-object HttpClientFactory {
-    private val client: HttpAsyncClient
-    private val noRedirect: HttpAsyncClient
+class HttpClientFactory {
+    companion object {
+        val REQUEST_CONFIG = RequestConfig
+            .copy(RequestConfig.DEFAULT)
+            .setConnectTimeout(5000)
+            .setSocketTimeout(5000)
+            .setConnectionRequestTimeout(5000)
+            .build()!!
 
-    val REQUEST_CONFIG = RequestConfig
-        .copy(RequestConfig.DEFAULT)
-        .setConnectTimeout(5000)
-        .setSocketTimeout(5000)
-        .setConnectionRequestTimeout(5000)
-        .build()!!
+        const val NON_REDIRECTING = "non-redirect"
+        const val REDIRECTING = "redirect"
+    }
 
-    init {
-
+    @Singleton
+    @Produces
+    @Named(REDIRECTING)
+    fun getHttpClient(): HttpAsyncClient {
         val client = HttpAsyncClients.custom()
             .setConnectionReuseStrategy(NoConnectionReuseStrategy())
             .disableCookieManagement()
             .setDefaultRequestConfig(REQUEST_CONFIG)
             .build()
         client.start()
-        this.client = client
+        return client
+    }
 
+    @Singleton
+    @Produces
+    @Named(NON_REDIRECTING)
+    fun getNonRedirectHttpClient(): HttpAsyncClient {
         val noRedirect = HttpAsyncClients.custom()
             .setRedirectStrategy(object : RedirectStrategy {
                 override fun getRedirect(p0: HttpRequest?, p1: HttpResponse?, p2: HttpContext?): HttpUriRequest? {
@@ -45,14 +57,6 @@ object HttpClientFactory {
             .setDefaultRequestConfig(REQUEST_CONFIG)
             .build()
         noRedirect.start()
-        this.noRedirect = noRedirect
-    }
-
-    fun getHttpClient(): HttpAsyncClient {
-        return client
-    }
-
-    fun getNonRedirectHttpClient(): HttpAsyncClient {
         return noRedirect
     }
 }

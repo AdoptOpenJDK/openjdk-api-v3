@@ -2,16 +2,14 @@ package net.adoptopenjdk.api.v3.dataSources.github.graphql.clients
 
 import io.aexp.nodes.graphql.GraphQLRequestEntity
 import io.aexp.nodes.graphql.GraphQLResponseEntity
-import io.aexp.nodes.graphql.GraphQLTemplate
 import io.aexp.nodes.graphql.Variable
 import io.aexp.nodes.graphql.exceptions.GraphQLException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.adoptopenjdk.api.v3.TimeSource
-import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClientFactory
+import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UpdaterJsonMapper
-import net.adoptopenjdk.api.v3.dataSources.github.GitHubAuth
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.HasRateLimit
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -21,7 +19,10 @@ import java.util.concurrent.TimeUnit
 import javax.json.JsonObject
 import kotlin.math.max
 
-open class GraphQLGitHubInterface() {
+abstract class GraphQLGitHubInterface(
+    private val graphQLRequest: GraphQLRequest,
+    private val updaterHtmlClient: UpdaterHtmlClient
+) {
     companion object {
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
@@ -29,28 +30,12 @@ open class GraphQLGitHubInterface() {
 
     protected val OWNER = "AdoptOpenJDK"
 
-    private val BASE_URL = "https://api.github.com/graphql"
-    private val TOKEN: String
     private val THRESHOLD_START = System.getenv("GITHUB_THRESHOLD")?.toFloatOrNull() ?: 1000f
     private val THRESHOLD_HARD_FLOOR = System.getenv("GITHUB_THRESHOLD_HARD_FLOOR")?.toFloatOrNull() ?: 200f
 
-    init {
-        val token = GitHubAuth.readToken()
-        if (token == null) {
-            throw IllegalStateException("No token provided")
-        } else {
-            TOKEN = token
-        }
-    }
-
     fun request(query: String): GraphQLRequestEntity.RequestBuilder {
-        return GraphQLRequestEntity.Builder()
-            .url(BASE_URL)
-            .headers(
-                mapOf(
-                    "Authorization" to "Bearer $TOKEN"
-                )
-            )
+        return GraphQLRequestFactoryImpl()
+            .getRequestBuilder()
             .request(query.trimIndent().replace("\n", ""))
     }
 
@@ -107,18 +92,18 @@ open class GraphQLGitHubInterface() {
             var quota = getRemainingQuota()
             do {
                 val delayTime = max(10, quota.second)
-                LOGGER.info("Remaining data getting low $quota ${rateLimitData.cost} $delayTime")
+                LOGGER.debug("Remaining data getting low $quota ${rateLimitData.cost} $delayTime")
                 delay(1000 * delayTime)
 
                 quota = getRemainingQuota()
             } while (quota.first < THRESHOLD_START)
         }
-        LOGGER.info("RateLimit ${rateLimitData.remaining} ${rateLimitData.cost}")
+        LOGGER.debug("RateLimit ${rateLimitData.remaining} ${rateLimitData.cost}")
     }
 
     private suspend fun getRemainingQuota(): Pair<Int, Long> {
         try {
-            val response = UpdaterHtmlClientFactory.client.get("https://api.github.com/rate_limit")
+            val response = updaterHtmlClient.get("https://api.github.com/rate_limit")
             if (response != null) {
                 return processResponse(response)
             }
@@ -167,7 +152,7 @@ open class GraphQLGitHubInterface() {
         while (retryCount <= 20) {
             try {
                 return withContext(Dispatchers.Default) {
-                    return@withContext GraphQLTemplate(Int.MAX_VALUE, Int.MAX_VALUE).query(query, clazz)
+                    return@withContext graphQLRequest.query(query, clazz)
                 }
             } catch (e: GraphQLException) {
                 if (e.status == "403" || e.status == "502") {

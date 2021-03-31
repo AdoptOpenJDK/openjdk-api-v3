@@ -12,6 +12,7 @@ import net.adoptopenjdk.api.v3.models.Project
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
+import org.eclipse.microprofile.metrics.annotation.Timed
 import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
@@ -19,28 +20,35 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
+import org.jboss.resteasy.annotations.GZIP
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
+import javax.enterprise.context.ApplicationScoped
+import javax.inject.Inject
 import javax.ws.rs.GET
 import javax.ws.rs.HEAD
 import javax.ws.rs.HeaderParam
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
-import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
-import javax.ws.rs.core.Request
 import javax.ws.rs.core.Response
 
 @Tag(name = "Binary")
 @Path("/v3/binary/")
 @Produces(MediaType.APPLICATION_JSON)
-class BinaryResource : PackageEndpoint() {
+@Timed
+@ApplicationScoped
+@GZIP
+class BinaryResource @Inject constructor(private val packageEndpoint: PackageEndpoint) {
 
     @GET
-    @HEAD
     @Path("/version/{release_name}/{os}/{arch}/{image_type}/{jvm_impl}/{heap_size}/{vendor}")
     @Produces("application/octet-stream")
-    @Operation(summary = "Redirects to the binary that matches your current query", description = "Redirects to the binary that matches your current query")
+    @Operation(
+        operationId = "getBinaryByVersion",
+        summary = "Redirects to the binary that matches your current query",
+        description = "Redirects to the binary that matches your current query"
+    )
     @APIResponses(
         value = [
             APIResponse(responseCode = "307", description = "link to binary that matches your current query"),
@@ -82,26 +90,68 @@ class BinaryResource : PackageEndpoint() {
 
         @Parameter(name = "project", description = "Project", required = false)
         @QueryParam("project")
-        project: Project?,
+        project: Project?
+    ): Response {
+        val releases = packageEndpoint.getReleases(release_name, vendor, os, arch, image_type, jvm_impl, heap_size, project)
+        return formResponse(releases)
+    }
 
-        @Context
-        request: Request,
+    @HEAD
+    @Path("/version/{release_name}/{os}/{arch}/{image_type}/{jvm_impl}/{heap_size}/{vendor}")
+    @Produces("application/octet-stream")
+    @Operation(
+        operationId = "getBinaryByVersionHead",
+        summary = "Redirects to the binary that matches your current query",
+        description = "Redirects to the binary that matches your current query"
+    )
+    @APIResponses(
+        value = [
+            APIResponse(responseCode = "307", description = "link to binary that matches your current query"),
+            APIResponse(responseCode = "400", description = "bad input parameter"),
+            APIResponse(responseCode = "404", description = "No matching binary found")
+        ]
+    )
+    fun returnBinaryByVersionHead(
+        @Parameter(name = "os", description = "Operating System", required = true)
+        @PathParam("os")
+        os: OperatingSystem?,
+
+        @Parameter(name = "arch", description = "Architecture", required = true)
+        @PathParam("arch")
+        arch: Architecture?,
+
+        @Parameter(
+            name = "release_name", description = OpenApiDocs.RELASE_NAME, required = true,
+            schema = Schema(defaultValue = "jdk-11.0.6+10", type = SchemaType.STRING)
+        )
+        @PathParam("release_name")
+        release_name: String?,
+
+        @Parameter(name = "image_type", description = "Image Type", required = true)
+        @PathParam("image_type")
+        image_type: ImageType?,
+
+        @Parameter(name = "jvm_impl", description = "JVM Implementation", required = true)
+        @PathParam("jvm_impl")
+        jvm_impl: JvmImpl?,
+
+        @Parameter(name = "heap_size", description = "Heap Size", required = true)
+        @PathParam("heap_size")
+        heap_size: HeapSize?,
+
+        @Parameter(name = "vendor", description = OpenApiDocs.VENDOR, required = true)
+        @PathParam("vendor")
+        vendor: Vendor?,
+
+        @Parameter(name = "project", description = "Project", required = false)
+        @QueryParam("project")
+        project: Project?,
 
         @Parameter(hidden = true, required = false)
         @HeaderParam("User-Agent")
         userAgent: String
     ): Response {
-        val releases = getReleases(release_name, vendor, os, arch, image_type, jvm_impl, heap_size, project)
-        return when (request.method) {
-            "HEAD" -> versionHead(userAgent, releases)
-            else -> formResponse(releases)
-        }
-    }
-
-    private fun versionHead(
-        userAgent: String,
-        releases: List<Release>
-    ): Response {
+        val releases = packageEndpoint.getReleases(release_name, vendor, os, arch, image_type, jvm_impl, heap_size, project)
         return if (userAgent.contains("Gradle")) {
             return formResponse(releases) { `package` ->
                 Response.status(200)
@@ -117,7 +167,11 @@ class BinaryResource : PackageEndpoint() {
     @GET
     @Path("/latest/{feature_version}/{release_type}/{os}/{arch}/{image_type}/{jvm_impl}/{heap_size}/{vendor}")
     @Produces("application/octet-stream")
-    @Operation(summary = "Redirects to the binary that matches your current query", description = "Redirects to the binary that matches your current query")
+    @Operation(
+        operationId = "getBinary",
+        summary = "Redirects to the binary that matches your current query",
+        description = "Redirects to the binary that matches your current query"
+    )
     @APIResponses(
         value = [
             APIResponse(responseCode = "307", description = "link to binary that matches your current query"),
@@ -165,7 +219,7 @@ class BinaryResource : PackageEndpoint() {
         @QueryParam("project")
         project: Project?
     ): Response {
-        val releaseList = getRelease(release_type, version, vendor, os, arch, image_type, jvm_impl, heap_size, project)
+        val releaseList = packageEndpoint.getRelease(release_type, version, vendor, os, arch, image_type, jvm_impl, heap_size, project)
 
         val release = releaseList.lastOrNull()
 
@@ -174,9 +228,9 @@ class BinaryResource : PackageEndpoint() {
 
     protected fun formResponse(
         releases: List<Release>,
-        createResponse: (Package) -> Response = redirectToAsset()
+        createResponse: (Package) -> Response = packageEndpoint.redirectToAsset()
     ): Response {
-        return formResponse(releases, extractPackage(), createResponse)
+        return packageEndpoint.formResponse(releases, extractPackage(), createResponse)
     }
 
     private fun extractPackage(): (binary: Binary) -> Package {

@@ -2,9 +2,7 @@ package net.adoptopenjdk.api
 
 import io.quarkus.test.junit.QuarkusTest
 import kotlinx.coroutines.runBlocking
-import net.adoptopenjdk.api.v3.AdoptReposBuilder
-import net.adoptopenjdk.api.v3.dataSources.APIDataStore
-import net.adoptopenjdk.api.v3.dataSources.ApiPersistenceFactory
+import net.adoptopenjdk.api.v3.dataSources.persitence.ApiPersistence
 import org.awaitility.Awaitility
 import org.junit.Ignore
 import org.junit.jupiter.api.BeforeAll
@@ -18,13 +16,11 @@ class TestRunner : BaseTest() {
     companion object {
         @JvmStatic
         @BeforeAll
-        fun populateDb() {
+        fun populateDb(apiPersistence: ApiPersistence) {
             runBlocking {
-                val repo = AdoptReposBuilder.build(APIDataStore.variants.versions)
+                val repo = AdoptReposTestDataGenerator.generate()
                 // Reset connection
-                ApiPersistenceFactory.set(null)
-                ApiPersistenceFactory.get().updateAllRepos(repo, "")
-                APIDataStore.loadDataFromDb(true)
+                apiPersistence.updateAllRepos(repo, "")
             }
         }
     }

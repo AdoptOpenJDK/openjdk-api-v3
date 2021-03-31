@@ -2,6 +2,7 @@ package net.adoptopenjdk.api.v3.routes.stats
 
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import net.adoptopenjdk.api.v3.DownloadStatsInterface
 import net.adoptopenjdk.api.v3.TimeSource
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
@@ -15,10 +16,13 @@ import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
+import org.jboss.resteasy.annotations.GZIP
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import java.time.LocalDate
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
+import javax.enterprise.context.ApplicationScoped
+import javax.inject.Inject
 import javax.ws.rs.BadRequestException
 import javax.ws.rs.GET
 import javax.ws.rs.Path
@@ -28,32 +32,48 @@ import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
 
 @Path("/v3/stats/downloads")
-@Produces(MediaType.APPLICATION_JSON)
 @Schema(hidden = true)
+@Produces(MediaType.APPLICATION_JSON)
 @Timed
+@ApplicationScoped
+@GZIP
 class DownloadStatsResource {
-    private val statsInterface = net.adoptopenjdk.api.v3.DownloadStatsInterface()
+    @Schema(hidden = true)
+    private val apiDataStore: APIDataStore
+
+    @Schema(hidden = true)
+    private val downloadStatsInterface: DownloadStatsInterface
+
+    //Dont convert to primary constructor, @Schema(hidden = true) is not processed correctly on primary constructor
+    @Inject
+    constructor(
+        apiDataStore: APIDataStore,
+        downloadStatsInterface: DownloadStatsInterface
+    ) {
+        this.apiDataStore = apiDataStore
+        this.downloadStatsInterface = downloadStatsInterface
+    }
 
     @GET
+    @Schema(hidden = true)
     @Path("/total")
     @Operation(summary = "Get download stats", description = "stats", hidden = true)
-    @Schema(hidden = true)
     fun getTotalDownloadStats(): CompletionStage<Response> {
         return runAsync {
-            return@runAsync statsInterface.getTotalDownloadStats()
+            return@runAsync downloadStatsInterface.getTotalDownloadStats()
         }
     }
 
     @GET
+    @Schema(hidden = true)
     @Path("/total/{feature_version}")
     @Operation(summary = "Get download stats for feature verson", description = "stats", hidden = true)
-    @Schema(hidden = true)
     fun getTotalDownloadStats(
         @Parameter(name = "feature_version", description = "Feature version (i.e 8, 9, 10...)", required = true)
         @PathParam("feature_version")
         featureVersion: Int
     ): Map<String, Long> {
-        val release = APIDataStore.getAdoptRepos().getFeatureRelease(featureVersion)
+        val release = apiDataStore.getAdoptRepos().getFeatureRelease(featureVersion)
             ?: throw BadRequestException("Unable to find version $featureVersion")
 
         return getAdoptReleases(release)
@@ -71,9 +91,9 @@ class DownloadStatsResource {
 
     @Throws(BadRequestException::class)
     @GET
+    @Schema(hidden = true)
     @Path("/total/{feature_version}/{release_name}")
     @Operation(summary = "Get download stats for feature verson", description = "stats", hidden = true)
-    @Schema(hidden = true)
     fun getTotalDownloadStatsForTag(
         @Parameter(name = "feature_version", description = "Feature version (i.e 8, 9, 10...)", required = true)
         @PathParam("feature_version")
@@ -82,7 +102,7 @@ class DownloadStatsResource {
         @PathParam("release_name")
         releaseName: String
     ): Map<String, Long> {
-        val release = APIDataStore.getAdoptRepos().getFeatureRelease(featureVersion)
+        val release = apiDataStore.getAdoptRepos().getFeatureRelease(featureVersion)
             ?: throw BadRequestException("Unable to find version $featureVersion")
 
         return getAdoptReleases(release)
@@ -107,9 +127,9 @@ class DownloadStatsResource {
     }
 
     @GET
+    @Schema(hidden = true)
     @Path("/tracking")
     @Operation(summary = "Get download stats for feature verson", description = "stats", hidden = true)
-    @Schema(hidden = true)
     fun tracking(
         @Parameter(name = "days", description = "Number of days to display, if used in conjunction with from/to then this will limit the request to x days before the end of the given period", schema = Schema(defaultValue = "30", type = SchemaType.INTEGER), required = false)
         @QueryParam("days")
@@ -142,14 +162,14 @@ class DownloadStatsResource {
             val fromDate = parseDate(from)?.atStartOfDay()?.atZone(TimeSource.ZONE)
             val toDate = parseDate(to)?.plusDays(1)?.atStartOfDay()?.atZone(TimeSource.ZONE)
 
-            return@runAsync statsInterface.getTrackingStats(days, fromDate, toDate, source, featureVersion, dockerRepo, jvmImpl)
+            return@runAsync downloadStatsInterface.getTrackingStats(days, fromDate, toDate, source, featureVersion, dockerRepo, jvmImpl)
         }
     }
 
     @GET
+    @Schema(hidden = true)
     @Path("/monthly")
     @Operation(summary = "Get download stats for feature verson", description = "stats", hidden = true)
-    @Schema(hidden = true)
     fun tracking(
         @Parameter(name = "source", description = "Stats data source", schema = Schema(defaultValue = "all"), required = false)
         @QueryParam("source")
@@ -175,7 +195,7 @@ class DownloadStatsResource {
             val jvmImpl = parseJvmImpl(jvmImplStr)
             val toDate = parseDate(to)?.withDayOfMonth(1)?.plusMonths(1)?.atStartOfDay()?.atZone(TimeSource.ZONE)
 
-            return@runAsync statsInterface.getMonthlyTrackingStats(toDate, source, featureVersion, dockerRepo, jvmImpl)
+            return@runAsync downloadStatsInterface.getMonthlyTrackingStats(toDate, source, featureVersion, dockerRepo, jvmImpl)
         }
     }
 

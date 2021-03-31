@@ -12,18 +12,21 @@ import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.OperatingSystem
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
+import org.hamcrest.Matchers
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import org.junit.jupiter.api.extension.ExtendWith
 import java.util.stream.Stream
 import kotlin.test.assertTrue
 
 @QuarkusTest
+@ExtendWith(value = [DbExtension::class])
 class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
 
     @TestFactory
     fun noFilter(): Stream<DynamicTest> {
-        return (8..12)
+        return AdoptReposTestDataGenerator.TEST_VERSIONS
             .flatMap { version ->
                 ReleaseType.values()
                     .map { "/v3/assets/feature_releases/$version/$it" }
@@ -33,6 +36,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                                 .`when`()
                                 .get(it)
                                 .then()
+                                .body("binaries.size()", Matchers.greaterThan(0))
                                 .statusCode(200)
                         }
                     }
@@ -65,7 +69,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                 null,
                 { previous: Release?, next: Release ->
                     if (previous != null) {
-                        if (Releases.RELEASE_COMPARATOR.compare(previous, next) > 0) {
+                        if (Releases.VERSION_COMPARATOR.compare(previous.version_data, next.version_data) > 0) {
                             fail("${previous.version_data} is before ${next.version_data}")
                         }
                     }
@@ -81,7 +85,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                 null,
                 { previous: Release?, next: Release ->
                     if (previous != null) {
-                        if (Releases.RELEASE_COMPARATOR.compare(previous, next) < 0) {
+                        if (Releases.VERSION_COMPARATOR.compare(previous.version_data, next.version_data) < 0) {
                             fail("${previous.version_data} is before ${next.version_data}")
                         }
                     }
@@ -131,8 +135,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                 .get("${getPath()}/8/ga?sort_order=${sortOrder.name}")
                 .body
 
-            val releasesStr = body.prettyPrint()
-            return parseReleases(releasesStr)
+            return parseReleases(body.asString())
         }
 
         fun getReleasesWithSortMethod(sortOrder: SortOrder, sortMethod: SortMethod): List<Release> {
@@ -141,8 +144,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                 .get("${getPath()}/8/ga?sort_order=${sortOrder.name}&sort_method=${sortMethod.name}")
                 .body
 
-            val releasesStr = body.prettyPrint()
-            return parseReleases(releasesStr)
+            return parseReleases(body.asString())
         }
 
         fun parseReleases(json: String?): List<Release> =
@@ -165,8 +167,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
             .get("${getPath()}/11/ea?page_size=5")
             .body
 
-        val releasesStr = body.prettyPrint()
-        val releases = parseReleases(releasesStr)
+        val releases = parseReleases(body.asString())
 
         assertTrue { releases.size == 5 }
     }
@@ -186,7 +187,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
             Pair("2000-12-03T10:15:30Z", 404),
             Pair("2000-12-03+01:00", 404),
 
-            Pair("foo", 400)
+            Pair("foo", 404)
         )
             .map {
                 DynamicTest.dynamicTest(it.first) {

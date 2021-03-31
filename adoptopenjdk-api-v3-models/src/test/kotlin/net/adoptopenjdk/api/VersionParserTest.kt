@@ -150,7 +150,7 @@ class VersionParserTest {
             VersionData(8, 0, 282, "internal", 0, 7, "202101061709", "1.8.0_282-internal-202101061709-b07"),
             VersionData(8, 0, 282, "internal", 0, 6, "202012231721", "1.8.0_282-internal-202012231721-b06"),
             VersionData(8, 0, 282, null, 0, 7, "202101042134", "1.8.0_282-202101042134-b07"),
-            VersionData(8, 0, 282, null, 0, 4, "202012071203", "1.8.0_282-202012071203-b04")
+            VersionData(8, 0, 282, null, 0, 4, "202012071203", "1.8.0_282-202012071203-b04"),
         )
         val sorted = unsorted.sortedWith(Releases.VERSION_COMPARATOR)
 

@@ -12,6 +12,7 @@ import net.adoptopenjdk.api.v3.models.Project
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
+import org.eclipse.microprofile.metrics.annotation.Timed
 import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
@@ -19,8 +20,11 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
+import org.jboss.resteasy.annotations.GZIP
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.jboss.resteasy.annotations.jaxrs.QueryParam
+import javax.enterprise.context.ApplicationScoped
+import javax.inject.Inject
 import javax.ws.rs.GET
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
@@ -30,12 +34,19 @@ import javax.ws.rs.core.Response
 @Tag(name = "Installer")
 @Path("/v3/installer/")
 @Produces(MediaType.APPLICATION_JSON)
-class InstallerResource : PackageEndpoint() {
+@Timed
+@ApplicationScoped
+@GZIP
+class InstallerResource @Inject constructor(private val packageEndpoint: PackageEndpoint) {
 
     @GET
     @Path("/version/{release_name}/{os}/{arch}/{image_type}/{jvm_impl}/{heap_size}/{vendor}")
     @Produces("application/octet-stream")
-    @Operation(summary = "Redirects to the installer that matches your current query", description = "Redirects to the installer that matches your current query")
+    @Operation(
+        operationId = "getInstallerByVersion",
+        summary = "Redirects to the installer that matches your current query",
+        description = "Redirects to the installer that matches your current query"
+    )
     @APIResponses(
         value = [
             APIResponse(responseCode = "307", description = "link to installer that matches your current query"),
@@ -79,14 +90,18 @@ class InstallerResource : PackageEndpoint() {
         @QueryParam("project")
         project: Project?
     ): Response {
-        val releases = getReleases(release_name, vendor, os, arch, image_type, jvm_impl, heap_size, project)
+        val releases = packageEndpoint.getReleases(release_name, vendor, os, arch, image_type, jvm_impl, heap_size, project)
         return formResponseInstaller(releases)
     }
 
     @GET
     @Path("/latest/{feature_version}/{release_type}/{os}/{arch}/{image_type}/{jvm_impl}/{heap_size}/{vendor}")
     @Produces("application/octet-stream")
-    @Operation(summary = "Redirects to the installer that matches your current query", description = "Redirects to the installer that matches your current query")
+    @Operation(
+        operationId = "getInstaller",
+        summary = "Redirects to the installer that matches your current query",
+        description = "Redirects to the installer that matches your current query"
+    )
     @APIResponses(
         value = [
             APIResponse(responseCode = "307", description = "link to installer that matches your current query"),
@@ -134,7 +149,7 @@ class InstallerResource : PackageEndpoint() {
         @QueryParam("project")
         project: Project?
     ): Response {
-        val releaseList = getRelease(release_type, version, vendor, os, arch, image_type, jvm_impl, heap_size, project)
+        val releaseList = packageEndpoint.getRelease(release_type, version, vendor, os, arch, image_type, jvm_impl, heap_size, project)
 
         val release = releaseList
             .lastOrNull { release ->
@@ -145,7 +160,7 @@ class InstallerResource : PackageEndpoint() {
     }
 
     private fun formResponseInstaller(releases: List<Release>): Response {
-        return formResponse(releases, extractInstaller(), redirectToAsset())
+        return packageEndpoint.formResponse(releases, extractInstaller(), packageEndpoint.redirectToAsset())
     }
 
     private fun extractInstaller(): (Binary) -> Installer? {

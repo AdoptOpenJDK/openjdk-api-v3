@@ -3,13 +3,16 @@ package net.adoptopenjdk.api.v3.dataSources
 import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepos
 import net.adoptopenjdk.api.v3.models.ReleaseInfo
 import net.adoptopenjdk.api.v3.models.ReleaseType
+import javax.inject.Inject
 
-object ReleaseVersionResolver {
+class ReleaseVersionResolver @Inject constructor(
+    private val updaterHtmlClient: UpdaterHtmlClient
+) {
 
-    private val VERSION_FILE_URL = "https://raw.githubusercontent.com/openjdk/jdk/master/make/autoconf/version-numbers"
+    private val VERSION_FILE_URL = "https://raw.githubusercontent.com/openjdk/jdk/master/make/conf/version-numbers.conf"
 
     private suspend fun getTipVersion(): Int? {
-        val versionFile = UpdaterHtmlClientFactory.client.get(VERSION_FILE_URL)
+        val versionFile = updaterHtmlClient.get(VERSION_FILE_URL)
 
         return if (versionFile != null) {
             Regex(""".*DEFAULT_VERSION_FEATURE=(?<num>\d+).*""", setOf(RegexOption.MULTILINE, RegexOption.DOT_MATCHES_ALL))
@@ -17,10 +20,6 @@ object ReleaseVersionResolver {
         } else {
             null
         }
-    }
-
-    suspend fun updateDbVersion(repo: AdoptRepos) {
-        ApiPersistenceFactory.get().setReleaseInfo(formReleaseInfo(repo))
     }
 
     suspend fun formReleaseInfo(repo: AdoptRepos): ReleaseInfo {
@@ -40,7 +39,7 @@ object ReleaseVersionResolver {
 
         val availableLtsReleases: Array<Int> = gaReleases
             .asSequence()
-            .filter { APIDataStore.variants.ltsVersions.contains(it.version_data.major) }
+            .filter { VariantStore.variants.ltsVersions.contains(it.version_data.major) }
             .map { it.version_data.major }
             .distinct()
             .sorted()

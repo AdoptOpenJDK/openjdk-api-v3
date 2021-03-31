@@ -4,6 +4,7 @@ import net.adoptopenjdk.api.v3.ReleaseResult
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
 import net.adoptopenjdk.api.v3.mapping.BinaryMapper
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
+import net.adoptopenjdk.api.v3.models.DateTime
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.SourcePackage
@@ -51,7 +52,7 @@ object UpstreamReleaseMapper : ReleaseMapper() {
 
             val sourcePackage = getSourcePackage(ghRelease)
 
-            return ReleaseResult(result = listOf(Release(ghRelease.id.githubId, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, versionData, sourcePackage)))
+            return ReleaseResult(result = listOf(Release(ghRelease.id.id, release_type, releaseLink, releaseName, DateTime(timestamp), DateTime(updatedAt), binaries.toTypedArray(), downloadCount, vendor, versionData, sourcePackage)))
         } catch (e: FailedToParse) {
             LOGGER.error("Failed to parse $releaseName")
             return ReleaseResult(error = "Failed to parse")

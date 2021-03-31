@@ -8,10 +8,11 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAsset
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHAssets
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHMetaData
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
-import net.adoptopenjdk.api.v3.dataSources.models.GithubId
-import net.adoptopenjdk.api.v3.dataSources.mongo.CachedGithubHtmlClient
+import net.adoptopenjdk.api.v3.dataSources.models.GitHubId
+import net.adoptopenjdk.api.v3.dataSources.mongo.GitHubHtmlClient
 import net.adoptopenjdk.api.v3.mapping.BinaryMapper
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
+import net.adoptopenjdk.api.v3.models.DateTime
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
@@ -23,11 +24,20 @@ import java.security.MessageDigest
 import java.time.ZonedDateTime
 import java.util.*
 import java.util.regex.Pattern
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object AdoptReleaseMapper : ReleaseMapper() {
-    @JvmStatic
-    private val LOGGER = LoggerFactory.getLogger(this::class.java)
-    private val excludedReleases: MutableSet<GithubId> = mutableSetOf()
+@Singleton
+class AdoptReleaseMapper @Inject constructor(
+    val adoptBinaryMapper: AdoptBinaryMapper,
+    val htmlClient: GitHubHtmlClient
+) : ReleaseMapper() {
+    companion object {
+        @JvmStatic
+        private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    }
+
+    private val excludedReleases: MutableSet<GitHubId> = mutableSetOf()
 
     override suspend fun toAdoptRelease(ghRelease: GHRelease): ReleaseResult {
         if (excludedReleases.contains(ghRelease.id)) {
@@ -66,7 +76,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
                         // if we have no metadata resort to parsing release names
                         val version = parseVersionInfo(ghRelease, releaseName)
                         val ghAssets = ghRelease.releaseAssets.assets
-                        val id = ghRelease.id.githubId
+                        val id = ghRelease.id.id
 
                         return@ifEmpty listOf(toRelease(releaseName, ghAssets, ghAssetsWithMetadata, id, releaseType, releaseLink, timestamp, updatedAt, vendor, version, ghAssets))
                     } catch (e: Exception) {
@@ -118,7 +128,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
                     .copyOfRange(0, 10)
             )
 
-        return release.id.githubId + "." + suffix
+        return release.id.id + "." + suffix
     }
 
     private suspend fun toRelease(
@@ -134,9 +144,9 @@ object AdoptReleaseMapper : ReleaseMapper() {
         version: VersionData,
         fullGhAssetList: List<GHAsset>
     ): Release {
-        LOGGER.info("Getting binaries $releaseName")
-        val binaries = AdoptBinaryMapper().toBinaryList(ghAssets, fullGhAssetList, ghAssetWithMetadata)
-        LOGGER.info("Done Getting binaries $releaseName")
+        LOGGER.debug("Getting binaries $releaseName")
+        val binaries = adoptBinaryMapper.toBinaryList(ghAssets, fullGhAssetList, ghAssetWithMetadata)
+        LOGGER.debug("Done Getting binaries $releaseName")
 
         val downloadCount = ghAssets
             .filter { asset ->
@@ -144,7 +154,7 @@ object AdoptReleaseMapper : ReleaseMapper() {
             }
             .map { it.downloadCount }.sum()
 
-        return Release(id, release_type, releaseLink, releaseName, timestamp, updatedAt, binaries.toTypedArray(), downloadCount, vendor, version)
+        return Release(id, release_type, releaseLink, releaseName, DateTime(timestamp), DateTime(updatedAt), binaries.toTypedArray(), downloadCount, vendor, version)
     }
 
     private fun formReleaseType(release: GHRelease): ReleaseType {
@@ -199,7 +209,11 @@ object AdoptReleaseMapper : ReleaseMapper() {
                 metadataAsset.name.startsWith(it.name)
             }
 
-        val metadataString = CachedGithubHtmlClient.getUrl(metadataAsset.downloadUrl)
+        if (metadataAsset.downloadUrl == null) {
+            return null
+        }
+
+        val metadataString = htmlClient.getUrl(metadataAsset.downloadUrl)
         if (binaryAsset != null && metadataString != null) {
             try {
                 return withContext(Dispatchers.IO) {

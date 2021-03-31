@@ -9,8 +9,10 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
+import org.jboss.resteasy.annotations.GZIP
 import org.jboss.resteasy.annotations.jaxrs.PathParam
 import org.slf4j.LoggerFactory
+import javax.enterprise.context.ApplicationScoped
 import javax.ws.rs.BadRequestException
 import javax.ws.rs.GET
 import javax.ws.rs.Path
@@ -21,6 +23,8 @@ import javax.ws.rs.core.MediaType
 @Path("/v3/version/")
 @Produces(MediaType.APPLICATION_JSON)
 @Timed
+@ApplicationScoped
+@GZIP
 class VersionResource {
 
     companion object {
@@ -30,8 +34,11 @@ class VersionResource {
 
     @GET
     @Path("/{version}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Parses a java version string", description = "Parses a java version string and returns that data in a structured format")
+    @Operation(
+        operationId = "parseVersion",
+        summary = "Parses a java version string",
+        description = "Parses a java version string and returns that data in a structured format"
+    )
     @APIResponses(
         value = [
             APIResponse(responseCode = "400", description = "bad input parameter")
@@ -43,7 +50,7 @@ class VersionResource {
         version: String?
     ): VersionData {
         try {
-            return VersionParser.parse(version)
+            return VersionParser.parse(version, sanityCheck = false, exactMatch = true)
         } catch (e: FailedToParse) {
             LOGGER.info("Failed to parse version: $version", e)
             throw BadRequestException("Unable to parse version")
