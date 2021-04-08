@@ -364,10 +364,14 @@ constructor(
 
         @Parameter(name = "jvm_impl", description = "JVM Implementation", required = true)
         @PathParam("jvm_impl")
-        jvm_impl: JvmImpl
+        jvm_impl: JvmImpl,
+
+        @Parameter(name = "vendor", description = OpenApiDocs.VENDOR, required = false)
+        @QueryParam("vendor")
+        vendor: Vendor?
 
     ): List<BinaryAssetView> {
-        val releaseFilter = ReleaseFilter(ReleaseType.ga, featureVersion = version)
+        val releaseFilter = ReleaseFilter(ReleaseType.ga, featureVersion = version, vendor = vendor)
         val binaryFilter = BinaryFilter(null, null, null, jvm_impl, null, null)
         val releases = apiDataStore
             .getAdoptRepos()
