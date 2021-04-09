@@ -366,11 +366,15 @@ constructor(
         @PathParam("jvm_impl")
         jvm_impl: JvmImpl,
 
-        @Parameter(name = "vendor", description = OpenApiDocs.VENDOR, required = false)
+        @Parameter(
+            name = "vendor", description = OpenApiDocs.VENDOR, required = false,
+            schema = Schema(defaultValue = "adoptopenjdk", type = SchemaType.STRING)
+        )
         @QueryParam("vendor")
         vendor: Vendor?
 
     ): List<BinaryAssetView> {
+        val vendor = vendor ?: Vendor.adoptopenjdk
         val releaseFilter = ReleaseFilter(ReleaseType.ga, featureVersion = version, vendor = vendor)
         val binaryFilter = BinaryFilter(null, null, null, jvm_impl, null, null)
         val releases = apiDataStore
