@@ -151,8 +151,9 @@ constructor(
     ): List<Release> {
         val order = sortOrder ?: SortOrder.DESC
         val sortMethod = sortMethod ?: SortMethod.DEFAULT
+        val vendorNonNull = vendor ?: Vendor.adoptopenjdk
 
-        val releaseFilter = ReleaseFilter(releaseType = release_type, featureVersion = version, vendor = vendor)
+        val releaseFilter = ReleaseFilter(releaseType = release_type, featureVersion = version, vendor = vendorNonNull)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project, before)
         val repos = apiDataStore.getAdoptRepos().getFeatureRelease(version!!)
 
@@ -334,8 +335,9 @@ constructor(
         val sortMethod = sortMethod ?: SortMethod.DEFAULT
 
         val range = VersionRangeFilter(version)
+        val vendorNonNull = vendor ?: Vendor.adoptopenjdk
 
-        val releaseFilter = ReleaseFilter(releaseType = release_type, vendor = vendor, versionRange = range, lts = lts)
+        val releaseFilter = ReleaseFilter(releaseType = release_type, vendor = vendorNonNull, versionRange = range, lts = lts)
         val binaryFilter = BinaryFilter(os = os, arch = arch, imageType = image_type, jvmImpl = jvm_impl, heapSize = heap_size, project = project)
 
         val releases = apiDataStore
