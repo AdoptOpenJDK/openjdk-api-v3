@@ -135,7 +135,8 @@ constructor(
 
     private fun getReleases(release_type: ReleaseType?, vendor: Vendor?, version: String?, sortOrder: SortOrder, sortMethod: SortMethod): Sequence<Release> {
         val range = VersionRangeFilter(version)
-        val releaseFilter = ReleaseFilter(releaseType = release_type, vendor = vendor, versionRange = range)
+        val vendorNonNull = vendor ?: Vendor.adoptopenjdk
+        val releaseFilter = ReleaseFilter(releaseType = release_type, vendor = vendorNonNull, versionRange = range)
         return apiDataStore
             .getAdoptRepos()
             .getReleases(releaseFilter, sortOrder, sortMethod)
