@@ -370,10 +370,7 @@ constructor(
         @PathParam("jvm_impl")
         jvm_impl: JvmImpl,
 
-        @Parameter(
-            name = "vendor", description = OpenApiDocs.VENDOR, required = false,
-            schema = Schema(defaultValue = "adoptopenjdk", type = SchemaType.STRING)
-        )
+        @Parameter(name = "vendor", description = OpenApiDocs.VENDOR, required = false)
         @QueryParam("vendor")
         vendor: Vendor?
 
