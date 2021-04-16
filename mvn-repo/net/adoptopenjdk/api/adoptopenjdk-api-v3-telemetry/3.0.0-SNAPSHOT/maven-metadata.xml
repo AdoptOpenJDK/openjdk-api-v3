@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata modelVersion="1.1.0">
+  <groupId>net.adoptopenjdk.api</groupId>
+  <artifactId>adoptopenjdk-api-v3-telemetry</artifactId>
+  <version>3.0.0-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <timestamp>20210416.130447</timestamp>
+      <buildNumber>1</buildNumber>
+    </snapshot>
+    <lastUpdated>20210416130447</lastUpdated>
+    <snapshotVersions>
+      <snapshotVersion>
+        <extension>jar</extension>
+        <value>3.0.0-20210416.130447-1</value>
+        <updated>20210416130447</updated>
+      </snapshotVersion>
+      <snapshotVersion>
+        <extension>pom</extension>
+        <value>3.0.0-20210416.130447-1</value>
+        <updated>20210416130447</updated>
+      </snapshotVersion>
+      <snapshotVersion>
+        <classifier>tests</classifier>
+        <extension>jar</extension>
+        <value>3.0.0-20210416.130447-1</value>
+        <updated>20210416130447</updated>
+      </snapshotVersion>
+    </snapshotVersions>
+  </versioning>
+</metadata>

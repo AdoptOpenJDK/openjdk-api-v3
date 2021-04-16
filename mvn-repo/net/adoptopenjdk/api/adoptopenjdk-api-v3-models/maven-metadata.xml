@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>net.adoptopenjdk.api</groupId>
+  <artifactId>adoptopenjdk-api-v3-models</artifactId>
+  <versioning>
+    <versions>
+      <version>3.0.0-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20210416130421</lastUpdated>
+  </versioning>
+</metadata>
