@@ -41,7 +41,7 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
             RANGE_8_METADATA,
             JAVA11
         )
-            .map { request -> "${getPath()}/${request}?PAGE_SIZE=100" }
+            .map { request -> "${getPath()}/$request?PAGE_SIZE=100" }
             .map { request ->
                 DynamicTest.dynamicTest(request) {
                     RestAssured.given()
@@ -62,7 +62,6 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
                         })
                         .statusCode(200)
                 }
-
             }
             .stream()
     }
