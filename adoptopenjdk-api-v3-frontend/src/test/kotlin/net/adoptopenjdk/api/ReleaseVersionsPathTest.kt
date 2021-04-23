@@ -9,33 +9,33 @@ import java.util.stream.Stream
 
 @QuarkusTest
 @ExtendWith(value = [DbExtension::class])
-class ReleaseNamesPathTest : AssetsPathTest() {
+class ReleaseVersionsPathTest : AssetsPathTest() {
 
     @Test
-    fun releaseNames() {
+    fun releaseVersions() {
         RestAssured.given()
             .`when`()
-            .get("/v3/info/release_names")
+            .get("/v3/info/release_versions")
             .then()
             .statusCode(200)
     }
 
     @Test
-    fun releaseNamesPageSize() {
+    fun releaseVersionsPageSize() {
 
         RestAssured.given()
             .`when`()
-            .get("/v3/info/release_names?page_size=50")
+            .get("/v3/info/release_versions?page_size=50")
             .then()
             .statusCode(200)
     }
 
     @Test
-    fun releaseNamesSortOrder() {
+    fun releaseVersionsSortOrder() {
 
         RestAssured.given()
             .`when`()
-            .get("/v3/info/release_names?sort_order=DESC")
+            .get("/v3/info/release_versions?sort_order=ASC")
             .then()
             .statusCode(200)
     }
@@ -46,7 +46,7 @@ class ReleaseNamesPathTest : AssetsPathTest() {
                 DynamicTest.dynamicTest(value.toString()) {
                     RestAssured.given()
                         .`when`()
-                        .get("/v3/info/release_names?$filterParamName=$value")
+                        .get("/v3/info/release_versions?$filterParamName=$value")
                         .then()
                         .statusCode(200)
                 }
