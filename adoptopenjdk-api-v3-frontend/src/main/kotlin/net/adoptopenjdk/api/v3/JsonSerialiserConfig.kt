@@ -1,6 +1,8 @@
 package net.adoptopenjdk.api.v3
 
+import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.DateTime
+import java.lang.reflect.Type
 import java.time.format.DateTimeFormatter
 import javax.json.bind.Jsonb
 import javax.json.bind.JsonbBuilder
@@ -9,7 +11,10 @@ import javax.json.bind.serializer.JsonbSerializer
 import javax.json.bind.serializer.SerializationContext
 import javax.json.stream.JsonGenerator
 import javax.ws.rs.ext.ContextResolver
+import javax.ws.rs.ext.ParamConverter
+import javax.ws.rs.ext.ParamConverterProvider
 import javax.ws.rs.ext.Provider
+
 
 @Provider
 class JsonSerialiserConfig : ContextResolver<Jsonb> {
@@ -32,5 +37,25 @@ class JsonSerialiserConfig : ContextResolver<Jsonb> {
 
     override fun getContext(objectType: Class<*>?): Jsonb {
         return jsonb
+    }
+}
+
+@Provider
+class ArchitectureParamConverterProvider : ParamConverterProvider {
+    class ArchitectureDeserializer : ParamConverter<Architecture> {
+        override fun fromString(value: String?): Architecture? {
+            if (value == null) return null
+            return Architecture.getValue(value)
+        }
+
+        override fun toString(value: Architecture?): String? {
+            return value?.name
+        }
+    }
+
+    override fun <T> getConverter(rawType: Class<T>, genericType: Type?, annotations: Array<Annotation?>?): ParamConverter<T>? {
+        return if (rawType.isAssignableFrom(Architecture::class.java)) {
+            ArchitectureDeserializer() as ParamConverter<T>?
+        } else null
     }
 }

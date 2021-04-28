@@ -6,7 +6,9 @@ import net.adoptopenjdk.api.v3.JsonMapper
 import net.adoptopenjdk.api.v3.dataSources.APIDataStore
 import net.adoptopenjdk.api.v3.dataSources.SortMethod
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
+import net.adoptopenjdk.api.v3.filters.BinaryFilter
 import net.adoptopenjdk.api.v3.filters.ReleaseFilter
+import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
 import net.adoptopenjdk.api.v3.models.Vendor
@@ -78,6 +80,33 @@ class AssetsResourceReleaseNamePathTest : FrontendTest() {
             .get("/v3/assets/release_name/adoptopenjdk/foo")
             .then()
             .statusCode(404)
+    }
+
+    @Test
+    fun `for frontend requests x86 == x32`() {
+        val releaseName = apiDataStore
+            .getAdoptRepos()
+            .getFilteredReleases(ReleaseFilter(vendor = Vendor.adoptopenjdk), BinaryFilter(arch = Architecture.x32), SortOrder.DESC, SortMethod.DEFAULT)
+            .first()
+            .release_name
+
+        RestAssured.given()
+            .`when`()
+            .get("/v3/assets/release_name/adoptopenjdk/$releaseName?architecture=x86")
+            .then()
+            .statusCode(200)
+            .and()
+            .body(object : TypeSafeMatcher<String>() {
+                override fun describeTo(description: Description?) {
+                    description!!.appendText("json")
+                }
+
+                override fun matchesSafely(p0: String?): Boolean {
+                    val returnedRelease = JsonMapper.mapper.readValue(p0, Release::class.java)
+                    return returnedRelease.binaries.filter { it.architecture == Architecture.x32 }.size > 0 &&
+                        returnedRelease.binaries.filter { it.architecture != Architecture.x32 }.size == 0
+                }
+            })
     }
 
     @Test
