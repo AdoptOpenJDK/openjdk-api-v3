@@ -9,7 +9,7 @@ object Pagination {
     const val defaultPageSize = defaultPageSizeNum.toString()
     const val maxPageSize = maxPageSizeNum.toString()
 
-    fun <T> getPage(pageSize: Int?, page: Int?, releases: Sequence<T>): List<T> {
+    fun <T> getPage(pageSize: Int?, page: Int?, releases: Sequence<T>, maxPageSizeNum: Int = 20): List<T> {
         val pageSizeNum = min(maxPageSizeNum, (pageSize ?: defaultPageSizeNum))
         val pageNum = page ?: 0
 

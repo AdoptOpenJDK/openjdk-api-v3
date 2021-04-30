@@ -200,7 +200,7 @@ class ReleaseListResource @Inject constructor(
             .map { it.version_data }
             .distinct()
 
-        val pagedReleases = getPage(pageSize, page, releases)
+        val pagedReleases = getPage(pageSize, page, releases, maxPageSizeNum = 50)
 
         return ReleaseVersionList(pagedReleases.toTypedArray())
     }
