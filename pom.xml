@@ -272,12 +272,6 @@
         </dependency>
     </dependencies>
 
-    <repositories>
-        <repository>
-            <id>bintray-americanexpress-maven</id>
-            <url>https://dl.bintray.com/americanexpress/maven</url>
-        </repository>
-    </repositories>
 
     <build>
         <pluginManagement>
