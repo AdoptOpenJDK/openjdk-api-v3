@@ -166,7 +166,7 @@ class ReleaseListResource @Inject constructor(
         @QueryParam("lts")
         lts: Boolean?,
 
-        @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = Pagination.defaultPageSize, maximum = Pagination.maxPageSize, type = SchemaType.INTEGER), required = false)
+        @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = Pagination.defaultPageSize, maximum = "50", type = SchemaType.INTEGER), required = false)
         @QueryParam("page_size")
         pageSize: Int?,
 
