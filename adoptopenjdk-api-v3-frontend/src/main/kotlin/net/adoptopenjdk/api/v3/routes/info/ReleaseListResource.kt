@@ -125,6 +125,7 @@ class ReleaseListResource @Inject constructor(
     @Path("/release_versions")
     @GET
     @Operation(summary = "Returns a list of all release versions", operationId = "getReleaseVersions")
+
     fun getVersions(
         @Parameter(name = "release_type", description = OpenApiDocs.RELEASE_TYPE, required = false)
         @QueryParam("release_type")
@@ -166,7 +167,7 @@ class ReleaseListResource @Inject constructor(
         @QueryParam("lts")
         lts: Boolean?,
 
-        @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = Pagination.defaultPageSize, maximum = Pagination.maxPageSize, type = SchemaType.INTEGER), required = false)
+        @Parameter(name = "page_size", description = "Pagination page size", schema = Schema(defaultValue = Pagination.defaultPageSize, maximum = Pagination.largerPageSize, type = SchemaType.INTEGER), required = false)
         @QueryParam("page_size")
         pageSize: Int?,
 
@@ -200,7 +201,7 @@ class ReleaseListResource @Inject constructor(
             .map { it.version_data }
             .distinct()
 
-        val pagedReleases = getPage(pageSize, page, releases)
+        val pagedReleases = getPage(pageSize, page, releases, maxPageSizeNum = Pagination.largerPageSizeNum)
 
         return ReleaseVersionList(pagedReleases.toTypedArray())
     }
