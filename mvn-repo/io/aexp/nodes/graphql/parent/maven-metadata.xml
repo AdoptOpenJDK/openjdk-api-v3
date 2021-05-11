@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>io.aexp.nodes.graphql</groupId>
+  <artifactId>parent</artifactId>
+  <versioning>
+    <release>0.5.0</release>
+    <versions>
+      <version>0.5.0</version>
+    </versions>
+    <lastUpdated>20210511174930</lastUpdated>
+  </versioning>
+</metadata>
