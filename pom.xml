@@ -13,7 +13,7 @@
     </prerequisites>
 
     <properties>
-        <jacoco.version>0.8.6</jacoco.version>
+        <jacoco.version>0.8.7</jacoco.version>
         <jdk.version>11</jdk.version>
         <junit.version>4.12</junit.version>
         <kotlin.compiler.jvmTarget>11</kotlin.compiler.jvmTarget>
