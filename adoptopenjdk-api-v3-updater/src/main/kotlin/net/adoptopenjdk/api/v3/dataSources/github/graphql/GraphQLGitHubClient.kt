@@ -18,15 +18,15 @@ open class GraphQLGitHubClient @Inject constructor(
     private val repositoryClientClient: GraphQLGitHubRepositoryClient
 ) : GitHubApi {
 
-    override suspend fun getRepositorySummary(repoName: String): GHRepositorySummary {
-        return summaryClient.getRepositorySummary(repoName)
+    override suspend fun getRepositorySummary(owner:String, repoName: String): GHRepositorySummary {
+        return summaryClient.getRepositorySummary(owner, repoName)
     }
 
     override suspend fun getReleaseById(id: GitHubId): GHRelease? {
         return releaseClient.getReleaseById(id)
     }
 
-    override suspend fun getRepository(repoName: String): GHRepository {
-        return repositoryClientClient.getRepository(repoName)
+    override suspend fun getRepository(owner:String, repoName: String): GHRepository {
+        return repositoryClientClient.getRepository(owner, repoName)
     }
 }

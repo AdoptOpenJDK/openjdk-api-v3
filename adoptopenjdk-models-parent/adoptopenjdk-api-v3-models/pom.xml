@@ -6,7 +6,7 @@
         <groupId>net.adoptopenjdk.api</groupId>
         <artifactId>adoptopenjdk-api-v3</artifactId>
         <version>3.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>adoptopenjdk-api-v3-models</artifactId>
@@ -40,4 +40,38 @@
         <sourceDirectory>src/main/kotlin</sourceDirectory>
         <testSourceDirectory>src/test/kotlin</testSourceDirectory>
     </build>
+
+    <profiles>
+        <profile>
+            <id>adopt</id>
+            <activation>
+                <property>
+                    <name>!ecosystem</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>net.adoptopenjdk.api</groupId>
+                    <artifactId>adoptopenjdk-api-v3-adopt-specific-models</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>adoptium</id>
+            <activation>
+                <property>
+                    <name>ecosystem</name>
+                    <value>adoptium</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>net.adoptopenjdk.api</groupId>
+                    <artifactId>adoptopenjdk-api-v3-adoptium-specific-models</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>

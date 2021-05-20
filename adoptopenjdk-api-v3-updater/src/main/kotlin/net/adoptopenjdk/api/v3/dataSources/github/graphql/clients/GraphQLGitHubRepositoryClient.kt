@@ -19,8 +19,8 @@ class GraphQLGitHubRepositoryClient @Inject constructor(
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
     }
 
-    suspend fun getRepository(repoName: String): GHRepository {
-        val requestEntityBuilder = getReleasesRequest(repoName)
+    suspend fun getRepository(owner:String, repoName: String): GHRepository {
+        val requestEntityBuilder = getReleasesRequest(owner, repoName)
 
         LOGGER.info("Getting repo $repoName")
 
@@ -51,11 +51,11 @@ class GraphQLGitHubRepositoryClient @Inject constructor(
             }
     }
 
-    private fun getReleasesRequest(repoName: String): GraphQLRequestEntity.RequestBuilder {
+    private fun getReleasesRequest(owner:String, repoName: String): GraphQLRequestEntity.RequestBuilder {
         return request(
             """
                         query(${'$'}cursorPointer:String) { 
-                            repository(owner:"$OWNER", name:"$repoName") { 
+                            repository(owner:"$owner", name:"$repoName") { 
                                 releases(first:50, after:${'$'}cursorPointer, orderBy: {field: CREATED_AT, direction: DESC}) {
                                     nodes {
                                         id,

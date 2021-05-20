@@ -6,7 +6,7 @@ import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.summary.GHRepos
 import net.adoptopenjdk.api.v3.dataSources.models.GitHubId
 
 interface GitHubApi {
-    suspend fun getRepository(repoName: String): GHRepository
-    suspend fun getRepositorySummary(repoName: String): GHRepositorySummary
+    suspend fun getRepository(owner:String, repoName: String): GHRepository
+    suspend fun getRepositorySummary(owner:String, repoName: String): GHRepositorySummary
     suspend fun getReleaseById(id: GitHubId): GHRelease?
 }

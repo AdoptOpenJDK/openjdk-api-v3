@@ -36,7 +36,7 @@ open class GitHubDownloadStatsCalculator @Inject constructor(private val databas
                 val total = featureRelease
                     .releases
                     .getReleases()
-                    .filter { it.vendor == Vendor.adoptopenjdk }
+                    .filter { it.vendor == Vendor.getDefault() }
                     .flatMap { release ->
                         release
                             .binaries
@@ -61,7 +61,7 @@ open class GitHubDownloadStatsCalculator @Inject constructor(private val databas
                 val total = featureRelease
                     .releases
                     .getReleases()
-                    .filter { it.vendor == Vendor.adoptopenjdk }
+                    .filter { it.vendor == Vendor.getDefault() }
                     .sumBy {
                         it.download_count.toInt()
                     }
@@ -72,7 +72,7 @@ open class GitHubDownloadStatsCalculator @Inject constructor(private val databas
                         featureRelease
                             .releases
                             .getReleases()
-                            .filter { it.vendor == Vendor.adoptopenjdk }
+                            .filter { it.vendor == Vendor.getDefault() }
                             .sumBy {
                                 it.binaries
                                     .filter { binary -> binary.jvm_impl == jvmImpl }

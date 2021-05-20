@@ -22,8 +22,8 @@ class GraphQLGitHubSummaryClient @Inject constructor(
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
     }
 
-    suspend fun getRepositorySummary(repoName: String): GHRepositorySummary {
-        val requestEntityBuilder = getReleaseSummary(repoName)
+    suspend fun getRepositorySummary(owner:String, repoName: String): GHRepositorySummary {
+        val requestEntityBuilder = getReleaseSummary(owner, repoName)
 
         LOGGER.info("Getting repo summary $repoName")
 
@@ -47,11 +47,11 @@ class GraphQLGitHubSummaryClient @Inject constructor(
         return request.repository.releases.releases
     }
 
-    private fun getReleaseSummary(repoName: String): GraphQLRequestEntity.RequestBuilder {
+    private fun getReleaseSummary(owner:String, repoName: String): GraphQLRequestEntity.RequestBuilder {
         return request(
             """
                         query(${'$'}cursorPointer:String) { 
-                            repository(owner:"$OWNER", name:"$repoName") { 
+                            repository(owner:"$owner", name:"$repoName") { 
                                 releases(first:50, after:${'$'}cursorPointer, orderBy: {field: CREATED_AT, direction: DESC}) {
                                     nodes {
                                         id,

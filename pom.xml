@@ -27,10 +27,11 @@
         <quarkus.version>1.11.2.Final</quarkus.version>
         <surefire-plugin.version>3.0.0-M3</surefire-plugin.version>
         <jackson.version>2.11.3</jackson.version>
+        <ecosystem>adopt</ecosystem>
     </properties>
 
     <modules>
-        <module>adoptopenjdk-api-v3-models</module>
+        <module>adoptopenjdk-models-parent</module>
         <module>adoptopenjdk-api-v3-persistence</module>
         <module>adoptopenjdk-api-v3-frontend</module>
         <module>adoptopenjdk-api-v3-updater</module>

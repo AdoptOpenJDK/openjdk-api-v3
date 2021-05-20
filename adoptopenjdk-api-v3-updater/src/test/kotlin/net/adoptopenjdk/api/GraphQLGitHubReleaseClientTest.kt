@@ -5,6 +5,8 @@ import io.aexp.nodes.graphql.GraphQLResponseEntity
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import net.adoptopenjdk.api.v3.AdoptRepository
+import net.adoptopenjdk.api.v3.AdoptRepositoryImpl
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.clients.GraphQLGitHubReleaseClient
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.clients.GraphQLGitHubRepositoryClient
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.clients.GraphQLGitHubSummaryClient
@@ -101,7 +103,7 @@ class GraphQLGitHubReleaseClientTest : BaseTest() {
                 mockkHttpClient()
             )
 
-            val repo = client.getRepository("a-repo-name")
+            val repo = client.getRepository(AdoptRepositoryImpl.ADOPT_ORG,"a-repo-name")
 
             assertEquals(Companion.repo, repo)
         }
@@ -135,7 +137,7 @@ class GraphQLGitHubReleaseClientTest : BaseTest() {
                 mockkHttpClient()
             )
 
-            val repo = client.getRepositorySummary("a-repo-name")
+            val repo = client.getRepositorySummary(AdoptRepositoryImpl.ADOPT_ORG, "a-repo-name")
 
             assertEquals(summary.repository, repo)
         }
@@ -167,7 +169,7 @@ class GraphQLGitHubReleaseClientTest : BaseTest() {
                 mockkHttpClient()
             )
 
-            val repo = client.getRepository("a-repo-name")
+            val repo = client.getRepository(AdoptRepositoryImpl.ADOPT_ORG, "a-repo-name")
 
             assertEquals(2, repo.releases.releases.size)
         }

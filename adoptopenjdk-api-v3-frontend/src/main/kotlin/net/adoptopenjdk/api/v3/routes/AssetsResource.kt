@@ -149,7 +149,7 @@ class AssetsResource @Inject constructor(
     ): List<Release> {
         val order = sortOrder ?: SortOrder.DESC
         val sortMethod = sortMethod ?: SortMethod.DEFAULT
-        val vendorNonNull = vendor ?: Vendor.adoptopenjdk
+        val vendorNonNull = vendor ?: Vendor.getDefault()
 
         val releaseFilter = ReleaseFilter(releaseType = release_type, featureVersion = version, vendor = vendorNonNull)
         val binaryFilter = BinaryFilter(os, arch, image_type, jvm_impl, heap_size, project, before)
@@ -374,7 +374,7 @@ class AssetsResource @Inject constructor(
         vendor: Vendor?
 
     ): List<BinaryAssetView> {
-        val vendor = vendor ?: Vendor.adoptopenjdk
+        val vendor = vendor ?: Vendor.getDefault()
         val releaseFilter = ReleaseFilter(ReleaseType.ga, featureVersion = version, vendor = vendor)
         val binaryFilter = BinaryFilter(null, null, null, jvm_impl, null, null)
         val releases = apiDataStore

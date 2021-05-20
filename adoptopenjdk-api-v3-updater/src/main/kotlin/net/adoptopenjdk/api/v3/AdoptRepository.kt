@@ -35,6 +35,9 @@ class AdoptRepositoryImpl @Inject constructor(
 ) : AdoptRepository {
 
     companion object {
+        const val ADOPT_ORG = "AdoptOpenJDK"
+        const val ADOPTIUM_ORG = "adoptium"
+
         @JvmStatic
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
     }
@@ -65,7 +68,7 @@ class AdoptRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getSummary(version: Int): GHRepositorySummary {
-        val releaseSummaries = getDataForEachRepo(version, { repoName: String -> client.getRepositorySummary(repoName) })
+        val releaseSummaries = getDataForEachRepo(version) { owner: String, repoName: String -> client.getRepositorySummary(owner, repoName) }
             .await()
             .filterNotNull()
             .flatMap { it.releases.releases }
@@ -73,9 +76,9 @@ class AdoptRepositoryImpl @Inject constructor(
         return GHRepositorySummary(GHReleasesSummary(releaseSummaries, PageInfo(false, "")))
     }
 
-    private suspend fun getRepository(repoName: String): List<Release> {
+    private suspend fun getRepository(owner: String, repoName: String): List<Release> {
         return client
-            .getRepository(repoName)
+            .getRepository(owner, repoName)
             .getReleases()
             .flatMap {
                 try {
@@ -91,25 +94,28 @@ class AdoptRepositoryImpl @Inject constructor(
             }
     }
 
-    private suspend fun <E> getDataForEachRepo(version: Int, getFun: suspend (String) -> E): Deferred<List<E?>> {
+    private suspend fun <E> getDataForEachRepo(version: Int, getFun: suspend (String, String) -> E): Deferred<List<E?>> {
         LOGGER.info("getting $version")
         return GlobalScope.async {
+
             return@async listOf(
-                getRepoDataAsync("openjdk$version-openj9-releases", getFun),
-                getRepoDataAsync("openjdk$version-openj9-nightly", getFun),
-                getRepoDataAsync("openjdk$version-nightly", getFun),
-                getRepoDataAsync("openjdk$version-binaries", getFun),
-                getRepoDataAsync("openjdk$version-upstream-binaries", getFun)
+                getRepoDataAsync(ADOPT_ORG, "openjdk$version-openj9-releases", getFun),
+                getRepoDataAsync(ADOPT_ORG, "openjdk$version-openj9-nightly", getFun),
+                getRepoDataAsync(ADOPT_ORG, "openjdk$version-nightly", getFun),
+                getRepoDataAsync(ADOPT_ORG, "openjdk$version-binaries", getFun),
+                getRepoDataAsync(ADOPT_ORG, "openjdk$version-upstream-binaries", getFun),
+
+                getRepoDataAsync(ADOPTIUM_ORG, "openjdk$version-binaries", getFun)
             )
                 .map { repo -> repo.await() }
         }
     }
 
-    private fun <E> getRepoDataAsync(repoName: String, getFun: suspend (String) -> E): Deferred<E?> {
+    private fun <E> getRepoDataAsync(owner: String, repoName: String, getFun: suspend (String, String) -> E): Deferred<E?> {
         return GlobalScope.async {
-            LOGGER.info("getting $repoName")
-            val releases = getFun(repoName)
-            LOGGER.info("Done getting $repoName")
+            LOGGER.info("getting $owner $repoName")
+            val releases = getFun(owner, repoName)
+            LOGGER.info("Done getting $owner $repoName")
             return@async releases
         }
     }

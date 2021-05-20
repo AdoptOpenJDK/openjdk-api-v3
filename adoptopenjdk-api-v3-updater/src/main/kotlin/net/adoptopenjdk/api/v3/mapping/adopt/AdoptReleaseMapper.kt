@@ -50,7 +50,7 @@ class AdoptReleaseMapper @Inject constructor(
         val releaseName = ghRelease.name
         val timestamp = parseDate(ghRelease.publishedAt)
         val updatedAt = parseDate(ghRelease.updatedAt)
-        val vendor = Vendor.adoptopenjdk
+        val vendor = Vendor.getDefault()
 
         val ghAssetsWithMetadata = associateMetadataWithBinaries(ghRelease.releaseAssets)
 
@@ -208,10 +208,6 @@ class AdoptReleaseMapper @Inject constructor(
             .firstOrNull {
                 metadataAsset.name.startsWith(it.name)
             }
-
-        if (metadataAsset.downloadUrl == null) {
-            return null
-        }
 
         val metadataString = htmlClient.getUrl(metadataAsset.downloadUrl)
         if (binaryAsset != null && metadataString != null) {

@@ -123,7 +123,7 @@ class DownloadStatsResource {
         return release
             .releases
             .getReleases()
-            .filter { it.vendor == Vendor.adoptopenjdk }
+            .filter { it.vendor == Vendor.getDefault() }
     }
 
     @GET
@@ -212,11 +212,12 @@ class DownloadStatsResource {
     }
 
     private fun parseJvmImpl(jvmImpl: String?): JvmImpl? {
-        return when (jvmImpl) {
-            "hotspot" -> JvmImpl.hotspot
-            "openj9" -> JvmImpl.openj9
-            null -> null
-            else -> throw BadRequestException("jvm_impl not recognized. Must be one of: hotspot, openj9")
+        if (jvmImpl == null) return null
+
+        try {
+            return JvmImpl.valueOf(jvmImpl)
+        } catch (e: Exception) {
+            throw BadRequestException("jvm_impl not recognized.")
         }
     }
 

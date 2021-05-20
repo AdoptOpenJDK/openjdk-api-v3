@@ -37,7 +37,7 @@ constructor(private val apiDataStore: APIDataStore) {
         project: Project?
     ): Sequence<Release> {
         val order = sortOrder ?: SortOrder.DESC
-        val vendorNonNull = vendor ?: Vendor.adoptopenjdk
+        val vendorNonNull = vendor ?: Vendor.getDefault()
         val sortMethod = sortMethod ?: SortMethod.DEFAULT
 
         val range = VersionRangeFilter(version)

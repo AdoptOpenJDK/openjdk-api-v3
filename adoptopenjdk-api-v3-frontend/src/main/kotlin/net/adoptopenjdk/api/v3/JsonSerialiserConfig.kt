@@ -15,7 +15,6 @@ import javax.ws.rs.ext.ParamConverter
 import javax.ws.rs.ext.ParamConverterProvider
 import javax.ws.rs.ext.Provider
 
-
 @Provider
 class JsonSerialiserConfig : ContextResolver<Jsonb> {
 
