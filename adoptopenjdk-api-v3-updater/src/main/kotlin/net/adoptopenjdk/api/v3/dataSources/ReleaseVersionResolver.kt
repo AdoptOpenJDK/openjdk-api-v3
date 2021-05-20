@@ -35,7 +35,7 @@ class ReleaseVersionResolver @Inject constructor(
             .sorted()
             .toList()
             .toTypedArray()
-        val mostRecentFeatureRelease: Int = availableReleases.last()
+        val mostRecentFeatureRelease: Int = availableReleases.lastOrNull()?:0
 
         val availableLtsReleases: Array<Int> = gaReleases
             .asSequence()
@@ -45,7 +45,7 @@ class ReleaseVersionResolver @Inject constructor(
             .sorted()
             .toList()
             .toTypedArray()
-        val mostRecentLts = availableLtsReleases.last()
+        val mostRecentLts = availableLtsReleases.lastOrNull()?:0
 
         val mostRecentFeatureVersion: Int = repo
             .allReleases
@@ -53,7 +53,7 @@ class ReleaseVersionResolver @Inject constructor(
             .map { it.version_data.major }
             .distinct()
             .sorted()
-            .last()
+            .lastOrNull()?:0
 
         val tip = getTipVersion() ?: mostRecentFeatureVersion
 

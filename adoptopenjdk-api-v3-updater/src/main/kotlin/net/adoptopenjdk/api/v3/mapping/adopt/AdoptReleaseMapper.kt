@@ -22,7 +22,7 @@ import net.adoptopenjdk.api.v3.parser.VersionParser
 import org.slf4j.LoggerFactory
 import java.security.MessageDigest
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.Base64
 import java.util.regex.Pattern
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -50,7 +50,7 @@ class AdoptReleaseMapper @Inject constructor(
         val releaseName = ghRelease.name
         val timestamp = parseDate(ghRelease.publishedAt)
         val updatedAt = parseDate(ghRelease.updatedAt)
-        val vendor = Vendor.adoptopenjdk
+        val vendor = if (releaseLink.contains("dragonwell-binaries")) Vendor.alibaba else Vendor.adoptopenjdk
 
         val ghAssetsWithMetadata = associateMetadataWithBinaries(ghRelease.releaseAssets)
 
