@@ -46,7 +46,7 @@ class ReleaseNamesPathTest : AssetsPathTest() {
                 DynamicTest.dynamicTest(value.toString()) {
                     RestAssured.given()
                         .`when`()
-                        .get("/v3/info/release_names?$filterParamName=$value")
+                        .get(customiseQuery(value, "/v3/info/release_names?$filterParamName=$value"))
                         .then()
                         .statusCode(200)
                 }

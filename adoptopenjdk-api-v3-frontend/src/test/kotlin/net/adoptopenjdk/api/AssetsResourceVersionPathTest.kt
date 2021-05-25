@@ -29,8 +29,6 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
         val JAVA11 = "11.0.200+2.1"
         val ABOVE_8 = "[8.0.0,)"
         val BELOW_11 = "(,11.0.0]"
-        val dragonwell_8 = "8.0.0"
-        val dragonwell_11 = "11.0.0"
     }
 
     @TestFactory
@@ -99,9 +97,7 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
             JAVA8_212,
             RANGE_11_12,
             RANGE_8_METADATA,
-            JAVA11,
-            dragonwell_8,
-            dragonwell_11
+            JAVA11
         )
             .flatMap { versionRange ->
                 createTest(values, getPath() + "/" + versionRange, filterParamName, { element -> getExclusions(versionRange, element) }, customiseQuery)
@@ -134,6 +130,6 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
             element == ImageType.debugimage ||
             element == ImageType.staticlibs ||
             element == OperatingSystem.`alpine-linux` ||
-            (element == JvmImpl.dragonwell).xor(versionRange.equals(dragonwell_8) || versionRange.equals(dragonwell_11))
+            (element == JvmImpl.dragonwell).xor(versionRange.equals(JAVA8_212) || versionRange.equals(JAVA11))
     }
 }

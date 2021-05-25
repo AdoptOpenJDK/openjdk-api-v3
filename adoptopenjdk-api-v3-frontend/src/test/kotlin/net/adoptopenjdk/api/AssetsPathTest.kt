@@ -15,8 +15,11 @@ import java.util.stream.Stream
 
 abstract class AssetsPathTest : FrontendTest() {
 
-    abstract fun <T> runFilterTest(filterParamName: String, values: Array<T>,
-                                   customiseQuery: (T, String) -> String = { value, query -> query }): Stream<DynamicTest>
+    abstract fun <T> runFilterTest(
+        filterParamName: String,
+        values: Array<T>,
+        customiseQuery: (T, String) -> String = { value, query -> query }
+    ): Stream<DynamicTest>
 
     @TestFactory
     fun filtersOs(): Stream<DynamicTest> {
@@ -35,13 +38,15 @@ abstract class AssetsPathTest : FrontendTest() {
 
     @TestFactory
     fun filtersJvmImpl(): Stream<DynamicTest> {
-        return runFilterTest("jvm_impl", JvmImpl.values(), { value, query ->
+        return runFilterTest(
+            "jvm_impl", JvmImpl.values()
+        ) { value, query ->
             if (value == JvmImpl.dragonwell) {
                 "$query&vendor=${Vendor.alibaba.name}"
             } else {
                 query
             }
-        })
+        }
     }
 
     @TestFactory
