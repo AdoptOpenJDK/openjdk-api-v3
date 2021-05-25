@@ -7,6 +7,7 @@ import net.adoptopenjdk.api.v3.models.ImageType
 import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.OperatingSystem
 import net.adoptopenjdk.api.v3.models.Project
+import net.adoptopenjdk.api.v3.models.Vendor
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
@@ -14,7 +15,8 @@ import java.util.stream.Stream
 
 abstract class AssetsPathTest : FrontendTest() {
 
-    abstract fun <T> runFilterTest(filterParamName: String, values: Array<T>): Stream<DynamicTest>
+    abstract fun <T> runFilterTest(filterParamName: String, values: Array<T>,
+                                   customiseQuery: (T, String) -> String = { value, query -> query }): Stream<DynamicTest>
 
     @TestFactory
     fun filtersOs(): Stream<DynamicTest> {
@@ -33,7 +35,13 @@ abstract class AssetsPathTest : FrontendTest() {
 
     @TestFactory
     fun filtersJvmImpl(): Stream<DynamicTest> {
-        return runFilterTest("jvm_impl", JvmImpl.values())
+        return runFilterTest("jvm_impl", JvmImpl.values(), { value, query ->
+            if (value == JvmImpl.dragonwell) {
+                "$query&vendor=${Vendor.alibaba.name}"
+            } else {
+                query
+            }
+        })
     }
 
     @TestFactory
@@ -50,12 +58,13 @@ abstract class AssetsPathTest : FrontendTest() {
         values: Array<T>,
         path: String,
         filterParamName: String,
-        exclude: (element: T) -> Boolean = { false }
+        exclude: (element: T) -> Boolean = { false },
+        customiseQuery: (T, String) -> String
     ): List<DynamicTest> {
         return values
             .filter { !exclude(it) }
             .map { value ->
-                val path2 = "$path?$filterParamName=${value.toString().toLowerCase()}"
+                val path2 = customiseQuery(value, "$path?$filterParamName=${value.toString().toLowerCase()}")
                 DynamicTest.dynamicTest(path2) {
                     RestAssured.given()
                         .`when`()

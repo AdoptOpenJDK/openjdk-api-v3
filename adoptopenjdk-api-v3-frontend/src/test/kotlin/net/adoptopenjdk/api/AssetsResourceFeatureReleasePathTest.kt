@@ -129,7 +129,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
             )
     }
 
-    override fun <T> runFilterTest(filterParamName: String, values: Array<T>): Stream<DynamicTest> {
+    override fun <T> runFilterTest(filterParamName: String, values: Array<T>, customiseQuery: (T, String) -> String): Stream<DynamicTest> {
         return ReleaseType.values()
             .flatMap { releaseType ->
                 // test the ltses and 1 non-lts
@@ -139,7 +139,8 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                             values, "${getPath()}/$version/$releaseType", filterParamName,
                             { element ->
                                 getExclusions(version, element)
-                            }
+                            },
+                            customiseQuery
                         )
                     }
             }

@@ -40,7 +40,7 @@ class ReleaseVersionsPathTest : AssetsPathTest() {
             .statusCode(200)
     }
 
-    override fun <T> runFilterTest(filterParamName: String, values: Array<T>): Stream<DynamicTest> {
+    override fun <T> runFilterTest(filterParamName: String, values: Array<T>, customiseQuery: (T, String) -> String): Stream<DynamicTest> {
         return values
             .map { value ->
                 DynamicTest.dynamicTest(value.toString()) {

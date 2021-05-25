@@ -91,7 +91,7 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
         }.stream()
     }
 
-    override fun <T> runFilterTest(filterParamName: String, values: Array<T>): Stream<DynamicTest> {
+    override fun <T> runFilterTest(filterParamName: String, values: Array<T>, customiseQuery: (T, String) -> String): Stream<DynamicTest> {
 
         return listOf(
             ABOVE_8,
@@ -104,7 +104,7 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
             dragonwell_11
         )
             .flatMap { versionRange ->
-                createTest(values, getPath() + "/" + versionRange, filterParamName, { element -> getExclusions(versionRange, element) })
+                createTest(values, getPath() + "/" + versionRange, filterParamName, { element -> getExclusions(versionRange, element) }, customiseQuery)
             }
             .stream()
     }
