@@ -9,6 +9,7 @@ import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.ImageType
+import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.OperatingSystem
 import net.adoptopenjdk.api.v3.models.Release
 import net.adoptopenjdk.api.v3.models.ReleaseType
@@ -153,6 +154,7 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
             version == 8 && element == ImageType.testimage ||
             version == 11 && element == ImageType.testimage ||
             version == 12 && element == ImageType.testimage ||
+            version == 12 && element == JvmImpl.dragonwell ||
 
             element == Architecture.riscv64 || // Temporary until riscv ga
 

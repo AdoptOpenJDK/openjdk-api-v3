@@ -55,6 +55,16 @@ object AdoptReposTestDataGenerator {
             Architecture.values().asList(),
             OperatingSystem.values().asList(),
             listOf(HeapSize.normal)
+        ),
+        PermittedValues(
+            ReleaseType.values().asList(),
+            listOf(Vendor.alibaba),
+            listOf(Project.jdk),
+            listOf(JvmImpl.dragonwell),
+            ImageType.values().asList(),
+            Architecture.values().asList(),
+            OperatingSystem.values().asList(),
+            listOf(HeapSize.normal)
         )
     )
 

@@ -37,7 +37,7 @@ enum class Architecture : FileNameMatcher {
         }
 
         fun getValue(value: String): Architecture {
-            //For frontend queries make x86 == x32
+            // For frontend queries make x86 == x32
             return if (value == "x86") {
                 x32
             } else {
