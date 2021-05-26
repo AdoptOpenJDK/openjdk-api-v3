@@ -40,13 +40,13 @@ class ReleaseVersionsPathTest : AssetsPathTest() {
             .statusCode(200)
     }
 
-    override fun <T> runFilterTest(filterParamName: String, values: Array<T>): Stream<DynamicTest> {
+    override fun <T> runFilterTest(filterParamName: String, values: Array<T>, customiseQuery: (T, String) -> String): Stream<DynamicTest> {
         return values
             .map { value ->
                 DynamicTest.dynamicTest(value.toString()) {
                     RestAssured.given()
                         .`when`()
-                        .get("/v3/info/release_versions?$filterParamName=$value")
+                        .get(customiseQuery(value, "/v3/info/release_versions?$filterParamName=$value"))
                         .then()
                         .statusCode(200)
                 }

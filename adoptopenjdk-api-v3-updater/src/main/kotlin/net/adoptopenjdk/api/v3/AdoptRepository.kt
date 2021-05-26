@@ -99,7 +99,8 @@ class AdoptRepositoryImpl @Inject constructor(
                 getRepoDataAsync("openjdk$version-openj9-nightly", getFun),
                 getRepoDataAsync("openjdk$version-nightly", getFun),
                 getRepoDataAsync("openjdk$version-binaries", getFun),
-                getRepoDataAsync("openjdk$version-upstream-binaries", getFun)
+                getRepoDataAsync("openjdk$version-upstream-binaries", getFun),
+                getRepoDataAsync("openjdk$version-dragonwell-binaries", getFun)
             )
                 .map { repo -> repo.await() }
         }

@@ -89,7 +89,7 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
         }.stream()
     }
 
-    override fun <T> runFilterTest(filterParamName: String, values: Array<T>): Stream<DynamicTest> {
+    override fun <T> runFilterTest(filterParamName: String, values: Array<T>, customiseQuery: (T, String) -> String): Stream<DynamicTest> {
 
         return listOf(
             ABOVE_8,
@@ -100,7 +100,7 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
             JAVA11
         )
             .flatMap { versionRange ->
-                createTest(values, getPath() + "/" + versionRange, filterParamName, { element -> getExclusions(versionRange, element) })
+                createTest(values, getPath() + "/" + versionRange, filterParamName, { element -> getExclusions(versionRange, element) }, customiseQuery)
             }
             .stream()
     }
@@ -129,6 +129,7 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
 
             element == ImageType.debugimage ||
             element == ImageType.staticlibs ||
-            element == OperatingSystem.`alpine-linux`
+            element == OperatingSystem.`alpine-linux` ||
+            (element == JvmImpl.dragonwell).xor(versionRange.equals(JAVA8_212) || versionRange.equals(JAVA11))
     }
 }
