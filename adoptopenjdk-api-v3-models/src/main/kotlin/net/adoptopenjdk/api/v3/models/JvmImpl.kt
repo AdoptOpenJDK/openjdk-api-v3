@@ -3,9 +3,9 @@ package net.adoptopenjdk.api.v3.models
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 
-@Schema(type = SchemaType.STRING, enumeration = ["dragonwell", "hotspot", "openj9"])
+@Schema(type = SchemaType.STRING, enumeration = ["dragonwell", "openj9", "hotspot"])
 enum class JvmImpl : FileNameMatcher {
-    dragonwell, hotspot, openj9;
+    dragonwell, openj9, hotspot;
 
     override lateinit var names: List<String>
     override var priority: Int = 0
