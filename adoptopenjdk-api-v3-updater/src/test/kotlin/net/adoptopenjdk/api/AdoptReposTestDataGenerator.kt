@@ -24,7 +24,7 @@ import java.util.Random
 object AdoptReposTestDataGenerator {
 
     var rand: Random = Random(1)
-    val TEST_VERSIONS = listOf(8, 9, 10, 11, 12)
+    val TEST_VERSIONS = listOf(8, 10, 11, 12)
     private val TEST_RESOURCES = listOf(
         PermittedValues(
             ReleaseType.values().asList(),
@@ -54,7 +54,8 @@ object AdoptReposTestDataGenerator {
             ImageType.values().asList(),
             Architecture.values().asList(),
             OperatingSystem.values().asList(),
-            listOf(HeapSize.normal)
+            listOf(HeapSize.normal),
+            listOf(8, 11)
         ),
         PermittedValues(
             ReleaseType.values().asList(),
@@ -64,7 +65,8 @@ object AdoptReposTestDataGenerator {
             ImageType.values().asList(),
             Architecture.values().asList(),
             OperatingSystem.values().asList(),
-            listOf(HeapSize.normal)
+            listOf(HeapSize.normal),
+            listOf(8, 11)
         )
     )
 
@@ -93,7 +95,8 @@ object AdoptReposTestDataGenerator {
         val imageType: List<ImageType>,
         val architecture: List<Architecture>,
         val operatingSystem: List<OperatingSystem>,
-        val heapSize: List<HeapSize>
+        val heapSize: List<HeapSize>,
+        val versions: List<Int> = TEST_VERSIONS
     ) {
         private fun releaseBuilder(): (ReleaseType) -> (Vendor) -> (VersionData) -> Release {
             return { releaseType: ReleaseType ->
@@ -172,6 +175,9 @@ object AdoptReposTestDataGenerator {
         }
 
         fun createReleases(majorVersion: Int): List<Release> {
+            if (!versions.contains(majorVersion)) {
+                return emptyList()
+            }
             return releaseType
                 .map { releaseBuilder()(it) }
                 .flatMap { builder -> vendor.map { builder(it) } }
