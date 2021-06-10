@@ -102,7 +102,7 @@ class AdoptRepositoryImpl @Inject constructor(
                 getRepoDataAsync(ADOPT_ORG, "openjdk$version-upstream-binaries", getFun),
                 getRepoDataAsync(ADOPT_ORG, "openjdk$version-dragonwell-binaries", getFun),
 
-                getRepoDataAsync(ADOPTIUM_ORG, "openjdk$version-binaries", getFun)
+                getRepoDataAsync(ADOPTIUM_ORG, "temurin$version-binaries", getFun)
             )
                 .map { repo -> repo.await() }
         }
