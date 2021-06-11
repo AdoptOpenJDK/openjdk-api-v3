@@ -802,25 +802,16 @@
         </repository>
     </distributionManagement>
 
-    <profiles>
-        <profile>
-            <id>deploy</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-
-            <repositories>
-                <repository>
-                    <id>adopt-api-assets</id>
-                    <url>https://raw.githubusercontent.com/AdoptOpenJDK/openjdk-api-v3/maven/mvn-repo</url>
-                    <releases>
-                        <enabled>true</enabled>
-                    </releases>
-                    <snapshots>
-                        <enabled>true</enabled>
-                    </snapshots>
-                </repository>
-            </repositories>
-        </profile>
-    </profiles>
+    <repositories>
+        <repository>
+            <id>adopt-api-assets</id>
+            <url>https://raw.githubusercontent.com/AdoptOpenJDK/openjdk-api-v3/maven/mvn-repo</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>
