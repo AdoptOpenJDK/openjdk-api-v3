@@ -10,7 +10,6 @@ import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UrlRequest
 import net.adoptopenjdk.api.v3.dataSources.github.GitHubHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.github.graphql.models.GHRelease
-import net.adoptopenjdk.api.v3.mapping.adopt.AdoptReleaseMapper
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.ProtocolVersion
@@ -20,7 +19,7 @@ import org.jboss.weld.junit5.auto.AddPackages
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-@AddPackages(value = [AdoptReleaseMapper::class, GitHubHtmlClient::class, DefaultUpdaterHtmlClient::class, HttpClientFactory::class])
+@AddPackages(value = [GitHubHtmlClient::class, DefaultUpdaterHtmlClient::class, HttpClientFactory::class])
 class AdoptMetadataVersionParsingTest : BaseTest() {
 
     val client: UpdaterHtmlClient = object : UpdaterHtmlClient {

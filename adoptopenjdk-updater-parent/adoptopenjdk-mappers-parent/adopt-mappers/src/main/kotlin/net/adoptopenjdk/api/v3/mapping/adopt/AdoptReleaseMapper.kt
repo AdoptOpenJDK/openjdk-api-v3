@@ -28,9 +28,27 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AdoptReleaseMapper @Inject constructor(
+class AdoptReleaseMapperFactory @Inject constructor(
     val adoptBinaryMapper: AdoptBinaryMapper,
     val htmlClient: GitHubHtmlClient
+) {
+    private val mappers: MutableMap<Vendor, AdoptReleaseMapper> = HashMap()
+
+    fun get(vendor: Vendor): ReleaseMapper {
+        return if (mappers.containsKey(vendor)) {
+            mappers[vendor]!!
+        } else {
+            val mapper = AdoptReleaseMapper(adoptBinaryMapper, htmlClient, vendor)
+            mappers[vendor] = mapper
+            mapper
+        }
+    }
+}
+
+private class AdoptReleaseMapper @Inject constructor(
+    val adoptBinaryMapper: AdoptBinaryMapper,
+    val htmlClient: GitHubHtmlClient,
+    val vendor: Vendor
 ) : ReleaseMapper() {
     companion object {
         @JvmStatic
@@ -50,7 +68,6 @@ class AdoptReleaseMapper @Inject constructor(
         val releaseName = ghRelease.name
         val timestamp = parseDate(ghRelease.publishedAt)
         val updatedAt = parseDate(ghRelease.updatedAt)
-        val vendor = if (releaseLink.contains("dragonwell-binaries")) Vendor.alibaba else Vendor.getDefault()
 
         val ghAssetsWithMetadata = associateMetadataWithBinaries(ghRelease.releaseAssets)
 

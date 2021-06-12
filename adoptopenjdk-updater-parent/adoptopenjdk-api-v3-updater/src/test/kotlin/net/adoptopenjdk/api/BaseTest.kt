@@ -9,8 +9,10 @@ import net.adoptopenjdk.api.v3.dataSources.APIDataStoreImpl
 import net.adoptopenjdk.api.v3.dataSources.UpdaterHtmlClient
 import net.adoptopenjdk.api.v3.dataSources.UrlRequest
 import net.adoptopenjdk.api.v3.dataSources.github.CachedGitHubHtmlClient
+import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
 import net.adoptopenjdk.api.v3.mapping.adopt.AdoptBinaryMapper
-import net.adoptopenjdk.api.v3.mapping.adopt.AdoptReleaseMapper
+import net.adoptopenjdk.api.v3.mapping.adopt.AdoptReleaseMapperFactory
+import net.adoptopenjdk.api.v3.models.Vendor
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.ProtocolVersion
@@ -62,9 +64,8 @@ abstract class BaseTest {
         }
     }
 
-    protected fun createAdoptReleaseMapper(client: UpdaterHtmlClient = mockkHttpClient()): AdoptReleaseMapper {
+    protected fun createAdoptReleaseMapper(client: UpdaterHtmlClient = mockkHttpClient()): ReleaseMapper {
         val cachedGitHubHtmlClient = CachedGitHubHtmlClient(InMemoryInternalDbStore(), client)
-        val adoptReleaseMapper = AdoptReleaseMapper(AdoptBinaryMapper(cachedGitHubHtmlClient), cachedGitHubHtmlClient)
-        return adoptReleaseMapper
+        return AdoptReleaseMapperFactory(AdoptBinaryMapper(cachedGitHubHtmlClient), cachedGitHubHtmlClient).get(Vendor.getDefault())
     }
 }

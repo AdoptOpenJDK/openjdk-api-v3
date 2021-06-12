@@ -11,9 +11,10 @@ import net.adoptopenjdk.api.v3.dataSources.models.AdoptRepo
 import net.adoptopenjdk.api.v3.dataSources.models.FeatureRelease
 import net.adoptopenjdk.api.v3.dataSources.models.GitHubId
 import net.adoptopenjdk.api.v3.mapping.ReleaseMapper
-import net.adoptopenjdk.api.v3.mapping.adopt.AdoptReleaseMapper
+import net.adoptopenjdk.api.v3.mapping.adopt.AdoptReleaseMapperFactory
 import net.adoptopenjdk.api.v3.mapping.upstream.UpstreamReleaseMapper
 import net.adoptopenjdk.api.v3.models.Release
+import net.adoptopenjdk.api.v3.models.Vendor
 import org.slf4j.LoggerFactory
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -27,7 +28,7 @@ interface AdoptRepository {
 @Singleton
 class AdoptRepositoryImpl @Inject constructor(
     val client: GitHubApi,
-    val adoptReleaseMapper: AdoptReleaseMapper
+    adoptReleaseMapperFactory: AdoptReleaseMapperFactory
 ) : AdoptRepository {
 
     companion object {
@@ -38,12 +39,29 @@ class AdoptRepositoryImpl @Inject constructor(
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
     }
 
+    private val mappers = mapOf(
+        ".*/openjdk\\d+-openj9-releases/.*".toRegex() to adoptReleaseMapperFactory.get(Vendor.adoptium),
+        ".*/openjdk\\d+-openj9-nightly/.*".toRegex() to adoptReleaseMapperFactory.get(Vendor.adoptium),
+        ".*/openjdk\\d+-nightly/.*".toRegex() to adoptReleaseMapperFactory.get(Vendor.adoptium),
+        ".*/openjdk\\d+-binaries/.*".toRegex() to adoptReleaseMapperFactory.get(Vendor.adoptium),
+
+        ".*/openjdk\\d+-upstream-binaries/.*".toRegex() to UpstreamReleaseMapper,
+
+        ".*/openjdk\\d+-dragonwell-binaries/.*".toRegex() to adoptReleaseMapperFactory.get(Vendor.alibaba),
+
+        ".*/temurin\\d+-binaries/.*".toRegex() to adoptReleaseMapperFactory.get(Vendor.adoptium),
+    )
+
     private fun getMapperForRepo(url: String): ReleaseMapper {
-        if (url.matches(".*/openjdk\\d+-upstream-binaries/.*".toRegex())) {
-            return UpstreamReleaseMapper
-        } else {
-            return adoptReleaseMapper
+        val mapper = mappers
+            .entries
+            .firstOrNull { url.matches(it.key) }
+
+        if (mapper == null) {
+            throw IllegalStateException("No mapper found for repo $url")
         }
+
+        return mapper.value
     }
 
     override suspend fun getReleaseById(gitHubId: GitHubId): ReleaseResult? {
@@ -95,21 +113,26 @@ class AdoptRepositoryImpl @Inject constructor(
         return GlobalScope.async {
 
             return@async listOf(
-                getRepoDataAsync(ADOPT_ORG, "openjdk$version-openj9-releases", getFun),
-                getRepoDataAsync(ADOPT_ORG, "openjdk$version-openj9-nightly", getFun),
-                getRepoDataAsync(ADOPT_ORG, "openjdk$version-nightly", getFun),
-                getRepoDataAsync(ADOPT_ORG, "openjdk$version-binaries", getFun),
-                getRepoDataAsync(ADOPT_ORG, "openjdk$version-upstream-binaries", getFun),
-                getRepoDataAsync(ADOPT_ORG, "openjdk$version-dragonwell-binaries", getFun),
+                getRepoDataAsync(ADOPT_ORG, Vendor.adoptopenjdk, "openjdk$version-openj9-releases", getFun),
+                getRepoDataAsync(ADOPT_ORG, Vendor.adoptopenjdk, "openjdk$version-openj9-nightly", getFun),
+                getRepoDataAsync(ADOPT_ORG, Vendor.adoptopenjdk, "openjdk$version-nightly", getFun),
+                getRepoDataAsync(ADOPT_ORG, Vendor.adoptopenjdk, "openjdk$version-binaries", getFun),
 
-                getRepoDataAsync(ADOPTIUM_ORG, "temurin$version-binaries", getFun)
+                getRepoDataAsync(ADOPT_ORG, Vendor.openjdk, "openjdk$version-upstream-binaries", getFun),
+
+                getRepoDataAsync(ADOPT_ORG, Vendor.alibaba, "openjdk$version-dragonwell-binaries", getFun),
+
+                getRepoDataAsync(ADOPTIUM_ORG, Vendor.adoptium, "temurin$version-binaries", getFun)
             )
                 .map { repo -> repo.await() }
         }
     }
 
-    private fun <E> getRepoDataAsync(owner: String, repoName: String, getFun: suspend (String, String) -> E): Deferred<E?> {
+    private fun <E> getRepoDataAsync(owner: String, vendor: Vendor, repoName: String, getFun: suspend (String, String) -> E): Deferred<E?> {
         return GlobalScope.async {
+            if (!Vendor.validVendor(vendor)) {
+                return@async null
+            }
             LOGGER.info("getting $owner $repoName")
             val releases = getFun(owner, repoName)
             LOGGER.info("Done getting $owner $repoName")
