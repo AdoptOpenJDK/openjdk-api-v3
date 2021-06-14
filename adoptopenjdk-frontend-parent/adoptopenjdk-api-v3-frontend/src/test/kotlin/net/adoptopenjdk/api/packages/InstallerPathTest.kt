@@ -24,7 +24,7 @@ class InstallerPathTest : PackageEndpointTest() {
 
     @Test
     fun latestDoesRedirectToBinary() {
-        val path = getLatestPath(11, ReleaseType.ga, OperatingSystem.windows, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.adoptopenjdk, Project.jdk)
+        val path = getLatestPath(11, ReleaseType.ga, OperatingSystem.windows, Architecture.x64, ImageType.jdk, JvmImpl.hotspot, HeapSize.normal, Vendor.getDefault(), Project.jdk)
         performRequest(path)
             .then()
             .statusCode(307)
@@ -33,7 +33,7 @@ class InstallerPathTest : PackageEndpointTest() {
 
     @Test
     fun latestDoesRedirectToBinaryNoProject() {
-        val path = "${getPath()}/latest/11/ga/windows/x64/jdk/openj9/normal/adoptopenjdk"
+        val path = "${getPath()}/latest/11/ga/windows/x64/jdk/hotspot/normal/${Vendor.getDefault()}"
         performRequest(path)
             .then()
             .statusCode(307)

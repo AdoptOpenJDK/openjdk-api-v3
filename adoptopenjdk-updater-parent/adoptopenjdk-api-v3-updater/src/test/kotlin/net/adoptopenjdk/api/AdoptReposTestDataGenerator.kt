@@ -24,16 +24,16 @@ import java.util.Random
 object AdoptReposTestDataGenerator {
 
     var rand: Random = Random(1)
-    val TEST_VERSIONS = listOf(8, 10, 11, 12)
+    private val TEST_VERSIONS = listOf(8, 10, 11, 12)
     private val TEST_RESOURCES = listOf(
         PermittedValues(
             ReleaseType.values().asList(),
             listOf(Vendor.adoptopenjdk),
-            listOf(Project.jdk, Project.jfr),
+            listOf(Project.jdk),
             listOf(JvmImpl.hotspot),
-            ImageType.values().asList(),
-            Architecture.values().asList(),
-            OperatingSystem.values().asList(),
+            listOf(ImageType.jre, ImageType.jdk),
+            listOf(Architecture.x64, Architecture.x32, Architecture.arm),
+            listOf(OperatingSystem.linux, OperatingSystem.mac, OperatingSystem.windows),
             listOf(HeapSize.normal)
         ),
         PermittedValues(
@@ -41,9 +41,9 @@ object AdoptReposTestDataGenerator {
             listOf(Vendor.adoptopenjdk),
             listOf(Project.jdk),
             listOf(JvmImpl.openj9),
-            ImageType.values().asList(),
-            Architecture.values().asList(),
-            OperatingSystem.values().asList(),
+            listOf(ImageType.jre, ImageType.jdk),
+            listOf(Architecture.x64, Architecture.x32, Architecture.arm),
+            listOf(OperatingSystem.linux, OperatingSystem.mac, OperatingSystem.windows),
             HeapSize.values().asList()
         ),
         PermittedValues(
@@ -51,9 +51,9 @@ object AdoptReposTestDataGenerator {
             listOf(Vendor.openjdk),
             listOf(Project.jdk),
             listOf(JvmImpl.hotspot),
-            ImageType.values().asList(),
-            Architecture.values().asList(),
-            OperatingSystem.values().asList(),
+            listOf(ImageType.jre, ImageType.jdk),
+            listOf(Architecture.x64, Architecture.x32, Architecture.arm),
+            listOf(OperatingSystem.linux, OperatingSystem.mac, OperatingSystem.windows),
             listOf(HeapSize.normal),
             listOf(8, 11)
         ),
@@ -62,11 +62,22 @@ object AdoptReposTestDataGenerator {
             listOf(Vendor.alibaba),
             listOf(Project.jdk),
             listOf(JvmImpl.dragonwell),
-            ImageType.values().asList(),
-            Architecture.values().asList(),
-            OperatingSystem.values().asList(),
+            listOf(ImageType.jre, ImageType.jdk),
+            listOf(Architecture.x64, Architecture.x32, Architecture.arm),
+            listOf(OperatingSystem.linux, OperatingSystem.mac, OperatingSystem.windows),
             listOf(HeapSize.normal),
             listOf(8, 11)
+        ),
+        PermittedValues(
+            ReleaseType.values().asList(),
+            listOf(Vendor.adoptium),
+            listOf(Project.jdk),
+            listOf(JvmImpl.hotspot),
+            listOf(ImageType.jre, ImageType.jdk),
+            listOf(Architecture.x64, Architecture.x32, Architecture.arm),
+            listOf(OperatingSystem.linux, OperatingSystem.mac, OperatingSystem.windows),
+            listOf(HeapSize.normal),
+            listOf(8, 11, 12)
         )
     )
 
@@ -76,6 +87,9 @@ object AdoptReposTestDataGenerator {
             TEST_VERSIONS.associateWith { version ->
                 FeatureRelease(version, createRepos(version))
             }
+                .filter {
+                    it.value.releases.nodeList.isNotEmpty()
+                }
         )
     }
 
@@ -146,6 +160,116 @@ object AdoptReposTestDataGenerator {
             )
         }
 
+        private fun exhaustiveBinaryList(): List<Binary> {
+            return HeapSize.values()
+                .map {
+                    Binary(
+                        createPackage(),
+                        1,
+                        randomDate(),
+                        randomString("scm ref"),
+                        createInstaller(),
+                        it,
+                        OperatingSystem.linux,
+                        Architecture.x64,
+                        ImageType.jdk,
+                        JvmImpl.hotspot,
+                        Project.jdk
+                    )
+                }
+                .union(
+                    OperatingSystem.values()
+                        .map {
+                            Binary(
+                                createPackage(),
+                                1,
+                                randomDate(),
+                                randomString("scm ref"),
+                                createInstaller(),
+                                HeapSize.normal,
+                                it,
+                                Architecture.x64,
+                                ImageType.jdk,
+                                JvmImpl.hotspot,
+                                Project.jdk
+                            )
+                        }
+                )
+                .union(
+                    Architecture.values()
+                        .map {
+                            Binary(
+                                createPackage(),
+                                1,
+                                randomDate(),
+                                randomString("scm ref"),
+                                createInstaller(),
+                                HeapSize.normal,
+                                OperatingSystem.linux,
+                                it,
+                                ImageType.jdk,
+                                JvmImpl.hotspot,
+                                Project.jdk
+                            )
+                        }
+                )
+                .union(
+                    ImageType.values()
+                        .map {
+                            Binary(
+                                createPackage(),
+                                1,
+                                randomDate(),
+                                randomString("scm ref"),
+                                createInstaller(),
+                                HeapSize.normal,
+                                OperatingSystem.linux,
+                                Architecture.x64,
+                                it,
+                                JvmImpl.hotspot,
+                                Project.jdk
+                            )
+                        }
+                )
+                .union(
+                    JvmImpl.values()
+                        .map {
+                            Binary(
+                                createPackage(),
+                                1,
+                                randomDate(),
+                                randomString("scm ref"),
+                                createInstaller(),
+                                HeapSize.normal,
+                                OperatingSystem.linux,
+                                Architecture.x64,
+                                ImageType.jdk,
+                                it,
+                                Project.jdk
+                            )
+                        }
+                )
+                .union(
+                    Project.values()
+                        .map {
+                            Binary(
+                                createPackage(),
+                                1,
+                                randomDate(),
+                                randomString("scm ref"),
+                                createInstaller(),
+                                HeapSize.normal,
+                                OperatingSystem.linux,
+                                Architecture.x64,
+                                ImageType.jdk,
+                                JvmImpl.hotspot,
+                                it
+                            )
+                        }
+                )
+                .toList()
+        }
+
         private fun binaryBuilder(): (HeapSize) -> (OperatingSystem) -> (Architecture) -> (ImageType) -> (JvmImpl) -> (Project) -> Binary {
             return { heapSize ->
                 { operatingSystem ->
@@ -182,6 +306,10 @@ object AdoptReposTestDataGenerator {
                 .map { releaseBuilder()(it) }
                 .flatMap { builder -> vendor.map { builder(it) } }
                 .flatMap { builder -> getVersions(majorVersion).map { builder(it) } }
+                .filter { it.binaries.isNotEmpty() }
+                .filter {
+                    Vendor.validVendor(it.vendor)
+                }
         }
 
         private fun getBinaries(): Array<Binary> {
@@ -191,11 +319,18 @@ object AdoptReposTestDataGenerator {
                 .flatMap { builder -> imageType.map { builder(it) } }
                 .flatMap { builder -> jvmImpl.map { builder(it) } }
                 .flatMap { builder -> project.map { builder(it) } }
+                .union(exhaustiveBinaryList())
+                .filter { binary ->
+                    JvmImpl.validJvmImpl(binary.jvm_impl)
+                }
+                .distinctBy {
+                    listOf(it.architecture, it.heap_size, it.image_type, it.jvm_impl, it.os, it.project)
+                }
                 .toTypedArray()
         }
     }
 
-    private fun sourcePackage(): SourcePackage? {
+    private fun sourcePackage(): SourcePackage {
         return SourcePackage(randomString("source package name"), randomString("source package link"), rand.nextLong())
     }
 

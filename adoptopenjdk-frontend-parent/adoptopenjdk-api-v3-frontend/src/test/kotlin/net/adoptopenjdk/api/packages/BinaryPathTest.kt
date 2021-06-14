@@ -38,7 +38,7 @@ class BinaryPathTest : PackageEndpointTest() {
 
     @Test
     fun latestDoesRedirectToBinaryNoProject() {
-        val path = "${getPath()}/latest/11/ga/linux/x64/jdk/openj9/normal/adoptopenjdk"
+        val path = "${getPath()}/latest/11/ga/linux/x64/jdk/hotspot/normal/${Vendor.getDefault()}"
         performRequest(path)
             .then()
             .statusCode(307)

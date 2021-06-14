@@ -23,13 +23,24 @@ import org.jboss.weld.junit5.auto.EnableAutoWeld
 )
 open class FrontendTest {
 
+    protected fun getReleases(): Sequence<Release> {
+        return BaseTest.adoptRepos
+            .getFilteredReleases(
+                ReleaseFilter(featureVersion = 8, vendor = Vendor.getDefault()),
+                BinaryFilter(),
+                SortOrder.ASC,
+                SortMethod.DEFAULT
+            )
+    }
+
     protected fun getRandomBinary(): Pair<Release, Binary> {
-        val release = BaseTest.adoptRepos.getFilteredReleases(
-            ReleaseFilter(featureVersion = 8, vendor = Vendor.adoptopenjdk),
-            BinaryFilter(),
-            SortOrder.ASC,
-            SortMethod.DEFAULT
-        ).first()
+        val release = BaseTest.adoptRepos
+            .getFilteredReleases(
+                ReleaseFilter(featureVersion = 8, vendor = Vendor.getDefault()),
+                BinaryFilter(),
+                SortOrder.ASC,
+                SortMethod.DEFAULT
+            ).first()
 
         val binary = release.binaries.first()
         return Pair(release, binary)

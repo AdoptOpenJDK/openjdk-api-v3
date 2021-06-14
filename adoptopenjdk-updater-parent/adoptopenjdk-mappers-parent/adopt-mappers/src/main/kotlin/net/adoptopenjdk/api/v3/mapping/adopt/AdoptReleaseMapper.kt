@@ -45,7 +45,7 @@ class AdoptReleaseMapperFactory @Inject constructor(
     }
 }
 
-private class AdoptReleaseMapper @Inject constructor(
+private class AdoptReleaseMapper constructor(
     val adoptBinaryMapper: AdoptBinaryMapper,
     val htmlClient: GitHubHtmlClient,
     val vendor: Vendor

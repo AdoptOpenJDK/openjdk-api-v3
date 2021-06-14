@@ -30,22 +30,21 @@ class LatestAssetsPathTest : FrontendTest() {
 
         val binaries = JsonArray(body.asString())
 
-        assert(hasEntryFor(binaries, OperatingSystem.linux, ImageType.jdk, Architecture.x64, Vendor.adoptopenjdk))
-        assert(hasEntryFor(binaries, OperatingSystem.linux, ImageType.jre, Architecture.x64, Vendor.adoptopenjdk))
-        assert(hasEntryFor(binaries, OperatingSystem.windows, ImageType.jdk, Architecture.x64, Vendor.adoptopenjdk))
-        assert(hasEntryFor(binaries, OperatingSystem.windows, ImageType.jre, Architecture.x64, Vendor.adoptopenjdk))
+        assert(hasEntryFor(binaries, OperatingSystem.linux, ImageType.jdk, Architecture.x64, Vendor.getDefault()))
+        assert(hasEntryFor(binaries, OperatingSystem.linux, ImageType.jre, Architecture.x64, Vendor.getDefault()))
+        assert(hasEntryFor(binaries, OperatingSystem.windows, ImageType.jdk, Architecture.x64, Vendor.getDefault()))
+        assert(hasEntryFor(binaries, OperatingSystem.windows, ImageType.jre, Architecture.x64, Vendor.getDefault()))
     }
 
     private fun hasEntryFor(binaries: JsonArray, os: OperatingSystem, imageType: ImageType, architecture: Architecture, vendor: Vendor): Boolean {
-        val hasEntry = binaries
+        return binaries
             .map { JsonMapper.mapper.readValue(it.toString(), BinaryAssetView::class.java) }
-            .filter({ release ->
+            .filter { release ->
                 release.binary.os == os &&
                     release.binary.image_type == imageType &&
                     release.binary.architecture == architecture &&
                     release.vendor == vendor
-            })
+            }
             .count() > 0
-        return hasEntry
     }
 }
