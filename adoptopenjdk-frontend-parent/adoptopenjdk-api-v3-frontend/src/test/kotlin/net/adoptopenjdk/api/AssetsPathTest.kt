@@ -39,7 +39,8 @@ abstract class AssetsPathTest : FrontendTest() {
     @TestFactory
     fun filtersJvmImpl(): Stream<DynamicTest> {
         return runFilterTest(
-            "jvm_impl", JvmImpl.values()
+            "jvm_impl",
+            JvmImpl.values().filter { JvmImpl.validJvmImpl(it) }.toTypedArray()
         ) { value, query ->
             if (value == JvmImpl.dragonwell) {
                 "$query&vendor=${Vendor.alibaba.name}"

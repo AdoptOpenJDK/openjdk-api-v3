@@ -12,6 +12,7 @@ import net.adoptopenjdk.api.v3.models.DownloadStats
 import net.adoptopenjdk.api.v3.models.GitHubDownloadStatsDbEntry
 import net.adoptopenjdk.api.v3.models.JvmImpl
 import net.adoptopenjdk.api.v3.models.StatsSource
+import net.adoptopenjdk.api.v3.models.Vendor
 import net.adoptopenjdk.api.v3.routes.stats.DownloadStatsResource
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -172,7 +173,11 @@ class DownloadStatsPathTest : FrontendTest() {
     @Test
     fun totalTagReturnsSaneData() {
         runBlocking {
-            val (release, binary) = getRandomBinary()
+            val releases = getReleases()
+
+            val release = releases
+                .filter { it.vendor == Vendor.getDefault() }
+                .first()
 
             val stats = downloadStatsResource.getTotalDownloadStatsForTag(release.version_data.major, release.release_name)
             assertTrue { return@assertTrue stats.isNotEmpty() && !stats.containsValue(0L) }

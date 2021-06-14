@@ -86,13 +86,13 @@ class AssetsResourceReleaseNamePathTest : FrontendTest() {
     fun `for frontend requests x86 == x32`() {
         val releaseName = apiDataStore
             .getAdoptRepos()
-            .getFilteredReleases(ReleaseFilter(vendor = Vendor.adoptopenjdk), BinaryFilter(arch = Architecture.x32), SortOrder.DESC, SortMethod.DEFAULT)
+            .getFilteredReleases(ReleaseFilter(vendor = Vendor.getDefault()), BinaryFilter(arch = Architecture.x32), SortOrder.DESC, SortMethod.DEFAULT)
             .first()
             .release_name
 
         RestAssured.given()
             .`when`()
-            .get("/v3/assets/release_name/adoptopenjdk/$releaseName?architecture=x86")
+            .get("/v3/assets/release_name/${Vendor.getDefault()}/$releaseName?architecture=x86")
             .then()
             .statusCode(200)
             .and()
@@ -114,13 +114,13 @@ class AssetsResourceReleaseNamePathTest : FrontendTest() {
         val releaseName = apiDataStore
             .getAdoptRepos()
             .allReleases
-            .getReleases(ReleaseFilter(vendor = Vendor.openjdk), SortOrder.DESC, SortMethod.DEFAULT)
+            .getReleases(ReleaseFilter(vendor = Vendor.getDefault()), SortOrder.DESC, SortMethod.DEFAULT)
             .first()
             .release_name
 
         RestAssured.given()
             .`when`()
-            .get("/v3/assets/release_name/adoptopenjdk/$releaseName")
+            .get("/v3/assets/release_name/openjdk/$releaseName")
             .then()
             .statusCode(404)
     }

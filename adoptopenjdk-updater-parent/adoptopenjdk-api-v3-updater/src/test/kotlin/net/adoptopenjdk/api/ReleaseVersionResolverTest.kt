@@ -40,7 +40,7 @@ class ReleaseVersionResolverTest : BaseTest() {
     @Test
     fun availableVersionsIsCorrect() {
         check { releaseInfo ->
-            releaseInfo.available_releases.contentEquals(AdoptReposTestDataGenerator.TEST_VERSIONS.toTypedArray())
+            releaseInfo.available_releases.contentEquals(AdoptReposTestDataGenerator.generate().repos.keys.toTypedArray())
         }
     }
 

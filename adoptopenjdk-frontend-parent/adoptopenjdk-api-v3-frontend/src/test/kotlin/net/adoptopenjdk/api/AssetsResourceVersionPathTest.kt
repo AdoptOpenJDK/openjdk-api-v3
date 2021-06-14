@@ -3,6 +3,7 @@ package net.adoptopenjdk.api
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
 import net.adoptopenjdk.api.v3.JsonMapper
+import net.adoptopenjdk.api.v3.config.Ecosystem
 import net.adoptopenjdk.api.v3.models.Architecture
 import net.adoptopenjdk.api.v3.models.HeapSize
 import net.adoptopenjdk.api.v3.models.ImageType
@@ -32,7 +33,7 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
     }
 
     @TestFactory
-    fun `no Vendor Defaults To AdoptopenJDK`(): Stream<DynamicTest> {
+    fun `no Vendor Defaults To Default`(): Stream<DynamicTest> {
         return listOf(
             ABOVE_8,
             BELOW_11,
@@ -57,7 +58,13 @@ class AssetsResourceVersionPathTest : AssetsPathTest() {
                             override fun matchesSafely(p0: String?): Boolean {
                                 val releases = JsonMapper.mapper.readValue(p0, Array<Release>::class.java)
                                 return releases
-                                    .none { it.vendor != Vendor.adoptopenjdk }
+                                    .all {
+                                        return if (Ecosystem.CURRENT == Ecosystem.adoptopenjdk) {
+                                            return it.vendor == Vendor.adoptopenjdk || it.vendor == Vendor.adoptium
+                                        } else {
+                                            it.vendor == Vendor.getDefault()
+                                        }
+                                    }
                             }
                         })
                         .statusCode(200)

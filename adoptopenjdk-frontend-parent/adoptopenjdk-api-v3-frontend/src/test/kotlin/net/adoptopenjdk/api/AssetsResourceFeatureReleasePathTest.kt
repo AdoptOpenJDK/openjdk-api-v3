@@ -2,9 +2,8 @@ package net.adoptopenjdk.api
 
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
-import junit.framework.Assert.fail
 import net.adoptopenjdk.api.v3.JsonMapper
-import net.adoptopenjdk.api.v3.dataSources.SortMethod
+import net.adoptopenjdk.api.v3.config.Ecosystem
 import net.adoptopenjdk.api.v3.dataSources.SortOrder
 import net.adoptopenjdk.api.v3.dataSources.models.Releases
 import net.adoptopenjdk.api.v3.models.Architecture
@@ -22,7 +21,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.stream.Stream
-import kotlin.test.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.fail
 
 @QuarkusTest
 @ExtendWith(value = [DbExtension::class])
@@ -30,7 +30,10 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
 
     @TestFactory
     fun noFilter(): Stream<DynamicTest> {
-        return AdoptReposTestDataGenerator.TEST_VERSIONS
+        return AdoptReposTestDataGenerator
+            .generate()
+            .repos
+            .keys
             .flatMap { version ->
                 ReleaseType.values()
                     .map { "/v3/assets/feature_releases/$version/$it" }
@@ -49,8 +52,11 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
     }
 
     @TestFactory
-    fun `no Vendor Defaults To AdoptopenJDK`(): Stream<DynamicTest> {
-        return AdoptReposTestDataGenerator.TEST_VERSIONS
+    fun `no Vendor Defaults To Vendor Default`(): Stream<DynamicTest> {
+        return AdoptReposTestDataGenerator
+            .generate()
+            .repos
+            .keys
             .flatMap { version ->
                 ReleaseType.values()
                     .map { "/v3/assets/feature_releases/$version/$it?PAGE_SIZE=100" }
@@ -69,7 +75,13 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
                                     override fun matchesSafely(p0: String?): Boolean {
                                         val releases = JsonMapper.mapper.readValue(p0, Array<Release>::class.java)
                                         return releases
-                                            .none { it.vendor != Vendor.adoptopenjdk }
+                                            .all {
+                                                return if (Ecosystem.CURRENT == Ecosystem.adoptopenjdk) {
+                                                    return it.vendor == Vendor.adoptopenjdk || it.vendor == Vendor.adoptium
+                                                } else {
+                                                    it.vendor == Vendor.getDefault()
+                                                }
+                                            }
                                     }
                                 })
                                 .statusCode(200)
@@ -101,32 +113,30 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
     fun sortOrderASCIsHonoured() {
         getReleases(SortOrder.ASC)
             .fold(
-                null,
-                { previous: Release?, next: Release ->
-                    if (previous != null) {
-                        if (Releases.VERSION_COMPARATOR.compare(previous.version_data, next.version_data) > 0) {
-                            fail("${previous.version_data} is before ${next.version_data}")
-                        }
+                null
+            ) { previous: Release?, next: Release ->
+                if (previous != null) {
+                    if (Releases.VERSION_COMPARATOR.compare(previous.version_data, next.version_data) > 0) {
+                        fail("${previous.version_data} is before ${next.version_data}")
                     }
-                    next
                 }
-            )
+                next
+            }
     }
 
     @Test
     fun sortOrderDESIsHonoured() {
         getReleases(SortOrder.DESC)
             .fold(
-                null,
-                { previous: Release?, next: Release ->
-                    if (previous != null) {
-                        if (Releases.VERSION_COMPARATOR.compare(previous.version_data, next.version_data) < 0) {
-                            fail("${previous.version_data} is before ${next.version_data}")
-                        }
+                null
+            ) { previous: Release?, next: Release ->
+                if (previous != null) {
+                    if (Releases.VERSION_COMPARATOR.compare(previous.version_data, next.version_data) < 0) {
+                        fail("${previous.version_data} is before ${next.version_data}")
                     }
-                    next
                 }
-            )
+                next
+            }
     }
 
     override fun <T> runFilterTest(filterParamName: String, values: Array<T>, customiseQuery: (T, String) -> String): Stream<DynamicTest> {
@@ -175,15 +185,6 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
             return parseReleases(body.asString())
         }
 
-        fun getReleasesWithSortMethod(sortOrder: SortOrder, sortMethod: SortMethod): List<Release> {
-            val body = RestAssured.given()
-                .`when`()
-                .get("${getPath()}/8/ga?sort_order=${sortOrder.name}&sort_method=${sortMethod.name}")
-                .body
-
-            return parseReleases(body.asString())
-        }
-
         fun parseReleases(json: String?): List<Release> =
             JsonMapper.mapper.readValue(json, JsonMapper.mapper.getTypeFactory().constructCollectionType(MutableList::class.java, Release::class.java))
     }
@@ -201,12 +202,12 @@ class AssetsResourceFeatureReleasePathTest : AssetsPathTest() {
     fun pageSizeIsWorking() {
         val body = RestAssured.given()
             .`when`()
-            .get("${getPath()}/11/ea?page_size=5")
+            .get("${getPath()}/11/ea?page_size=3")
             .body
 
         val releases = parseReleases(body.asString())
 
-        assertTrue { releases.size == 5 }
+        assertEquals(3, releases.size)
     }
 
     @TestFactory

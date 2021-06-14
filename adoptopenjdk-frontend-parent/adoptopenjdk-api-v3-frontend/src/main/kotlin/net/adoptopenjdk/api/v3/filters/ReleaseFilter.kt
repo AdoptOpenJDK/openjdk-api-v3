@@ -16,7 +16,6 @@ class ReleaseFilter(
     private val lts: Boolean? = null
 ) : Predicate<Release> {
     override fun test(release: Release): Boolean {
-
         val ltsFilter = if (lts != null) {
             val isLts = Versions.ltsVersions.contains(release.version_data.major)
             lts == isLts
