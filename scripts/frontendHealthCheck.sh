@@ -1,10 +1,12 @@
 #!/bin/bash
 
 # Temp monitoring for native memory leak from platform
-cat /tmp/frontend.log | grep OutOfMemoryError > /dev/null
-if [ $? -eq 0 ];
-then
-  exit 1
+if [ -f "/tmp/frontend.log" ]; then
+  cat /tmp/frontend.log | grep OutOfMemoryError > /dev/null
+  if [ $? -eq 0 ];
+  then
+    exit 1
+  fi
 fi
 
 uptime=$(jcmd 1 VM.uptime | egrep -o "^[0-9]+" | tail -n 1)
