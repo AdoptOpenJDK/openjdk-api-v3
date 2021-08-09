@@ -21,6 +21,13 @@ jobs:
 
     - uses: actions/checkout@v2
 
+    # Temporary until patch is released upstream
+    - name: Build quarkus
+      run: |
+        cd quarkus-patch
+        chmod +x ./patch-quarkus.sh
+        ./patch-quarkus.sh
+
     - name: Build app
       run: ./mvnw --batch-mode clean install jacoco:report jacoco:report-aggregate
 
