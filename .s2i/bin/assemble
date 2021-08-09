@@ -6,6 +6,10 @@ if [ "$(ls /tmp/artifacts/ 2>/dev/null)" ]; then
     mv /tmp/artifacts/.m2 ${HOME}/
 fi
 
+cd /tmp/src/quarkus-patch
+chmod +x ./patch-quarkus.sh
+./patch-quarkus.sh
+
 cd /tmp/src
 ./mvnw -B clean install
 
