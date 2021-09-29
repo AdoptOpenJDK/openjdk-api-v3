@@ -120,7 +120,7 @@ private class AdoptReleaseMapper constructor(
 
         return if (release.release_type == ReleaseType.ea) {
             // remove all 14.0.1+7.1 and 15.0.0+24.1 nightlies - https://github.com/AdoptOpenJDK/openjdk-api-v3/issues/213
-            // also ignore jdk-2021-01-13-07-01 - https://github.com/AdoptOpenJDK/openjdk-api-v3/issues/449
+            // also ignore jdk-2021-01-13-07-01
             if (release.version_data.semver.startsWith("14.0.1+7.1.") ||
                 release.version_data.semver.startsWith("15.0.0+24.1.") ||
                 release.release_name == "jdk-2021-01-13-07-01"
@@ -224,6 +224,7 @@ private class AdoptReleaseMapper constructor(
     private suspend fun pairUpBinaryAndMetadata(releaseAssets: GHAssets, metadataAsset: GHAsset): Pair<GHAsset, GHMetaData>? {
         val binaryAsset = releaseAssets
             .assets
+            .filter { asset -> !asset.name.endsWith(".json") }
             .firstOrNull {
                 metadataAsset.name.startsWith(it.name)
             }
