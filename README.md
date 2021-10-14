@@ -1,3 +1,6 @@
+**NOTE:** This repo is now deprecated/archived as github.com/adoptium/api.adoptium.net runs both api.adoptium.net and api.adoptopenjdk.net using vendor properties as a filter to do the correct thing on each domain.
+
+
 ![Build](https://github.com/AdoptOpenJDK/openjdk-api-v3/workflows/Build/badge.svg?branch=master) [![codecov](https://codecov.io/gh/AdoptOpenJDK/openjdk-api-v3/branch/master/graph/badge.svg)](https://codecov.io/gh/AdoptOpenJDK/openjdk-api-v3)
 
 # AdoptOpenJDK API
